@@ -7,6 +7,7 @@ demog<-subset(demog,final.status %in% c("H","D","X"))
 tag<-c()
 status<-c()
 surv<-c()
+height<-c()
 
 for(index in unique(demog$tag))
 {
@@ -15,28 +16,38 @@ for(index in unique(demog$tag))
   stat2<-NA
   surv1<-NA
   surv2<-NA
+  height1<-NA
+  height2<-NA
   sub.data<-subset(demog,tag==index)
   if(all("2018" %in% sub.data$year,"2019" %in% sub.data$year))
     {
       stat1<-as.character(sub.data[which(sub.data$year=="2018"),"final.status"])
       surv1<-ifelse(sub.data[which(sub.data$year=="2019"),"status"]=="X",0,1)
+      height1<-as.numeric(sub.data[which(sub.data$year=="2018"),"height.cm"])
     }
   if(all("2019" %in% sub.data$year,"2020" %in% sub.data$year))
     {
     stat2<-as.character(sub.data[which(sub.data$year=="2019"),"final.status"])
     surv2<-ifelse(sub.data[which(sub.data$year=="2020"),"status"]=="X",0,1)
+    height2<-as.numeric(sub.data[which(sub.data$year=="2019"),"height.cm"])
+    
   }
   
-  if(!any(is.na(c(stat1,surv1)))) {tag<-c(tag,index);status<-c(status,stat1);surv<-c(surv,surv1)}
-  if(!any(is.na(c(stat2,surv2)))) {tag<-c(tag,index);status<-c(status,stat2);surv<-c(surv,surv2)}
+  if(!any(is.na(c(stat1,surv1)))) {tag<-c(tag,index);status<-c(status,stat1);surv<-c(surv,surv1);height<-c(height,height1)}
+  if(!any(is.na(c(stat2,surv2)))) {tag<-c(tag,index);status<-c(status,stat2);surv<-c(surv,surv2);height<-c(height,height2)}
   
   if(!(length(tag)==length(status))) {print(index)}
 }
 
-surv.data<-data.frame(tag=tag,status=status,surv=surv)
+surv.data<-data.frame(tag=tag,status=status,surv=surv,height=height)
 surv.data<-droplevels(surv.data)
 plot(jitter(as.numeric(surv.data$status)),jitter(surv.data$surv),xlab="status",ylab="",axes=F)
 axis(1,at=c(1,2),labels=c("diseased","healthy"))
 axis(2,at=c(0,1),labels = c("died","survived"))
 
 mod<-glm(surv~status,data=surv.data)
+summary(mod)
+
+plot(surv.data$height,surv.data$surv)
+mod<-glm(surv~status*height,data=surv.data)
+summary(mod)
