@@ -7,10 +7,6 @@ within.host<-read.csv("Withinhost.csv")
 
 #### clean demog data
 
-demog<-subset(demog,status %in% c("H","D","X"))
-demog<-subset(demog,final.status %in% c("H","D","X"))
-
-
 ### pull relevant info out of demog
 tag<-c()
 status<-c()
@@ -29,12 +25,19 @@ for(index in unique(demog$tag))
   if(all("2018" %in% sub.data$year,"2019" %in% sub.data$year))
   {
     stat1<-as.character(sub.data[which(sub.data$year=="2018"),"final.status"])
-    death1<-ifelse(sub.data[which(sub.data$year=="2019"),"status"]=="X",1,0)
+    if(sub.data[which(sub.data$year=="2019"),"status"] %in% c("H","D","X"))
+    {
+      death1<-ifelse(sub.data[which(sub.data$year=="2019"),"status"]=="X",1,0)
+    } else {death1<-NA}
+    
   }
   if(all("2019" %in% sub.data$year,"2020" %in% sub.data$year))
   {
     stat2<-as.character(sub.data[which(sub.data$year=="2019"),"final.status"])
-    death2<-ifelse(sub.data[which(sub.data$year=="2020"),"status"]=="X",1,0)
+    if(sub.data[which(sub.data$year=="2020"),"status"] %in% c("H","D","X"))
+    {
+      death2<-ifelse(sub.data[which(sub.data$year=="2020"),"status"]=="X",1,0)
+    } else {death2<-NA}
   }
   
   if(!any(is.na(c(stat1,death1)))) {tag<-c(tag,index);status<-c(status,stat1);death<-c(death,death1);year<-c(year,"2018")}
