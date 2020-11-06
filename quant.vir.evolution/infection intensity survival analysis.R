@@ -146,9 +146,9 @@ death.metrics<-c()
 for(i in 1:dim(predictor.data)[1])
 {
   index<-which(as.character(sub.surv.data$tag)==as.character(predictor.data[i,"tag"]))
-  death.metrics<-c(death.metrics,sub.surv.data[index,"death"])
-  print(paste0("tag = ",as.character(predictor.data[i,"tag"])," death = ",sub.surv.data[index,"death"]))
+  if(length(index)>0) {death.metrics<-c(death.metrics,sub.surv.data[index,"death"])} else {death.metrics<-c(death.metrics,NA)}
 }
 
 final.data2<-data.frame(predictor.data,"death"=death.metrics)
 
+plot(final.data2$N.D.Stems/final.data2$N.Stems,final.data2$death)
