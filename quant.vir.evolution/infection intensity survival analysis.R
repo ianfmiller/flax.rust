@@ -69,32 +69,48 @@ within.host[which(within.host[,"percent.tissue.infected"]=="<.05"),"percent.tiss
 within.host[which(within.host[,"percent.tissue.infected"]==""),"percent.tissue.infected"]<-NA
 within.host<-transform(within.host,percent.tissue.infected=as.numeric(as.character(percent.tissue.infected)))
 
-### extract total infected tissue at last observation
+### extract plant metrics and total infected tissue at last observation
 
 tags<-c()
-
-tot.inf.tissue.measures<-c()
+sites<-c()
+N.Stems<-c()
+N.D.Stems<-c()
+max.heights<-c()
+tot.inf.metric.measures<-c()
 
 for(tag in unique(within.host$Tag))
 {
   sub.data<-subset(within.host,Tag==tag)
   sub.data<-subset(sub.data,Date==max(unique(sub.data$Date)))
   
-  inf.tissue.measured<-c()
+  tag<-sub.data[1,"Tag"]
+  site<-sub.data[1,"Site"]
+  N.Stem<-sub.data[1,"N.Stems"]
+  N.D.Stem<-sub.data[1,"N.D.Stems"]
+  max.height<-sub.data[1,"max.height"]
+  
+  tags<-c(tags,tag)
+  sites<-c(sites,site)
+  N.Stems<-c(N.Stems,N.Stem)
+  N.D.Stems<-c(N.D.Stems,N.D.Stem)
+  max.heights<-c(max.heights,max.height)
+  
+  inf.metric.measured<-c()
   for(i in 1:dim(sub.data)[1])
   {
     if(is.na(sub.data[i,"length.tissue.infected"]) & !is.na(sub.data[i,"percent.tissue.infected"])) {sub.data[i,"length.tissue.infected"]<-sub.data[i,"percent.tissue.infected"]*sub.data[i,"stem.height"]}
-    new.inf.tissue.measured<-sub.data[i,"length.tissue.infected"]*sub.data[i,"N.pustules.middle"]
-    inf.tissue.measured<-c(inf.tissue.measured,new.inf.tissue.measured)
+    new.inf.metric<-sub.data[i,"length.tissue.infected"]*sub.data[i,"N.pustules.middle"]
+    inf.metric.measured<-c(inf.metric.measured,new.inf.metric)
   }
-  if(!all(is.na(inf.tissue.measured))) {tot.inf.tissue.measure<-sub.data$N.D.Stems[1]*sum(inf.tissue.measured,na.rm = T)/length(inf.tissue.measured)} else{tot.inf.tissue.measure<-NA}
-  tags<-c(tag,tags)
-  tot.inf.tissue.measures<-c(tot.inf.tissue.measures,tot.inf.tissue.measure)
+  if(!all(is.na(inf.metric.measured))) {tot.inf.metric.measure<-sub.data$N.D.Stems[1]*sum(inf.metric.measured,na.rm = T)/length(inf.metric.measured)} else{tot.inf.metric.measure<-NA}
+  tot.inf.metric.measures<-c(tot.inf.metric.measures,tot.inf.metric.measure)
 }
 
-tot.inf.tissue.measures.frame<-data.frame(tag=tags,tot.inf.tissue=tot.inf.tissue.measures)
+predictor.data<-data.frame(tag=tags,site=sites,N.Stems=N.Stems,N.D.Stems=N.D.Stems,max.height=max.heights,tot.inf.metric=tot.inf.metric.measures)
 
-#### join survival data, tot inf.load
+#### analyze total tissue infected, including healhty plant data
+
+### join data
 sub.surv.data<-subset(surv.data,year==2019)
 
 new.metrics<-c()
@@ -103,14 +119,15 @@ for(i in 1:dim(sub.surv.data)[1])
   if(sub.surv.data[i,"status"]=="H") {new.metric<-0}
   if(sub.surv.data[i,"status"]=="D") 
   {
-    if(as.character(sub.surv.data[i,"tag"]) %in% as.character(tot.inf.tissue.measures.frame$tag))
+    if(as.character(sub.surv.data[i,"tag"]) %in% as.character(predictor.data$tag))
     {
-      new.metric<-tot.inf.tissue.measures.frame[which(as.character(tot.inf.tissue.measures.frame$tag)==as.character(sub.surv.data[i,"tag"])),"tot.inf.tissue"]
+      new.metric<-predictor.data[which(as.character(predictor.data$tag)==as.character(sub.surv.data[i,"tag"])),"tot.inf.metric"]
     } else {new.metric<-NA}
   }
   new.metrics<-c(new.metrics,new.metric)
 }
 
-final.data<-data.frame(sub.surv.data,"tot.inf.tissue"=new.metrics)
-plot(final.data$tot.inf.tissue,final.data$death,xlab="total infection load",ylab="death")
-summary(glm(death~tot.inf.tissue,data=final.data))
+### analysis
+final.data1<-data.frame(sub.surv.data,"tot.inf.metric"=new.metrics)
+plot(final.data1$tot.inf.metric,final.data1$death,xlab="total infection metric",ylab="death")
+summary(glm(death~tot.inf.metric,data=final.data1))
