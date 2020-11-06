@@ -103,7 +103,7 @@ for(i in 1:dim(sub.surv.data)[1])
   {
     if(as.character(sub.surv.data[i,"tag"]) %in% as.character(tot.inf.load$tag))
     {
-      inf.load<-tot.inf.load[which(as.character(tot.inf.load$tag)==as.character(sub.surv.data[i,"tag"])),"tag"]
+      inf.load<-tot.inf.load[which(as.character(tot.inf.load$tag)==as.character(sub.surv.data[i,"tag"])),"inf.intens"]
     } else {inf.load<-NA}
   }
   inf.loads<-c(inf.loads,inf.load)
