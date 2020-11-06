@@ -49,7 +49,6 @@ surv.data<-droplevels(surv.data)
 
 ### clean
 
-within.host<-read.csv("Withinhost.csv")
 within.host$Date<-as.Date(within.host$Date,tryFormats=c("%m/%d/%Y"))
 column.index<-c(1:7,9,11,14,15,17)
 within.host<-within.host[,column.index]
@@ -62,7 +61,7 @@ within.host<-droplevels(within.host)
 
 ## for stems with height recorded as '<5' set height to 5
 within.host[which(within.host[,"stem.height"]=="<5"),"stem.height"]<-5
-within.host<-transform(within.host,stem.height=as.numeric(stem.height))
+within.host<-transform(within.host,stem.height=as.numeric(as.character(stem.height)))
 
 ## for stems with height recorded as '<5' set height to 5
 within.host[which(within.host[,"percent.tissue.infected"]=="<.05"),"percent.tissue.infected"]<-.05
@@ -83,8 +82,8 @@ for(tag in unique(within.host$Tag))
   sub.data<-subset(within.host,Tag==tag)
   sub.data<-subset(sub.data,Date==max(unique(sub.data$Date)))
   
-  tag<-sub.data[1,"Tag"]
-  site<-sub.data[1,"Site"]
+  tag<-as.character(sub.data[1,"Tag"])
+  site<-as.character(sub.data[1,"Site"])
   N.Stem<-sub.data[1,"N.Stems"]
   N.D.Stem<-sub.data[1,"N.D.Stems"]
   max.height<-sub.data[1,"max.height"]
@@ -102,11 +101,12 @@ for(tag in unique(within.host$Tag))
     new.inf.metric<-sub.data[i,"length.tissue.infected"]*sub.data[i,"N.pustules.middle"]
     inf.metric.measured<-c(inf.metric.measured,new.inf.metric)
   }
+  tot.inf.metric.measure<-c()
   if(!all(is.na(inf.metric.measured))) {tot.inf.metric.measure<-sub.data$N.D.Stems[1]*sum(inf.metric.measured,na.rm = T)/length(inf.metric.measured)} else{tot.inf.metric.measure<-NA}
   tot.inf.metric.measures<-c(tot.inf.metric.measures,tot.inf.metric.measure)
 }
 
-predictor.data<-data.frame(tag=tags,site=sites,N.Stems=N.Stems,N.D.Stems=N.D.Stems,max.height=max.heights,tot.inf.metric=tot.inf.metric.measures)
+predictor.data<-data.frame(tag=as.character(tags),site=sites,N.Stems=N.Stems,N.D.Stems=N.D.Stems,max.height=max.heights,tot.inf.metric=tot.inf.metric.measures)
 
 #### analyze total tissue infected, including healhty plant data
 
@@ -127,7 +127,25 @@ for(i in 1:dim(sub.surv.data)[1])
   new.metrics<-c(new.metrics,new.metric)
 }
 
-### analysis
 final.data1<-data.frame(sub.surv.data,"tot.inf.metric"=new.metrics)
+
+### analysis
 plot(final.data1$tot.inf.metric,final.data1$death,xlab="total infection metric",ylab="death")
 summary(glm(death~tot.inf.metric,data=final.data1))
+
+#### analyze by plant metrics, including healhty plant data
+
+### join data
+
+sub.surv.data<-subset(surv.data,year==2019)
+
+death.metrics<-c()
+for(i in 1:dim(predictor.data)[1])
+{
+  index<-which(as.character(sub.surv.data$tag)==as.character(predictor.data[i,"tag"]))
+  death.metrics<-c(death.metrics,sub.surv.data[index,"death"])
+  print(paste0("tag = ",as.character(predictor.data[i,"tag"])," death = ",sub.surv.data[index,"death"]))
+}
+
+final.data2<-data.frame(predictor.data,"death"=death.metrics)
+
