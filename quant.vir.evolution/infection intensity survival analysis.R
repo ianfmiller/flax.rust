@@ -92,25 +92,25 @@ for(tag in unique(within.host$Tag))
   tot.inf.tissue.measures<-c(tot.inf.tissue.measures,tot.inf.tissue.measure)
 }
 
-tot.inf.load<-data.frame(tag=tags,inf.intens=inf.intensities)
+tot.inf.tissue.measures.frame<-data.frame(tag=tags,tot.inf.tissue=tot.inf.tissue.measures)
 
 #### join survival data, tot inf.load
 sub.surv.data<-subset(surv.data,year==2019)
 
-inf.loads<-c()
+new.metrics<-c()
 for(i in 1:dim(sub.surv.data)[1])
 {
-  if(sub.surv.data[i,"status"]=="H") {inf.load<-0}
+  if(sub.surv.data[i,"status"]=="H") {new.metric<-0}
   if(sub.surv.data[i,"status"]=="D") 
   {
-    if(as.character(sub.surv.data[i,"tag"]) %in% as.character(tot.inf.load$tag))
+    if(as.character(sub.surv.data[i,"tag"]) %in% as.character(tot.inf.tissue.measures.frame$tag))
     {
-      inf.load<-tot.inf.load[which(as.character(tot.inf.load$tag)==as.character(sub.surv.data[i,"tag"])),"inf.intens"]
-    } else {inf.load<-NA}
+      new.metric<-tot.inf.tissue.measures.frame[which(as.character(tot.inf.tissue.measures.frame$tag)==as.character(sub.surv.data[i,"tag"])),"tot.inf.tissue"]
+    } else {new.metric<-NA}
   }
-  inf.loads<-c(inf.loads,inf.load)
+  new.metrics<-c(new.metrics,new.metric)
 }
 
-final.data<-data.frame(sub.surv.data,"inf.load"=inf.loads)
-plot(final.data$inf.load,final.data$death,xlab="total infection load",ylab="death")
-summary(glm(death~inf.load,data=final.data))
+final.data<-data.frame(sub.surv.data,"tot.inf.tissue"=new.metrics)
+plot(final.data$tot.inf.tissue,final.data$death,xlab="total infection load",ylab="death")
+summary(glm(death~tot.inf.tissue,data=final.data))
