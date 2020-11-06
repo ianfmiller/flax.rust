@@ -47,7 +47,8 @@ surv.data<-droplevels(surv.data)
 
 #### within host data
 
-## clean
+### clean
+
 within.host<-read.csv("Withinhost.csv")
 within.host$Date<-as.Date(within.host$Date,tryFormats=c("%m/%d/%Y"))
 column.index<-c(1:7,9,11,14,15,17)
@@ -68,26 +69,27 @@ within.host[which(within.host[,"percent.tissue.infected"]=="<.05"),"percent.tiss
 within.host[which(within.host[,"percent.tissue.infected"]==""),"percent.tissue.infected"]<-NA
 within.host<-transform(within.host,percent.tissue.infected=as.numeric(as.character(percent.tissue.infected)))
 
-#extract infection intensity at last observation
+### extract total infected tissue at last observation
 
 tags<-c()
-inf.intensities<-c()
+
+tot.inf.tissue.measures<-c()
 
 for(tag in unique(within.host$Tag))
 {
-  new.data<-subset(within.host,Tag==tag)
-  new.data<-subset(new.data,Date==max(unique(new.data$Date)))
+  sub.data<-subset(within.host,Tag==tag)
+  sub.data<-subset(sub.data,Date==max(unique(sub.data$Date)))
   
-  tot.inf.tissue.measured<-c()
-  for(i in 1:dim(new.data)[1])
+  inf.tissue.measured<-c()
+  for(i in 1:dim(sub.data)[1])
   {
-    if(is.na(new.data[i,"length.tissue.infected"]) & !is.na(new.data[i,"percent.tissue.infected"])) {new.data[i,"length.tissue.infected"]<-new.data[i,"percent.tissue.infected"]*new.data[i,"stem.height"]}
-    inf.tissue.metric<-new.data[i,"length.tissue.infected"]*new.data[i,"N.pustules.middle"]
-    tot.inf.tissue.measured<-c(tot.inf.tissue.measured,inf.tissue.metric)
+    if(is.na(sub.data[i,"length.tissue.infected"]) & !is.na(sub.data[i,"percent.tissue.infected"])) {sub.data[i,"length.tissue.infected"]<-sub.data[i,"percent.tissue.infected"]*sub.data[i,"stem.height"]}
+    new.inf.tissue.measured<-sub.data[i,"length.tissue.infected"]*sub.data[i,"N.pustules.middle"]
+    inf.tissue.measured<-c(inf.tissue.measured,new.inf.tissue.measured)
   }
-  if(!all(is.na(tot.inf.tissue.measured))) {inf.intensity<-new.data$N.D.Stems[1]*sum(tot.inf.tissue.measured,na.rm = T)/length(tot.inf.tissue.measured)} else{inf.intensity<-NA}
+  if(!all(is.na(inf.tissue.measured))) {tot.inf.tissue.measure<-sub.data$N.D.Stems[1]*sum(inf.tissue.measured,na.rm = T)/length(inf.tissue.measured)} else{tot.inf.tissue.measure<-NA}
   tags<-c(tag,tags)
-  inf.intensities<-c(inf.intensities,inf.intensity)
+  tot.inf.tissue.measures<-c(tot.inf.tissue.measures,tot.inf.tissue.measure)
 }
 
 tot.inf.load<-data.frame(tag=tags,inf.intens=inf.intensities)
