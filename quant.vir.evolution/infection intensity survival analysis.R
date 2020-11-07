@@ -1,4 +1,5 @@
 library(lubridate)
+library(viridis)
 
 setwd("~/Documents/GitHub/flax.rust/data")
 demog<-read.csv("Demography.csv")
@@ -111,7 +112,7 @@ for(tag in unique(within.host$Tag))
 
 predictor.data<-data.frame(tag=as.character(tags),site=sites,N.Stems=N.Stems,N.D.Stems=N.D.Stems,max.height=max.heights,tot.inf.metric=tot.inf.metric.measures)
 
-#### analyze total tissue infected, including healhty plant data
+#### analyze total tissue infected, including healhty plant data. Can't look at anything besides total infection metric because final stem#s for healthy plants weren't tracked.
 
 ### join data
 sub.surv.data<-subset(surv.data,year==2019)
@@ -149,6 +150,128 @@ for(i in 1:dim(predictor.data)[1])
   if(length(index)>0) {death.metrics<-c(death.metrics,sub.surv.data[index,"death"])} else {death.metrics<-c(death.metrics,NA)}
 }
 
-final.data2<-data.frame(predictor.data,"death"=death.metrics)
+final.data2<-data.frame(predictor.data,"death"=death.metrics,"p.stems.inf"=predictor.data$N.D.Stems/predictor.data$N.Stems)
 
-plot(final.data2$N.D.Stems/final.data2$N.Stems,final.data2$death)
+### fit models
+## N.D.stems as predictor
+mod1<-glm(death~N.D.Stems*N.Stems*max.height+site,data=final.data2)
+mod2<-glm(death~N.D.Stems*N.Stems+max.height+site,data=final.data2)
+mod3<-glm(death~N.D.Stems*N.Stems+site,data=final.data2)
+mod4<-glm(death~N.D.Stems*max.height+N.Stems+site,data=final.data2)
+mod5<-glm(death~N.D.Stems*max.height+site,data=final.data2)
+mod6<-glm(death~N.D.Stems+N.Stems+max.height+site,data=final.data2)
+mod7<-glm(death~N.D.Stems+max.height+site,data=final.data2)
+mod8<-glm(death~N.D.Stems+N.Stems+site,data=final.data2)
+mod9<-glm(death~N.D.Stems+site,data=final.data2)
+
+mod10<-glm(death~N.D.Stems*N.Stems*max.height,data=final.data2)
+mod11<-glm(death~N.D.Stems*N.Stems+max.height,data=final.data2)
+mod12<-glm(death~N.D.Stems*N.Stems,data=final.data2)
+mod13<-glm(death~N.D.Stems*max.height+N.Stems,data=final.data2)
+mod14<-glm(death~N.D.Stems*max.height,data=final.data2)
+mod15<-glm(death~N.D.Stems+N.Stems+max.height,data=final.data2)
+mod16<-glm(death~N.D.Stems+max.height,data=final.data2)
+mod17<-glm(death~N.D.Stems+N.Stems,data=final.data2)
+mod18<-glm(death~N.D.Stems,data=final.data2)
+
+AICs<-AIC(mod1,mod2,mod3,mod4,mod5,mod6,mod7,mod8,mod9,mod10,mod11,mod12,mod13,mod14,mod15,mod16,mod17,mod18)
+
+final.stem.mod<-mod5
+
+layout(matrix(c(1,1,1,1,1,2),1,6,byrow = T))
+par(mar=c(5.1,4.1,4.1,2.1))
+plot(final.data2$N.D.Stems,jitter(final.data2$death,amount=.05),xlab="N diseased stems",ylab="",axes=F)
+axis(1)
+axis(2,at=c(0,1),labels = c("survived","died"))
+box()
+ilogit<-function(x) {exp(x)/(exp(x)+1)}
+curve(ilogit(coef(final.stem.mod)[1]+coef(final.stem.mod)[2]*x+coef(final.stem.mod)[3]*quantile(final.data2$max.height,.05,na.rm = T)+coef(final.stem.mod)[6]*x*quantile(final.data2$max.height,.05,na.rm = T)+coef(final.stem.mod)[4]),add=T,col=viridis(5,direction=-1)[1],lwd=2,lty=1)
+curve(ilogit(coef(final.stem.mod)[1]+coef(final.stem.mod)[2]*x+coef(final.stem.mod)[3]*quantile(final.data2$max.height,.25,na.rm = T)+coef(final.stem.mod)[6]*x*quantile(final.data2$max.height,.25,na.rm = T)+coef(final.stem.mod)[4]),add=T,col=viridis(5,direction=-1)[2],lwd=2,lty=1)
+curve(ilogit(coef(final.stem.mod)[1]+coef(final.stem.mod)[2]*x+coef(final.stem.mod)[3]*quantile(final.data2$max.height,.5,na.rm = T)+coef(final.stem.mod)[6]*x*quantile(final.data2$max.height,.5,na.rm = T)+coef(final.stem.mod)[4]),add=T,col=viridis(5,direction=-1)[3],lwd=2,lty=1)
+curve(ilogit(coef(final.stem.mod)[1]+coef(final.stem.mod)[2]*x+coef(final.stem.mod)[3]*quantile(final.data2$max.height,.75,na.rm = T)+coef(final.stem.mod)[6]*x*quantile(final.data2$max.height,.75,na.rm = T)+coef(final.stem.mod)[4]),add=T,col=viridis(5,direction=-1)[4],lwd=2,lty=1)
+curve(ilogit(coef(final.stem.mod)[1]+coef(final.stem.mod)[2]*x+coef(final.stem.mod)[3]*quantile(final.data2$max.height,.95,na.rm = T)+coef(final.stem.mod)[6]*x*quantile(final.data2$max.height,.95,na.rm = T)+coef(final.stem.mod)[4]),add=T,col=viridis(5,direction=-1)[5],lwd=2,lty=1)
+
+curve(ilogit(coef(final.stem.mod)[1]+coef(final.stem.mod)[2]*x+coef(final.stem.mod)[3]*quantile(final.data2$max.height,.05,na.rm = T)+coef(final.stem.mod)[6]*x*quantile(final.data2$max.height,.05,na.rm = T)),add=T,col=viridis(5,direction=-1)[1],lwd=2,lty=2)
+curve(ilogit(coef(final.stem.mod)[1]+coef(final.stem.mod)[2]*x+coef(final.stem.mod)[3]*quantile(final.data2$max.height,.25,na.rm = T)+coef(final.stem.mod)[6]*x*quantile(final.data2$max.height,.25,na.rm = T)),add=T,col=viridis(5,direction=-1)[2],lwd=2,lty=2)
+curve(ilogit(coef(final.stem.mod)[1]+coef(final.stem.mod)[2]*x+coef(final.stem.mod)[3]*quantile(final.data2$max.height,.5,na.rm = T)+coef(final.stem.mod)[6]*x*quantile(final.data2$max.height,.5,na.rm = T)),add=T,col=viridis(5,direction=-1)[3],lwd=2,lty=2)
+curve(ilogit(coef(final.stem.mod)[1]+coef(final.stem.mod)[2]*x+coef(final.stem.mod)[3]*quantile(final.data2$max.height,.75,na.rm = T)+coef(final.stem.mod)[6]*x*quantile(final.data2$max.height,.75,na.rm = T)),add=T,col=viridis(5,direction=-1)[4],lwd=2,lty=2)
+curve(ilogit(coef(final.stem.mod)[1]+coef(final.stem.mod)[2]*x+coef(final.stem.mod)[3]*quantile(final.data2$max.height,.95,na.rm = T)+coef(final.stem.mod)[6]*x*quantile(final.data2$max.height,.95,na.rm = T)),add=T,col=viridis(5,direction=-1)[5],lwd=2,lty=2)
+
+curve(ilogit(coef(final.stem.mod)[1]+coef(final.stem.mod)[2]*x+coef(final.stem.mod)[3]*quantile(final.data2$max.height,.05,na.rm = T)+coef(final.stem.mod)[6]*x*quantile(final.data2$max.height,.05,na.rm = T)+coef(final.stem.mod)[5]),add=T,col=viridis(5,direction=-1)[1],lwd=2,lty=3)
+curve(ilogit(coef(final.stem.mod)[1]+coef(final.stem.mod)[2]*x+coef(final.stem.mod)[3]*quantile(final.data2$max.height,.25,na.rm = T)+coef(final.stem.mod)[6]*x*quantile(final.data2$max.height,.25,na.rm = T)+coef(final.stem.mod)[5]),add=T,col=viridis(5,direction=-1)[2],lwd=2,lty=3)
+curve(ilogit(coef(final.stem.mod)[1]+coef(final.stem.mod)[2]*x+coef(final.stem.mod)[3]*quantile(final.data2$max.height,.5,na.rm = T)+coef(final.stem.mod)[6]*x*quantile(final.data2$max.height,.5,na.rm = T)+coef(final.stem.mod)[5]),add=T,col=viridis(5,direction=-1)[3],lwd=2,lty=3)
+curve(ilogit(coef(final.stem.mod)[1]+coef(final.stem.mod)[2]*x+coef(final.stem.mod)[3]*quantile(final.data2$max.height,.75,na.rm = T)+coef(final.stem.mod)[6]*x*quantile(final.data2$max.height,.75,na.rm = T)+coef(final.stem.mod)[5]),add=T,col=viridis(5,direction=-1)[4],lwd=2,lty=3)
+curve(ilogit(coef(final.stem.mod)[1]+coef(final.stem.mod)[2]*x+coef(final.stem.mod)[3]*quantile(final.data2$max.height,.95,na.rm = T)+coef(final.stem.mod)[6]*x*quantile(final.data2$max.height,.95,na.rm = T)+coef(final.stem.mod)[5]),add=T,col=viridis(5,direction=-1)[5],lwd=2,lty=3)
+
+par(mar=c(1,0,1,0))
+plot(0,0,type="n",xlim=c(0,1),ylim=c(0,1),bty="n",axes = F,xlab="",ylab="")
+legend(.5,.4,legend=c("5%","25%","50%","75%","95%"),lwd=2,col=viridis(5,direction=-1),title="CC\nquantile height",xjust = .5,yjust = .5,cex=1,bty="n")
+legend(.5,.6,legend=c("CC","BT","GM"),lwd=2,lty=c(1,2,3),col="black",title="Site",xjust = .5,yjust = .5,cex=1,bty="n")
+
+
+## p.stems.inf as predictor
+mod1<-glm(death~p.stems.inf*N.Stems*max.height+site,data=final.data2)
+mod2<-glm(death~p.stems.inf*N.Stems+max.height+site,data=final.data2)
+mod3<-glm(death~p.stems.inf*N.Stems+site,data=final.data2)
+mod4<-glm(death~p.stems.inf*max.height+N.Stems+site,data=final.data2)
+mod5<-glm(death~p.stems.inf*max.height+site,data=final.data2)
+mod6<-glm(death~p.stems.inf+N.Stems+max.height+site,data=final.data2)
+mod7<-glm(death~p.stems.inf+max.height+site,data=final.data2)
+mod8<-glm(death~p.stems.inf+N.Stems+site,data=final.data2)
+mod9<-glm(death~p.stems.inf+site,data=final.data2)
+
+mod10<-glm(death~p.stems.inf*N.Stems*max.height,data=final.data2)
+mod11<-glm(death~p.stems.inf*N.Stems+max.height,data=final.data2)
+mod12<-glm(death~p.stems.inf*N.Stems,data=final.data2)
+mod13<-glm(death~p.stems.inf*max.height+N.Stems,data=final.data2)
+mod14<-glm(death~p.stems.inf*max.height,data=final.data2)
+mod15<-glm(death~p.stems.inf+N.Stems+max.height,data=final.data2)
+mod16<-glm(death~p.stems.inf+max.height,data=final.data2)
+mod17<-glm(death~p.stems.inf+N.Stems,data=final.data2)
+mod18<-glm(death~p.stems.inf,data=final.data2)
+
+AICs<-AIC(mod1,mod2,mod3,mod4,mod5,mod6,mod7,mod8,mod9,mod10,mod11,mod12,mod13,mod14,mod15,mod16,mod17,mod18)
+
+final.p.stem.mod<-mod7
+
+## tot.inf.metric as predictor
+mod1<-glm(death~tot.inf.metric*N.Stems*max.height+site,data=final.data2)
+mod2<-glm(death~tot.inf.metric*N.Stems+max.height+site,data=final.data2)
+mod3<-glm(death~tot.inf.metric*N.Stems+site,data=final.data2)
+mod4<-glm(death~tot.inf.metric*max.height+N.Stems+site,data=final.data2)
+mod5<-glm(death~tot.inf.metric*max.height+site,data=final.data2)
+mod6<-glm(death~tot.inf.metric+N.Stems+max.height+site,data=final.data2)
+mod7<-glm(death~tot.inf.metric+max.height+site,data=final.data2)
+mod8<-glm(death~tot.inf.metric+N.Stems+site,data=final.data2)
+mod9<-glm(death~tot.inf.metric+site,data=final.data2)
+
+mod10<-glm(death~tot.inf.metric*N.Stems*max.height,data=final.data2)
+mod11<-glm(death~tot.inf.metric*N.Stems+max.height,data=final.data2)
+mod12<-glm(death~tot.inf.metric*N.Stems,data=final.data2)
+mod13<-glm(death~tot.inf.metric*max.height+N.Stems,data=final.data2)
+mod14<-glm(death~tot.inf.metric*max.height,data=final.data2)
+mod15<-glm(death~tot.inf.metric+N.Stems+max.height,data=final.data2)
+mod16<-glm(death~tot.inf.metric+max.height,data=final.data2)
+mod17<-glm(death~tot.inf.metric+N.Stems,data=final.data2)
+mod18<-glm(death~tot.inf.metric,data=final.data2)
+
+AICs<-AIC(mod1,mod2,mod3,mod4,mod5,mod6,mod7,mod8,mod9,mod10,mod11,mod12,mod13,mod14,mod15,mod16,mod17,mod18)
+
+final.metric.mod<-mod14
+
+layout(matrix(c(1,1,1,1,1,2),1,6,byrow = T))
+par(mar=c(5.1,4.1,4.1,2.1))
+plot(final.data2$tot.inf.metric,jitter(final.data2$death,amount=.05),xlab="total infection load metric",ylab="",axes = F)
+axis(1)
+axis(2,at=c(0,1),labels = c("survived","died"))
+box()
+ilogit<-function(x) {exp(x)/(exp(x)+1)}
+curve(ilogit(coef(final.metric.mod)[1]+coef(final.metric.mod)[2]*x+coef(final.metric.mod)[3]*quantile(final.data2$max.height,.05,na.rm = T)+coef(final.metric.mod)[4]*x*quantile(final.data2$max.height,.05,na.rm = T)),add=T,col=viridis(5,direction=-1)[1],lwd=2)
+curve(ilogit(coef(final.metric.mod)[1]+coef(final.metric.mod)[2]*x+coef(final.metric.mod)[3]*quantile(final.data2$max.height,.25,na.rm = T)+coef(final.metric.mod)[4]*x*quantile(final.data2$max.height,.25,na.rm = T)),add=T,col=viridis(5,direction=-1)[2],lwd=2)
+curve(ilogit(coef(final.metric.mod)[1]+coef(final.metric.mod)[2]*x+coef(final.metric.mod)[3]*quantile(final.data2$max.height,.5,na.rm = T)+coef(final.metric.mod)[4]*x*quantile(final.data2$max.height,.5,na.rm = T)),add=T,col=viridis(5,direction=-1)[3],lwd=2)
+curve(ilogit(coef(final.metric.mod)[1]+coef(final.metric.mod)[2]*x+coef(final.metric.mod)[3]*quantile(final.data2$max.height,.75,na.rm = T)+coef(final.metric.mod)[4]*x*quantile(final.data2$max.height,.75,na.rm = T)),add=T,col=viridis(5,direction=-1)[4],lwd=2)
+curve(ilogit(coef(final.metric.mod)[1]+coef(final.metric.mod)[2]*x+coef(final.metric.mod)[3]*quantile(final.data2$max.height,.95,na.rm = T)+coef(final.metric.mod)[4]*x*quantile(final.data2$max.height,.95,na.rm = T)),add=T,col=viridis(5,direction=-1)[5],lwd=2)
+par(mar=c(1,0,1,0))
+plot(0,0,type="n",xlim=c(0,1),ylim=c(0,1),bty="n",axes = F,xlab="",ylab="")
+legend(.5,.5,legend=c("5%","25%","50%","75%","95%"),lwd=2,col=viridis(5,direction=-1),title="quantile height",xjust = .5,yjust = .5,cex=1)
+
