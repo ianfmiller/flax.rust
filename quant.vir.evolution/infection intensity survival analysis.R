@@ -10,6 +10,7 @@ within.host<-read.csv("Withinhost.csv")
 
 ### pull relevant info out of demog
 tag<-c()
+site<-c()
 status<-c()
 death<-c()
 year<-c()
@@ -21,11 +22,14 @@ for(index in unique(demog$tag))
   stat2<-NA
   death1<-NA
   death2<-NA
+  site1<-NA
+  site2<-NA
  
   sub.data<-subset(demog,tag==index)
   if(all("2018" %in% sub.data$year,"2019" %in% sub.data$year))
   {
     stat1<-as.character(sub.data[which(sub.data$year=="2018"),"final.status"])
+    site1<-as.character(sub.data[which(sub.data$year=="2018"),"Site"])
     if(sub.data[which(sub.data$year=="2019"),"status"] %in% c("H","D","X"))
     {
       death1<-ifelse(sub.data[which(sub.data$year=="2019"),"status"]=="X",1,0)
@@ -35,18 +39,19 @@ for(index in unique(demog$tag))
   if(all("2019" %in% sub.data$year,"2020" %in% sub.data$year))
   {
     stat2<-as.character(sub.data[which(sub.data$year=="2019"),"final.status"])
+    site2<-as.character(sub.data[which(sub.data$year=="2019"),"Site"])
     if(sub.data[which(sub.data$year=="2020"),"status"] %in% c("H","D","X"))
     {
       death2<-ifelse(sub.data[which(sub.data$year=="2020"),"status"]=="X",1,0)
     } else {death2<-NA}
   }
   
-  if(!any(is.na(c(stat1,death1)))) {tag<-c(tag,index);status<-c(status,stat1);death<-c(death,death1);year<-c(year,"2018")}
-  if(!any(is.na(c(stat2,death2)))) {tag<-c(tag,index);status<-c(status,stat2);death<-c(death,death2);year<-c(year,"2019")}            
+  if(!any(is.na(c(stat1,death1)))) {tag<-c(tag,index);status<-c(status,stat1);death<-c(death,death1);year<-c(year,"2018");site<-c(site,site1)}
+  if(!any(is.na(c(stat2,death2)))) {tag<-c(tag,index);status<-c(status,stat2);death<-c(death,death2);year<-c(year,"2019");site<-c(site,site2)}            
   if(!(length(tag)==length(status))) {print(index)}
 }
 
-surv.data<-data.frame(tag=tag,year=year,status=status,death=death)
+surv.data<-data.frame(tag=tag,year=year,site=site,status=status,death=death)
 surv.data<-droplevels(surv.data)
 
 #### within host data
@@ -133,11 +138,14 @@ for(i in 1:dim(sub.surv.data)[1])
 
 final.data1<-data.frame(sub.surv.data,"tot.inf.metric"=new.metrics)
 
-### analysis
+### fit models
+
+mod1<-glm(death~N.D.Stems*N.Stems*max.height+site,data=final.data2)
+
 plot(final.data1$tot.inf.metric,final.data1$death,xlab="total infection metric",ylab="death")
 summary(glm(death~tot.inf.metric,data=final.data1))
 
-#### analyze by plant metrics, including healhty plant data
+#### analyze by plant metrics, including only D plant data
 
 ### join data
 
@@ -274,4 +282,5 @@ curve(ilogit(coef(final.metric.mod)[1]+coef(final.metric.mod)[2]*x+coef(final.me
 par(mar=c(1,0,1,0))
 plot(0,0,type="n",xlim=c(0,1),ylim=c(0,1),bty="n",axes = F,xlab="",ylab="")
 legend(.5,.5,legend=c("5%","25%","50%","75%","95%"),lwd=2,col=viridis(5,direction=-1),title="quantile height",xjust = .5,yjust = .5,cex=1)
+
 
