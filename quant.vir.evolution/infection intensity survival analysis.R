@@ -117,35 +117,48 @@ for(tag in unique(within.host$Tag))
 
 predictor.data<-data.frame(tag=as.character(tags),site=sites,N.Stems=N.Stems,N.D.Stems=N.D.Stems,max.height=max.heights,tot.inf.metric=tot.inf.metric.measures)
 
-#### analyze total tissue infected, including healhty plant data. Can't look at anything besides total infection metric because final stem#s for healthy plants weren't tracked.
+#### analyze total tissue infected, including healhty plant data. Can't look at anything besides total infection metric and p.stems.infected because final # stems / height for healthy plants weren't tracked.
 
 ### join data
 sub.surv.data<-subset(surv.data,year==2019)
 
-new.metrics<-c()
+new.metrics1<-c()
+new.metrics2<-c()
 for(i in 1:dim(sub.surv.data)[1])
 {
-  if(sub.surv.data[i,"status"]=="H") {new.metric<-0}
+  if(sub.surv.data[i,"status"]=="H") {new.metric1<-0; new.metric2<-0}
   if(sub.surv.data[i,"status"]=="D") 
   {
     if(as.character(sub.surv.data[i,"tag"]) %in% as.character(predictor.data$tag))
     {
-      new.metric<-predictor.data[which(as.character(predictor.data$tag)==as.character(sub.surv.data[i,"tag"])),"tot.inf.metric"]
-    } else {new.metric<-NA}
+      pred.data.index<-which(as.character(predictor.data$tag)==as.character(sub.surv.data[i,"tag"]))
+      new.metric1<-predictor.data[pred.data.index,"tot.inf.metric"]
+      new.metric2<-predictor.data[pred.data.index,"N.D.Stems"]/predictor.data[pred.data.index,"N.Stems"]
+    } else {new.metric1<-NA;new.metric2<-NA}
   }
-  new.metrics<-c(new.metrics,new.metric)
+  new.metrics1<-c(new.metrics1,new.metric1)
+  new.metrics2<-c(new.metrics2,new.metric2)
 }
 
-final.data1<-data.frame(sub.surv.data,"tot.inf.metric"=new.metrics)
+final.data1<-data.frame(sub.surv.data,"tot.inf.metric"=new.metrics1,"p.stems.inf"=new.metrics2)
+
 
 ### fit models
 
-mod1<-glm(death~N.D.Stems*N.Stems*max.height+site,data=final.data2)
+mod1<-glm(death~tot.inf.metric+site,data=final.data1)
+mod2<-glm(death~tot.inf.metric,data=final.data1)
+AIC(mod1,mod2)
+
+mod3<-glm(death~p.stems.inf+site,data=final.data1)
+mod4<-glm(death~p.stems.inf,data=final.data1)
+AIC(mod3,mod4)
+
+which(is.na(final.data1$p.stems.inf)) %in% which(is.na(final.data1$tot.inf.metric))
 
 plot(final.data1$tot.inf.metric,final.data1$death,xlab="total infection metric",ylab="death")
 summary(glm(death~tot.inf.metric,data=final.data1))
 
-#### analyze by plant metrics, including only D plant data
+#### analyze by plant size metrics + disease metrics, including only D plant data
 
 ### join data
 
