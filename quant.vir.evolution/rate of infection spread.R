@@ -124,7 +124,7 @@ for(tag.index in unique(predictor.data$tag))
   plot.data<-subset(predictor.data,tag==tag.index)
   if(dim(plot.data)[1]>1)
   {
-    slope<-coef(lm(N.D.Stems~date,data = plot.data[c(min(which(!is.na(plot.data$N.D.Stems))),dim(plot.data)[1]),] ))[2]
+    slope<-coef(lm(N.D.Stems~date,data = plot.data[c(min(which(!is.na(plot.data$N.D.Stems))),max(which(!is.na(plot.data$N.D.Stems)))),] ))[2]
     slopes<-c(slopes,slope)
   } else{slopes<-c(slopes,NA)}
 }
@@ -177,7 +177,7 @@ for(tag.index in unique(predictor.data$tag))
   plot.data<-subset(predictor.data,tag==tag.index)
   if(dim(plot.data)[1]>1)
   {
-    slope<-coef(lm(p.D.stems~date,data = plot.data[c(min(which(!is.na(plot.data$p.D.stems))),dim(plot.data)[1]),] ))[2]
+    slope<-coef(lm(p.D.stems~date,data = plot.data[c(min(which(!is.na(plot.data$p.D.stems))),max(which(!is.na(plot.data$p.D.stems)))),] ))[2]
     slopes<-c(slopes,slope)
   } else{slopes<-c(slopes,NA)}
 }
@@ -230,7 +230,7 @@ for(tag.index in unique(predictor.data$tag))
   plot.data<-subset(predictor.data,tag==tag.index)
   if(dim(plot.data)[1]>1)
   {
-    slope<-coef(lm(tot.inf.metric~date,data = plot.data[c(min(which(!is.na(plot.data$tot.inf.metric))),dim(plot.data)[1]),] ))[2]
+    slope<-coef(lm(tot.inf.metric~date,data = plot.data[c(min(which(!is.na(plot.data$tot.inf.metric))),max(which(!is.na(plot.data$tot.inf.metric)))),] ))[2]
     slopes<-c(slopes,slope)
   } else{slopes<-c(slopes,NA)}
 }
