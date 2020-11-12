@@ -153,8 +153,6 @@ mod3<-glm(death~p.stems.inf+site,data=final.data1)
 mod4<-glm(death~p.stems.inf,data=final.data1)
 AIC(mod3,mod4)
 
-which(is.na(final.data1$p.stems.inf)) %in% which(is.na(final.data1$tot.inf.metric))
-
 plot(final.data1$tot.inf.metric,final.data1$death,xlab="total infection metric",ylab="death")
 summary(glm(death~tot.inf.metric,data=final.data1))
 
