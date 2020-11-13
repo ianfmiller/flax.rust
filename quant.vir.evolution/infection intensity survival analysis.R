@@ -126,14 +126,14 @@ for(tag in unique(within.host$Tag))
   }
   
   if(any(!is.na(tot.inf.metric.measures.week))) {tot.inf.metrics<-c(tot.inf.metrics,tot.inf.metric.measures.week[max(which(!is.na(tot.inf.metric.measures.week)))])} else {tot.inf.metrics<-c(tot.inf.metrics,NA)}
-  if(any(!is.na(N.Stems.week))) {N.Stems<-c(N.Stems,N.Stems.week[max(which(!is.na(N.Stems.week)))])} else {N.Stems<-c(N.Stems,NA)}
-  if(any(!is.na(N.D.Stems.week))) {N.D.Stems<-c(N.D.Stems,N.D.Stems.week[max(which(!is.na(N.D.Stems.week)))])} else {N.D.Stems<-c(N.D.Stems,NA)}
+  if(any(!is.na(N.Stems.week))) {N.Stems<-c(N.Stems,N.Stems.week[max(which(!is.na(N.D.Stems.week)))])} else {N.Stems<-c(N.Stems,NA)} #get N.stems and N.D.Stems from same time point
+  if(any(!is.na(N.D.Stems.week))) {N.D.Stems<-c(N.D.Stems,N.D.Stems.week[max(which(!is.na(N.D.Stems.week)))])} else {N.D.Stems<-c(N.D.Stems,NA)} #get N.stems and N.D.Stems from same time point
   if(any(!is.na(max.heights.week))) {max.heights<-c(max.heights,max.heights.week[max(which(!is.na(max.heights.week)))])} else {max.heights<-c(max.heights,NA)}
 }
 
-predictor.data<-data.frame(tag=as.character(tags),site=sites,date=as.Date(dates),N.Stems=N.Stems,N.D.Stems=N.D.Stems,p.D.stems=N.D.Stems/(N.D.Stems+N.Stems),max.height=max.heights,tot.inf.metric=tot.inf.metrics)
+predictor.data<-data.frame(tag=as.character(tags),site=sites,date=as.Date(dates),N.Stems=N.Stems,N.D.Stems=N.D.Stems,p.D.stems=N.D.Stems/N.Stems,max.height=max.heights,tot.inf.metric=tot.inf.metrics)
 
-#### analyze total tissue infected, including healhty plant data. Can't look at anything besides total infection metric and p.stems.infected because final # stems / height for healthy plants weren't tracked.
+#### analyze total tissue infected, including healhty plant data, no plant size predictors
 
 ### join data
 sub.surv.data<-subset(surv.data,year==2019)
@@ -315,4 +315,124 @@ par(mar=c(1,0,1,0))
 plot(0,0,type="n",xlim=c(0,1),ylim=c(0,1),bty="n",axes = F,xlab="",ylab="")
 legend(.5,.5,legend=c("5%","25%","50%","75%","95%"),lwd=2,col=viridis(5,direction=-1),title="quantile height",xjust = .5,yjust = .5,cex=1)
 
+
+#### analyze total tissue infected, including healhty plant data, use first obs plant size as predictor
+
+### join data
+sub.surv.data<-subset(surv.data,year==2019)
+sub.demog.data<-subset(demog,year==2019)
+#disease metrics
+new.metrics1<-c() #tot.inf.metric
+new.metrics2<-c() #p.D.stems
+new.metrics3<-c() #N.D.stems
+
+#size metrics
+new.metrics4<-c() #N.Stems
+new.metrics5<-c() #max height
+
+for(i in 1:dim(sub.surv.data)[1])
+{
+  ## get infection intensity data
+  if(sub.surv.data[i,"status"]=="H") {new.metric1<-0; new.metric2<-0; new.metric3<-0;}
+  if(sub.surv.data[i,"status"]=="D") 
+  {
+    if(as.character(sub.surv.data[i,"tag"]) %in% as.character(predictor.data$tag))
+    {
+      pred.data.index<-which(as.character(predictor.data$tag)==as.character(sub.surv.data[i,"tag"]))
+      new.metric1<-predictor.data[pred.data.index,"tot.inf.metric"]
+      new.metric2<-predictor.data[pred.data.index,"p.D.stems"]
+      new.metric3<-predictor.data[pred.data.index,"N.D.Stems"]
+      
+    } else {new.metric1<-NA;new.metric2<-NA; new.metric3<-NA}
+  }
+  
+  demog.index<-which(sub.demog.data$tag==as.character(sub.surv.data[i,"tag"]))
+  new.metric4<-sub.demog.data[demog.index,"num.infl"]
+  new.metric5<-sub.demog.data[demog.index,"height.cm"]
+  
+  new.metrics1<-c(new.metrics1,new.metric1)
+  new.metrics2<-c(new.metrics2,new.metric2)
+  new.metrics3<-c(new.metrics3,new.metric3)
+  new.metrics4<-c(new.metrics4,new.metric4)
+  new.metrics5<-c(new.metrics5,new.metric5)
+  
+  ## get size data
+}
+
+final.data3<-data.frame(sub.surv.data,"tot.inf.metric"=new.metrics1,"p.stems.inf"=new.metrics2,"N.D.Stems"=new.metrics3,"N.Stems"=new.metrics4,"max.height"=new.metrics5)
+final.data3[which(final.data3$site=="CCDO"),"site"]<-"CC"
+final.data3[which(final.data3$site=="BTDO"),"site"]<-"BT"
+final.data3[which(final.data3$site=="GMDO"),"site"]<-"GM"
+final.data3<-final.data3[-which(is.na(final.data3$p.stems.inf)),]
+final.data3<-final.data3[-which(is.na(final.data3$N.Stems)),]
+
+### fit models
+
+mod1<-glm(death~tot.inf.metric*N.Stems*max.height+site,data=final.data3)
+mod2<-glm(death~tot.inf.metric*N.Stems+max.height+site,data=final.data3)
+mod3<-glm(death~tot.inf.metric*N.Stems+site,data=final.data3)
+mod4<-glm(death~tot.inf.metric*max.height+N.Stems+site,data=final.data3)
+mod5<-glm(death~tot.inf.metric*max.height+site,data=final.data3)
+mod6<-glm(death~tot.inf.metric+N.Stems+max.height+site,data=final.data3)
+mod7<-glm(death~tot.inf.metric+max.height+site,data=final.data3)
+mod8<-glm(death~tot.inf.metric+N.Stems+site,data=final.data3)
+mod9<-glm(death~tot.inf.metric+site,data=final.data3)
+
+mod10<-glm(death~tot.inf.metric*N.Stems*max.height,data=final.data3)
+mod11<-glm(death~tot.inf.metric*N.Stems+max.height,data=final.data3)
+mod12<-glm(death~tot.inf.metric*N.Stems,data=final.data3)
+mod13<-glm(death~tot.inf.metric*max.height+N.Stems,data=final.data3)
+mod14<-glm(death~tot.inf.metric*max.height,data=final.data3)
+mod15<-glm(death~tot.inf.metric+N.Stems+max.height,data=final.data3)
+mod16<-glm(death~tot.inf.metric+max.height,data=final.data3)
+mod17<-glm(death~tot.inf.metric+N.Stems,data=final.data3)
+mod18<-glm(death~tot.inf.metric,data=final.data3)
+
+AICs<-AIC(mod1,mod2,mod3,mod4,mod5,mod6,mod7,mod8,mod9,mod10,mod11,mod12,mod13,mod14,mod15,mod16,mod17,mod18)
+
+#mods1,3,6,8 all have similar AICs
+
+mod1<-glm(death~p.stems.inf*N.Stems*max.height+site,data=final.data3)
+mod2<-glm(death~p.stems.inf*N.Stems+max.height+site,data=final.data3)
+mod3<-glm(death~p.stems.inf*N.Stems+site,data=final.data3)
+mod4<-glm(death~p.stems.inf*max.height+N.Stems+site,data=final.data3)
+mod5<-glm(death~p.stems.inf*max.height+site,data=final.data3)
+mod6<-glm(death~p.stems.inf+N.Stems+max.height+site,data=final.data3)
+mod7<-glm(death~p.stems.inf+max.height+site,data=final.data3)
+mod8<-glm(death~p.stems.inf+N.Stems+site,data=final.data3)
+mod9<-glm(death~p.stems.inf+site,data=final.data3)
+
+mod10<-glm(death~p.stems.inf*N.Stems*max.height,data=final.data3)
+mod11<-glm(death~p.stems.inf*N.Stems+max.height,data=final.data3)
+mod12<-glm(death~p.stems.inf*N.Stems,data=final.data3)
+mod13<-glm(death~p.stems.inf*max.height+N.Stems,data=final.data3)
+mod14<-glm(death~p.stems.inf*max.height,data=final.data3)
+mod15<-glm(death~p.stems.inf+N.Stems+max.height,data=final.data3)
+mod16<-glm(death~p.stems.inf+max.height,data=final.data3)
+mod17<-glm(death~p.stems.inf+N.Stems,data=final.data3)
+mod18<-glm(death~p.stems.inf,data=final.data3)
+
+AICs<-AIC(mod1,mod2,mod3,mod4,mod5,mod6,mod7,mod8,mod9,mod10,mod11,mod12,mod13,mod14,mod15,mod16,mod17,mod18)
+
+mod1<-glm(death~N.D.Stems*N.Stems*max.height+site,data=final.data3)
+mod2<-glm(death~N.D.Stems*N.Stems+max.height+site,data=final.data3)
+mod3<-glm(death~N.D.Stems*N.Stems+site,data=final.data3)
+mod4<-glm(death~N.D.Stems*max.height+N.Stems+site,data=final.data3)
+mod5<-glm(death~N.D.Stems*max.height+site,data=final.data3)
+mod6<-glm(death~N.D.Stems+N.Stems+max.height+site,data=final.data3)
+mod7<-glm(death~N.D.Stems+max.height+site,data=final.data3)
+mod8<-glm(death~N.D.Stems+N.Stems+site,data=final.data3)
+mod9<-glm(death~N.D.Stems+site,data=final.data3)
+
+mod10<-glm(death~N.D.Stems*N.Stems*max.height,data=final.data3)
+mod11<-glm(death~N.D.Stems*N.Stems+max.height,data=final.data3)
+mod12<-glm(death~N.D.Stems*N.Stems,data=final.data3)
+mod13<-glm(death~N.D.Stems*max.height+N.Stems,data=final.data3)
+mod14<-glm(death~N.D.Stems*max.height,data=final.data3)
+mod15<-glm(death~N.D.Stems+N.Stems+max.height,data=final.data3)
+mod16<-glm(death~N.D.Stems+max.height,data=final.data3)
+mod17<-glm(death~N.D.Stems+N.Stems,data=final.data3)
+mod18<-glm(death~N.D.Stems,data=final.data3)
+
+AICs<-AIC(mod1,mod2,mod3,mod4,mod5,mod6,mod7,mod8,mod9,mod10,mod11,mod12,mod13,mod14,mod15,mod16,mod17,mod18)
 
