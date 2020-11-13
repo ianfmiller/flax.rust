@@ -207,8 +207,9 @@ box()
 for(tag.index in unique(predictor.data$tag))
 {
   plot.data<-subset(predictor.data,tag==tag.index)
+  plot.data<-plot.data[c(min(which(!is.na(plot.data$tot.inf.metric))),max(which(!is.na(plot.data$tot.inf.metric)))),]
   col<-viridis(length(unique(predictor.data$tag)))[which(unique(predictor.data$tag)==tag.index)]
-  points(c(plot.data[1,"date"],plot.data[dim(plot.data)[1],"date"]),c(plot.data[1,"tot.inf.metric"],plot.data[dim(plot.data)[1],"tot.inf.metric"]),type="l",col=col)
+  points(c(plot.data[c(1,2),"date"]),c(plot.data[c(1,2),"tot.inf.metric"]),type="l",col=col)
 }
 
 slopes<-c()
