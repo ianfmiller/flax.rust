@@ -133,7 +133,7 @@ for(tag in unique(within.host$Tag))
 
 predictor.data<-data.frame(tag=as.character(tags),site=sites,date=as.Date(dates),N.Stems=N.Stems,N.D.Stems=N.D.Stems,p.D.stems=N.D.Stems/N.Stems,max.height=max.heights,tot.inf.metric=tot.inf.metrics)
 
-#### analyze total tissue infected, including healhty plant data, no plant size predictors
+#### analyze disease metrics, including healhty plant data, no plant size predictors
 
 ### join data
 sub.surv.data<-subset(surv.data,year==2019)
@@ -216,7 +216,7 @@ mod18<-glm(death~N.D.Stems,data=final.data2)
 
 AICs<-AIC(mod1,mod2,mod3,mod4,mod5,mod6,mod7,mod8,mod9,mod10,mod11,mod12,mod13,mod14,mod15,mod16,mod17,mod18)
 
-final.stem.mod<-mod5 #mod4 and mod5 very similar AICs, mod5 has all effects significant
+final.stem.mod<-mod4
 
 layout(matrix(c(1,1,1,1,1,2),1,6,byrow = T))
 par(mar=c(5.1,4.1,4.1,2.1))
@@ -272,7 +272,7 @@ mod18<-glm(death~p.D.stems,data=final.data2)
 
 AICs<-AIC(mod1,mod2,mod3,mod4,mod5,mod6,mod7,mod8,mod9,mod10,mod11,mod12,mod13,mod14,mod15,mod16,mod17,mod18)
 
-final.p.stem.mod<-mod7 #mod6 and 7 similar, neither have significant effect of p.D.stems
+final.p.stem.mod<-mod6 #mod6 and 7 similar, neither have significant effect of p.D.stems
 
 ## tot.inf.metric as predictor
 mod1<-glm(death~tot.inf.metric*N.Stems*max.height+site,data=final.data2)
@@ -316,7 +316,7 @@ plot(0,0,type="n",xlim=c(0,1),ylim=c(0,1),bty="n",axes = F,xlab="",ylab="")
 legend(.5,.5,legend=c("5%","25%","50%","75%","95%"),lwd=2,col=viridis(5,direction=-1),title="quantile height",xjust = .5,yjust = .5,cex=1)
 
 
-#### analyze total tissue infected, including healhty plant data, use first obs plant size as predictor
+#### include healhty plant data, use first obs plant size as predictor
 
 ### join data
 sub.surv.data<-subset(surv.data,year==2019)
