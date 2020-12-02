@@ -111,3 +111,4 @@ curve(ilogit(coef(final.mod2)[1]+coef(final.mod2)[2]*x+coef(final.mod2)[3]*quant
 legend("topright",legend=c("5%","25%","50%","75%","95%"),lwd=1,col=heat.colors(5),title = "quantile N stems")
 
 #AIC(mod1,mod2,mod3,mod4,mod5,mod6,mod7,mod8,mod9,mod10,mod11,mod12,mod13,mod14)
+
