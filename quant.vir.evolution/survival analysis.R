@@ -45,7 +45,7 @@ for(index in unique(demog$tag))
 surv.data<-data.frame(tag=tag,status=status,death=death,height=height,ninfl=ninfl)
 surv.data<-droplevels(surv.data)
 surv.data<-surv.data[which(complete.cases(surv.data)),]
-plot(jitter(as.numeric(surv.data$status)),jitter(surv.data$death),xlab="status",ylab="",axes=F)
+plot(jitter(as.numeric(as.factor(surv.data$status))),jitter(surv.data$death),xlab="status",ylab="",axes=F)
 axis(1,at=c(1,2),labels=c("diseased","healthy"))
 axis(2,at=c(0,1),labels = c("survived","died"))
 
