@@ -1,6 +1,6 @@
 library(lubridate)
 library(viridis)
-library(nnet)
+library(MASS)
 
 setwd("~/Documents/GitHub/flax.rust/data")
 demog<-read.csv("Demography.csv")
@@ -145,7 +145,29 @@ for(i in 1:dim(predictor.data)[1])
   if(length(index)>0) {nextstat.metrics<-c(nextstat.metrics,sub.surv.data[index,"nextstat"])} else {nextstat.metrics<-c(nextstat.metrics,NA)}
 }
 
+nextstat.metrics<-factor(nextstat.metrics,ordered = T,levels=c("H","D","X"))
+
 final.data<-data.frame(predictor.data,"nextstat"=nextstat.metrics)
 
-mod1<-multinom(nextstat~p.D.stems,data=final.data)
+#ordinal logistic regression
+mod1<-polr(nextstat~p.D.stems*max.height*N.Stems,data=final.data)
+mod2<-polr(nextstat~p.D.stems+max.height*N.Stems,data=final.data)
+mod3<-polr(nextstat~p.D.stems*max.height+N.Stems,data=final.data)
+mod4<-polr(nextstat~p.D.stems*N.Stems+max.height,data=final.data)
+mod5<-polr(nextstat~p.D.stems+N.Stems+max.height,data=final.data)
+mod6<-polr(nextstat~p.D.stems*N.Stems,data=final.data)
+mod7<-polr(nextstat~p.D.stems+N.Stems,data=final.data)
+mod8<-polr(nextstat~p.D.stems*max.height,data=final.data)
+mod9<-polr(nextstat~p.D.stems+max.height,data=final.data)
+mod10<-polr(nextstat~N.Stems*max.height,data=final.data)
+mod11<-polr(nextstat~N.Stems+max.height,data=final.data)
+mod12<-polr(nextstat~p.D.stems,data=final.data)
+mod13<-polr(nextstat~N.Stems,data=final.data)
+mod14<-polr(nextstat~max.height,data=final.data)
+AIC(mod1,mod2,mod3,mod4,mod5,mod6,mod7,mod8,mod9,mod10,mod11,mod12,mod13,mod14)
 
+##get p values
+ctable <- coef(summary(mod9))
+p <- pnorm(abs(ctable[, "t value"]), lower.tail = FALSE) * 2
+cbind(ctable, "p value" = p)
+confint.default(mod1)
