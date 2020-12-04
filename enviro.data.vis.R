@@ -12,38 +12,6 @@ make.transparent<-function(col,alpha)
   rgb(r,g,b,alpha)
 }
 
-hm<-read.csv("high meadow temp RH 2020.csv",skip=2)
-gm<-read.csv("gothic mountain temp RH 2020.csv",skip=2)
-bt<-read.csv("bus turnaround temp RH 2020.csv",skip=2)
-cc<-read.csv("cement creek temp RH 2020.csv",skip=2)
-
-hm[,1]<-ymd_hms(hm[,1])
-gm[,1]<-ymd_hms(gm[,1])
-bt[,1]<-ymd_hms(bt[,1])
-cc[,1]<-ymd_hms(cc[,1])
-all<-rbind(hm[,1:4],gm[,1:4],bt[,1:4],cc[,1:4])
-
-
-hm.weath<-read.csv("High_Meadow.csv",skip=2)[,-1]
-colnames(hm.weath)<-c("date","wetness","rain","solar.radiation","wind.speed","gust.speed","wind.direction","soil.moisture")
-hm.weath[,1]<-parse_date_time(hm.weath[,1],'%m/%d/%y %I:%M:%S %p')
-hm.weath<-hm.weath[-which(hm.weath$wetness==-888.88),]
-
-gm.weath<-read.csv("Gothic_Mountain.csv",skip=2)[,-1]
-colnames(gm.weath)<-c("date","wetness","rain","solar.radiation","wind.speed","gust.speed","wind.direction","soil.moisture")
-gm.weath[,1]<-parse_date_time(gm.weath[,1],'%m/%d/%y %I:%M:%S %p')
-gm.weath<-gm.weath[-which(gm.weath$wetness==-888.88),]
-
-bt.weath<-read.csv("Bus_Turnaround.csv",skip=2)[,-1]
-colnames(bt.weath)<-c("date","wetness","rain","solar.radiation","wind.speed","gust.speed","wind.direction","soil.moisture")
-bt.weath[,1]<-parse_date_time(bt.weath[,1],'%m/%d/%y %I:%M:%S %p')
-bt.weath<-bt.weath[-which(bt.weath$wetness==-888.88),]
-
-cc.weath<-read.csv("Cement_Creek.csv",skip=2)[,-1]
-colnames(cc.weath)<-c("date","wetness","rain","solar.radiation","wind.speed","gust.speed","wind.direction","soil.moisture")
-cc.weath[,1]<-parse_date_time(cc.weath[,1],'%m/%d/%y %I:%M:%S %p')
-cc.weath<-cc.weath[-which(cc.weath$wetness==-888.88),]
-
 ### plot raw data
 
 par(mfrow=c(2,2),oma=c(0,0,2,0),mar=c(5.1,4.1,4.1,2.1))
@@ -51,7 +19,7 @@ par(mfrow=c(2,2),oma=c(0,0,2,0),mar=c(5.1,4.1,4.1,2.1))
 
 plot.func<-function(x,title)
 {
-  plot(x[,1],x[,2],type="l",col="red",main=title,ylim=c(-5,100),xlim=c(min(all[,1],na.rm=T),max(all[,1],na.rm = T)),xlab="date",ylab="")
+  plot(x[,1],x[,2],type="l",col="red",main=title,ylim=c(-5,100),xlim=c(min(all.temp.rh[,1],na.rm=T),max(all.temp.rh[,1],na.rm = T)),xlab="date",ylab="")
   mtext("temp",2,cex=par()$cex,line=2.25,col="red")
   lines(x[,1],x[,3],type="l",col="blue")
   mtext("RH",2,cex=par()$cex,line=3,col="blue",las=0)
@@ -66,11 +34,11 @@ mtext("raw temp + humidity data",outer=T,cex=1.75)
 
 par(mfrow=c(3,1),oma=c(0,0,0,0),mar=c(2.1,4.1,2.1,2.1))
 
-plot(cc.weath$date,cc.weath$rain,type="l",col=make.transparent("yellow2",alpha = .5),lwd=2,xlim=c(1592577358,1596028858),ylim=c(0,4),ylab="rainfall (mm)",xlab="")
+plot(cc.weath$date,cc.weath$rain,type="l",col=make.transparent("yellow2",alpha = .5),lwd=2,xlim=c(1592577358,1596028858),ylim=c(0,4),ylab="rainfall.temp.rh (mm)",xlab="")
 lines(bt.weath$date,bt.weath$rain,col=make.transparent("orange",alpha = .5),lwd=2)
 lines(gm.weath$date,gm.weath$rain,col=make.transparent("red",alpha = .5),lwd=2)
 lines(hm.weath$date,hm.weath$rain,col=make.transparent("purple",alpha = .5),lwd=2)
-mtext("rainfall")
+mtext("rainfall.temp.rh")
 
 plot(cc.weath$date,cc.weath$wetness,type="l",col=make.transparent("yellow2",alpha = .5),lwd=2,xlim=c(1592577358,1596028858),ylim=c(0,100),ylab="leaf wetness (%)",xlab="")
 lines(bt.weath$date,bt.weath$wetness,col=make.transparent("orange",alpha = .5),lwd=2)
@@ -145,7 +113,7 @@ pull.daily.data(cc,"cc.day")
 
 plot.func2<-function(x,title)
 {
-  plot(x[,1],x[,"max.temp"],type="l",col="red",main=title,ylim=c(-5,100),xlim=as.Date(c(min(all[,1],na.rm=T),max(all[,1],na.rm = T))),xlab="date",ylab="")
+  plot(x[,1],x[,"max.temp"],type="l",col="red",main=title,ylim=c(-5,100),xlim=as.Date(c(min(all.temp.rh[,1],na.rm=T),max(all.temp.rh[,1],na.rm = T))),xlab="date",ylab="")
   lines(x[,1],x[,"min.temp"],type="l",col="red",lty=2)
   mtext("temp",2,cex=par()$cex,line=2.25,col="red")
   
@@ -302,7 +270,7 @@ lines(density(gm.day[,"mean.dewpoint"]),col="red")
 lines(density(hm.day[,"mean.dewpoint"]),col="purple")
 
 par(mfrow=c(2,3))
-hist(cc.weath[,"rain"],col=make.transparent("yellow2",.5),xlim=c(0,4),ylim=c(0,20000),breaks=seq(0,4,length.out = 20),main="rainfall",xlab="mm")
+hist(cc.weath[,"rain"],col=make.transparent("yellow2",.5),xlim=c(0,4),ylim=c(0,20000),breaks=seq(0,4,length.out = 20),main="rainfall.temp.rh",xlab="mm")
 hist(bt.weath[,"rain"],add=T,col=make.transparent("orange",.5),breaks=seq(0,4,length.out = 20))
 hist(gm.weath[,"rain"],add=T,col=make.transparent("red",.5),breaks=seq(0,4,length.out = 20))
 hist(hm.weath[,"rain"],add=T,col=make.transparent("purple",.5),breaks=seq(0,4,length.out = 20))
@@ -320,7 +288,7 @@ hist(gm.weath[,"soil.moisture"],add=T,col=make.transparent("red",.5),breaks=seq(
 hist(hm.weath[,"soil.moisture"],add=T,col=make.transparent("purple",.5),breaks=seq(0,.3,length.out = 20))
 legend("topright",c("HM","GM","BT","CC"),col=c("purple","red","orange","yellow2"),pch=15)
 
-plot(density(cc.weath[,"rain"],na.rm=T),col="yellow2",xlim=c(0,4),main = "rainfall")
+plot(density(cc.weath[,"rain"],na.rm=T),col="yellow2",xlim=c(0,4),main = "rainfall.temp.rh")
 lines(density(bt.weath[,"rain"],na.rm=T),col="orange")
 lines(density(gm.weath[,"rain"],na.rm=T),col="red")
 lines(density(hm.weath[,"rain"],na.rm=T),col="purple")
