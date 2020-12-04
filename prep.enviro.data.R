@@ -20,6 +20,11 @@ gm<-read.csv("gothic mountain temp RH 2020.csv",skip=2)
 bt<-read.csv("bus turnaround temp RH 2020.csv",skip=2)
 cc<-read.csv("cement creek temp RH 2020.csv",skip=2)
 
+colnames(hm)[1:4]<-c("date.time","temp.c","rh","dew.pt.c")
+colnames(gm)[1:4]<-c("date.time","temp.c","rh","dew.pt.c")
+colnames(bt)[1:4]<-c("date.time","temp.c","rh","dew.pt.c")
+colnames(cc)[1:4]<-c("date.time","temp.c","rh","dew.pt.c")
+
 hm[,1]<-ymd_hms(hm[,1])
 gm[,1]<-ymd_hms(gm[,1])
 bt[,1]<-ymd_hms(bt[,1])
