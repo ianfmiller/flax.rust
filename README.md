@@ -23,3 +23,8 @@ Infection slightly increases odds of death for larger plants
 #### predicting probability of death from disease status and size metrics
 #### conclusions:
 N stems decreases odds of death; no significant effect of disease status
+
+### categorical outcome analysis
+#### ordinal logistic regression to predict status (H,D,X) from disease/size metrics
+#### conclusions: more diseased, small size correlated with D, then X, but effects are just barely statistically insignificant
+
