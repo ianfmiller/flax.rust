@@ -1,4 +1,6 @@
 ### prep enviro data
+### only 2020 data
+### notes: GM soil moisture hits negative values, and also has some pretty extreme jumps--could potentially indicate issues w/ sensor
 
 library(lubridate)
 
@@ -22,7 +24,7 @@ hm[,1]<-ymd_hms(hm[,1])
 gm[,1]<-ymd_hms(gm[,1])
 bt[,1]<-ymd_hms(bt[,1])
 cc[,1]<-ymd_hms(cc[,1])
-all<-rbind(hm[,1:4],gm[,1:4],bt[,1:4],cc[,1:4])
+all.temp.rh<-rbind(hm[,1:4],gm[,1:4],bt[,1:4],cc[,1:4])
 
 
 hm.weath<-read.csv("High_Meadow.csv",skip=2)[,-1]
@@ -44,3 +46,5 @@ cc.weath<-read.csv("Cement_Creek.csv",skip=2)[,-1]
 colnames(cc.weath)<-c("date","wetness","rain","solar.radiation","wind.speed","gust.speed","wind.direction","soil.moisture")
 cc.weath[,1]<-parse_date_time(cc.weath[,1],'%m/%d/%y %I:%M:%S %p')
 cc.weath<-cc.weath[-which(cc.weath$wetness==-888.88),]
+
+all.weath<-rbind(hm.weath,gm.weath,bt.weath,cc.weath)
