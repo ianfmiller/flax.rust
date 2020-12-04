@@ -316,7 +316,7 @@ legend("topright",c("HM","GM","BT","CC"),col=c("purple","red","orange","yellow2"
 
 hist(cc.weath[,"soil.moisture"],col=make.transparent("yellow2",.5),xlim=c(0,.3),breaks=seq(0,.3,length.out = 20),main="soil moisture",xlab=expression("soil moisture ("*m^3/m^3*")"))
 hist(bt.weath[,"soil.moisture"],add=T,col=make.transparent("orange",.5),breaks=seq(0,.3,length.out = 20))
-hist(gm.weath[,"soil.moisture"],add=T,col=make.transparent("red",.5),breaks=seq(0,.3,length.out = 20))
+hist(gm.weath[,"soil.moisture"],add=T,col=make.transparent("red",.5),breaks=seq(-0.01578947,.3,length.out = 21))
 hist(hm.weath[,"soil.moisture"],add=T,col=make.transparent("purple",.5),breaks=seq(0,.3,length.out = 20))
 legend("topright",c("HM","GM","BT","CC"),col=c("purple","red","orange","yellow2"),pch=15)
 
