@@ -33,7 +33,7 @@ temp.16.22.dew.point.days<-c()
 temp.7.30.dew.point.days<-c()
 
 
-for (tag in unique(pustules$tag))
+for (tag in unique(pustules$tag)) #916, 917, 920
 {
   sub.pustules1<-pustules[which(pustules$tag==tag),]
   
@@ -51,6 +51,14 @@ for (tag in unique(pustules$tag))
         sub.pustules4<-sub.pustules4[order(sub.pustules4$date),]
         if(dim(sub.pustules4)[1]>=2)
         {
+          if(length(unique(sub.pustules4$date))<dim(sub.pustules4)[1]) #get rid of duplicate data resulting from two pics of same pustule on same date
+          {
+            for(date in unique(sub.pustules4$date))
+            {
+              date.indicies<-which(sub.pustules4$date==date)
+              if(length(date.indicies)>1) {sub.pustules4<-sub.pustules4[-date.indicies[2:length(date.indicies)],]}
+            }
+          }
           for(i in 1:(dim(sub.pustules4)[1]-1))
           {
             #pull reference data
@@ -144,6 +152,35 @@ for (tag in unique(pustules$tag))
 ## plot change
 plot(delta.pustules$area,delta.pustules$area.next,col="grey")
 abline(0,1)
+
+#plot relationships
+par(mfrow=c(3,2))
+plot(delta.pustules$time,delta.pustules$area.next)
+plot(delta.pustules$time,delta.pustules$area-delta.pustules$area.next)
+
+plot(delta.pustules$temp.days.16.22,delta.pustules$area.next)
+plot(delta.pustules$temp.days.16.22,delta.pustules$area-delta.pustules$area.next)
+
+plot(delta.pustules$temp.days.7.30,delta.pustules$area.next)
+plot(delta.pustules$temp.days.7.30,delta.pustules$area-delta.pustules$area.next)
+
+plot(delta.pustules$mean.temp,delta.pustules$area.next)
+plot(delta.pustules$mean.temp,delta.pustules$area-delta.pustules$area.next)
+
+plot(delta.pustules$dew.point.days,delta.pustules$area.next)
+plot(delta.pustules$dew.point.days,delta.pustules$area-delta.pustules$area.next)
+
+plot(delta.pustules$mean.dew.point ,delta.pustules$area.next)
+plot(delta.pustules$mean.dew.point ,delta.pustules$area-delta.pustules$area.next)
+
+plot(delta.pustules$temp.16.22.dew.point.days,delta.pustules$area.next)
+plot(delta.pustules$temp.16.22.dew.point.days,delta.pustules$area-delta.pustules$area.next)
+
+plot(delta.pustules$temp.7.30.dew.point.days,delta.pustules$area.next)
+plot(delta.pustules$temp.7.30.dew.point.days,delta.pustules$area-delta.pustules$area.next)
+
+plot(delta.pustules$temp.dew.point.days,delta.pustules$area.next)
+plot(delta.pustules$temp.dew.point.days,delta.pustules$area-delta.pustules$area.next)
 
 # analyze data
 mod<-gam(area.next~s(area)+s(days),data = delta.pustules)
