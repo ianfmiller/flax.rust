@@ -244,7 +244,7 @@ plot(delta.pustules$area,delta.pustules$area.next-delta.pustules$area)
 curve(best.model$coefficients["(Intercept)"]+
       best.model$coefficients["area"]*x+
       best.model$coefficients["time"]*quantile(delta.pustules$time,.5)+
-      best.model$coefficients["mean.temp"]*quantile(delta.pustules$mean.temp,.95)+
+      best.model$coefficients["mean.temp"]*quantile(delta.pustules$mean.temp,.5)+
       best.model$coefficients["mean.wetness"]*quantile(delta.pustules$mean.wetness,.5)+
       best.model$coefficients["mean.solar"]*quantile(delta.pustules$mean.solar,.5)+
       best.model$coefficients["mean.wind.speed"]*quantile(delta.pustules$mean.wind.speed,.5)+
@@ -254,8 +254,8 @@ curve(best.model$coefficients["(Intercept)"]+
       best.model$coefficients["time:mean.wetness"]*quantile(delta.pustules$time,.5)*quantile(delta.pustules$mean.wetness,.5)+
       best.model$coefficients["time:mean.solar"]*quantile(delta.pustules$time,.5)*quantile(delta.pustules$mean.solar,.5)+
       best.model$coefficients["time:mean.wind.speed"]*quantile(delta.pustules$time,.5)*quantile(delta.pustules$mean.wind.speed,.5)+
-      best.model$coefficients["mean.temp:mean.wetness"]*quantile(delta.pustules$mean.temp,.95)*quantile(delta.pustules$mean.wetness,.5)+
-      best.model$coefficients["time:mean.temp:mean.wetness"]*quantile(delta.pustules$time,.5)*quantile(delta.pustules$mean.temp,.95)*quantile(delta.pustules$mean.wetness,.5)
+      best.model$coefficients["mean.temp:mean.wetness"]*quantile(delta.pustules$mean.temp,.5)*quantile(delta.pustules$mean.wetness,.5)+
+      best.model$coefficients["time:mean.temp:mean.wetness"]*quantile(delta.pustules$time,.5)*quantile(delta.pustules$mean.temp,.5)*quantile(delta.pustules$mean.wetness,.5)
       ,add=T,col="red")
 
 
