@@ -1,5 +1,6 @@
 library(mgcv)
 library(lme4)
+library(progress)
 
 source("prep.enviro.data.R")
 
@@ -199,7 +200,11 @@ abline(0,1)
 source("model.set.creation.R")
 
 ### create all sets of models
-model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors[x]),collapse=" + ")))
+model.set1 <-apply(pred.mat1, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors1[x]),collapse=" + ")))
+model.set2 <-apply(pred.mat2, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors2[x]),collapse=" + ")))
+model.set3 <-apply(pred.mat3, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors3[x]),collapse=" + ")))
+model.set<-append(append(model.set1,model.set2),model.set3)
+
 re.model.set <- apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors[x],"(1|tag)"),collapse=" + ")))
 #gam.model.set <- apply(pred.mat, 1, function(x) as.formula( paste0(paste(c("area.next ~ offset(area",predictors[x]),collapse=") + s("),")")))
   
@@ -207,7 +212,19 @@ names(model.set)<-seq(1,length(model.set),1)
 names(re.model.set)<-seq(1,length(re.model.set),1)
 #names(gam.model.set)<-seq(1,length(gam.model.set),1)
 
-all.fit.models<-lapply(model.set,function(x) lm(x,data=delta.pustules))
+#all.fit.models<-lapply(model.set,function(x) lm(x,data=delta.pustules))
+all.fit.models<-c()
+max.AIC<-NULL
+pb <- progress_bar$new(total = length(model.set))
+for (i in 1:length(model.set))
+{
+  new.mod<-lm(model.set[[i]],data=delta.pustules)
+  AIC.new.mod<-AIC(new.mod)
+  if(is.null(max.AIC)) {max.AIC<-AIC.new.mod}
+  if(abs(AIC.new.mod-max.AIC)<=10) {all.fit.models<-append(all.fit.models,new.mod)}
+  pb$tick()
+}
+
 re.all.fit.models<-lapply(re.model.set,function(x) lmer(x,data=delta.pustules,REML=F))
 #gam.all.fit.models<-lapply(gam.model.set,function(x) gam(x,data=delta.pustules,method = "REML"))
 
