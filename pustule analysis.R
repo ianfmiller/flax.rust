@@ -215,13 +215,13 @@ names(re.model.set)<-seq(1,length(re.model.set),1)
 #all.fit.models<-lapply(model.set,function(x) lm(x,data=delta.pustules))
 all.fit.models<-c()
 max.AIC<-NULL
-pb <- progress_bar$new(total = length(model.set))
+pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
 for (i in 1:length(model.set))
 {
   new.mod<-lm(model.set[[i]],data=delta.pustules)
   AIC.new.mod<-AIC(new.mod)
   if(is.null(max.AIC)) {max.AIC<-AIC.new.mod}
-  if(abs(AIC.new.mod-max.AIC)<=10) {all.fit.models<-append(all.fit.models,new.mod)}
+  if(abs(AIC.new.mod-max.AIC)<=10) {all.fit.models<-append(all.fit.models,list(new.mod))}
   pb$tick()
 }
 
@@ -234,10 +234,28 @@ re.all.fit.models<-lapply(re.model.set,function(x) lmer(x,data=delta.pustules,RE
 AICs<-unlist(lapply(all.fit.models,AIC))
 delta.AICs<-AICs-min(AICs)
 candidate.models<-unname(which(delta.AICs<4))
-model.set[candidate.models[order(AICs[candidate.models])]] #models to consider--offset(diam.last) not shown
+#model.set[candidate.models[order(AICs[candidate.models])]] #models to consider--offset(diam.last) not shown
 index<-1
 best.model<-all.fit.models[[order(AICs)[index]]]
 summary(best.model)
+
+plot(delta.pustules$area,delta.pustules$area.next-delta.pustules$area)
+curve(best.model$coefficients["(Intercept)"]+
+      best.model$coefficients["area"]*x+
+      best.model$coefficients["time"]*quantile(delta.pustules$time,.5)+
+      best.model$coefficients["mean.temp"]*quantile(delta.pustules$mean.temp,.5)+
+      best.model$coefficients["mean.wetness"]*quantile(delta.pustules$mean.wetness,.5)+
+      best.model$coefficients["mean.solar"]*quantile(delta.pustules$mean.solar,.5)+
+      best.model$coefficients["mean.wind.speed"]*quantile(delta.pustules$mean.wind.speed,.5)+
+      best.model$coefficients["tot.rain"]*quantile(delta.pustules$tot.rain,.5,na.rm = T)+
+      best.model$coefficients["temp.days"]*quantile(delta.pustules$temp.days,.5)+
+      best.model$coefficients["temp.dew.point.days"]*quantile(delta.pustules$temp.dew.point.days,.5)+
+      best.model$coefficients["time:mean.wetness"]*quantile(delta.pustules$time,.5)*quantile(delta.pustules$mean.wetness,.5)+
+      best.model$coefficients["time:mean.solar"]*quantile(delta.pustules$time,.5)*quantile(delta.pustules$mean.solar,.5)+
+      best.model$coefficients["time:mean.wind.speed"]*quantile(delta.pustules$time,.5)*quantile(delta.pustules$mean.wind.speed,.5)+
+      best.model$coefficients["mean.temp:mean.wetness"]*quantile(delta.pustules$mean.temp,.5)*quantile(delta.pustules$mean.wetness,.5)+
+      best.model$coefficients["time:mean.temp:mean.wetness"]*quantile(delta.pustules$time,.5)*quantile(delta.pustules$mean.temp,.5)*quantile(delta.pustules$mean.wetness,.5)
+      ,add=T)
 
 
 ### lmms
@@ -258,10 +276,4 @@ summary(best.model)
 #best.model<-gam.all.fit.models[[order(gam.AICs)[index]]]
 #summary(best.model)
 
-### lmm mumin approach w/ interactions
-options(na.action="na.omit")
-all.fit.lm<-lm(area.next~offset(area)+area+time+mean.temp+mean.temp:time+mean.dew.point+mean.dew.point:time+mean.wetness+mean.wetnesss:time+mean.solar+mean:solar,data=delta.pustules)
-options(na.action="na.fail")
-dd<-dredge(all.fit,fixed=~offset(area)+area)
-best<-lmer(area.next~offset(area)+area+mean.dew.point+mean.temp+mean.wetnesss+mean.dew.point:mean.temp+(1|tag),data=delta.pustules)
-summary(best)
+
