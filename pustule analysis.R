@@ -196,20 +196,32 @@ abline(0,1)
 ## fit models 
 
 ### construct all combinations of predictors
-predictors<-c("area","time","temp.days","temp.days.16.22","temp.days.7.30","mean.temp","dew.point.days","mean.dew.point","temp.dew.point.days","temp.16.22.dew.point.days","temp.7.30.dew.point.days","mean.wetness","tot.rain","mean.solar","mean.wind.speed","mean.gust.speed")
-switch.vars<-list(
-  list("temp.days",c("temp.days.16.22","temp.days.7.30","mean.temp")),
-  list("temp.days.16.22",c("temp.days","temp.days.7.30","mean.temp")),
-  list("temp.days.7.30",c("temp.days","temp.days.16.22","mean.temp")),
-  list("mean.temp",c("temp.days","temp.days.16.22","temp.days.7.30")),
-  list("temp.dew.point.days",c("temp.16.22.dew.point.days","temp.7.30.dew.point.days","temp.days.16.22","temp.days.7.30","mean.temp","mean.dew.point")),
-  list("temp.16.22.dew.point.days",c("temp.dew.point.days","temp.7.30.dew.point.days","temp.days","temp.days.7.30","mean.temp","mean.dew.point")),
-  list("temp.7.30.dew.point.days",c("temp.16.22.dew.point.days","temp.dew.point.days","temp.days.16.22","temp.days","mean.temp","mean.dew.point"))
-  
-)
-pred.mat<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F))
+predictors<-c("area","time","mean.temp","mean.dew.point","mean.wetness","mean.solar",
+              "mean.temp:time","temp.days",
+              "mean.dew.point:time","dew.point.days",
+              "mean.temp:mean.dew.point:time","temp.dew.point.days",
+              "mean.wetness:time","mean.solar:time","mean.wind.speed","mean.wind.speed:time","tot.rain")
+
+pred.mat<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F))
 names(pred.mat)<-predictors
 
+switch.vars<-list(
+  list("mean.temp:time",c("temp.days")),
+  list("temp.days",c("mean.temp:time")),
+  list("mean.dew.point:time",c("dew.point.days")),
+  list("dew.point.days",c("mean.dew.point:time")),
+  list("mean.temp:mean.dew.point:time",c("temp.dew.point.days")),
+  list("temp.dew.point.days",c("mean.temp:mean.dew.point:time"))
+)
+
+force.include.vars<-list(
+  list("mean.temp:time",c("mean.temp","time")),
+  list("mean.dew.point:time",c("mean.dew.point","time")),
+  list("mean.temp:mean.dew.point:time",c("mean.temp","mean.dew.point","time")),
+  list("mean.wetness:time",c("mean.wetness","time")),
+  list("mean.solar:time",c("mean.solar","time")),
+  list("mean.wind.speed:time",c("mean.wind.speed","time"))
+)
 
 for (i in 1:length(switch.vars))
 {
@@ -218,21 +230,29 @@ for (i in 1:length(switch.vars))
   off.rows<-which(pred.mat[,on.var]==T)
   pred.mat[off.rows,off.vars]<-F
 }
+
+for (i in 1:length(force.include.vars))
+{
+  on.var<-unlist(force.include.vars[[i]][1])
+  force.on.vars<-unlist(force.include.vars[[i]][2])
+  on.rows<-which(pred.mat[,on.var]==T)
+  pred.mat[on.rows,force.on.vars]<-T
+}
+
 pred.mat<-unique(pred.mat)
 
 ### create all sets of models
 model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors[x]),collapse=" + ")))
 re.model.set <- apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors[x],"(1|tag)"),collapse=" + ")))
-gam.model.set <- apply(pred.mat, 1, function(x) as.formula( paste0(paste(c("area.next ~ offset(area",predictors[x]),collapse=") + s("),")")))
+#gam.model.set <- apply(pred.mat, 1, function(x) as.formula( paste0(paste(c("area.next ~ offset(area",predictors[x]),collapse=") + s("),")")))
   
 names(model.set)<-seq(1,length(model.set),1)
 names(re.model.set)<-seq(1,length(re.model.set),1)
-names(gam.model.set)<-seq(1,length(gam.model.set),1)
+#names(gam.model.set)<-seq(1,length(gam.model.set),1)
 
 all.fit.models<-lapply(model.set,function(x) lm(x,data=delta.pustules))
 re.all.fit.models<-lapply(re.model.set,function(x) lmer(x,data=delta.pustules,REML=F))
-gam.all.fit.models<-lapply(gam.model.set,function(x) gam(x,data=delta.pustules,method = "REML"))
-
+#gam.all.fit.models<-lapply(gam.model.set,function(x) gam(x,data=delta.pustules,method = "REML"))
 
 ## compare between models
 
@@ -256,13 +276,18 @@ best.model<-re.all.fit.models[[order(re.AICs)[index]]]
 summary(best.model)
 
 ### gams
-gam.AICs<-unlist(lapply(gam.all.fit.models,AIC))
-delta.gam.AICs<-gam.AICs-min(gam.AICs)
-gam.candidate.models<-unname(which(delta.gam.AICs<4))
-gam.model.set[gam.candidate.models[order(delta.gam.AICs[gam.candidate.models])]] #models to consider--offset(diam.last) not shown
-index<-1
-best.model<-gam.all.fit.models[[order(gam.AICs)[index]]]
-summary(best.model)
+#gam.AICs<-unlist(lapply(gam.all.fit.models,AIC))
+#delta.gam.AICs<-gam.AICs-min(gam.AICs)
+#gam.candidate.models<-unname(which(delta.gam.AICs<4))
+#gam.model.set[gam.candidate.models[order(delta.gam.AICs[gam.candidate.models])]] #models to consider--offset(diam.last) not shown
+#index<-1
+#best.model<-gam.all.fit.models[[order(gam.AICs)[index]]]
+#summary(best.model)
 
-
-
+### lmm mumin approach w/ interactions
+options(na.action="na.omit")
+all.fit.lm<-lm(area.next~offset(area)+area+time+mean.temp+mean.temp:time+mean.dew.point+mean.dew.point:time+mean.wetness+mean.wetnesss:time+mean.solar+mean:solar,data=delta.pustules)
+options(na.action="na.fail")
+dd<-dredge(all.fit,fixed=~offset(area)+area)
+best<-lmer(area.next~offset(area)+area+mean.dew.point+mean.temp+mean.wetnesss+mean.dew.point:mean.temp+(1|tag),data=delta.pustules)
+summary(best)
