@@ -5,7 +5,7 @@
 ## no temp. subsetting
 
 ### construct all combinations of predictors
-predictors<-c("area","time","mean.temp","mean.dew.point","mean.wetness","mean.solar","mean.wind.speed","tot.rain", 
+predictors1<-c("area","time","mean.temp","mean.dew.point","mean.wetness","mean.solar","mean.wind.speed","tot.rain", 
               "mean.temp:time","temp.days", 
               "mean.dew.point:time","dew.point.days",
               "mean.wetness:time", 
@@ -18,7 +18,7 @@ predictors<-c("area","time","mean.temp","mean.dew.point","mean.wetness","mean.so
               )
 
 pred.mat1<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F))
-names(pred.mat1)<-predictors
+names(pred.mat1)<-predictors1
 
 ### define sets of variables that explain the same thing
 switch.vars<-list( 
@@ -69,7 +69,7 @@ pred.mat1<-unique(pred.mat1)
 ## subset temp between 16 and 22
 
 ### construct all combinations of predictors
-predictors<-c("area","time","temp.days.16.22","mean.dew.point","mean.wetness","mean.solar","mean.wind.speed","tot.rain", 
+predictors2<-c("area","time","temp.days.16.22","mean.dew.point","mean.wetness","mean.solar","mean.wind.speed","tot.rain", 
               "mean.dew.point:time","dew.point.days",
               "mean.wetness:time", 
               "mean.solar:time",
@@ -79,7 +79,7 @@ predictors<-c("area","time","temp.days.16.22","mean.dew.point","mean.wetness","m
 )
 
 pred.mat2<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F))
-names(pred.mat2)<-predictors
+names(pred.mat2)<-predictors2
 
 ### define sets of variables that explain the same thing
 switch.vars<-list( 
@@ -123,7 +123,7 @@ pred.mat2<-unique(pred.mat2)
 ## subset temp between 7 and 30
 
 ### construct all combinations of predictors
-predictors<-c("area","time","temp.days.7.30","mean.dew.point","mean.wetness","mean.solar","mean.wind.speed","tot.rain", 
+predictors3<-c("area","time","temp.days.7.30","mean.dew.point","mean.wetness","mean.solar","mean.wind.speed","tot.rain", 
               "mean.dew.point:time","dew.point.days",
               "mean.wetness:time", 
               "mean.solar:time",
@@ -133,7 +133,7 @@ predictors<-c("area","time","temp.days.7.30","mean.dew.point","mean.wetness","me
 )
 
 pred.mat3<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F))
-names(pred.mat3)<-predictors
+names(pred.mat3)<-predictors3
 
 ### define sets of variables that explain the same thing
 switch.vars<-list( 
