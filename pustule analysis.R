@@ -1,4 +1,5 @@
 library(mgcv)
+library(lme4)
 
 source("prep.enviro.data.R")
 
@@ -148,13 +149,14 @@ for (tag in unique(pustules$tag)) #916, 917, 920
 }
 
 delta.pustules<-data.frame(tag=factor(tags),stem.iter=stem.iters,leaf.iter=leaf.iters,pustule.num=pustule.nums,area=start.vals,area.next=end.vals,time=days,
-                           temp.days.16.22=temp.days.16.22,temp.days.7.30=temp.days.7.30,temp.days=temp.days,mean.temp=mean.temp,dew.point.days=dew.point.days,mean.dew.point=mean.dew.point,temp.16.22.dew.point.days=temp.16.22.dew.point.days,temp.7.30.dew.point.days=temp.7.30.dew.point.days,temp.dew.point.days=temp.dew.point.days,
+                           temp.days=temp.days,temp.days.16.22=temp.days.16.22,temp.days.7.30=temp.days.7.30,temp.days=temp.days,mean.temp=mean.temp,dew.point.days=dew.point.days,mean.dew.point=mean.dew.point,temp.16.22.dew.point.days=temp.16.22.dew.point.days,temp.7.30.dew.point.days=temp.7.30.dew.point.days,temp.dew.point.days=temp.dew.point.days,
                            mean.wetness=mean.wetnesss,tot.rain=tot.rains,mean.solar=mean.solars,mean.wind.speed=mean.wind.speeds,mean.gust.speed=mean.gust.speeds)
-
 # visualize data
 
-## size histogram
-hist(pustules$area,main="pustule area",breaks=100)
+## histograms
+par(mfrow=c(2,1))
+hist(delta.pustules$area,main="pustule area",breaks=100,xlab="area")
+hist(delta.pustules$area.next-delta.pustules$area,main="pustule area",breaks=100,xlab="change in area")
 
 ## plot trajectories
 plot(c(min(pustules$date),max(pustules$date)),c(0,max(pustules$area)),type="n",xlab="date",ylab="pustule area")
@@ -186,37 +188,81 @@ for (tag in unique(pustules$tag))
 }
 
 ## plot change
-plot(delta.pustules$area,delta.pustules$area.next,col="grey")
+plot(delta.pustules$area,delta.pustules$area.next,col="grey",xlab = "area",ylab="next obs. area")
 abline(0,1)
 
-#plot relationships
-par(mfrow=c(3,2))
-plot(delta.pustules$time,delta.pustules$area.next)
-plot(delta.pustules$time,delta.pustules$area-delta.pustules$area.next)
-
-plot(delta.pustules$temp.days.16.22,delta.pustules$area.next)
-plot(delta.pustules$temp.days.16.22,delta.pustules$area-delta.pustules$area.next)
-
-plot(delta.pustules$temp.days.7.30,delta.pustules$area.next)
-plot(delta.pustules$temp.days.7.30,delta.pustules$area-delta.pustules$area.next)
-
-plot(delta.pustules$mean.temp,delta.pustules$area.next)
-plot(delta.pustules$mean.temp,delta.pustules$area-delta.pustules$area.next)
-
-plot(delta.pustules$dew.point.days,delta.pustules$area.next)
-plot(delta.pustules$dew.point.days,delta.pustules$area-delta.pustules$area.next)
-
-plot(delta.pustules$mean.dew.point ,delta.pustules$area.next)
-plot(delta.pustules$mean.dew.point ,delta.pustules$area-delta.pustules$area.next)
-
-plot(delta.pustules$temp.16.22.dew.point.days,delta.pustules$area.next)
-plot(delta.pustules$temp.16.22.dew.point.days,delta.pustules$area-delta.pustules$area.next)
-
-plot(delta.pustules$temp.7.30.dew.point.days,delta.pustules$area.next)
-plot(delta.pustules$temp.7.30.dew.point.days,delta.pustules$area-delta.pustules$area.next)
-
-plot(delta.pustules$temp.dew.point.days,delta.pustules$area.next)
-plot(delta.pustules$temp.dew.point.days,delta.pustules$area-delta.pustules$area.next)
-
 # analyze data
-mod<-gam(area.next~s(area)+s(time)+s(temp.dew.point.days),data = delta.pustules)
+
+## fit models 
+
+### construct all combinations of predictors
+predictors<-c("area","time","temp.days","temp.days.16.22","temp.days.7.30","mean.temp","dew.point.days","mean.dew.point","temp.dew.point.days","temp.16.22.dew.point.days","temp.7.30.dew.point.days","mean.wetness","tot.rain","mean.solar","mean.wind.speed","mean.gust.speed")
+switch.vars<-list(
+  list("temp.days",c("temp.days.16.22","temp.days.7.30","mean.temp")),
+  list("temp.days.16.22",c("temp.days","temp.days.7.30","mean.temp")),
+  list("temp.days.7.30",c("temp.days","temp.days.16.22","mean.temp")),
+  list("mean.temp",c("temp.days","temp.days.16.22","temp.days.7.30")),
+  list("temp.dew.point.days",c("temp.16.22.dew.point.days","temp.7.30.dew.point.days","temp.days.16.22","temp.days.7.30","mean.temp","mean.dew.point")),
+  list("temp.16.22.dew.point.days",c("temp.dew.point.days","temp.7.30.dew.point.days","temp.days","temp.days.7.30","mean.temp","mean.dew.point")),
+  list("temp.7.30.dew.point.days",c("temp.16.22.dew.point.days","temp.dew.point.days","temp.days.16.22","temp.days","mean.temp","mean.dew.point"))
+  
+)
+pred.mat<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F))
+names(pred.mat)<-predictors
+
+
+for (i in 1:length(switch.vars))
+{
+  on.var<-unlist(switch.vars[[i]][1])
+  off.vars<-unlist(switch.vars[[i]][2])
+  off.rows<-which(pred.mat[,on.var]==T)
+  pred.mat[off.rows,off.vars]<-F
+}
+pred.mat<-unique(pred.mat)
+
+### create all sets of models
+model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors[x]),collapse=" + ")))
+re.model.set <- apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors[x],"(1|tag)"),collapse=" + ")))
+gam.model.set <- apply(pred.mat, 1, function(x) as.formula( paste0(paste(c("area.next ~ offset(area",predictors[x]),collapse=") + s("),")")))
+  
+names(model.set)<-seq(1,length(model.set),1)
+names(re.model.set)<-seq(1,length(re.model.set),1)
+names(gam.model.set)<-seq(1,length(gam.model.set),1)
+
+all.fit.models<-lapply(model.set,function(x) lm(x,data=delta.pustules))
+re.all.fit.models<-lapply(re.model.set,function(x) lmer(x,data=delta.pustules,REML=F))
+gam.all.fit.models<-lapply(gam.model.set,function(x) gam(x,data=delta.pustules,method = "REML"))
+
+
+## compare between models
+
+### lms
+AICs<-unlist(lapply(all.fit.models,AIC))
+delta.AICs<-AICs-min(AICs)
+candidate.models<-unname(which(delta.AICs<4))
+model.set[candidate.models[order(AICs[candidate.models])]] #models to consider--offset(diam.last) not shown
+index<-1
+best.model<-all.fit.models[[order(AICs)[index]]]
+summary(best.model)
+
+
+### lmms
+re.AICs<-unlist(lapply(re.all.fit.models,AIC))
+delta.re.AICs<-re.AICs-min(re.AICs)
+re.candidate.models<-unname(which(delta.re.AICs<4))
+re.model.set[re.candidate.models[order(re.AICs[re.candidate.models])]] #models to consider--offset(diam.last) not shown
+index<-1
+best.model<-re.all.fit.models[[order(re.AICs)[index]]]
+summary(best.model)
+
+### gams
+gam.AICs<-unlist(lapply(gam.all.fit.models,AIC))
+delta.gam.AICs<-gam.AICs-min(gam.AICs)
+gam.candidate.models<-unname(which(delta.gam.AICs<4))
+gam.model.set[gam.candidate.models[order(delta.gam.AICs[gam.candidate.models])]] #models to consider--offset(diam.last) not shown
+index<-1
+best.model<-gam.all.fit.models[[order(gam.AICs)[index]]]
+summary(best.model)
+
+
+
