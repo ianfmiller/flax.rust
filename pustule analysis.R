@@ -196,50 +196,7 @@ abline(0,1)
 ## fit models 
 
 ### construct all combinations of predictors
-predictors<-c("area","time","mean.temp","mean.dew.point","mean.wetness","mean.solar",
-              "mean.temp:time","temp.days",
-              "mean.dew.point:time","dew.point.days",
-              "mean.temp:mean.dew.point:time","temp.dew.point.days",
-              "mean.wetness:time","mean.solar:time","mean.wind.speed","mean.wind.speed:time","tot.rain")
-
-pred.mat<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F))
-names(pred.mat)<-predictors
-
-switch.vars<-list(
-  list("mean.temp:time",c("temp.days")),
-  list("temp.days",c("mean.temp:time")),
-  list("mean.dew.point:time",c("dew.point.days")),
-  list("dew.point.days",c("mean.dew.point:time")),
-  list("mean.temp:mean.dew.point:time",c("temp.dew.point.days")),
-  list("temp.dew.point.days",c("mean.temp:mean.dew.point:time"))
-)
-
-force.include.vars<-list(
-  list("mean.temp:time",c("mean.temp","time")),
-  list("mean.dew.point:time",c("mean.dew.point","time")),
-  list("mean.temp:mean.dew.point:time",c("mean.temp","mean.dew.point","time")),
-  list("mean.wetness:time",c("mean.wetness","time")),
-  list("mean.solar:time",c("mean.solar","time")),
-  list("mean.wind.speed:time",c("mean.wind.speed","time"))
-)
-
-for (i in 1:length(switch.vars))
-{
-  on.var<-unlist(switch.vars[[i]][1])
-  off.vars<-unlist(switch.vars[[i]][2])
-  off.rows<-which(pred.mat[,on.var]==T)
-  pred.mat[off.rows,off.vars]<-F
-}
-
-for (i in 1:length(force.include.vars))
-{
-  on.var<-unlist(force.include.vars[[i]][1])
-  force.on.vars<-unlist(force.include.vars[[i]][2])
-  on.rows<-which(pred.mat[,on.var]==T)
-  pred.mat[on.rows,force.on.vars]<-T
-}
-
-pred.mat<-unique(pred.mat)
+source("model.set.creation.R")
 
 ### create all sets of models
 model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors[x]),collapse=" + ")))
