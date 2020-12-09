@@ -152,6 +152,7 @@ for (tag in unique(pustules$tag)) #916, 917, 920
 delta.pustules<-data.frame(tag=factor(tags),stem.iter=stem.iters,leaf.iter=leaf.iters,pustule.num=pustule.nums,area=start.vals,area.next=end.vals,time=days,
                            temp.days=temp.days,temp.days.16.22=temp.days.16.22,temp.days.7.30=temp.days.7.30,temp.days=temp.days,mean.temp=mean.temp,dew.point.days=dew.point.days,mean.dew.point=mean.dew.point,temp.16.22.dew.point.days=temp.16.22.dew.point.days,temp.7.30.dew.point.days=temp.7.30.dew.point.days,temp.dew.point.days=temp.dew.point.days,
                            mean.wetness=mean.wetnesss,tot.rain=tot.rains,mean.solar=mean.solars,mean.wind.speed=mean.wind.speeds,mean.gust.speed=mean.gust.speeds)
+
 # visualize data
 
 ## histograms
@@ -218,7 +219,7 @@ max.AIC<-NULL
 pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
 for (i in 1:length(model.set))
 {
-  new.mod<-lm(model.set[[i]],data=delta.pustules)
+  new.mod<-lm(model.set[[i]],data=as.data.frame(scale(delta.pustules[,5:22])))
   AIC.new.mod<-AIC(new.mod)
   if(is.null(max.AIC)) {max.AIC<-AIC.new.mod}
   if(abs(AIC.new.mod-max.AIC)<=10) {all.fit.models<-append(all.fit.models,list(new.mod))}
@@ -243,7 +244,7 @@ plot(delta.pustules$area,delta.pustules$area.next-delta.pustules$area)
 curve(best.model$coefficients["(Intercept)"]+
       best.model$coefficients["area"]*x+
       best.model$coefficients["time"]*quantile(delta.pustules$time,.5)+
-      best.model$coefficients["mean.temp"]*quantile(delta.pustules$mean.temp,.5)+
+      best.model$coefficients["mean.temp"]*quantile(delta.pustules$mean.temp,.95)+
       best.model$coefficients["mean.wetness"]*quantile(delta.pustules$mean.wetness,.5)+
       best.model$coefficients["mean.solar"]*quantile(delta.pustules$mean.solar,.5)+
       best.model$coefficients["mean.wind.speed"]*quantile(delta.pustules$mean.wind.speed,.5)+
@@ -253,9 +254,9 @@ curve(best.model$coefficients["(Intercept)"]+
       best.model$coefficients["time:mean.wetness"]*quantile(delta.pustules$time,.5)*quantile(delta.pustules$mean.wetness,.5)+
       best.model$coefficients["time:mean.solar"]*quantile(delta.pustules$time,.5)*quantile(delta.pustules$mean.solar,.5)+
       best.model$coefficients["time:mean.wind.speed"]*quantile(delta.pustules$time,.5)*quantile(delta.pustules$mean.wind.speed,.5)+
-      best.model$coefficients["mean.temp:mean.wetness"]*quantile(delta.pustules$mean.temp,.5)*quantile(delta.pustules$mean.wetness,.5)+
-      best.model$coefficients["time:mean.temp:mean.wetness"]*quantile(delta.pustules$time,.5)*quantile(delta.pustules$mean.temp,.5)*quantile(delta.pustules$mean.wetness,.5)
-      ,add=T)
+      best.model$coefficients["mean.temp:mean.wetness"]*quantile(delta.pustules$mean.temp,.95)*quantile(delta.pustules$mean.wetness,.5)+
+      best.model$coefficients["time:mean.temp:mean.wetness"]*quantile(delta.pustules$time,.5)*quantile(delta.pustules$mean.temp,.95)*quantile(delta.pustules$mean.wetness,.5)
+      ,add=T,col="red")
 
 
 ### lmms
