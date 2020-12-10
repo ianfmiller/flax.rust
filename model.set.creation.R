@@ -1,5 +1,5 @@
 # constructing sets of predictor variables--offset, random effects not included
-
+## need to seriously consider which variables should be considered informative--mean temps probably not
 ################################################################################################################################
 
 ## no temp. subsetting
