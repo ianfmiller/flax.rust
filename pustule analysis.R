@@ -282,15 +282,24 @@ summary(best.model)
 par(mfrow=c(1,1))
 plot(delta.pustules$area,delta.pustules$area.next-delta.pustules$area)
 quant.time<-quantile(delta.pustules$time,.5)
-quant.temp.days<-quantile(delta.pustules$temp.days,.5)
 quant.mean.temp<-quantile(delta.pustules$mean.temp,.5)
+quant.mean.dew.point<-quantile(delta.pustules$mean.dew.point,.5)
 quant.wetness<-quantile(delta.pustules$mean.wetness,.5)
-curve.col<-"red"
+quant.wind.speed<-quantile(delta.pustules$mean.wind.speed,.5)
+
+curve.col<-"blue"
 curve(fixef(best.model)["(Intercept)"]+
         fixef(best.model)["area"]*x+
-        fixef(best.model)["temp.days"]*quant.temp.days+
-        fixef(best.model)["mean.temp:mean.wetness"]*quant.mean.temp*quant.wetness+
-        fixef(best.model)["mean.temp:mean.wetness:time"]*quant.mean.temp*quant.wetness*quant.time
+        fixef(best.model)["time"]*quant.time+
+        fixef(best.model)["mean.temp"]*quant.mean.temp+
+        fixef(best.model)["mean.dew.point"]*quant.mean.dew.point+
+        fixef(best.model)["mean.wetness"]*quant.wetness+
+        fixef(best.model)["mean.wind.speed"]*quant.wind.speed+
+        fixef(best.model)["time:mean.temp"]*quant.time*quant.mean.temp+
+        fixef(best.model)["time:mean.dew.point"]*quant.time*quant.mean.dew.point+
+        fixef(best.model)["time:mean.wind.speed"]*quant.time*quant.wind.speed+
+        fixef(best.model)["mean.temp:mean.dew.point"]*quant.mean.temp*quant.mean.dew.point+
+        fixef(best.model)["time:mean.temp:mean.dew.point"]*quant.time*quant.mean.temp*quant.mean.dew.point
       ,add=T,col=curve.col)
 
 ### gams
