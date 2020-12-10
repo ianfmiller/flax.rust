@@ -206,7 +206,10 @@ model.set2 <-apply(pred.mat2, 1, function(x) as.formula( paste(c("area.next ~ of
 model.set3 <-apply(pred.mat3, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors3[x]),collapse=" + ")))
 model.set<-append(append(model.set1,model.set2),model.set3)
 
-re.model.set <- apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors[x],"(1|tag)"),collapse=" + ")))
+re.model.set1 <-apply(pred.mat1, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors1[x],"(1|tag)"),collapse=" + ")))
+re.model.set2 <-apply(pred.mat2, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors1[x],"(1|tag)"),collapse=" + ")))
+re.model.set3 <-apply(pred.mat3, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors1[x],"(1|tag)"),collapse=" + ")))
+re.model.set<-append(append(re.model.set1,re.model.set2),re.model.set3)
 #gam.model.set <- apply(pred.mat, 1, function(x) as.formula( paste0(paste(c("area.next ~ offset(area",predictors[x]),collapse=") + s("),")")))
   
 names(model.set)<-seq(1,length(model.set),1)
@@ -215,18 +218,26 @@ names(re.model.set)<-seq(1,length(re.model.set),1)
 
 #all.fit.models<-lapply(model.set,function(x) lm(x,data=delta.pustules))
 all.fit.models<-c()
-max.AIC<-NULL
+AIC.benchmark<-AIC(lm(area.next~offset(area)+area,data=delta.pustules))
 pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
 for (i in 1:length(model.set))
 {
-  new.mod<-lm(model.set[[i]],data=as.data.frame(scale(delta.pustules[,5:22])))
+  new.mod<-lm(model.set[[i]],data=delta.pustules)
   AIC.new.mod<-AIC(new.mod)
-  if(is.null(max.AIC)) {max.AIC<-AIC.new.mod}
-  if(abs(AIC.new.mod-max.AIC)<=10) {all.fit.models<-append(all.fit.models,list(new.mod))}
+  if(AIC.new.mod<=(AIC.benchmark+10)) {all.fit.models<-append(all.fit.models,list(new.mod))}
   pb$tick()
 }
 
-re.all.fit.models<-lapply(re.model.set,function(x) lmer(x,data=delta.pustules,REML=F))
+re.all.fit.models<-c()
+AIC.benchmark<-AIC(lmer(area.next~offset(area)+area +(1|tag),data=delta.pustules))
+pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
+for (i in 1:length(model.set))
+{
+  suppressMessages(new.mod<-lmer(re.model.set[[i]],data=delta.pustules,REML=F))
+  AIC.new.mod<-AIC(new.mod)
+  if(AIC.new.mod<=(AIC.benchmark+10)) {re.all.fit.models<-append(all.fit.models,list(new.mod))}
+  pb$tick()
+}
 #gam.all.fit.models<-lapply(gam.model.set,function(x) gam(x,data=delta.pustules,method = "REML"))
 
 ## compare between models
@@ -240,23 +251,23 @@ index<-1
 best.model<-all.fit.models[[order(AICs)[index]]]
 summary(best.model)
 
+par(mfrow=c(1,1))
 plot(delta.pustules$area,delta.pustules$area.next-delta.pustules$area)
+quant.time<-quantile(delta.pustules$time,.5)
+quant.mean.temp<-quantile(delta.pustules$mean.temp,.25)
+quant.mean.dew.point<-quantile(delta.pustules$mean.dew.point,.25)
+quant.wetness<-quantile(delta.pustules$mean.wetness,.5)
+curve.col<-"red"
 curve(best.model$coefficients["(Intercept)"]+
       best.model$coefficients["area"]*x+
-      best.model$coefficients["time"]*quantile(delta.pustules$time,.5)+
-      best.model$coefficients["mean.temp"]*quantile(delta.pustules$mean.temp,.5)+
-      best.model$coefficients["mean.wetness"]*quantile(delta.pustules$mean.wetness,.5)+
-      best.model$coefficients["mean.solar"]*quantile(delta.pustules$mean.solar,.5)+
-      best.model$coefficients["mean.wind.speed"]*quantile(delta.pustules$mean.wind.speed,.5)+
-      best.model$coefficients["tot.rain"]*quantile(delta.pustules$tot.rain,.5,na.rm = T)+
-      best.model$coefficients["temp.days"]*quantile(delta.pustules$temp.days,.5)+
-      best.model$coefficients["temp.dew.point.days"]*quantile(delta.pustules$temp.dew.point.days,.5)+
-      best.model$coefficients["time:mean.wetness"]*quantile(delta.pustules$time,.5)*quantile(delta.pustules$mean.wetness,.5)+
-      best.model$coefficients["time:mean.solar"]*quantile(delta.pustules$time,.5)*quantile(delta.pustules$mean.solar,.5)+
-      best.model$coefficients["time:mean.wind.speed"]*quantile(delta.pustules$time,.5)*quantile(delta.pustules$mean.wind.speed,.5)+
-      best.model$coefficients["mean.temp:mean.wetness"]*quantile(delta.pustules$mean.temp,.5)*quantile(delta.pustules$mean.wetness,.5)+
-      best.model$coefficients["time:mean.temp:mean.wetness"]*quantile(delta.pustules$time,.5)*quantile(delta.pustules$mean.temp,.5)*quantile(delta.pustules$mean.wetness,.5)
-      ,add=T,col="red")
+      best.model$coefficients["time"]*quant.time+
+      best.model$coefficients["mean.temp"]*quant.mean.temp+
+      best.model$coefficients["mean.dew.point"]*quant.mean.dew.point+
+      best.model$coefficients["mean.wetness"]*quant.wetness+
+      best.model$coefficients["time:mean.temp"]*quant.mean.temp*quant.time+
+      best.model$coefficients["time:mean.wetness"]*quant.wetness*quant.time+
+      best.model$coefficients["mean.temp:mean.dew.point"]*quant.mean.temp*quant.mean.dew.point
+      ,add=T,col=curve.col)
 
 
 ### lmms
