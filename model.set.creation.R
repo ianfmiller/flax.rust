@@ -132,7 +132,7 @@ pred.mat2<-unique(pred.mat2)
 
 ################################################################################################################################
 
-## subset temp between 16 and 22
+## subset temp between 7 and 30
 
 ### construct all combinations of predictors
 predictors3<-c("area","time","temp.days.7.30","mean.dew.point","mean.wetness","mean.solar","mean.wind.speed","tot.rain", 
