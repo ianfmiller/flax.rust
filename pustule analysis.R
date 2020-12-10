@@ -18,6 +18,9 @@ pustules$area<-area
 pustules<-pustules[which(pustules$pustule.ID.confidence=="Yes"),]
 pustules<-pustules[which(pustules$area>0),]
 
+## cut out incomplete records
+pustules<-pustules[-intersect(which(pustules$site=="HM"),which(pustules$date>"2020-07-10 00:00:00 UTC")),]
+
 ## make new data object for change in pustule size
 temp.rh.sub.func<-function(x,lower.bound,upper.bound) {out<-subset(x,temp.c>=lower.bound); out<-subset(out,temp.c<=upper.bound); out}
 
@@ -28,24 +31,25 @@ pustule.nums<-c()
 start.vals<-c()
 end.vals<-c()
 days<-c()
+temp.days<-c()
 temp.days.16.22<-c()
 temp.days.7.30<-c()
-temp.days<-c()
-mean.temp<-c()
 dew.point.days<-c()
-mean.dew.point<-c()
 temp.dew.point.days<-c()
 temp.16.22.dew.point.days<-c()
 temp.7.30.dew.point.days<-c()
-mean.wetnesss<-c()
+wetness.days<-c()
+temp.wetness.days<-c()
+temp.16.22.wetness.days<-c()
+temp.7.30.wetness.days<-c()
 tot.rains<-c()
-mean.solars<-c()
-mean.wind.speeds<-c()
-mean.gust.speeds<-c()
+solar.days<-c()
+wind.speed.days<-c()
+gust.speed.days<-c()
 
 
 
-for (tag in unique(pustules$tag)) #916, 917, 920
+for (tag in unique(pustules$tag))
 {
   sub.pustules1<-pustules[which(pustules$tag==tag),]
   
@@ -89,28 +93,31 @@ for (tag in unique(pustules$tag)) #916, 917, 920
             weath.sub<-subset(all.weath,site==site)
             weath.sub<-subset(weath.sub,date<=date1) #pull out relevant data
             weath.sub<-subset(weath.sub,date>=date0) #pull out relevant data
+            weath.sub<-cbind(weath.sub,interval.length=c(diff(as.numeric(weath.sub$date))/(60*60*24),NA))
             
             #calculate environmental variable metrics
-            new.temp.days.16.22<-sum(temp.rh.sub.func(temp.rh.sub,16,22)$temp.c*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T) #temperature days for temp between 16 and 22 celsius
-            new.temp.days.7.30<-sum(temp.rh.sub.func(temp.rh.sub,7,30)$temp.c*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T) #temperature days for temp between 7 and 30 celsius
             new.temp.days<-sum(temp.rh.sub$temp.c*temp.rh.sub$interval.length,na.rm = T) #temperature days
-            new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #temperature days
+            new.temp.days.16.22<-sum(1*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T) #time (in days) during which temp between 16 and 22 celsius
+            new.temp.days.7.30<-sum(1*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T) #time (in days) during which temp between 7 and 30 celsius
             new.dew.point.days<-mean(temp.rh.sub$dew.pt.c,na.rm = T) #Dew point days
-            new.mean.dew.point<-mean(temp.rh.sub$dew.pt.c,na.rm = T) #temperature days
 
+            #calculate weather metrics
+            new.wetness.days<-sum(weath.sub$wetness*weath.sub$interval.length,na.rm = T)
+            new.tot.rain<-sum(weath.sub$rain,na.rm=T)
+            new.solar.days<-sum(weath.sub$solar.radiation*weath.sub$interval.length,na.rm = T)
+            new.wind.speed.days<-sum(weath.sub$wind.speed*weath.sub$interval.length,na.rm = T)
+            new.gust.speed.days<-sum(weath.sub$wind.direction*weath.sub$interval.length,na.rm = T)
+            
             #calculate joint environmental variable metrics--accounts for temporal co-occurence of environmental variables
             new.temp.dew.point.days<-sum(temp.rh.sub$temp.c*temp.rh.sub$dew.pt.c*temp.rh.sub$interval.length,na.rm = T)
-            new.temp.16.22.dew.point.days<-sum(temp.rh.sub.func(temp.rh.sub,16,22)$temp.c*temp.rh.sub.func(temp.rh.sub,16,22)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T)
-            new.temp.7.30.dew.point.days<-sum(temp.rh.sub.func(temp.rh.sub,7,30)$temp.c*temp.rh.sub.func(temp.rh.sub,7,30)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T)
+            new.temp.16.22.dew.point.days<-sum(1*temp.rh.sub.func(temp.rh.sub,16,22)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T)
+            new.temp.7.30.dew.point.days<-sum(1*temp.rh.sub.func(temp.rh.sub,7,30)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T)
+            LEFT OFF HERE
+            new.temp.wetness.days<-
+            new.temp.16.22.wetness.days<-
+            new.temp.7.30.wetness.days<-
             
-            #calculate weather metrics
-            new.mean.wetness<-mean(weath.sub$wetness)
-            new.tot.rain<-sum(weath.sub$rain)
-            new.mean.solar<-mean(weath.sub$solar.radiation)
-            new.mean.wind.speed<-mean(weath.sub$wind.speed)
-            new.mean.gust.speed<-mean(weath.sub$gust.speed)
-            
-            #pull out core predictors
+              #pull out core predictors
             start.val<-sub.pustules4[i,"area"]
             end.val<-sub.pustules4[i+1,"area"]
             delta.days<-date1-date0
