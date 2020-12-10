@@ -231,11 +231,11 @@ for (i in 1:length(model.set))
 re.all.fit.models<-c()
 AIC.benchmark<-AIC(lmer(area.next~offset(area)+area +(1|tag),data=delta.pustules))
 pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
-for (i in 1:length(model.set))
+for (i in 1:length(re.model.set))
 {
   suppressMessages(new.mod<-lmer(re.model.set[[i]],data=delta.pustules,REML=F))
   AIC.new.mod<-AIC(new.mod)
-  if(AIC.new.mod<=(AIC.benchmark+10)) {re.all.fit.models<-append(all.fit.models,list(new.mod))}
+  if(AIC.new.mod<=(AIC.benchmark+10)) {re.all.fit.models<-append(re.all.fit.models,list(new.mod))}
   pb$tick()
 }
 #gam.all.fit.models<-lapply(gam.model.set,function(x) gam(x,data=delta.pustules,method = "REML"))
@@ -274,10 +274,24 @@ curve(best.model$coefficients["(Intercept)"]+
 re.AICs<-unlist(lapply(re.all.fit.models,AIC))
 delta.re.AICs<-re.AICs-min(re.AICs)
 re.candidate.models<-unname(which(delta.re.AICs<4))
-re.model.set[re.candidate.models[order(re.AICs[re.candidate.models])]] #models to consider--offset(diam.last) not shown
+#re.model.set[re.candidate.models[order(re.AICs[re.candidate.models])]] #models to consider--offset(diam.last) not shown
 index<-1
 best.model<-re.all.fit.models[[order(re.AICs)[index]]]
 summary(best.model)
+
+par(mfrow=c(1,1))
+plot(delta.pustules$area,delta.pustules$area.next-delta.pustules$area)
+quant.time<-quantile(delta.pustules$time,.5)
+quant.temp.days<-quantile(delta.pustules$temp.days,.5)
+quant.mean.temp<-quantile(delta.pustules$mean.temp,.5)
+quant.wetness<-quantile(delta.pustules$mean.wetness,.5)
+curve.col<-"red"
+curve(fixef(best.model)["(Intercept)"]+
+        fixef(best.model)["area"]*x+
+        fixef(best.model)["temp.days"]*quant.temp.days+
+        fixef(best.model)["mean.temp:mean.wetness"]*quant.mean.temp*quant.wetness+
+        fixef(best.model)["mean.temp:mean.wetness:time"]*quant.mean.temp*quant.wetness*quant.time
+      ,add=T,col=curve.col)
 
 ### gams
 #gam.AICs<-unlist(lapply(gam.all.fit.models,AIC))
