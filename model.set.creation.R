@@ -29,14 +29,14 @@ switch.vars<-list(
   list("mean.temp:mean.wetness",c("temp.dew.point.days","temp.days")),
   list("mean.temp:mean.wetness:time",c("temp.dew.point.days","temp.days")),
   
-  list("temp.days",c("mean.temp","mean.temp:time","mean.temp:mean.dew.point","mean.temp:mean.dew.point:time","mean.temp:mean.wetness","mean.temp.mean.wetness:time")),
+  list("temp.days",c("mean.temp","mean.temp:time","mean.temp:mean.dew.point","mean.temp:mean.dew.point:time","mean.temp:mean.wetness","mean.temp:mean.wetness:time")),
   
   list("mean.dew.point",c("dew.point.days","temp.dew.point.days")),
   list("mean.dew.point:time",c("dew.point.days","temp.dew.point.days")),
   
   list("dew.point.days",c("mean.dew.point","mean.dew.point:time")),
   
-  list("temp.dew.point.days",c("mean.temp","mean.temp:time","mean.temp:mean.dew.point","mean.temp:mean.dew.point:time","mean.temp:mean.wetness","mean.temp.mean.wetness:time","mean.dew.point","mean.dew.point:time"))
+  list("temp.dew.point.days",c("mean.temp","mean.temp:time","mean.temp:mean.dew.point","mean.temp:mean.dew.point:time","mean.temp:mean.wetness","mean.temp:mean.wetness:time","mean.dew.point","mean.dew.point:time"))
   
 )
 
