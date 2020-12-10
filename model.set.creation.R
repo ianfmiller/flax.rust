@@ -6,28 +6,38 @@
 
 ### construct all combinations of predictors
 predictors1<-c("area","time","mean.temp","mean.dew.point","mean.wetness","mean.solar","mean.wind.speed","tot.rain", 
-              "mean.temp:time","temp.days", 
-              "mean.dew.point:time","dew.point.days",
-              "mean.wetness:time", 
-              "mean.solar:time",
-              "mean.wind.speed:time",
-              "mean.temp:mean.wetness",
-              "mean.temp:mean.wetness:time",
-              "mean.temp:mean.dew.point", 
-              "mean.temp:mean.dew.point:time","temp.dew.point.days"
-              )
+               "mean.temp:time","temp.days", 
+               "mean.dew.point:time","dew.point.days",
+               "mean.wetness:time", 
+               "mean.solar:time",
+               "mean.wind.speed:time",
+               "mean.temp:mean.wetness",
+               "mean.temp:mean.wetness:time",
+               "mean.temp:mean.dew.point", 
+               "mean.temp:mean.dew.point:time","temp.dew.point.days"
+)
 
 pred.mat1<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F))
 names(pred.mat1)<-predictors1
 
 ### define sets of variables that explain the same thing
 switch.vars<-list( 
-  list("mean.temp:time",c("temp.days")),
-  list("temp.days",c("mean.temp:time","mean.temp")),
-  list("mean.dew.point:time",c("dew.point.days")),
-  list("dew.point.days",c("mean.dew.point:time","mean.dew.point")),
-  list("mean.temp:mean.dew.point:time",c("temp.dew.point.days")),
-  list("temp.dew.point.days",c("mean.temp:mean.dew.point:time","mean.temp:time","mean.dew.point:time","mean.temp","mean.dew.point"))
+  list("mean.temp",c("temp.dew.point.days","temp.days")),
+  list("mean.temp:time",c("temp.dew.point.days","temp.days")),
+  list("mean.temp:mean.dew.point",c("temp.dew.point.days","temp.days")),
+  list("mean.temp:mean.dew.point:time",c("temp.dew.point.days","temp.days")),
+  list("mean.temp:mean.wetness",c("temp.dew.point.days","temp.days")),
+  list("mean.temp:mean.wetness:time",c("temp.dew.point.days","temp.days")),
+  
+  list("temp.days",c("mean.temp","mean.temp:time","mean.temp:mean.dew.point","mean.temp:mean.dew.point:time","mean.temp:mean.wetness","mean.temp.mean.wetness:time")),
+  
+  list("mean.dew.point",c("dew.point.days","temp.dew.point.days")),
+  list("mean.dew.point:time",c("dew.point.days","temp.dew.point.days")),
+  
+  list("dew.point.days",c("mean.dew.point","mean.dew.point:time")),
+  
+  list("temp.dew.point.days",c("mean.temp","mean.temp:time","mean.temp:mean.dew.point","mean.temp:mean.dew.point:time","mean.temp:mean.wetness","mean.temp.mean.wetness:time","mean.dew.point","mean.dew.point:time"))
+  
 )
 
 ### define sets of variables that need to occur together
@@ -39,8 +49,8 @@ force.include.vars<-list(
   list("mean.wind.speed:time",c("mean.wind.speed","time")),
   list("mean.temp:mean.dew.point",c("mean.temp","mean.dew.point")),
   list("mean.temp:mean.wetness",c("mean.temp","mean.wetness")),
-  list("mean.temp:mean.dew.point:time",c("mean.temp","mean.dew.point","time")),
-  list("mean.temp:mean.wetness:time",c("mean.temp","mean.wetness","time"))
+  list("mean.temp:mean.dew.point:time",c("mean.temp","mean.dew.point","time","mean.temp:mean.dew.point","mean.temp:time","mean.dew.point:time")),
+  list("mean.temp:mean.wetness:time",c("mean.temp","mean.wetness","time","mean.temp:mean.wetness","mean.temp:time","mean.wetness:time"))
 )
 
 ### turn variables off
@@ -79,7 +89,7 @@ predictors2<-c("area","time","temp.days.16.22","mean.dew.point","mean.wetness","
               "temp.16.22.dew.point.days"
 )
 
-pred.mat2<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F))
+pred.mat2<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,T))
 names(pred.mat2)<-predictors2
 
 ### define sets of variables that explain the same thing
@@ -122,24 +132,24 @@ pred.mat2<-unique(pred.mat2)
 
 ################################################################################################################################
 
-## subset temp between 7 and 30
+## subset temp between 16 and 22
 
 ### construct all combinations of predictors
 predictors3<-c("area","time","temp.days.7.30","mean.dew.point","mean.wetness","mean.solar","mean.wind.speed","tot.rain", 
-              "mean.dew.point:time","dew.point.days",
-              "mean.wetness:time", 
-              "mean.solar:time",
-              "mean.wind.speed:time",
-              "temp.days.7.30:mean.wetness",
-              "temp.days.7.30:mean.dew.point",
-              "temp.7.30.dew.point.days"
+               "mean.dew.point:time","dew.point.days",
+               "mean.wetness:time", 
+               "mean.solar:time",
+               "mean.wind.speed:time",
+               "temp.days.7.30:mean.wetness",
+               "temp.days.7.30:mean.dew.point",
+               "temp.7.30.dew.point.days"
 )
 
-pred.mat3<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F))
+pred.mat3<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,T))
 names(pred.mat3)<-predictors3
 
 ### define sets of variables that explain the same thing
-switch.vars<-list( 
+switch.vars<-list(
   list("mean.dew.point:time",c("dew.point.days")),
   list("dew.point.days",c("mean.dew.point:time","mean.dew.point")),
   list("temp.7.30.dew.point.days",c("temp.days.7.30:mean.dew.point","mean.dew.point:time","mean.dew.point"))
