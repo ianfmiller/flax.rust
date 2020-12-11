@@ -212,10 +212,8 @@ source("model.set.creation.R")
 ### create all sets of models
 model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors[x]),collapse=" + ")))
 
-re.model.set1 <-apply(pred.mat1, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors1[x],"(1|tag)"),collapse=" + ")))
-re.model.set2 <-apply(pred.mat2, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors1[x],"(1|tag)"),collapse=" + ")))
-re.model.set3 <-apply(pred.mat3, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors1[x],"(1|tag)"),collapse=" + ")))
-re.model.set<-append(append(re.model.set1,re.model.set2),re.model.set3)
+re.model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors[x],"(1|tag)"),collapse=" + ")))
+
 #gam.model.set <- apply(pred.mat, 1, function(x) as.formula( paste0(paste(c("area.next ~ offset(area",predictors[x]),collapse=") + s("),")")))
   
 names(model.set)<-seq(1,length(model.set),1)
@@ -235,13 +233,14 @@ for (i in 1:length(model.set))
 }
 
 re.all.fit.models<-c()
-AIC.benchmark<-AIC(lmer(area.next~offset(area)+area +(1|tag),data=delta.pustules))
+#AIC.benchmark<-AIC(lmer(area.next~offset(area)+area +(1|tag),data=delta.pustules))
+AIC.benchmark<- -17395
 pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
 for (i in 1:length(re.model.set))
 {
   suppressMessages(new.mod<-lmer(re.model.set[[i]],data=delta.pustules,REML=F))
   AIC.new.mod<-AIC(new.mod)
-  if(AIC.new.mod<=(AIC.benchmark+10)) {re.all.fit.models<-append(re.all.fit.models,list(new.mod))}
+  if(AIC.new.mod<=(AIC.benchmark)) {re.all.fit.models<-append(re.all.fit.models,list(new.mod))}
   pb$tick()
 }
 #gam.all.fit.models<-lapply(gam.model.set,function(x) gam(x,data=delta.pustules,method = "REML"))
@@ -253,7 +252,7 @@ AICs<-unlist(lapply(all.fit.models,AIC))
 delta.AICs<-AICs-min(AICs)
 candidate.models<-unname(which(delta.AICs<4))
 #model.set[candidate.models[order(AICs[candidate.models])]] #models to consider--offset(diam.last) not shown
-index<-2
+index<-2 #top two models have nearly identical AICs, #2 drops insignificant gust speed days predictor
 best.model<-all.fit.models[[order(AICs)[index]]]
 summary(best.model)
 
@@ -293,25 +292,26 @@ summary(best.model)
 
 par(mfrow=c(1,1))
 plot(delta.pustules$area,delta.pustules$area.next-delta.pustules$area)
-quant.time<-quantile(delta.pustules$time,.5)
-quant.mean.temp<-quantile(delta.pustules$mean.temp,.5)
-quant.mean.dew.point<-quantile(delta.pustules$mean.dew.point,.5)
-quant.wetness<-quantile(delta.pustules$mean.wetness,.5)
-quant.wind.speed<-quantile(delta.pustules$mean.wind.speed,.5)
+quant.temp.days.16.22<-quantile(delta.pustules$temp.days.16.22,.5)
+quant.dew.point.days<-quantile(delta.pustules$dew.point.days,.5)
+quant.temp.dew.point.days<-quantile(delta.pustules$temp.dew.point.days,.5)
+quant.wetness.days<-quantile(delta.pustules$wetness.days,.5)
+quant.temp.7.30.wetness.days<-quantile(delta.pustules$temp.7.30.wetness.days,.5)
+quant.tot.rain<-quantile(delta.pustules$tot.rain,.5)
+quant.wind.speed.days<-quantile(delta.pustules$wind.speed.days,.5)
+quant.gust.speed.days<-quantile(delta.pustules$gust.speed.days,.5)
 
 curve.col<-"blue"
 curve(fixef(best.model)["(Intercept)"]+
         fixef(best.model)["area"]*x+
-        fixef(best.model)["time"]*quant.time+
-        fixef(best.model)["mean.temp"]*quant.mean.temp+
-        fixef(best.model)["mean.dew.point"]*quant.mean.dew.point+
-        fixef(best.model)["mean.wetness"]*quant.wetness+
-        fixef(best.model)["mean.wind.speed"]*quant.wind.speed+
-        fixef(best.model)["time:mean.temp"]*quant.time*quant.mean.temp+
-        fixef(best.model)["time:mean.dew.point"]*quant.time*quant.mean.dew.point+
-        fixef(best.model)["time:mean.wind.speed"]*quant.time*quant.wind.speed+
-        fixef(best.model)["mean.temp:mean.dew.point"]*quant.mean.temp*quant.mean.dew.point+
-        fixef(best.model)["time:mean.temp:mean.dew.point"]*quant.time*quant.mean.temp*quant.mean.dew.point
+        fixef(best.model)["temp.days.16.22"]*quant.temp.days.16.22+
+        fixef(best.model)["dew.point.days"]*quant.dew.point.days+
+        fixef(best.model)["temp.dew.point.days"]*quant.temp.dew.point.days+
+        fixef(best.model)["wetness.days"]*quant.wetness.days+
+        fixef(best.model)["temp.7.30.wetness.days"]*quant.temp.7.30.wetness.days+
+        fixef(best.model)["tot.rain"]*quant.tot.rain+
+        fixef(best.model)["wind.speed.days"]*quant.wind.speed.days+
+        fixef(best.model)["gust.speed.days"]*quant.gust.speed.days
       ,add=T,col=curve.col)
 
 ### gams
