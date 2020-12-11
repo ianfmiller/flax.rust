@@ -220,7 +220,6 @@ names(model.set)<-seq(1,length(model.set),1)
 names(re.model.set)<-seq(1,length(re.model.set),1)
 #names(gam.model.set)<-seq(1,length(gam.model.set),1)
 
-#all.fit.models<-lapply(model.set,function(x) lm(x,data=delta.pustules))
 all.fit.models<-c()
 AIC.benchmark<-AIC(lm(area.next~offset(area)+area,data=delta.pustules))
 pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
@@ -232,17 +231,18 @@ for (i in 1:length(model.set))
   pb$tick()
 }
 
-re.all.fit.models<-c()
+## run to search for best model
+#re.all.fit.models<-c()
 #AIC.benchmark<-AIC(lmer(area.next~offset(area)+area +(1|tag),data=delta.pustules))
-AIC.benchmark<- -17395
-pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
-for (i in 1:length(re.model.set))
-{
-  suppressMessages(new.mod<-lmer(re.model.set[[i]],data=delta.pustules,REML=F))
-  AIC.new.mod<-AIC(new.mod)
-  if(AIC.new.mod<=(AIC.benchmark)) {re.all.fit.models<-append(re.all.fit.models,list(new.mod))}
-  pb$tick()
-}
+#AIC.benchmark<- -17395
+#pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
+#for (i in 1:length(re.model.set))
+#{
+#  suppressMessages(new.mod<-lmer(re.model.set[[i]],data=delta.pustules,REML=F))
+#  AIC.new.mod<-AIC(new.mod)
+#  if(AIC.new.mod<=(AIC.benchmark)) {re.all.fit.models<-append(re.all.fit.models,list(new.mod))}
+#  pb$tick()
+#}
 #gam.all.fit.models<-lapply(gam.model.set,function(x) gam(x,data=delta.pustules,method = "REML"))
 
 ## compare between models
@@ -282,12 +282,16 @@ curve(best.model$coefficients["(Intercept)"]+
 
 
 ### lmms
-re.AICs<-unlist(lapply(re.all.fit.models,AIC))
-delta.re.AICs<-re.AICs-min(re.AICs)
-re.candidate.models<-unname(which(delta.re.AICs<4))
+## if all models fit
+#re.AICs<-unlist(lapply(re.all.fit.models,AIC))
+#delta.re.AICs<-re.AICs-min(re.AICs)
+#re.candidate.models<-unname(which(delta.re.AICs<4))
 #re.model.set[re.candidate.models[order(re.AICs[re.candidate.models])]] #models to consider--offset(diam.last) not shown
-index<-1
-best.model<-re.all.fit.models[[order(re.AICs)[index]]]
+#index<-1
+#best.model<-re.all.fit.models[[order(re.AICs)[index]]]
+
+##fitting just top model
+best.model<-lmer(re.model.set[[1824]],data=delta.pustules,REML=F)
 summary(best.model)
 
 par(mfrow=c(1,1))
