@@ -29,11 +29,29 @@ bt[,1]<-ymd_hms(bt[,1])
 cc[,1]<-ymd_hms(cc[,1])
 all.temp.rh<-rbind(hm[,1:4],gm[,1:4],bt[,1:4],cc[,1:4])
 
-
+# hm weather data
+## load data, clean
 hm.weath<-read.csv("~/Documents/Github/flax.rust/data/enviro/High_Meadow.csv",skip=2)[,-1]
 colnames(hm.weath)<-c("date","wetness","rain","solar.radiation","wind.speed","gust.speed","wind.direction","soil.moisture")
 hm.weath[,1]<-parse_date_time(hm.weath[,1],'%m/%d/%y %I:%M:%S %p')
 hm.weath<-hm.weath[-which(hm.weath$wetness==-888.88),]
+
+## join with temperature data for calculating variables capturing co-occurence of weather vars and temp
+temps<-c()
+temps.16.22<-c()
+temps.7.30<-c()
+for(i in 1:(dim(hm.weath)[1]))
+{
+  date0<-as.POSIXct(hm.weath[i,"date"])
+  date1<-as.POSIXct(hm.weath[i+1,"date"])
+  interval.temps<-hm[intersect(which(hm$date.time>=date0),which(hm$date.time<=date1)),"temp.c"]
+  ifelse(all(all(interval.temps>=16),all(interval.temps<=22)),interval.16.22<-1,interval.16.22<-0)
+  ifelse(all(all(interval.temps>=7),all(interval.temps<=30)),interval.7.30<-1,interval.7.30<-0)
+  temps<-c(temps,mean(interval.temps))
+  temps.16.22<-c(temps.16.22,interval.16.22)
+  temps.7.30<-c(temps.7.30,interval.7.30)
+}
+hm.weath<-cbind(hm.weath,temp=temps,temp.16.22=temps.16.22,temp.7.30=temps.7.30)
 
 gm.weath<-read.csv("~/Documents/Github/flax.rust/data/enviro/Gothic_Mountain.csv",skip=2)[,-1]
 colnames(gm.weath)<-c("date","wetness","rain","solar.radiation","wind.speed","gust.speed","wind.direction","soil.moisture")
