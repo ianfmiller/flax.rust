@@ -112,9 +112,9 @@ for (tag in unique(pustules$tag))
             new.temp.dew.point.days<-sum(temp.rh.sub$temp.c*temp.rh.sub$dew.pt.c*temp.rh.sub$interval.length,na.rm = T)
             new.temp.16.22.dew.point.days<-sum(1*temp.rh.sub.func(temp.rh.sub,16,22)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T)
             new.temp.7.30.dew.point.days<-sum(1*temp.rh.sub.func(temp.rh.sub,7,30)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T)
-            new.temp.wetness.days<-sum(weath.sub$temp*weath.sub$wetness*weath.sub$interval.length)
-            new.temp.16.22.wetness.days<-sum(weath.sub$temp.16.22*weath.sub$wetness*weath.sub$interval.length)
-            new.temp.7.30.wetness.days<-sum(weath.sub$temp.7.30*weath.sub$wetness*weath.sub$interval.length)
+            new.temp.wetness.days<-sum(weath.sub$temp*weath.sub$wetness*weath.sub$interval.length,na.rm = T)
+            new.temp.16.22.wetness.days<-sum(weath.sub$temp.16.22*weath.sub$wetness*weath.sub$interval.length,na.rm = T)
+            new.temp.7.30.wetness.days<-sum(weath.sub$temp.7.30*weath.sub$wetness*weath.sub$interval.length,na.rm = T)
             
             #pull out core predictors
             start.val<-sub.pustules4[i,"area"]
@@ -210,10 +210,7 @@ abline(0,1)
 source("model.set.creation.R")
 
 ### create all sets of models
-model.set1 <-apply(pred.mat1, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors1[x]),collapse=" + ")))
-model.set2 <-apply(pred.mat2, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors2[x]),collapse=" + ")))
-model.set3 <-apply(pred.mat3, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors3[x]),collapse=" + ")))
-model.set<-append(append(model.set1,model.set2),model.set3)
+model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors[x]),collapse=" + ")))
 
 re.model.set1 <-apply(pred.mat1, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors1[x],"(1|tag)"),collapse=" + ")))
 re.model.set2 <-apply(pred.mat2, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors1[x],"(1|tag)"),collapse=" + ")))
@@ -256,26 +253,32 @@ AICs<-unlist(lapply(all.fit.models,AIC))
 delta.AICs<-AICs-min(AICs)
 candidate.models<-unname(which(delta.AICs<4))
 #model.set[candidate.models[order(AICs[candidate.models])]] #models to consider--offset(diam.last) not shown
-index<-1
+index<-2
 best.model<-all.fit.models[[order(AICs)[index]]]
 summary(best.model)
 
 par(mfrow=c(1,1))
 plot(delta.pustules$area,delta.pustules$area.next-delta.pustules$area)
 quant.time<-quantile(delta.pustules$time,.5)
-quant.mean.temp<-quantile(delta.pustules$mean.temp,.25)
-quant.mean.dew.point<-quantile(delta.pustules$mean.dew.point,.25)
-quant.wetness<-quantile(delta.pustules$mean.wetness,.5)
+quant.temp.days.16.22<-quantile(delta.pustules$temp.days.16.22,.5)
+quant.dew.point.days<-quantile(delta.pustules$dew.point.days,.5)
+quant.temp.dew.point.days<-quantile(delta.pustules$temp.dew.point.days,.5)
+quant.wetness.days<-quantile(delta.pustules$wetness.days,.5)
+quant.temp.7.30.wetness.days<-quantile(delta.pustules$temp.7.30.wetness.days,.5)
+quant.tot.rain<-quantile(delta.pustules$tot.rain,.5)
+solar.days<-quantile(delta.pustules$solar.days,.5)
+
 curve.col<-"red"
 curve(best.model$coefficients["(Intercept)"]+
       best.model$coefficients["area"]*x+
       best.model$coefficients["time"]*quant.time+
-      best.model$coefficients["mean.temp"]*quant.mean.temp+
-      best.model$coefficients["mean.dew.point"]*quant.mean.dew.point+
-      best.model$coefficients["mean.wetness"]*quant.wetness+
-      best.model$coefficients["time:mean.temp"]*quant.mean.temp*quant.time+
-      best.model$coefficients["time:mean.wetness"]*quant.wetness*quant.time+
-      best.model$coefficients["mean.temp:mean.dew.point"]*quant.mean.temp*quant.mean.dew.point
+      best.model$coefficients["temp.days.16.22"]*quant.temp.days.16.22+
+      best.model$coefficients["dew.point.days"]*quant.dew.point.days+
+      best.model$coefficients["temp.dew.point.days"]*quant.temp.dew.point.days+
+      best.model$coefficients["wetness.days"]*quant.wetness.days+
+      best.model$coefficients["temp.7.30.wetness.days"]*quant.temp.7.30.wetness.days+
+      best.model$coefficients["tot.rain"]*quant.tot.rain+
+      best.model$coefficients["solar.days"]*solar.days
       ,add=T,col=curve.col)
 
 
