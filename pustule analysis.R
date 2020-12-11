@@ -99,7 +99,7 @@ for (tag in unique(pustules$tag))
             new.temp.days<-sum(temp.rh.sub$temp.c*temp.rh.sub$interval.length,na.rm = T) #temperature days
             new.temp.days.16.22<-sum(1*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T) #time (in days) during which temp between 16 and 22 celsius
             new.temp.days.7.30<-sum(1*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T) #time (in days) during which temp between 7 and 30 celsius
-            new.dew.point.days<-mean(temp.rh.sub$dew.pt.c,na.rm = T) #Dew point days
+            new.dew.point.days<-sum(temp.rh.sub$dew.pt.c*temp.rh.sub$interval.length,na.rm = T) #Dew point days
 
             #calculate weather metrics
             new.wetness.days<-sum(weath.sub$wetness*weath.sub$interval.length,na.rm = T)
@@ -112,12 +112,11 @@ for (tag in unique(pustules$tag))
             new.temp.dew.point.days<-sum(temp.rh.sub$temp.c*temp.rh.sub$dew.pt.c*temp.rh.sub$interval.length,na.rm = T)
             new.temp.16.22.dew.point.days<-sum(1*temp.rh.sub.func(temp.rh.sub,16,22)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T)
             new.temp.7.30.dew.point.days<-sum(1*temp.rh.sub.func(temp.rh.sub,7,30)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T)
-            LEFT OFF HERE
-            new.temp.wetness.days<-
-            new.temp.16.22.wetness.days<-
-            new.temp.7.30.wetness.days<-
+            new.temp.wetness.days<-sum(weath.sub$temp*weath.sub$wetness*weath.sub$interval.length)
+            new.temp.16.22.wetness.days<-sum(weath.sub$temp.16.22*weath.sub$wetness*weath.sub$interval.length)
+            new.temp.7.30.wetness.days<-sum(weath.sub$temp.7.30*weath.sub$wetness*weath.sub$interval.length)
             
-              #pull out core predictors
+            #pull out core predictors
             start.val<-sub.pustules4[i,"area"]
             end.val<-sub.pustules4[i+1,"area"]
             delta.days<-date1-date0
@@ -135,18 +134,19 @@ for (tag in unique(pustules$tag))
             temp.days.16.22<-c(temp.days.16.22,new.temp.days.16.22)
             temp.days.7.30<-c(temp.days.7.30,new.temp.days.7.30)
             temp.days<-c(temp.days,new.temp.days)
-            mean.temp<-c(mean.temp,new.mean.temp)
             dew.point.days<-c(dew.point.days,new.dew.point.days)
-            mean.dew.point<-c(mean.dew.point,new.mean.dew.point)
             temp.dew.point.days<-c(temp.dew.point.days,new.temp.dew.point.days)
             temp.16.22.dew.point.days<-c(temp.16.22.dew.point.days,new.temp.16.22.dew.point.days)
             temp.7.30.dew.point.days<-c(temp.7.30.dew.point.days,new.temp.7.30.dew.point.days)
             
-            mean.wetnesss<-c(mean.wetnesss,new.mean.wetness)
+            wetness.days<-c(wetness.days,new.wetness.days)
+            temp.wetness.days<-c(temp.wetness.days,new.temp.wetness.days)
+            temp.16.22.wetness.days<-c(temp.16.22.wetness.days,new.temp.16.22.wetness.days)
+            temp.7.30.wetness.days<-c(temp.7.30.wetness.days,new.temp.7.30.wetness.days)
             tot.rains<-c(tot.rains,new.tot.rain)
-            mean.solars<-c(mean.solars,new.mean.solar)
-            mean.wind.speeds<-c(mean.wind.speeds,new.mean.wind.speed)
-            mean.gust.speeds<-c(mean.gust.speeds,new.mean.gust.speed)
+            solar.days<-c(solar.days,new.solar.days)
+            wind.speed.days<-c(wind.speed.days,new.wind.speed.days)
+            gust.speed.days<-c(gust.speed.days,new.gust.speed.days)
             
             
           } 
@@ -157,8 +157,10 @@ for (tag in unique(pustules$tag))
 }
 
 delta.pustules<-data.frame(tag=factor(tags),stem.iter=stem.iters,leaf.iter=leaf.iters,pustule.num=pustule.nums,area=start.vals,area.next=end.vals,time=days,
-                           temp.days=temp.days,temp.days.16.22=temp.days.16.22,temp.days.7.30=temp.days.7.30,temp.days=temp.days,mean.temp=mean.temp,dew.point.days=dew.point.days,mean.dew.point=mean.dew.point,temp.16.22.dew.point.days=temp.16.22.dew.point.days,temp.7.30.dew.point.days=temp.7.30.dew.point.days,temp.dew.point.days=temp.dew.point.days,
-                           mean.wetness=mean.wetnesss,tot.rain=tot.rains,mean.solar=mean.solars,mean.wind.speed=mean.wind.speeds,mean.gust.speed=mean.gust.speeds)
+                           temp.days=temp.days,temp.days.16.22=temp.days.16.22,temp.days.7.30=temp.days.7.30,temp.days=temp.days,
+                           dew.point.days=dew.point.days,temp.dew.point.days=temp.dew.point.days,temp.16.22.dew.point.days=temp.16.22.dew.point.days,temp.7.30.dew.point.days=temp.7.30.dew.point.days,
+                           wetness.days=wetness.days,temp.16.22.wetness.days=temp.16.22.wetness.days,temp.7.30.wetness.days=temp.7.30.wetness.days,
+                           tot.rain=tot.rains,solar.days=solar.days,wind.speed.days=wind.speed.days,gust.speed.days=gust.speed.days)
 
 # visualize data
 
