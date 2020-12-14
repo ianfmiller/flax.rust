@@ -1,8 +1,6 @@
 # constructing sets of predictor variables--offset, random effects not included
 ################################################################################################################################
 
-## no temp. subsetting
-
 ### construct all combinations of predictors
 predictors<-c("area","time",
                "temp.days","temp.days.16.22","temp.days.7.30",
