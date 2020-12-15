@@ -218,7 +218,7 @@ gam.model.set <- apply(pred.mat, 1, function(x) as.formula( paste0(paste(c("area
   
 names(model.set)<-seq(1,length(model.set),1)
 names(re.model.set)<-seq(1,length(re.model.set),1)
-#names(gam.model.set)<-seq(1,length(gam.model.set),1)
+names(gam.model.set)<-seq(1,length(gam.model.set),1)
 
 all.fit.models<-c()
 AIC.benchmark<-AIC(lm(area.next~offset(area)+area,data=delta.pustules))
@@ -243,6 +243,20 @@ for (i in 1:length(model.set))
 #  if(AIC.new.mod<=(AIC.benchmark)) {re.all.fit.models<-append(re.all.fit.models,list(new.mod))}
 #  pb$tick()
 #}
+
+## run to search for best model
+gam.all.fit.models<-c()
+#AIC.benchmark<-AIC(gam(area.next~offset(area)+s(area),data=delta.pustules))
+AIC.benchmark<-(-17515)
+pb <- progress_bar$new(total = length(gam.model.set),format = " fitting models [:bar] :percent eta: :eta")
+for (i in 1:length(gam.model.set))
+{
+  suppressMessages(new.mod<-gam(gam.model.set[[i]],data=delta.pustules))
+  AIC.new.mod<-AIC(new.mod)
+  if(AIC.new.mod<=(AIC.benchmark)) {gam.all.fit.models<-append(gam.all.fit.models,list(new.mod))}
+  pb$tick()
+}
+
 #gam.all.fit.models<-lapply(gam.model.set,function(x) gam(x,data=delta.pustules,method = "REML"))
 
 ## compare between models
@@ -319,12 +333,16 @@ curve(fixef(best.model)["(Intercept)"]+
       ,add=T,col=curve.col)
 
 ### gams
+## if all models fit
 #gam.AICs<-unlist(lapply(gam.all.fit.models,AIC))
 #delta.gam.AICs<-gam.AICs-min(gam.AICs)
 #gam.candidate.models<-unname(which(delta.gam.AICs<4))
 #gam.model.set[gam.candidate.models[order(delta.gam.AICs[gam.candidate.models])]] #models to consider--offset(diam.last) not shown
 #index<-1
 #best.model<-gam.all.fit.models[[order(gam.AICs)[index]]]
-#summary(best.model)
+
+##fitting just top model
+best.model<-gam(area.next~offset(area)+s(area)+s(temp.days)+s(temp.7.30.dew.point.days)+s(tot.rain)+s(solar.days)+s(wind.speed.days)+s(gust.speed.days),data=delta.pustules)
+summary(best.model)
 
 
