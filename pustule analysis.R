@@ -1,5 +1,6 @@
 library(mgcv)
 library(lme4)
+library(lmerTest)
 library(progress)
 
 source("prep.enviro.data.R")
@@ -214,24 +215,25 @@ model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offs
 
 re.model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors[x],"(1|tag)"),collapse=" + ")))
 
-gam.model.set <- apply(pred.mat, 1, function(x) as.formula( paste0(paste(c("area.next ~ offset(area",predictors[x]),collapse=") + s("),")")))
+gam.model.set <- apply(pred.mat, 1, function(x) as.formula( paste0(paste0(paste(c("area.next ~ offset(area",predictors[x]),collapse=") + s("),")")," + s(tag,bs='re')")))
   
 names(model.set)<-seq(1,length(model.set),1)
 names(re.model.set)<-seq(1,length(re.model.set),1)
 names(gam.model.set)<-seq(1,length(gam.model.set),1)
 
-all.fit.models<-c()
-AIC.benchmark<-AIC(lm(area.next~offset(area)+area,data=delta.pustules))
-pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
-for (i in 1:length(model.set))
-{
-  new.mod<-lm(model.set[[i]],data=delta.pustules)
-  AIC.new.mod<-AIC(new.mod)
-  if(AIC.new.mod<=(AIC.benchmark+10)) {all.fit.models<-append(all.fit.models,list(new.mod))}
-  pb$tick()
-}
+## run to search for best lm model
+#all.fit.models<-c()
+#AIC.benchmark<-AIC(lm(area.next~offset(area)+area,data=delta.pustules))
+#pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
+#for (i in 1:length(model.set))
+#{
+#  new.mod<-lm(model.set[[i]],data=delta.pustules)
+#  AIC.new.mod<-AIC(new.mod)
+#  if(AIC.new.mod<=(AIC.benchmark+10)) {all.fit.models<-append(all.fit.models,list(new.mod))}
+#  pb$tick()
+#}
 
-## run to search for best model
+## run to search for best lmer model
 #re.all.fit.models<-c()
 #AIC.benchmark<-AIC(lmer(area.next~offset(area)+area +(1|tag),data=delta.pustules))
 #AIC.benchmark<- -17395
@@ -244,31 +246,32 @@ for (i in 1:length(model.set))
 #  pb$tick()
 #}
 
-## run to search for best model
-gam.all.fit.models<-c()
+## run to search for best gam model
+#gam.all.fit.models<-c()
 #AIC.benchmark<-AIC(gam(area.next~offset(area)+s(area),data=delta.pustules))
-AIC.benchmark<-(-17515)
-pb <- progress_bar$new(total = length(gam.model.set),format = " fitting models [:bar] :percent eta: :eta")
-for (i in 1:length(gam.model.set))
-{
-  suppressMessages(new.mod<-gam(gam.model.set[[i]],data=delta.pustules))
-  AIC.new.mod<-AIC(new.mod)
-  if(AIC.new.mod<=(AIC.benchmark)) {gam.all.fit.models<-append(gam.all.fit.models,list(new.mod))}
-  pb$tick()
-}
+#AIC.benchmark<-(-17515)
+#pb <- progress_bar$new(total = length(gam.model.set),format = " fitting models [:bar] :percent eta: :eta")
+#for (i in 1:length(gam.model.set))
+#{
+#  suppressMessages(new.mod<-gam(gam.model.set[[i]],data=delta.pustules))
+#  AIC.new.mod<-AIC(new.mod)
+#  if(AIC.new.mod<=(AIC.benchmark)) {gam.all.fit.models<-append(gam.all.fit.models,list(new.mod))}
+#  pb$tick()
+#}
 
-#gam.all.fit.models<-lapply(gam.model.set,function(x) gam(x,data=delta.pustules,method = "REML"))
+#gam.all.fit.models<-lapply(gam.model.set,function(x) gam(x,data=delta.pustules,method = "ML"))
 
 ## compare between models
 
 ### lms
-AICs<-unlist(lapply(all.fit.models,AIC))
-delta.AICs<-AICs-min(AICs)
-candidate.models<-unname(which(delta.AICs<4))
+#AICs<-unlist(lapply(all.fit.models,AIC))
+#delta.AICs<-AICs-min(AICs)
+#candidate.models<-unname(which(delta.AICs<4))
 #model.set[candidate.models[order(AICs[candidate.models])]] #models to consider--offset(diam.last) not shown
-index<-2 #top two models have nearly identical AICs, #2 drops insignificant gust speed days predictor
-best.model<-all.fit.models[[order(AICs)[index]]]
-summary(best.model)
+#index<-2 #top two models have nearly identical AICs, #2 drops insignificant gust speed days predictor
+#best.lm.model<-all.fit.models[[order(AICs)[index]]]
+best.lm.model<-lm(area.next~offset(area)+area+time+temp.days.16.22+dew.point.days+temp.dew.point.days+wetness.days+temp.7.30.wetness.days+tot.rain+solar.days,data=delta.pustules)
+summary(best.lm.model)
 
 par(mfrow=c(1,1))
 plot(delta.pustules$area,delta.pustules$area.next-delta.pustules$area)
@@ -282,16 +285,16 @@ quant.tot.rain<-quantile(delta.pustules$tot.rain,.5)
 solar.days<-quantile(delta.pustules$solar.days,.5)
 
 curve.col<-"red"
-curve(best.model$coefficients["(Intercept)"]+
-      best.model$coefficients["area"]*x+
-      best.model$coefficients["time"]*quant.time+
-      best.model$coefficients["temp.days.16.22"]*quant.temp.days.16.22+
-      best.model$coefficients["dew.point.days"]*quant.dew.point.days+
-      best.model$coefficients["temp.dew.point.days"]*quant.temp.dew.point.days+
-      best.model$coefficients["wetness.days"]*quant.wetness.days+
-      best.model$coefficients["temp.7.30.wetness.days"]*quant.temp.7.30.wetness.days+
-      best.model$coefficients["tot.rain"]*quant.tot.rain+
-      best.model$coefficients["solar.days"]*solar.days
+curve(best.lm.model$coefficients["(Intercept)"]+
+      best.lm.model$coefficients["area"]*x+
+      best.lm.model$coefficients["time"]*quant.time+
+      best.lm.model$coefficients["temp.days.16.22"]*quant.temp.days.16.22+
+      best.lm.model$coefficients["dew.point.days"]*quant.dew.point.days+
+      best.lm.model$coefficients["temp.dew.point.days"]*quant.temp.dew.point.days+
+      best.lm.model$coefficients["wetness.days"]*quant.wetness.days+
+      best.lm.model$coefficients["temp.7.30.wetness.days"]*quant.temp.7.30.wetness.days+
+      best.lm.model$coefficients["tot.rain"]*quant.tot.rain+
+      best.lm.model$coefficients["solar.days"]*solar.days
       ,add=T,col=curve.col)
 
 
@@ -305,11 +308,11 @@ curve(best.model$coefficients["(Intercept)"]+
 #best.model<-re.all.fit.models[[order(re.AICs)[index]]]
 
 ##fitting just top model
-best.model<-lmer(re.model.set[[1824]],data=delta.pustules,REML=F)
-summary(best.model)
+best.lmer.model<-lmer(area.next~offset(area)+area+temp.days.16.22+dew.point.days+temp.dew.point.days+wetness.days+temp.7.30.wetness.days+tot.rain+wind.speed.days+gust.speed.days+(1|tag),data=delta.pustules)
+summary(best.lmer.model)
 
-par(mfrow=c(1,1))
-plot(delta.pustules$area,delta.pustules$area.next-delta.pustules$area)
+#par(mfrow=c(1,1))
+#plot(delta.pustules$area,delta.pustules$area.next-delta.pustules$area)
 quant.temp.days.16.22<-quantile(delta.pustules$temp.days.16.22,.5)
 quant.dew.point.days<-quantile(delta.pustules$dew.point.days,.5)
 quant.temp.dew.point.days<-quantile(delta.pustules$temp.dew.point.days,.5)
@@ -320,16 +323,16 @@ quant.wind.speed.days<-quantile(delta.pustules$wind.speed.days,.5)
 quant.gust.speed.days<-quantile(delta.pustules$gust.speed.days,.5)
 
 curve.col<-"blue"
-curve(fixef(best.model)["(Intercept)"]+
-        fixef(best.model)["area"]*x+
-        fixef(best.model)["temp.days.16.22"]*quant.temp.days.16.22+
-        fixef(best.model)["dew.point.days"]*quant.dew.point.days+
-        fixef(best.model)["temp.dew.point.days"]*quant.temp.dew.point.days+
-        fixef(best.model)["wetness.days"]*quant.wetness.days+
-        fixef(best.model)["temp.7.30.wetness.days"]*quant.temp.7.30.wetness.days+
-        fixef(best.model)["tot.rain"]*quant.tot.rain+
-        fixef(best.model)["wind.speed.days"]*quant.wind.speed.days+
-        fixef(best.model)["gust.speed.days"]*quant.gust.speed.days
+curve(fixef(best.lmer.model)["(Intercept)"]+
+        fixef(best.lmer.model)["area"]*x+
+        fixef(best.lmer.model)["temp.days.16.22"]*quant.temp.days.16.22+
+        fixef(best.lmer.model)["dew.point.days"]*quant.dew.point.days+
+        fixef(best.lmer.model)["temp.dew.point.days"]*quant.temp.dew.point.days+
+        fixef(best.lmer.model)["wetness.days"]*quant.wetness.days+
+        fixef(best.lmer.model)["temp.7.30.wetness.days"]*quant.temp.7.30.wetness.days+
+        fixef(best.lmer.model)["tot.rain"]*quant.tot.rain+
+        fixef(best.lmer.model)["wind.speed.days"]*quant.wind.speed.days+
+        fixef(best.lmer.model)["gust.speed.days"]*quant.gust.speed.days
       ,add=T,col=curve.col)
 
 ### gams
@@ -342,7 +345,7 @@ curve(fixef(best.model)["(Intercept)"]+
 #best.model<-gam.all.fit.models[[order(gam.AICs)[index]]]
 
 ##fitting just top model
-best.model<-gam(area.next~offset(area)+s(area)+s(temp.days)+s(temp.7.30.dew.point.days)+s(tot.rain)+s(solar.days)+s(wind.speed.days)+s(gust.speed.days),data=delta.pustules)
+best.gam.model<-gam(area.next~offset(area)+s(area)+s(temp.days)+s(temp.7.30.dew.point.days)+s(tot.rain)+s(solar.days)+s(wind.speed.days)+s(gust.speed.days),data=delta.pustules)
 summary(best.model)
 
 
