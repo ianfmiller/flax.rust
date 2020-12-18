@@ -215,11 +215,11 @@ model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offs
 
 re.model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors[x],"(1|tag)"),collapse=" + ")))
 
-gam.model.set <- apply(pred.mat, 1, function(x) as.formula( paste0(paste0(paste(c("area.next ~ offset(area",predictors[x]),collapse=") + s("),")")," + s(tag,bs='re')")))
+#gam.model.set <- apply(pred.mat, 1, function(x) as.formula( paste0(paste0(paste(c("area.next ~ offset(area",predictors[x]),collapse=") + s("),")")," + s(tag,bs='re')")))
   
 names(model.set)<-seq(1,length(model.set),1)
 names(re.model.set)<-seq(1,length(re.model.set),1)
-names(gam.model.set)<-seq(1,length(gam.model.set),1)
+#names(gam.model.set)<-seq(1,length(gam.model.set),1)
 
 ## run to search for best lm model
 #all.fit.models<-c()
@@ -247,17 +247,17 @@ names(gam.model.set)<-seq(1,length(gam.model.set),1)
 #}
 
 ## run to search for best gam model
-gam.all.fit.models<-c()
+#gam.all.fit.models<-c()
 #AIC.benchmark<-AIC(gam(area.next~offset(area)+s(area)+s(tag,bs="re"),data=delta.pustules,method="GCV.Cp"))
-AIC.benchmark<-(-17813)
-pb <- progress_bar$new(total = length(gam.model.set),format = " fitting models [:bar] :percent eta: :eta")
-for (i in 1:length(gam.model.set))
-{
-  suppressMessages(new.mod<-gam(gam.model.set[[i]],data=delta.pustules,method="GCV.Cp"))
-  AIC.new.mod<-AIC(new.mod)
-  if(AIC.new.mod<=(AIC.benchmark)) {gam.all.fit.models<-append(gam.all.fit.models,list(new.mod))}
-  pb$tick()
-}
+#AIC.benchmark<-(-17813)
+#pb <- progress_bar$new(total = length(gam.model.set),format = " fitting models [:bar] :percent eta: :eta")
+#for (i in 1:length(gam.model.set))
+#{
+#  suppressMessages(new.mod<-gam(gam.model.set[[i]],data=delta.pustules,method="GCV.Cp"))
+#  AIC.new.mod<-AIC(new.mod)
+#  if(AIC.new.mod<=(AIC.benchmark)) {gam.all.fit.models<-append(gam.all.fit.models,list(new.mod))}
+#  pb$tick()
+#}
 
 ## compare between models
 
@@ -335,7 +335,7 @@ curve(fixef(best.lmer.model)["(Intercept)"]+
 
 ### gams
 ## if all models fit
-gam.AICs<-unlist(lapply(gam.all.fit.models,AIC))
+#gam.AICs<-unlist(lapply(gam.all.fit.models,AIC))
 #delta.gam.AICs<-gam.AICs-min(gam.AICs)
 #gam.candidate.models<-unname(which(delta.gam.AICs<4))
 #gam.model.set[gam.candidate.models[order(delta.gam.AICs[gam.candidate.models])]] #models to consider--offset(diam.last) not shown
@@ -343,22 +343,22 @@ gam.AICs<-unlist(lapply(gam.all.fit.models,AIC))
 #best.model<-gam.all.fit.models[[order(gam.AICs)[index]]]
 
 ##fitting just top model
-best.gam.model<-gam(area.next~offset(area)+s(area)+s(temp.days)+s(temp.7.30.dew.point.days)+s(tot.rain)+s(solar.days)+s(wind.speed.days)+s(gust.speed.days)+s(tag,bs="re"),data=delta.pustules,method="GCV.Cp")
-summary(best.gam.model)
+#best.gam.model<-gam(area.next~offset(area)+s(area)+s(temp.days)+s(temp.7.30.dew.point.days)+s(tot.rain)+s(solar.days)+s(wind.speed.days)+s(gust.speed.days)+s(tag,bs="re"),data=delta.pustules,method="GCV.Cp")
+#summary(best.gam.model)
 
-pred.areas<-seq(0,.5,.001)
-new.preds<-c()
-quant.temp.days<-quantile(delta.pustules$temp.days,.5)
-quant.temp.7.30.dew.point.days<-quantile(delta.pustules$temp.7.30.dew.point.days,.5)
-quant.tot.rain<-quantile(delta.pustules$tot.rain,.5)
-quant.solar.days<-quantile(delta.pustules$solar.days,.5)
-quant.wind.speed.days<-quantile(delta.pustules$wind.speed.days,.5)
-quant.gust.speed.days<-quantile(delta.pustules$gust.speed.days,.5)
-for(i in 1:length(pred.areas))
-{
-  new.preds<-c(new.preds,predict(best.gam.model,
-                                 newdata = data.frame(area=pred.areas[i],temp.days=quant.temp.days,temp.7.30.dew.point.days=quant.temp.7.30.dew.point.days,tot.rain=quant.tot.rain,solar.days=quant.solar.days,wind.speed.days=quant.wind.speed.days,gust.speed.days=quant.gust.speed.days),   
-                                 type="response"))
-}
-points(pred.areas,new.preds-pred.areas,type="l",col="orange")
+#pred.areas<-seq(0,.5,.001)
+#new.preds<-c()
+#quant.temp.days<-quantile(delta.pustules$temp.days,.5)
+#quant.temp.7.30.dew.point.days<-quantile(delta.pustules$temp.7.30.dew.point.days,.5)
+#quant.tot.rain<-quantile(delta.pustules$tot.rain,.5)
+#quant.solar.days<-quantile(delta.pustules$solar.days,.5)
+#quant.wind.speed.days<-quantile(delta.pustules$wind.speed.days,.5)
+#quant.gust.speed.days<-quantile(delta.pustules$gust.speed.days,.5)
+#for(i in 1:length(pred.areas))
+#{
+#  new.preds<-c(new.preds,predict(best.gam.model,
+#                                 newdata = data.frame(area=pred.areas[i],temp.days=quant.temp.days,temp.7.30.dew.point.days=quant.temp.7.30.dew.point.days,tot.rain=quant.tot.rain,solar.days=quant.solar.days,wind.speed.days=quant.wind.speed.days,gust.speed.days=quant.gust.speed.days),   
+#                                 type="response"))
+#}
+#points(pred.areas,new.preds-pred.areas,type="l",col="orange")
 
