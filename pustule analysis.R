@@ -12,7 +12,7 @@ pustules<-read.csv("~/Documents/GitHub/flax.rust/data/pustule measurements.csv")
 
 ## add in area
 area<-pi*(pustules$max.diam..mm./4)*(pustules$min.diam..mm./4)
-pustules$date<-as.Date(pustules$date,tryFormats = "%m/%d/%y")
+pustules$date<-as.POSIXct(pustules$date,tryFormats = "%m/%d/%y %H:%M",tz="UTC")
 pustules$area<-area
 
 ## clean data
@@ -47,7 +47,7 @@ tot.rains<-c()
 solar.days<-c()
 wind.speed.days<-c()
 gust.speed.days<-c()
-
+measurer.ids<-c()
 
 
 for (tag in unique(pustules$tag))
@@ -121,6 +121,7 @@ for (tag in unique(pustules$tag))
             start.val<-sub.pustules4[i,"area"]
             end.val<-sub.pustules4[i+1,"area"]
             delta.days<-date1-date0
+            measurer.id<-sub.pustules4[i,"who.entered"] #same person did all measurements for each pustule
             
             #store values
             tags<-c(tags,tag)
@@ -149,6 +150,7 @@ for (tag in unique(pustules$tag))
             wind.speed.days<-c(wind.speed.days,new.wind.speed.days)
             gust.speed.days<-c(gust.speed.days,new.gust.speed.days)
             
+            measurer.ids<-c(measurer.ids,measurer.id)
             
           } 
         }
@@ -161,7 +163,7 @@ delta.pustules<-data.frame(tag=factor(tags),stem.iter=stem.iters,leaf.iter=leaf.
                            temp.days=temp.days,temp.days.16.22=temp.days.16.22,temp.days.7.30=temp.days.7.30,
                            dew.point.days=dew.point.days,temp.dew.point.days=temp.dew.point.days,temp.16.22.dew.point.days=temp.16.22.dew.point.days,temp.7.30.dew.point.days=temp.7.30.dew.point.days,
                            wetness.days=wetness.days,temp.wetness.days=temp.wetness.days,temp.16.22.wetness.days=temp.16.22.wetness.days,temp.7.30.wetness.days=temp.7.30.wetness.days,
-                           tot.rain=tot.rains,solar.days=solar.days,wind.speed.days=wind.speed.days,gust.speed.days=gust.speed.days)
+                           tot.rain=tot.rains,solar.days=solar.days,wind.speed.days=wind.speed.days,gust.speed.days=gust.speed.days,who.measured=measurer.ids)
 
 # visualize data
 
@@ -222,7 +224,7 @@ names(re.model.set)<-seq(1,length(re.model.set),1)
 #names(gam.model.set)<-seq(1,length(gam.model.set),1)
 
 ## run to search for best lm model
-#all.fit.models<-c()
+#all.fit.models<-list()
 #AIC.benchmark<-AIC(lm(area.next~offset(area)+area,data=delta.pustules))
 #pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
 #for (i in 1:length(model.set))
@@ -234,17 +236,17 @@ names(re.model.set)<-seq(1,length(re.model.set),1)
 #}
 
 ## run to search for best lmer model
-#re.all.fit.models<-c()
-#AIC.benchmark<-AIC(lmer(area.next~offset(area)+area +(1|tag),data=delta.pustules))
-#AIC.benchmark<- -17395
-#pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
-#for (i in 1:length(re.model.set))
-#{
-#  suppressMessages(new.mod<-lmer(re.model.set[[i]],data=delta.pustules,REML=F))
-#  AIC.new.mod<-AIC(new.mod)
-#  if(AIC.new.mod<=(AIC.benchmark)) {re.all.fit.models<-append(re.all.fit.models,list(new.mod))}
-#  pb$tick()
-#}
+re.all.fit.models<-c()
+AIC.benchmark<-AIC(lmer(area.next~offset(area)+area +(1|tag),data=delta.pustules))
+AIC.benchmark<- -17395
+pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
+for (i in 1:length(re.model.set))
+{
+  suppressMessages(new.mod<-lmer(re.model.set[[i]],data=delta.pustules,REML=F))
+  AIC.new.mod<-AIC(new.mod)
+  if(AIC.new.mod<=(AIC.benchmark)) {re.all.fit.models<-append(re.all.fit.models,list(new.mod))}
+  pb$tick()
+}
 
 ## run to search for best gam model
 #gam.all.fit.models<-c()
@@ -266,33 +268,33 @@ names(re.model.set)<-seq(1,length(re.model.set),1)
 #delta.AICs<-AICs-min(AICs)
 #candidate.models<-unname(which(delta.AICs<4))
 #model.set[candidate.models[order(AICs[candidate.models])]] #models to consider--offset(diam.last) not shown
-#index<-2 #top two models have nearly identical AICs, #2 drops insignificant gust speed days predictor
+#index<-1 #top two models have nearly identical AICs, #2 drops insignificant wind speed days predictor
 #best.lm.model<-all.fit.models[[order(AICs)[index]]]
-best.lm.model<-lm(area.next~offset(area)+area+time+temp.days.16.22+dew.point.days+temp.dew.point.days+wetness.days+temp.7.30.wetness.days+tot.rain+solar.days,data=delta.pustules)
+best.lm.model<-lm(area.next~offset(area)+area+time+temp.days.7.30+dew.point.days+temp.7.30.dew.point.days+wetness.days+temp.wetness.days+wind.speed.days+gust.speed.days,data=delta.pustules)
 summary(best.lm.model)
 
 par(mfrow=c(1,1))
 plot(delta.pustules$area,delta.pustules$area.next-delta.pustules$area)
 quant.time<-quantile(delta.pustules$time,.5)
-quant.temp.days.16.22<-quantile(delta.pustules$temp.days.16.22,.5)
+quant.temp.days.7.30<-quantile(delta.pustules$temp.days.7.30,.5)
 quant.dew.point.days<-quantile(delta.pustules$dew.point.days,.5)
-quant.temp.dew.point.days<-quantile(delta.pustules$temp.dew.point.days,.5)
+quant.temp.7.30.dew.point.days<-quantile(delta.pustules$temp.7.30.dew.point.days,.5)
 quant.wetness.days<-quantile(delta.pustules$wetness.days,.5)
-quant.temp.7.30.wetness.days<-quantile(delta.pustules$temp.7.30.wetness.days,.5)
-quant.tot.rain<-quantile(delta.pustules$tot.rain,.5)
-solar.days<-quantile(delta.pustules$solar.days,.5)
+quant.temp.wetness.days<-quantile(delta.pustules$temp.wetness.days,.5)
+quant.wind.speed.days<-quantile(delta.pustules$wind.speed.days,.5)
+quant.gust.speed.days<-quantile(delta.pustules$gust.speed.days,.5)
 
 curve.col<-"red"
 curve(best.lm.model$coefficients["(Intercept)"]+
       best.lm.model$coefficients["area"]*x+
       best.lm.model$coefficients["time"]*quant.time+
-      best.lm.model$coefficients["temp.days.16.22"]*quant.temp.days.16.22+
+      best.lm.model$coefficients["temp.days.7.30"]*quant.temp.days.7.30+
       best.lm.model$coefficients["dew.point.days"]*quant.dew.point.days+
-      best.lm.model$coefficients["temp.dew.point.days"]*quant.temp.dew.point.days+
+      best.lm.model$coefficients["temp.7.30.dew.point.days"]*quant.temp.7.30.dew.point.days+
       best.lm.model$coefficients["wetness.days"]*quant.wetness.days+
-      best.lm.model$coefficients["temp.7.30.wetness.days"]*quant.temp.7.30.wetness.days+
-      best.lm.model$coefficients["tot.rain"]*quant.tot.rain+
-      best.lm.model$coefficients["solar.days"]*solar.days
+      best.lm.model$coefficients["temp.wetness.days"]*quant.temp.wetness.days+
+      best.lm.model$coefficients["wind.speed.days"]*quant.wind.speed.days+
+      best.lm.model$coefficients["gust.speed.days"]*quant.gust.speed.days
       ,add=T,col=curve.col)
 
 
