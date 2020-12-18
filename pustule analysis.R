@@ -1,5 +1,6 @@
 library(mgcv)
 library(lme4)
+library(lmerTest)
 library(progress)
 
 source("prep.enviro.data.R")
@@ -18,6 +19,9 @@ pustules$area<-area
 pustules<-pustules[which(pustules$pustule.ID.confidence=="Yes"),]
 pustules<-pustules[which(pustules$area>0),]
 
+## cut out incomplete records
+pustules<-pustules[-intersect(which(pustules$site=="HM"),which(pustules$date>"2020-07-10 00:00:00 UTC")),]
+
 ## make new data object for change in pustule size
 temp.rh.sub.func<-function(x,lower.bound,upper.bound) {out<-subset(x,temp.c>=lower.bound); out<-subset(out,temp.c<=upper.bound); out}
 
@@ -28,24 +32,25 @@ pustule.nums<-c()
 start.vals<-c()
 end.vals<-c()
 days<-c()
+temp.days<-c()
 temp.days.16.22<-c()
 temp.days.7.30<-c()
-temp.days<-c()
-mean.temp<-c()
 dew.point.days<-c()
-mean.dew.point<-c()
 temp.dew.point.days<-c()
 temp.16.22.dew.point.days<-c()
 temp.7.30.dew.point.days<-c()
-mean.wetnesss<-c()
+wetness.days<-c()
+temp.wetness.days<-c()
+temp.16.22.wetness.days<-c()
+temp.7.30.wetness.days<-c()
 tot.rains<-c()
-mean.solars<-c()
-mean.wind.speeds<-c()
-mean.gust.speeds<-c()
+solar.days<-c()
+wind.speed.days<-c()
+gust.speed.days<-c()
 
 
 
-for (tag in unique(pustules$tag)) #916, 917, 920
+for (tag in unique(pustules$tag))
 {
   sub.pustules1<-pustules[which(pustules$tag==tag),]
   
@@ -89,26 +94,28 @@ for (tag in unique(pustules$tag)) #916, 917, 920
             weath.sub<-subset(all.weath,site==site)
             weath.sub<-subset(weath.sub,date<=date1) #pull out relevant data
             weath.sub<-subset(weath.sub,date>=date0) #pull out relevant data
+            weath.sub<-cbind(weath.sub,interval.length=c(diff(as.numeric(weath.sub$date))/(60*60*24),NA))
             
             #calculate environmental variable metrics
-            new.temp.days.16.22<-sum(temp.rh.sub.func(temp.rh.sub,16,22)$temp.c*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T) #temperature days for temp between 16 and 22 celsius
-            new.temp.days.7.30<-sum(temp.rh.sub.func(temp.rh.sub,7,30)$temp.c*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T) #temperature days for temp between 7 and 30 celsius
             new.temp.days<-sum(temp.rh.sub$temp.c*temp.rh.sub$interval.length,na.rm = T) #temperature days
-            new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #temperature days
-            new.dew.point.days<-mean(temp.rh.sub$dew.pt.c,na.rm = T) #Dew point days
-            new.mean.dew.point<-mean(temp.rh.sub$dew.pt.c,na.rm = T) #temperature days
+            new.temp.days.16.22<-sum(1*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T) #time (in days) during which temp between 16 and 22 celsius
+            new.temp.days.7.30<-sum(1*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T) #time (in days) during which temp between 7 and 30 celsius
+            new.dew.point.days<-sum(temp.rh.sub$dew.pt.c*temp.rh.sub$interval.length,na.rm = T) #Dew point days
 
+            #calculate weather metrics
+            new.wetness.days<-sum(weath.sub$wetness*weath.sub$interval.length,na.rm = T)
+            new.tot.rain<-sum(weath.sub$rain,na.rm=T)
+            new.solar.days<-sum(weath.sub$solar.radiation*weath.sub$interval.length,na.rm = T)
+            new.wind.speed.days<-sum(weath.sub$wind.speed*weath.sub$interval.length,na.rm = T)
+            new.gust.speed.days<-sum(weath.sub$wind.direction*weath.sub$interval.length,na.rm = T)
+            
             #calculate joint environmental variable metrics--accounts for temporal co-occurence of environmental variables
             new.temp.dew.point.days<-sum(temp.rh.sub$temp.c*temp.rh.sub$dew.pt.c*temp.rh.sub$interval.length,na.rm = T)
-            new.temp.16.22.dew.point.days<-sum(temp.rh.sub.func(temp.rh.sub,16,22)$temp.c*temp.rh.sub.func(temp.rh.sub,16,22)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T)
-            new.temp.7.30.dew.point.days<-sum(temp.rh.sub.func(temp.rh.sub,7,30)$temp.c*temp.rh.sub.func(temp.rh.sub,7,30)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T)
-            
-            #calculate weather metrics
-            new.mean.wetness<-mean(weath.sub$wetness)
-            new.tot.rain<-sum(weath.sub$rain)
-            new.mean.solar<-mean(weath.sub$solar.radiation)
-            new.mean.wind.speed<-mean(weath.sub$wind.speed)
-            new.mean.gust.speed<-mean(weath.sub$gust.speed)
+            new.temp.16.22.dew.point.days<-sum(1*temp.rh.sub.func(temp.rh.sub,16,22)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T)
+            new.temp.7.30.dew.point.days<-sum(1*temp.rh.sub.func(temp.rh.sub,7,30)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T)
+            new.temp.wetness.days<-sum(weath.sub$temp*weath.sub$wetness*weath.sub$interval.length,na.rm = T)
+            new.temp.16.22.wetness.days<-sum(weath.sub$temp.16.22*weath.sub$wetness*weath.sub$interval.length,na.rm = T)
+            new.temp.7.30.wetness.days<-sum(weath.sub$temp.7.30*weath.sub$wetness*weath.sub$interval.length,na.rm = T)
             
             #pull out core predictors
             start.val<-sub.pustules4[i,"area"]
@@ -128,18 +135,19 @@ for (tag in unique(pustules$tag)) #916, 917, 920
             temp.days.16.22<-c(temp.days.16.22,new.temp.days.16.22)
             temp.days.7.30<-c(temp.days.7.30,new.temp.days.7.30)
             temp.days<-c(temp.days,new.temp.days)
-            mean.temp<-c(mean.temp,new.mean.temp)
             dew.point.days<-c(dew.point.days,new.dew.point.days)
-            mean.dew.point<-c(mean.dew.point,new.mean.dew.point)
             temp.dew.point.days<-c(temp.dew.point.days,new.temp.dew.point.days)
             temp.16.22.dew.point.days<-c(temp.16.22.dew.point.days,new.temp.16.22.dew.point.days)
             temp.7.30.dew.point.days<-c(temp.7.30.dew.point.days,new.temp.7.30.dew.point.days)
             
-            mean.wetnesss<-c(mean.wetnesss,new.mean.wetness)
+            wetness.days<-c(wetness.days,new.wetness.days)
+            temp.wetness.days<-c(temp.wetness.days,new.temp.wetness.days)
+            temp.16.22.wetness.days<-c(temp.16.22.wetness.days,new.temp.16.22.wetness.days)
+            temp.7.30.wetness.days<-c(temp.7.30.wetness.days,new.temp.7.30.wetness.days)
             tot.rains<-c(tot.rains,new.tot.rain)
-            mean.solars<-c(mean.solars,new.mean.solar)
-            mean.wind.speeds<-c(mean.wind.speeds,new.mean.wind.speed)
-            mean.gust.speeds<-c(mean.gust.speeds,new.mean.gust.speed)
+            solar.days<-c(solar.days,new.solar.days)
+            wind.speed.days<-c(wind.speed.days,new.wind.speed.days)
+            gust.speed.days<-c(gust.speed.days,new.gust.speed.days)
             
             
           } 
@@ -150,8 +158,10 @@ for (tag in unique(pustules$tag)) #916, 917, 920
 }
 
 delta.pustules<-data.frame(tag=factor(tags),stem.iter=stem.iters,leaf.iter=leaf.iters,pustule.num=pustule.nums,area=start.vals,area.next=end.vals,time=days,
-                           temp.days=temp.days,temp.days.16.22=temp.days.16.22,temp.days.7.30=temp.days.7.30,temp.days=temp.days,mean.temp=mean.temp,dew.point.days=dew.point.days,mean.dew.point=mean.dew.point,temp.16.22.dew.point.days=temp.16.22.dew.point.days,temp.7.30.dew.point.days=temp.7.30.dew.point.days,temp.dew.point.days=temp.dew.point.days,
-                           mean.wetness=mean.wetnesss,tot.rain=tot.rains,mean.solar=mean.solars,mean.wind.speed=mean.wind.speeds,mean.gust.speed=mean.gust.speeds)
+                           temp.days=temp.days,temp.days.16.22=temp.days.16.22,temp.days.7.30=temp.days.7.30,
+                           dew.point.days=dew.point.days,temp.dew.point.days=temp.dew.point.days,temp.16.22.dew.point.days=temp.16.22.dew.point.days,temp.7.30.dew.point.days=temp.7.30.dew.point.days,
+                           wetness.days=wetness.days,temp.wetness.days=temp.wetness.days,temp.16.22.wetness.days=temp.16.22.wetness.days,temp.7.30.wetness.days=temp.7.30.wetness.days,
+                           tot.rain=tot.rains,solar.days=solar.days,wind.speed.days=wind.speed.days,gust.speed.days=gust.speed.days)
 
 # visualize data
 
@@ -201,114 +211,154 @@ abline(0,1)
 source("model.set.creation.R")
 
 ### create all sets of models
-model.set1 <-apply(pred.mat1, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors1[x]),collapse=" + ")))
-model.set2 <-apply(pred.mat2, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors2[x]),collapse=" + ")))
-model.set3 <-apply(pred.mat3, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors3[x]),collapse=" + ")))
-model.set<-append(append(model.set1,model.set2),model.set3)
+model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors[x]),collapse=" + ")))
 
-re.model.set1 <-apply(pred.mat1, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors1[x],"(1|tag)"),collapse=" + ")))
-re.model.set2 <-apply(pred.mat2, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors1[x],"(1|tag)"),collapse=" + ")))
-re.model.set3 <-apply(pred.mat3, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors1[x],"(1|tag)"),collapse=" + ")))
-re.model.set<-append(append(re.model.set1,re.model.set2),re.model.set3)
-#gam.model.set <- apply(pred.mat, 1, function(x) as.formula( paste0(paste(c("area.next ~ offset(area",predictors[x]),collapse=") + s("),")")))
+re.model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors[x],"(1|tag)"),collapse=" + ")))
+
+#gam.model.set <- apply(pred.mat, 1, function(x) as.formula( paste0(paste0(paste(c("area.next ~ offset(area",predictors[x]),collapse=") + s("),")")," + s(tag,bs='re')")))
   
 names(model.set)<-seq(1,length(model.set),1)
 names(re.model.set)<-seq(1,length(re.model.set),1)
 #names(gam.model.set)<-seq(1,length(gam.model.set),1)
 
-#all.fit.models<-lapply(model.set,function(x) lm(x,data=delta.pustules))
-all.fit.models<-c()
-AIC.benchmark<-AIC(lm(area.next~offset(area)+area,data=delta.pustules))
-pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
-for (i in 1:length(model.set))
-{
-  new.mod<-lm(model.set[[i]],data=delta.pustules)
-  AIC.new.mod<-AIC(new.mod)
-  if(AIC.new.mod<=(AIC.benchmark+10)) {all.fit.models<-append(all.fit.models,list(new.mod))}
-  pb$tick()
-}
+## run to search for best lm model
+#all.fit.models<-c()
+#AIC.benchmark<-AIC(lm(area.next~offset(area)+area,data=delta.pustules))
+#pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
+#for (i in 1:length(model.set))
+#{
+#  new.mod<-lm(model.set[[i]],data=delta.pustules)
+#  AIC.new.mod<-AIC(new.mod)
+#  if(AIC.new.mod<=(AIC.benchmark+10)) {all.fit.models<-append(all.fit.models,list(new.mod))}
+#  pb$tick()
+#}
 
-re.all.fit.models<-c()
-AIC.benchmark<-AIC(lmer(area.next~offset(area)+area +(1|tag),data=delta.pustules))
-pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
-for (i in 1:length(re.model.set))
-{
-  suppressMessages(new.mod<-lmer(re.model.set[[i]],data=delta.pustules,REML=F))
-  AIC.new.mod<-AIC(new.mod)
-  if(AIC.new.mod<=(AIC.benchmark+10)) {re.all.fit.models<-append(re.all.fit.models,list(new.mod))}
-  pb$tick()
-}
-#gam.all.fit.models<-lapply(gam.model.set,function(x) gam(x,data=delta.pustules,method = "REML"))
+## run to search for best lmer model
+#re.all.fit.models<-c()
+#AIC.benchmark<-AIC(lmer(area.next~offset(area)+area +(1|tag),data=delta.pustules))
+#AIC.benchmark<- -17395
+#pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
+#for (i in 1:length(re.model.set))
+#{
+#  suppressMessages(new.mod<-lmer(re.model.set[[i]],data=delta.pustules,REML=F))
+#  AIC.new.mod<-AIC(new.mod)
+#  if(AIC.new.mod<=(AIC.benchmark)) {re.all.fit.models<-append(re.all.fit.models,list(new.mod))}
+#  pb$tick()
+#}
+
+## run to search for best gam model
+#gam.all.fit.models<-c()
+#AIC.benchmark<-AIC(gam(area.next~offset(area)+s(area)+s(tag,bs="re"),data=delta.pustules,method="GCV.Cp"))
+#AIC.benchmark<-(-17813)
+#pb <- progress_bar$new(total = length(gam.model.set),format = " fitting models [:bar] :percent eta: :eta")
+#for (i in 1:length(gam.model.set))
+#{
+#  suppressMessages(new.mod<-gam(gam.model.set[[i]],data=delta.pustules,method="GCV.Cp"))
+#  AIC.new.mod<-AIC(new.mod)
+#  if(AIC.new.mod<=(AIC.benchmark)) {gam.all.fit.models<-append(gam.all.fit.models,list(new.mod))}
+#  pb$tick()
+#}
 
 ## compare between models
 
 ### lms
-AICs<-unlist(lapply(all.fit.models,AIC))
-delta.AICs<-AICs-min(AICs)
-candidate.models<-unname(which(delta.AICs<4))
+#AICs<-unlist(lapply(all.fit.models,AIC))
+#delta.AICs<-AICs-min(AICs)
+#candidate.models<-unname(which(delta.AICs<4))
 #model.set[candidate.models[order(AICs[candidate.models])]] #models to consider--offset(diam.last) not shown
-index<-1
-best.model<-all.fit.models[[order(AICs)[index]]]
-summary(best.model)
+#index<-2 #top two models have nearly identical AICs, #2 drops insignificant gust speed days predictor
+#best.lm.model<-all.fit.models[[order(AICs)[index]]]
+best.lm.model<-lm(area.next~offset(area)+area+time+temp.days.16.22+dew.point.days+temp.dew.point.days+wetness.days+temp.7.30.wetness.days+tot.rain+solar.days,data=delta.pustules)
+summary(best.lm.model)
 
 par(mfrow=c(1,1))
 plot(delta.pustules$area,delta.pustules$area.next-delta.pustules$area)
 quant.time<-quantile(delta.pustules$time,.5)
-quant.mean.temp<-quantile(delta.pustules$mean.temp,.25)
-quant.mean.dew.point<-quantile(delta.pustules$mean.dew.point,.25)
-quant.wetness<-quantile(delta.pustules$mean.wetness,.5)
+quant.temp.days.16.22<-quantile(delta.pustules$temp.days.16.22,.5)
+quant.dew.point.days<-quantile(delta.pustules$dew.point.days,.5)
+quant.temp.dew.point.days<-quantile(delta.pustules$temp.dew.point.days,.5)
+quant.wetness.days<-quantile(delta.pustules$wetness.days,.5)
+quant.temp.7.30.wetness.days<-quantile(delta.pustules$temp.7.30.wetness.days,.5)
+quant.tot.rain<-quantile(delta.pustules$tot.rain,.5)
+solar.days<-quantile(delta.pustules$solar.days,.5)
+
 curve.col<-"red"
-curve(best.model$coefficients["(Intercept)"]+
-      best.model$coefficients["area"]*x+
-      best.model$coefficients["time"]*quant.time+
-      best.model$coefficients["mean.temp"]*quant.mean.temp+
-      best.model$coefficients["mean.dew.point"]*quant.mean.dew.point+
-      best.model$coefficients["mean.wetness"]*quant.wetness+
-      best.model$coefficients["time:mean.temp"]*quant.mean.temp*quant.time+
-      best.model$coefficients["time:mean.wetness"]*quant.wetness*quant.time+
-      best.model$coefficients["mean.temp:mean.dew.point"]*quant.mean.temp*quant.mean.dew.point
+curve(best.lm.model$coefficients["(Intercept)"]+
+      best.lm.model$coefficients["area"]*x+
+      best.lm.model$coefficients["time"]*quant.time+
+      best.lm.model$coefficients["temp.days.16.22"]*quant.temp.days.16.22+
+      best.lm.model$coefficients["dew.point.days"]*quant.dew.point.days+
+      best.lm.model$coefficients["temp.dew.point.days"]*quant.temp.dew.point.days+
+      best.lm.model$coefficients["wetness.days"]*quant.wetness.days+
+      best.lm.model$coefficients["temp.7.30.wetness.days"]*quant.temp.7.30.wetness.days+
+      best.lm.model$coefficients["tot.rain"]*quant.tot.rain+
+      best.lm.model$coefficients["solar.days"]*solar.days
       ,add=T,col=curve.col)
 
 
 ### lmms
-re.AICs<-unlist(lapply(re.all.fit.models,AIC))
-delta.re.AICs<-re.AICs-min(re.AICs)
-re.candidate.models<-unname(which(delta.re.AICs<4))
+## if all models fit
+#re.AICs<-unlist(lapply(re.all.fit.models,AIC))
+#delta.re.AICs<-re.AICs-min(re.AICs)
+#re.candidate.models<-unname(which(delta.re.AICs<4))
 #re.model.set[re.candidate.models[order(re.AICs[re.candidate.models])]] #models to consider--offset(diam.last) not shown
-index<-1
-best.model<-re.all.fit.models[[order(re.AICs)[index]]]
-summary(best.model)
+#index<-1
+#best.model<-re.all.fit.models[[order(re.AICs)[index]]]
 
-par(mfrow=c(1,1))
-plot(delta.pustules$area,delta.pustules$area.next-delta.pustules$area)
-quant.time<-quantile(delta.pustules$time,.5)
-quant.mean.temp<-quantile(delta.pustules$mean.temp,.5)
-quant.mean.dew.point<-quantile(delta.pustules$mean.dew.point,.5)
-quant.wetness<-quantile(delta.pustules$mean.wetness,.5)
-quant.wind.speed<-quantile(delta.pustules$mean.wind.speed,.5)
+##fitting just top model
+best.lmer.model<-lmer(area.next~offset(area)+area+temp.days.16.22+dew.point.days+temp.dew.point.days+wetness.days+temp.7.30.wetness.days+tot.rain+wind.speed.days+gust.speed.days+(1|tag),data=delta.pustules)
+summary(best.lmer.model)
+
+#par(mfrow=c(1,1))
+#plot(delta.pustules$area,delta.pustules$area.next-delta.pustules$area)
+quant.temp.days.16.22<-quantile(delta.pustules$temp.days.16.22,.5)
+quant.dew.point.days<-quantile(delta.pustules$dew.point.days,.5)
+quant.temp.dew.point.days<-quantile(delta.pustules$temp.dew.point.days,.5)
+quant.wetness.days<-quantile(delta.pustules$wetness.days,.5)
+quant.temp.7.30.wetness.days<-quantile(delta.pustules$temp.7.30.wetness.days,.5)
+quant.tot.rain<-quantile(delta.pustules$tot.rain,.5)
+quant.wind.speed.days<-quantile(delta.pustules$wind.speed.days,.5)
+quant.gust.speed.days<-quantile(delta.pustules$gust.speed.days,.5)
 
 curve.col<-"blue"
-curve(fixef(best.model)["(Intercept)"]+
-        fixef(best.model)["area"]*x+
-        fixef(best.model)["time"]*quant.time+
-        fixef(best.model)["mean.temp"]*quant.mean.temp+
-        fixef(best.model)["mean.dew.point"]*quant.mean.dew.point+
-        fixef(best.model)["mean.wetness"]*quant.wetness+
-        fixef(best.model)["mean.wind.speed"]*quant.wind.speed+
-        fixef(best.model)["time:mean.temp"]*quant.time*quant.mean.temp+
-        fixef(best.model)["time:mean.dew.point"]*quant.time*quant.mean.dew.point+
-        fixef(best.model)["time:mean.wind.speed"]*quant.time*quant.wind.speed+
-        fixef(best.model)["mean.temp:mean.dew.point"]*quant.mean.temp*quant.mean.dew.point+
-        fixef(best.model)["time:mean.temp:mean.dew.point"]*quant.time*quant.mean.temp*quant.mean.dew.point
+curve(fixef(best.lmer.model)["(Intercept)"]+
+        fixef(best.lmer.model)["area"]*x+
+        fixef(best.lmer.model)["temp.days.16.22"]*quant.temp.days.16.22+
+        fixef(best.lmer.model)["dew.point.days"]*quant.dew.point.days+
+        fixef(best.lmer.model)["temp.dew.point.days"]*quant.temp.dew.point.days+
+        fixef(best.lmer.model)["wetness.days"]*quant.wetness.days+
+        fixef(best.lmer.model)["temp.7.30.wetness.days"]*quant.temp.7.30.wetness.days+
+        fixef(best.lmer.model)["tot.rain"]*quant.tot.rain+
+        fixef(best.lmer.model)["wind.speed.days"]*quant.wind.speed.days+
+        fixef(best.lmer.model)["gust.speed.days"]*quant.gust.speed.days
       ,add=T,col=curve.col)
 
 ### gams
+## if all models fit
 #gam.AICs<-unlist(lapply(gam.all.fit.models,AIC))
 #delta.gam.AICs<-gam.AICs-min(gam.AICs)
 #gam.candidate.models<-unname(which(delta.gam.AICs<4))
 #gam.model.set[gam.candidate.models[order(delta.gam.AICs[gam.candidate.models])]] #models to consider--offset(diam.last) not shown
 #index<-1
 #best.model<-gam.all.fit.models[[order(gam.AICs)[index]]]
-#summary(best.model)
 
+##fitting just top model
+#best.gam.model<-gam(area.next~offset(area)+s(area)+s(temp.days)+s(temp.7.30.dew.point.days)+s(tot.rain)+s(solar.days)+s(wind.speed.days)+s(gust.speed.days)+s(tag,bs="re"),data=delta.pustules,method="GCV.Cp")
+#summary(best.gam.model)
+
+#pred.areas<-seq(0,.5,.001)
+#new.preds<-c()
+#quant.temp.days<-quantile(delta.pustules$temp.days,.5)
+#quant.temp.7.30.dew.point.days<-quantile(delta.pustules$temp.7.30.dew.point.days,.5)
+#quant.tot.rain<-quantile(delta.pustules$tot.rain,.5)
+#quant.solar.days<-quantile(delta.pustules$solar.days,.5)
+#quant.wind.speed.days<-quantile(delta.pustules$wind.speed.days,.5)
+#quant.gust.speed.days<-quantile(delta.pustules$gust.speed.days,.5)
+#for(i in 1:length(pred.areas))
+#{
+#  new.preds<-c(new.preds,predict(best.gam.model,
+#                                 newdata = data.frame(area=pred.areas[i],temp.days=quant.temp.days,temp.7.30.dew.point.days=quant.temp.7.30.dew.point.days,tot.rain=quant.tot.rain,solar.days=quant.solar.days,wind.speed.days=quant.wind.speed.days,gust.speed.days=quant.gust.speed.days),   
+#                                 type="response"))
+#}
+#points(pred.areas,new.preds-pred.areas,type="l",col="orange")
 
