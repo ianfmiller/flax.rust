@@ -215,7 +215,7 @@ source("model.set.creation.R")
 ### create all sets of models
 model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors[x]),collapse=" + ")))
 
-re.model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors[x],"(1|tag)"),collapse=" + ")))
+re.model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors[x],"(1|tag) + (1|who.measured)"),collapse=" + ")))
 
 #gam.model.set <- apply(pred.mat, 1, function(x) as.formula( paste0(paste0(paste(c("area.next ~ offset(area",predictors[x]),collapse=") + s("),")")," + s(tag,bs='re')")))
   
@@ -236,17 +236,17 @@ names(re.model.set)<-seq(1,length(re.model.set),1)
 #}
 
 ## run to search for best lmer model
-re.all.fit.models<-c()
-AIC.benchmark<-AIC(lmer(area.next~offset(area)+area +(1|tag),data=delta.pustules))
-AIC.benchmark<- -17395
-pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
-for (i in 1:length(re.model.set))
-{
-  suppressMessages(new.mod<-lmer(re.model.set[[i]],data=delta.pustules,REML=F))
-  AIC.new.mod<-AIC(new.mod)
-  if(AIC.new.mod<=(AIC.benchmark)) {re.all.fit.models<-append(re.all.fit.models,list(new.mod))}
-  pb$tick()
-}
+#re.all.fit.models<-c()
+#AIC.benchmark<-AIC(lmer(area.next~offset(area)+area +(1|tag) + (1|who.measured),data=delta.pustules))
+#AIC.benchmark<- -17555
+#pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
+#for (i in 1:length(re.model.set))
+#{
+#  suppressMessages(new.mod<-lmer(re.model.set[[i]],data=delta.pustules,REML=F))
+#  AIC.new.mod<-AIC(new.mod)
+#  if(AIC.new.mod<=(AIC.benchmark)) {re.all.fit.models<-append(re.all.fit.models,list(new.mod))}
+#  pb$tick()
+#}
 
 ## run to search for best gam model
 #gam.all.fit.models<-c()
@@ -308,18 +308,17 @@ curve(best.lm.model$coefficients["(Intercept)"]+
 #best.model<-re.all.fit.models[[order(re.AICs)[index]]]
 
 ##fitting just top model
-best.lmer.model<-lmer(area.next~offset(area)+area+temp.days.16.22+dew.point.days+temp.dew.point.days+wetness.days+temp.7.30.wetness.days+tot.rain+wind.speed.days+gust.speed.days+(1|tag),data=delta.pustules)
+best.lmer.model<-lmer(area.next~offset(area)+area+temp.days.16.22+dew.point.days+temp.16.22.dew.point.days +wetness.days+temp.wetness.days+tot.rain+gust.speed.days+(1|tag)+(1|who.measured),data=delta.pustules)
 summary(best.lmer.model)
 
 #par(mfrow=c(1,1))
 #plot(delta.pustules$area,delta.pustules$area.next-delta.pustules$area)
 quant.temp.days.16.22<-quantile(delta.pustules$temp.days.16.22,.5)
 quant.dew.point.days<-quantile(delta.pustules$dew.point.days,.5)
-quant.temp.dew.point.days<-quantile(delta.pustules$temp.dew.point.days,.5)
+quant.temp.16.22.dew.point.days<-quantile(delta.pustules$temp.16.22.dew.point.days,.5)
 quant.wetness.days<-quantile(delta.pustules$wetness.days,.5)
-quant.temp.7.30.wetness.days<-quantile(delta.pustules$temp.7.30.wetness.days,.5)
+quant.temp.wetness.days<-quantile(delta.pustules$temp.wetness.days,.5)
 quant.tot.rain<-quantile(delta.pustules$tot.rain,.5)
-quant.wind.speed.days<-quantile(delta.pustules$wind.speed.days,.5)
 quant.gust.speed.days<-quantile(delta.pustules$gust.speed.days,.5)
 
 curve.col<-"blue"
@@ -327,11 +326,10 @@ curve(fixef(best.lmer.model)["(Intercept)"]+
         fixef(best.lmer.model)["area"]*x+
         fixef(best.lmer.model)["temp.days.16.22"]*quant.temp.days.16.22+
         fixef(best.lmer.model)["dew.point.days"]*quant.dew.point.days+
-        fixef(best.lmer.model)["temp.dew.point.days"]*quant.temp.dew.point.days+
+        fixef(best.lmer.model)["temp.16.22.dew.point.days"]*quant.temp.16.22.dew.point.days+
         fixef(best.lmer.model)["wetness.days"]*quant.wetness.days+
-        fixef(best.lmer.model)["temp.7.30.wetness.days"]*quant.temp.7.30.wetness.days+
+        fixef(best.lmer.model)["temp.wetness.days"]*quant.temp.wetness.days+
         fixef(best.lmer.model)["tot.rain"]*quant.tot.rain+
-        fixef(best.lmer.model)["wind.speed.days"]*quant.wind.speed.days+
         fixef(best.lmer.model)["gust.speed.days"]*quant.gust.speed.days
       ,add=T,col=curve.col)
 
