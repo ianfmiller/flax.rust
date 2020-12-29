@@ -170,7 +170,7 @@ delta.pustules<-data.frame(tag=factor(tags),stem.iter=stem.iters,leaf.iter=leaf.
 ## histograms
 par(mfrow=c(2,1))
 hist(delta.pustules$area,main="pustule area",breaks=100,xlab="area")
-hist(delta.pustules$area.next-delta.pustules$area,main="pustule area",breaks=100,xlab="change in area")
+hist(delta.pustules$area.next-delta.pustules$area,main="change in pustule area",breaks=100,xlab="change in area")
 
 ## plot trajectories
 plot(c(min(pustules$date),max(pustules$date)),c(0,max(pustules$area)),type="n",xlab="date",ylab="pustule area")
@@ -213,13 +213,11 @@ abline(0,1)
 source("model.set.creation.R")
 
 ### create all sets of models
-model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors[x]),collapse=" + ")))
-
+#model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors[x]),collapse=" + ")))
 re.model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area)",predictors[x],"(1|tag) + (1|who.measured)"),collapse=" + ")))
-
 #gam.model.set <- apply(pred.mat, 1, function(x) as.formula( paste0(paste0(paste(c("area.next ~ offset(area",predictors[x]),collapse=") + s("),")")," + s(tag,bs='re')")))
   
-names(model.set)<-seq(1,length(model.set),1)
+#names(model.set)<-seq(1,length(model.set),1)
 names(re.model.set)<-seq(1,length(re.model.set),1)
 #names(gam.model.set)<-seq(1,length(gam.model.set),1)
 
@@ -236,17 +234,17 @@ names(re.model.set)<-seq(1,length(re.model.set),1)
 #}
 
 ## run to search for best lmer model
-#re.all.fit.models<-c()
-#AIC.benchmark<-AIC(lmer(area.next~offset(area)+area +(1|tag) + (1|who.measured),data=delta.pustules))
-#AIC.benchmark<- -17555
-#pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
-#for (i in 1:length(re.model.set))
-#{
-#  suppressMessages(new.mod<-lmer(re.model.set[[i]],data=delta.pustules,REML=F))
-#  AIC.new.mod<-AIC(new.mod)
-#  if(AIC.new.mod<=(AIC.benchmark)) {re.all.fit.models<-append(re.all.fit.models,list(new.mod))}
-#  pb$tick()
-#}
+re.all.fit.models<-c()
+#AIC.benchmark<-AIC(lmer(area.next~offset(area)+area +(1|tag),data=delta.pustules))
+AIC.benchmark<- -17400
+pb <- progress_bar$new(total = length(re.model.set),format = " fitting models [:bar] :percent eta: :eta")
+for (i in 1:length(re.model.set))
+{
+  suppressMessages(new.mod<-lmer(re.model.set[[i]],data=delta.pustules))
+  AIC.new.mod<-AIC(new.mod)
+  if(AIC.new.mod<=(AIC.benchmark)) {re.all.fit.models<-append(re.all.fit.models,list(new.mod))}
+  pb$tick()
+}
 
 ## run to search for best gam model
 #gam.all.fit.models<-c()
@@ -270,32 +268,32 @@ names(re.model.set)<-seq(1,length(re.model.set),1)
 #model.set[candidate.models[order(AICs[candidate.models])]] #models to consider--offset(diam.last) not shown
 #index<-1 #top two models have nearly identical AICs, #2 drops insignificant wind speed days predictor
 #best.lm.model<-all.fit.models[[order(AICs)[index]]]
-best.lm.model<-lm(area.next~offset(area)+area+time+temp.days.7.30+dew.point.days+temp.7.30.dew.point.days+wetness.days+temp.wetness.days+wind.speed.days+gust.speed.days,data=delta.pustules)
-summary(best.lm.model)
+#best.lm.model<-lm(area.next~offset(area)+area+time+temp.days.7.30+dew.point.days+temp.7.30.dew.point.days+wetness.days+temp.wetness.days+wind.speed.days+gust.speed.days,data=delta.pustules)
+#summary(best.lm.model)
 
-par(mfrow=c(1,1))
-plot(delta.pustules$area,delta.pustules$area.next-delta.pustules$area)
-quant.time<-quantile(delta.pustules$time,.5)
-quant.temp.days.7.30<-quantile(delta.pustules$temp.days.7.30,.5)
-quant.dew.point.days<-quantile(delta.pustules$dew.point.days,.5)
-quant.temp.7.30.dew.point.days<-quantile(delta.pustules$temp.7.30.dew.point.days,.5)
-quant.wetness.days<-quantile(delta.pustules$wetness.days,.5)
-quant.temp.wetness.days<-quantile(delta.pustules$temp.wetness.days,.5)
-quant.wind.speed.days<-quantile(delta.pustules$wind.speed.days,.5)
-quant.gust.speed.days<-quantile(delta.pustules$gust.speed.days,.5)
+#par(mfrow=c(1,1))
+#plot(delta.pustules$area,delta.pustules$area.next-delta.pustules$area)
+#quant.time<-quantile(delta.pustules$time,.5)
+#quant.temp.days.7.30<-quantile(delta.pustules$temp.days.7.30,.5)
+#quant.dew.point.days<-quantile(delta.pustules$dew.point.days,.5)
+#quant.temp.7.30.dew.point.days<-quantile(delta.pustules$temp.7.30.dew.point.days,.5)
+#quant.wetness.days<-quantile(delta.pustules$wetness.days,.5)
+#quant.temp.wetness.days<-quantile(delta.pustules$temp.wetness.days,.5)
+#quant.wind.speed.days<-quantile(delta.pustules$wind.speed.days,.5)
+#quant.gust.speed.days<-quantile(delta.pustules$gust.speed.days,.5)
 
-curve.col<-"red"
-curve(best.lm.model$coefficients["(Intercept)"]+
-      best.lm.model$coefficients["area"]*x+
-      best.lm.model$coefficients["time"]*quant.time+
-      best.lm.model$coefficients["temp.days.7.30"]*quant.temp.days.7.30+
-      best.lm.model$coefficients["dew.point.days"]*quant.dew.point.days+
-      best.lm.model$coefficients["temp.7.30.dew.point.days"]*quant.temp.7.30.dew.point.days+
-      best.lm.model$coefficients["wetness.days"]*quant.wetness.days+
-      best.lm.model$coefficients["temp.wetness.days"]*quant.temp.wetness.days+
-      best.lm.model$coefficients["wind.speed.days"]*quant.wind.speed.days+
-      best.lm.model$coefficients["gust.speed.days"]*quant.gust.speed.days
-      ,add=T,col=curve.col)
+#curve.col<-"red"
+#curve(best.lm.model$coefficients["(Intercept)"]+
+#      best.lm.model$coefficients["area"]*x+
+#      best.lm.model$coefficients["time"]*quant.time+
+#      best.lm.model$coefficients["temp.days.7.30"]*quant.temp.days.7.30+
+#      best.lm.model$coefficients["dew.point.days"]*quant.dew.point.days+
+#      best.lm.model$coefficients["temp.7.30.dew.point.days"]*quant.temp.7.30.dew.point.days+
+#      best.lm.model$coefficients["wetness.days"]*quant.wetness.days+
+#      best.lm.model$coefficients["temp.wetness.days"]*quant.temp.wetness.days+
+#      best.lm.model$coefficients["wind.speed.days"]*quant.wind.speed.days+
+#     best.lm.model$coefficients["gust.speed.days"]*quant.gust.speed.days
+#     ,add=T,col=curve.col)
 
 
 ### lmms
@@ -308,27 +306,22 @@ curve(best.lm.model$coefficients["(Intercept)"]+
 #best.model<-re.all.fit.models[[order(re.AICs)[index]]]
 
 ##fitting just top model
-best.lmer.model<-lmer(area.next~offset(area)+area+temp.days.16.22+dew.point.days+temp.16.22.dew.point.days +wetness.days+temp.wetness.days+tot.rain+gust.speed.days+(1|tag)+(1|who.measured),data=delta.pustules)
+best.lmer.model<-lmer(area.next~offset(area)+area+temp.7.30.dew.point.days+tot.rain+gust.speed.days+(1|tag),data=delta.pustules)
 summary(best.lmer.model)
 
 #par(mfrow=c(1,1))
 #plot(delta.pustules$area,delta.pustules$area.next-delta.pustules$area)
-quant.temp.days.16.22<-quantile(delta.pustules$temp.days.16.22,.5)
-quant.dew.point.days<-quantile(delta.pustules$dew.point.days,.5)
-quant.temp.16.22.dew.point.days<-quantile(delta.pustules$temp.16.22.dew.point.days,.5)
-quant.wetness.days<-quantile(delta.pustules$wetness.days,.5)
-quant.temp.wetness.days<-quantile(delta.pustules$temp.wetness.days,.5)
+quant.temp.7.30.dew.point.days<-quantile(delta.pustules$temp.7.30.dew.point.days,.5)
 quant.tot.rain<-quantile(delta.pustules$tot.rain,.5)
 quant.gust.speed.days<-quantile(delta.pustules$gust.speed.days,.5)
+
+par(mfrow=c(1,1))
+plot(delta.pustules$area,delta.pustules$area.next-delta.pustules$area)
 
 curve.col<-"blue"
 curve(fixef(best.lmer.model)["(Intercept)"]+
         fixef(best.lmer.model)["area"]*x+
-        fixef(best.lmer.model)["temp.days.16.22"]*quant.temp.days.16.22+
-        fixef(best.lmer.model)["dew.point.days"]*quant.dew.point.days+
-        fixef(best.lmer.model)["temp.16.22.dew.point.days"]*quant.temp.16.22.dew.point.days+
-        fixef(best.lmer.model)["wetness.days"]*quant.wetness.days+
-        fixef(best.lmer.model)["temp.wetness.days"]*quant.temp.wetness.days+
+        fixef(best.lmer.model)["temp.7.30.dew.point.days"]*quant.temp.7.30.dew.point.days+
         fixef(best.lmer.model)["tot.rain"]*quant.tot.rain+
         fixef(best.lmer.model)["gust.speed.days"]*quant.gust.speed.days
       ,add=T,col=curve.col)
