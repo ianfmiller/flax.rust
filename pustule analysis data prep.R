@@ -1,4 +1,4 @@
-if(!(file.exists("~/Documents/GitHub/flax.rust/data/summarized data/pustule.analysis.data.RDS")))
+if(!(file.exists("~/Documents/GitHub/flax.rust/data/summarized data/delta.pustules.RDS")) | !(file.exists("~/Documents/GitHub/flax.rust/data/summarized data/pustules.RDS")))
 {
 source("prep.enviro.data.R")
   
