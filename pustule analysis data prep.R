@@ -1,7 +1,7 @@
-source("prep.enviro.data.R")
-
-if(!file.exists("~/Documents/GitHub/flax.rust/data/summarized data/pustule.analysis.data.RDS"))
+if(!(file.exists("~/Documents/GitHub/flax.rust/data/summarized data/pustule.analysis.data.RDS")))
 {
+source("prep.enviro.data.R")
+  
 # clean data
 
 ## load data
@@ -161,9 +161,12 @@ delta.pustules<-data.frame(tag=factor(tags),stem.iter=stem.iters,leaf.iter=leaf.
                            dew.point.days=dew.point.days,temp.dew.point.days=temp.dew.point.days,temp.16.22.dew.point.days=temp.16.22.dew.point.days,temp.7.30.dew.point.days=temp.7.30.dew.point.days,
                            wetness.days=wetness.days,temp.wetness.days=temp.wetness.days,temp.16.22.wetness.days=temp.16.22.wetness.days,temp.7.30.wetness.days=temp.7.30.wetness.days,
                            tot.rain=tot.rains,solar.days=solar.days,wind.speed.days=wind.speed.days,gust.speed.days=gust.speed.days,who.measured=measurer.ids)
-saveRDS(delta.pustules,file="~/Documents/GitHub/flax.rust/data/summarized data/pustule.analysis.data.RDS")
+
+saveRDS(pustules,file="~/Documents/GitHub/flax.rust/data/summarized data/pustules.RDS")
+saveRDS(delta.pustules,file="~/Documents/GitHub/flax.rust/data/summarized data/delta.pustules.RDS")
 }
 
-delta.pustules<-readRDS("~/Documents/GitHub/flax.rust/data/summarized data/pustule.analysis.data.RDS")
+pustules<-readRDS("~/Documents/GitHub/flax.rust/data/summarized data/pustules.RDS")
+delta.pustules<-readRDS("~/Documents/GitHub/flax.rust/data/summarized data/delta.pustules.RDS")
 
 
