@@ -59,7 +59,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/data/models/pustule.model.RDS"))
   
   ## run to search for best  model
   all.fit.models<-c()
-  AIC.benchmark<- -17400 #cutoff to limit memory usage
+  AIC.benchmark<- -17420 #cutoff to limit memory usage
   pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
   for (i in 1:length(model.set))
   {
