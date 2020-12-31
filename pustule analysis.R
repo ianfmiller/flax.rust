@@ -63,7 +63,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/data/models/pustule.model.RDS"))
   pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
   for (i in 1:length(model.set))
   {
-    suppressMessages(new.mod<-(model.set[[i]],data=delta.pustules))
+    suppressMessages(new.mod<-lmer(model.set[[i]],data=delta.pustules))
     AIC.new.mod<-AIC(new.mod)
     if(AIC.new.mod<=(AIC.benchmark)) {all.fit.models<-append(all.fit.models,list(new.mod))}
     pb$tick()
