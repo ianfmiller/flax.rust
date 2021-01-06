@@ -66,11 +66,11 @@ for (tag in unique(pustules$tag))
         sub.pustules4<-sub.pustules4[order(sub.pustules4$date),]
         if(dim(sub.pustules4)[1]>=2)
         {
-          if(length(unique(sub.pustules4$date))<dim(sub.pustules4)[1]) #get rid of duplicate data resulting from two pics of same pustule on same date
+          if(length(unique(as.Date(sub.pustules4$date)))<dim(sub.pustules4)[1]) #get rid of duplicate data resulting from two pics of same pustule on same date
           {
-            for(date in unique(sub.pustules4$date))
+            for(date in unique(as.Date(sub.pustules4$date)))
             {
-              date.indicies<-which(sub.pustules4$date==date)
+              date.indicies<-which(as.Date(sub.pustules4$date)==date)
               if(length(date.indicies)>1) {sub.pustules4<-sub.pustules4[-date.indicies[2:length(date.indicies)],]}
             }
           }
