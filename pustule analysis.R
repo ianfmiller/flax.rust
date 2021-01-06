@@ -82,7 +82,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/data/models/pustule.model.RDS"))
 
 ## load best model
 
-best.pustule.model<-readRDS("~/Documents/GitHub/flax.rust/data/models/pustule.model.RDS")
+pustule.model<-readRDS("~/Documents/GitHub/flax.rust/data/models/pustule.model.RDS")
 
 ## visualize model
 
@@ -94,10 +94,10 @@ quant.tot.rain<-quantile(delta.pustules$tot.rain,.5)
 quant.gust.speed.days<-quantile(delta.pustules$gust.speed.days,.5)
 
 curve.col<-"blue"
-curve(fixef(best.pustule.model)["(Intercept)"]+
-        fixef(best.pustule.model)["area"]*x+
-        fixef(best.pustule.model)["temp.7.30.dew.point.days"]*quant.temp.7.30.dew.point.days+
-        fixef(best.pustule.model)["tot.rain"]*quant.tot.rain+
-        fixef(best.pustule.model)["gust.speed.days"]*quant.gust.speed.days
+curve(fixef(pustule.model)["(Intercept)"]+
+        fixef(pustule.model)["area"]*x+
+        fixef(pustule.model)["temp.7.30.dew.point.days"]*quant.temp.7.30.dew.point.days+
+        fixef(pustule.model)["tot.rain"]*quant.tot.rain+
+        fixef(pustule.model)["gust.speed.days"]*quant.gust.speed.days
       ,add=T,col=curve.col)
 
