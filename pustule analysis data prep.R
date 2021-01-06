@@ -20,6 +20,7 @@ pustules<-pustules[which(pustules$area>0),]
 pustules<-pustules[-intersect(which(pustules$site=="HM"),which(pustules$date>"2020-07-10 00:00:00 UTC")),]
 
 ## make new data object for change in pustule size
+
 temp.rh.sub.func<-function(x,lower.bound,upper.bound) {out<-subset(x,temp.c>=lower.bound); out<-subset(out,temp.c<=upper.bound); out}
 
 tags<-c()
