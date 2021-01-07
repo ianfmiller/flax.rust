@@ -163,3 +163,4 @@ delta.n.pustules<-data.frame(tag=factor(tags),stem.iter=stem.iters,leaf.iter=lea
                            wetness.days=wetness.days,temp.wetness.days=temp.wetness.days,temp.16.22.wetness.days=temp.16.22.wetness.days,temp.7.30.wetness.days=temp.7.30.wetness.days,
                            tot.rain=tot.rains,solar.days=solar.days,wind.speed.days=wind.speed.days,gust.speed.days=gust.speed.days,who.measured=measurer.ids,pred.pustule.diam.growth=pred.pustule.diam.growths)
 
+
