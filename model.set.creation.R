@@ -2,7 +2,7 @@
 ################################################################################################################################
 
 ### construct all combinations of predictors
-predictors<-c("area","time",
+predictors<-c(
                "temp.days","temp.days.16.22","temp.days.7.30",
                "dew.point.days",
                "temp.dew.point.days","temp.16.22.dew.point.days","temp.7.30.dew.point.days",
