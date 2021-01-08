@@ -56,17 +56,16 @@ if(!file.exists("~/Documents/GitHub/flax.rust/data/models/pustule.model.RDS"))
   source("model.set.creation.R")
   
   ### create all sets of models
-  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area) + s(area) + s(time)",predictors[x],'s(tag,bs="re")'),collapse=" + ")))
+  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area) + area",predictors[x],'(1|tag)'),collapse=" + ")))
   names(model.set)<-seq(1,length(model.set),1)
   
   ## run to search for best  model
   all.fit.models<-c()
-  #AIC.benchmark<- AIC(gam(area.next~offset(area)+s(area)+s(time)+s(tag,bs="re"),data=delta.pustules)) #cutoff to limit memory usage
-  AIC.benchmark<-(-17740)
+  AIC.benchmark<- AIC(lmer(area.next~offset(area)+area+(1|tag),data=delta.pustules)) #cutoff to limit memory usage
   pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
   for (i in 1:length(model.set))
   {
-    suppressMessages(new.mod<-gam(model.set[[i]],data=delta.pustules))
+    suppressMessages(new.mod<-lmer(model.set[[i]],data=delta.pustules))
     AIC.new.mod<-AIC(new.mod)
     if(AIC.new.mod<=(AIC.benchmark)) {all.fit.models<-append(all.fit.models,list(new.mod))}
     pb$tick()
