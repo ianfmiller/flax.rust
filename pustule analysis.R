@@ -4,6 +4,8 @@ library(lmerTest)
 library(progress)
 
 source("~/Documents/GitHub/flax.rust/pustule analysis data prep.R")
+
+delta.pustules<-subset(delta.pustules,time<=7)
 # visualize data
 
 ## histograms
@@ -59,7 +61,8 @@ if(!file.exists("~/Documents/GitHub/flax.rust/data/models/pustule.model.RDS"))
   
   ## run to search for best  model
   all.fit.models<-c()
-  AIC.benchmark<- AIC(gam(area.next~offset(area)+s(area)+s(time)+s(tag,bs="re"),data=delta.pustules)) #cutoff to limit memory usage
+  #AIC.benchmark<- AIC(gam(area.next~offset(area)+s(area)+s(time)+s(tag,bs="re"),data=delta.pustules)) #cutoff to limit memory usage
+  AIC.benchmark<-(-17740)
   pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
   for (i in 1:length(model.set))
   {
