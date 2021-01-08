@@ -1,5 +1,6 @@
 # load model and data from pustule area analysis
 source("~/Documents/GitHub/flax.rust/pustule analysis data prep.R")
+delta.pustules<-subset(delta.pustules,time<=7)
 pustule.model<-readRDS("~/Documents/GitHub/flax.rust/data/models/pustule.model.RDS")
 
 # prep enviro data
@@ -113,13 +114,14 @@ for (tag in unique(n.pustules$tag))
           #pull out core predictors
           start.val<-sub.n.pustules3[i,"N.pustules"]
           end.val<-sub.n.pustules3[i+1,"N.pustules"]
-          delta.days<-date1-date0
+          delta.days<-as.numeric(date1-date0)
           measurer.id<-sub.n.pustules3[i,"who.entered"] #same person did all measurements for each pustule
           
           #predict pustule growth from pustule growth model and enviro conditions
           #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
           pustule.model.new.area<-.01 #predict change for small pustule, arbitrarily pick .01
-          pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,"temp.7.30.dew.point.days"=new.temp.7.30.dew.point.days,"tot.rain"=new.tot.rain,"gust.speed.days"=new.gust.speed.days)
+          obs.time<-delta.days
+          pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,"temp.7.30.dew.point.days"=new.temp.7.30.dew.point.days/delta.days,"tot.rain"=new.tot.rain/delta.days,"gust.speed.days"=new.gust.speed.days/delta.days)
           pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,re.form=~0)
           
           #store values
