@@ -5,7 +5,7 @@ library(progress)
 
 # load data
 
-source("~/Documents/GitHub/flax.rust/n pustules data prep.R")
+source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/n pustules data prep.R")
 
 delta.n.pustules<-subset(delta.n.pustules,time<=7)
 
@@ -56,7 +56,7 @@ abline(0,1)
 
 ## fit models--only if not already fit
 
-if(!file.exists("~/Documents/GitHub/flax.rust/data/models/n.pustule.model.RDS"))
+if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS"))
 {
   ### construct all combinations of predictors
   source("n.pustules.model.set.creation.R")
@@ -83,12 +83,12 @@ if(!file.exists("~/Documents/GitHub/flax.rust/data/models/n.pustule.model.RDS"))
   delta.AICs<-AICs-min(AICs)
   index<-1
   best.model<-all.fit.models[[order(AICs)[index]]]
-  saveRDS(best.model,file="~/Documents/GitHub/flax.rust/data/models/n.pustules.model.RDS")
+  saveRDS(best.model,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS")
 }
 
 ## load best model
 
-n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/data/models/n.pustules.model.RDS")
+n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS")
 
 ## visualize model
 

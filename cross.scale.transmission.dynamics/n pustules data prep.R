@@ -1,9 +1,9 @@
-if(!(file.exists("~/Documents/GitHub/flax.rust/data/summarized data/delta.n.pustules.RDS")) | !(file.exists("~/Documents/GitHub/flax.rust/data/summarized data/n.pustules.RDS")))
+if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.n.pustules.RDS")) | !(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/n.pustules.RDS")))
 {
   # load model and data from pustule area analysis
-  source("~/Documents/GitHub/flax.rust/pustule analysis data prep.R")
+  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/pustule analysis data prep.R")
   delta.pustules<-subset(delta.pustules,time<=7)
-  pustule.model<-readRDS("~/Documents/GitHub/flax.rust/data/models/pustule.model.RDS")
+  pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
   
   # prep enviro data
   source("prep.enviro.data.R")
@@ -167,11 +167,11 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/data/summarized data/delta.n.pust
                              wetness.days=wetness.days,temp.wetness.days=temp.wetness.days,temp.16.22.wetness.days=temp.16.22.wetness.days,temp.7.30.wetness.days=temp.7.30.wetness.days,
                              tot.rain=tot.rains,solar.days=solar.days,wind.speed.days=wind.speed.days,gust.speed.days=gust.speed.days,who.measured=measurer.ids,pred.pustule.diam.growth=pred.pustule.diam.growths)
   
-  saveRDS(n.pustules,file="~/Documents/GitHub/flax.rust/data/summarized data/n.pustules.RDS")
-  saveRDS(delta.n.pustules,file="~/Documents/GitHub/flax.rust/data/summarized data/delta.n.pustules.RDS")
+  saveRDS(n.pustules,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/n.pustules.RDS")
+  saveRDS(delta.n.pustules,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.n.pustules.RDS")
 }
 
-n.pustules<-readRDS("~/Documents/GitHub/flax.rust/data/summarized data/n.pustules.RDS")
-delta.n.pustules<-readRDS("~/Documents/GitHub/flax.rust/data/summarized data/delta.n.pustules.RDS")
+n.pustules<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/n.pustules.RDS")
+delta.n.pustules<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.n.pustules.RDS")
 
 

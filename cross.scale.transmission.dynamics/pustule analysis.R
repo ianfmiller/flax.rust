@@ -4,7 +4,7 @@ library(lmerTest)
 library(progress)
 
 # load data
-source("~/Documents/GitHub/flax.rust/pustule analysis data prep.R")
+source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/pustule analysis data prep.R")
 
 delta.pustules<-subset(delta.pustules,time<=7)
 
@@ -52,7 +52,7 @@ abline(0,1)
 
 ## fit models--only if not already fit
 
-if(!file.exists("~/Documents/GitHub/flax.rust/data/models/pustule.model.RDS"))
+if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS"))
 {
   ### construct all combinations of predictors
   source("pustule.model.set.creation.R")
@@ -79,12 +79,12 @@ if(!file.exists("~/Documents/GitHub/flax.rust/data/models/pustule.model.RDS"))
   delta.AICs<-AICs-min(AICs)
   index<-1
   best.model<-all.fit.models[[order(AICs)[index]]]
-  saveRDS(best.model,file="~/Documents/GitHub/flax.rust/data/models/pustule.model.RDS")
+  saveRDS(best.model,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
 }
 
 ## load best model
 
-pustule.model<-readRDS("~/Documents/GitHub/flax.rust/data/models/pustule.model.RDS")
+pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
 
 ## visualize model
 

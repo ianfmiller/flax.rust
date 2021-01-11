@@ -1,4 +1,4 @@
-if(!(file.exists("~/Documents/GitHub/flax.rust/data/summarized data/delta.pustules.RDS")) | !(file.exists("~/Documents/GitHub/flax.rust/data/summarized data/pustules.RDS")))
+if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.pustules.RDS")) | !(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pustules.RDS")))
 {
   source("prep.enviro.data.R")
     
@@ -163,11 +163,11 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/data/summarized data/delta.pustul
                              wetness.days=wetness.days,temp.wetness.days=temp.wetness.days,temp.16.22.wetness.days=temp.16.22.wetness.days,temp.7.30.wetness.days=temp.7.30.wetness.days,
                              tot.rain=tot.rains,solar.days=solar.days,wind.speed.days=wind.speed.days,gust.speed.days=gust.speed.days,who.measured=measurer.ids)
   
-  saveRDS(pustules,file="~/Documents/GitHub/flax.rust/data/summarized data/pustules.RDS")
-  saveRDS(delta.pustules,file="~/Documents/GitHub/flax.rust/data/summarized data/delta.pustules.RDS")
+  saveRDS(pustules,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pustules.RDS")
+  saveRDS(delta.pustules,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.pustules.RDS")
 }
 
-pustules<-readRDS("~/Documents/GitHub/flax.rust/data/summarized data/pustules.RDS")
-delta.pustules<-readRDS("~/Documents/GitHub/flax.rust/data/summarized data/delta.pustules.RDS")
+pustules<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pustules.RDS")
+delta.pustules<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.pustules.RDS")
 
 
