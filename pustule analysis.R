@@ -89,7 +89,7 @@ pustule.model<-readRDS("~/Documents/GitHub/flax.rust/data/models/pustule.model.R
 ## visualize model
 
 par(mfrow=c(1,1))
-plot(delta.pustules$area,delta.pustules$area.next-delta.pustules$area)
+plot(delta.pustules$area,delta.pustules$area.next-delta.pustules$area,xlab="area",ylab="change in pustule area")
 
 quant.temp.7.30.dew.point.days<-quantile(delta.pustules$temp.7.30.dew.point.days,.5)
 quant.tot.rain<-quantile(delta.pustules$tot.rain,.5)
