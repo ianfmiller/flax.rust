@@ -3,9 +3,11 @@ library(lme4)
 library(lmerTest)
 library(progress)
 
+# load data
 source("~/Documents/GitHub/flax.rust/pustule analysis data prep.R")
 
 delta.pustules<-subset(delta.pustules,time<=7)
+
 # visualize data
 
 ## histograms
