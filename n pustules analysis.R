@@ -93,7 +93,7 @@ n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/data/models/n.pustules.m
 ## visualize model
 
 par(mfrow=c(1,1))
-plot(delta.n.pustules$time,delta.n.pustules$n.pustules.next-delta.n.pustules$n.pustules)
+plot(delta.n.pustules$time,delta.n.pustules$n.pustules.next-delta.n.pustules$n.pustules,xlab="time",ylab="change in n pustules")
 
 quant.0.25.temp.days.16.22<-quantile(delta.n.pustules$temp.days.16.22,.25)
 quant.0.5.temp.days.16.22<-quantile(delta.n.pustules$temp.days.16.22,.5)
