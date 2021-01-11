@@ -55,7 +55,7 @@ abline(0,1)
 if(!file.exists("~/Documents/GitHub/flax.rust/data/models/pustule.model.RDS"))
 {
   ### construct all combinations of predictors
-  source("model.set.creation.R")
+  source("pustule.model.set.creation.R")
   
   ### create all sets of models
   model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area) + area",predictors[x],'(1|tag)'),collapse=" + ")))
