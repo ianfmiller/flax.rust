@@ -1,7 +1,7 @@
 if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.n.pustules.RDS")) | !(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/n.pustules.RDS")))
 {
   # load model and data from pustule area analysis
-  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/pustule analysis data prep.R")
+  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/pustule area data prep.R")
   delta.pustules<-subset(delta.pustules,time<=7)
   pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
   

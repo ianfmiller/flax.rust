@@ -4,7 +4,7 @@ library(lmerTest)
 library(progress)
 
 # load data
-source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/pustule analysis data prep.R")
+source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/pustule area data prep.R")
 
 delta.pustules<-subset(delta.pustules,time<=7)
 
