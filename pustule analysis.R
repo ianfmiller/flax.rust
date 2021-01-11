@@ -77,8 +77,6 @@ if(!file.exists("~/Documents/GitHub/flax.rust/data/models/pustule.model.RDS"))
   ## compare between models
   AICs<-unlist(lapply(all.fit.models,AIC))
   delta.AICs<-AICs-min(AICs)
-  candidate.models<-unname(which(delta.AICs<4))
-  model.set[candidate.models[order(AICs[candidate.models])]] #models to consider--offset(diam.last) not shown
   index<-1
   best.model<-all.fit.models[[order(AICs)[index]]]
   saveRDS(best.model,file="~/Documents/GitHub/flax.rust/data/models/pustule.model.RDS")
