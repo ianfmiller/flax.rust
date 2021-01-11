@@ -83,9 +83,9 @@ if(!file.exists("~/Documents/GitHub/flax.rust/data/models/n.pustule.model.RDS"))
   delta.AICs<-AICs-min(AICs)
   index<-1
   best.model<-all.fit.models[[order(AICs)[index]]]
-  saveRDS(best.model,file="~/Documents/GitHub/flax.rust/data/models/pustule.model.RDS")
+  saveRDS(best.model,file="~/Documents/GitHub/flax.rust/data/models/n.pustules.model.RDS")
 }
 
 ## load best model
 
-pustule.model<-readRDS("~/Documents/GitHub/flax.rust/data/models/pustule.model.RDS")
+n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/data/models/n.pustules.model.RDS")
