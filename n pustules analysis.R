@@ -62,7 +62,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/data/models/n.pustule.model.RDS"))
   source("n.pustules.model.set.creation.R")
   
   ### create all sets of models
-  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("n.pustules.next ~ offset(n.pustules) + n.pustules",predictors[x],'(1|tag)'),collapse=" + ")))
+  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("n.pustules.next ~ offset(n.pustules)",predictors[x],'(1|tag)'),collapse=" + ")))
   names(model.set)<-seq(1,length(model.set),1)
   
   ## run to search for best  model
