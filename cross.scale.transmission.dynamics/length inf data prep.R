@@ -29,6 +29,9 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   ## subset to 2020
   length.inf<-length.inf[which(length.inf$Year=="2020"),]
   
+  ## finish cleaning
+  length.inf$stem.height<-as.numeric(length.inf$stem.height)
+  length.inf$length.tissue.infected<-as.numeric(length.inf$length.tissue.infected)
   ## make new data object for change in pustule size
   
   temp.rh.sub.func<-function(x,lower.bound,upper.bound) {out<-subset(x,temp.c>=lower.bound); out<-subset(out,temp.c<=upper.bound); out}
@@ -198,7 +201,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
     }    
   }
   
-  delta.length.inf<-data.frame(tag=factor(tags),stem.iter=stem.iters,time=days,start.length=start.lengths,end.length=end.lengths,start.length.inf=start.length.infs,end.length.inf=end.length.infs,
+  delta.length.inf<-data.frame(tag=factor(tags),stem.iter=stem.iters,time=days,start.length=as.numeric(start.lengths),end.length=as.numeric(end.lengths),start.length.inf=as.numeric(start.length.infs),end.length.inf=as.numeric(end.length.infs),
                                temp.days=temp.days,temp.days.16.22=temp.days.16.22,temp.days.7.30=temp.days.7.30,
                                dew.point.days=dew.point.days,temp.dew.point.days=temp.dew.point.days,temp.16.22.dew.point.days=temp.16.22.dew.point.days,temp.7.30.dew.point.days=temp.7.30.dew.point.days,
                                wetness.days=wetness.days,temp.wetness.days=temp.wetness.days,temp.16.22.wetness.days=temp.16.22.wetness.days,temp.7.30.wetness.days=temp.7.30.wetness.days,
