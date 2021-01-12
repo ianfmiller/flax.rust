@@ -32,8 +32,14 @@ gm[,1]<-ymd_hms(gm[,1])
 bt[,1]<-ymd_hms(bt[,1])
 cc[,1]<-ymd_hms(cc[,1])
 
+hm<-cbind("site"="HM",hm)
+gm<-cbind("site"="GM",gm)
+bt<-cbind("site"="BT",bt)
+cc<-cbind("site"="CC",cc)
+
+
 ## join
-all.temp.rh<-rbind(hm[,1:4],gm[,1:4],bt[,1:4],cc[,1:4])
+all.temp.rh<-rbind(hm[,1:5],gm[,1:5],bt[,1:5],cc[,1:5])
 
 # hm weather data
 ## load data, clean
@@ -41,6 +47,7 @@ hm.weath<-read.csv("~/Documents/Github/flax.rust/data/enviro/High_Meadow.csv",sk
 colnames(hm.weath)<-c("date","wetness","rain","solar.radiation","wind.speed","gust.speed","wind.direction","soil.moisture")
 hm.weath[,1]<-parse_date_time(hm.weath[,1],'%m/%d/%y %I:%M:%S %p')
 hm.weath<-hm.weath[-which(hm.weath$wetness==-888.88),]
+hm.weath<-cbind("site"="HM",hm.weath)
 
 ## join with temperature data for calculating variables capturing co-occurence of weather vars and temp
 temps<-c()
@@ -65,6 +72,7 @@ gm.weath<-read.csv("~/Documents/Github/flax.rust/data/enviro/Gothic_Mountain.csv
 colnames(gm.weath)<-c("date","wetness","rain","solar.radiation","wind.speed","gust.speed","wind.direction","soil.moisture")
 gm.weath[,1]<-parse_date_time(gm.weath[,1],'%m/%d/%y %I:%M:%S %p')
 gm.weath<-gm.weath[-which(gm.weath$wetness==-888.88),]
+gm.weath<-cbind("site"="GM",gm.weath)
 
 ## join with temperature data for calculating variables capturing co-occurence of weather vars and temp
 temps<-c()
@@ -89,6 +97,7 @@ bt.weath<-read.csv("~/Documents/Github/flax.rust/data/enviro/Bus_Turnaround.csv"
 colnames(bt.weath)<-c("date","wetness","rain","solar.radiation","wind.speed","gust.speed","wind.direction","soil.moisture")
 bt.weath[,1]<-parse_date_time(bt.weath[,1],'%m/%d/%y %I:%M:%S %p')
 bt.weath<-bt.weath[-which(bt.weath$wetness==-888.88),]
+bt.weath<-cbind("site"="BT",bt.weath)
 
 ## join with temperature data for calculating variables capturing co-occurence of weather vars and temp
 temps<-c()
@@ -114,6 +123,7 @@ cc.weath<-read.csv("~/Documents/Github/flax.rust/data/enviro/Cement_Creek.csv",s
 colnames(cc.weath)<-c("date","wetness","rain","solar.radiation","wind.speed","gust.speed","wind.direction","soil.moisture")
 cc.weath[,1]<-parse_date_time(cc.weath[,1],'%m/%d/%y %I:%M:%S %p')
 cc.weath<-cc.weath[-which(cc.weath$wetness==-888.88),]
+cc.weath<-cbind("site"="CC",cc.weath)
 
 ## join with temperature data for calculating variables capturing co-occurence of weather vars and temp
 temps<-c()
