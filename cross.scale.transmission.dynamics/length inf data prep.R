@@ -198,8 +198,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
     }    
   }
   
-  delta.length.inf<-data.frame(tag=factor(tags),stem.iter=stem.iters,time=days,
-                               temp.days=temp.days,temp.days.16.22=temp.days.16.22,temp.days.7.30=temp.days.7.30,start.length=start.lengths,end.length=end.lengths,start.length.inf=start.length.infs,end.length.inf=end.length.infs,
+  delta.length.inf<-data.frame(tag=factor(tags),stem.iter=stem.iters,time=days,start.length=start.lengths,end.length=end.lengths,start.length.inf=start.length.infs,end.length.inf=end.length.infs,
+                               temp.days=temp.days,temp.days.16.22=temp.days.16.22,temp.days.7.30=temp.days.7.30,
                                dew.point.days=dew.point.days,temp.dew.point.days=temp.dew.point.days,temp.16.22.dew.point.days=temp.16.22.dew.point.days,temp.7.30.dew.point.days=temp.7.30.dew.point.days,
                                wetness.days=wetness.days,temp.wetness.days=temp.wetness.days,temp.16.22.wetness.days=temp.16.22.wetness.days,temp.7.30.wetness.days=temp.7.30.wetness.days,
                                tot.rain=tot.rains,solar.days=solar.days,wind.speed.days=wind.speed.days,gust.speed.days=gust.speed.days,pred.pustule.diam.growth=pred.pustule.diam.growths)
