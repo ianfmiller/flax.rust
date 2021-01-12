@@ -110,14 +110,14 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
           site<-sub.length.inf.2[i,"Site"]
           
           ### subset temp data to relevant window
-          temp.rh.sub<-subset(all.temp.rh,site==site) #### pull out temp data for site
+          temp.rh.sub<-all.temp.rh[which(all.temp.rh$site==site),] #pull out temp data for site
           temp.rh.sub<-subset(temp.rh.sub,date.time<=date1) #### pull out relevant data
           temp.rh.sub<-subset(temp.rh.sub,date.time>=date0) #### pull out relevant data
           temp.rh.sub<-subset(temp.rh.sub,!is.na(temp.c)) #### throw out NAs
           temp.rh.sub<-cbind(temp.rh.sub,interval.length=c(diff(as.numeric(temp.rh.sub$date.time))/(60*60*24),NA)) #add interval length in days
           temp.rh.sub
           #### subset weather data to relevant window
-          weath.sub<-subset(all.weath,site==site)
+          weath.sub<-all.weath[which(all.weath$site==site),] #pull out weath data for site
           weath.sub<-subset(weath.sub,date<=date1) #### pull out relevant data
           weath.sub<-subset(weath.sub,date>=date0) #### pull out relevant data
           weath.sub<-cbind(weath.sub,interval.length=c(diff(as.numeric(weath.sub$date))/(60*60*24),NA))
