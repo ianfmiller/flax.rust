@@ -93,14 +93,7 @@ n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission
 ## visualize model
 
 par(mfrow=c(1,1))
-plot(delta.n.pustules$time,delta.n.pustules$n.pustules.next-delta.n.pustules$n.pustules,xlab="time",ylab="change in n pustules")
+plot(delta.n.pustules$temp.days.16.22,delta.n.pustules$n.pustules.next-delta.n.pustules$n.pustules,xlab="temp.days.16.22",ylab="change in n pustules",ylim=c(-20,20))
 
-quant.0.25.temp.days.16.22<-quantile(delta.n.pustules$temp.days.16.22,.25)
-quant.0.5.temp.days.16.22<-quantile(delta.n.pustules$temp.days.16.22,.5)
-quant.0.75.temp.days.16.22<-quantile(delta.n.pustules$temp.days.16.22,.75)
+curve(fixef(n.pustules.model)["(Intercept)"]+fixef(n.pustules.model)["temp.days.16.22"]*x,add=T,col="blue")
 
-curve(fixef(n.pustules.model)["(Intercept)"]+fixef(n.pustules.model)["time"]*x+fixef(n.pustules.model)["temp.days.16.22"]*quant.0.25.temp.days.16.22,add=T,col="yellow")
-curve(fixef(n.pustules.model)["(Intercept)"]+fixef(n.pustules.model)["time"]*x+fixef(n.pustules.model)["temp.days.16.22"]*quant.0.5.temp.days.16.22,add=T,col="orange")
-curve(fixef(n.pustules.model)["(Intercept)"]+fixef(n.pustules.model)["time"]*x+fixef(n.pustules.model)["temp.days.16.22"]*quant.0.75.temp.days.16.22,add=T,col="red")
-
-legend("topright",legend=c("25% quantile temp.days.16.22","50% quantile temp.days.16.22","75% quantile temp.days.16.22"),lty=1,col=c("yellow","orange","red"))
