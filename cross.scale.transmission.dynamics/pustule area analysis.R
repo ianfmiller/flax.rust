@@ -91,15 +91,13 @@ pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dy
 par(mfrow=c(1,1))
 plot(delta.pustules$area,delta.pustules$area.next-delta.pustules$area,xlab="area",ylab="change in pustule area")
 
-quant.temp.7.30.dew.point.days<-quantile(delta.pustules$temp.7.30.dew.point.days,.5)
-quant.tot.rain<-quantile(delta.pustules$tot.rain,.5)
-quant.gust.speed.days<-quantile(delta.pustules$gust.speed.days,.5)
+quant.temp.days.16.22<-quantile(delta.pustules$temp.days.16.22,.5)
+quant.temp.16.22.dew.point.days<-quantile(delta.pustules$temp.16.22.dew.point.days,.5)
 
 curve.col<-"blue"
 curve(fixef(pustule.model)["(Intercept)"]+
         fixef(pustule.model)["area"]*x+
-        fixef(pustule.model)["temp.7.30.dew.point.days"]*quant.temp.7.30.dew.point.days+
-        fixef(pustule.model)["tot.rain"]*quant.tot.rain+
-        fixef(pustule.model)["gust.speed.days"]*quant.gust.speed.days
+        fixef(pustule.model)["temp.days.16.22"]*quant.temp.days.16.22+
+        fixef(pustule.model)["temp.16.22.dew.point.days"]*quant.temp.16.22.dew.point.days
       ,add=T,col=curve.col)
 
