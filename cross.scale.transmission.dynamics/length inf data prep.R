@@ -32,6 +32,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   ## finish cleaning
   length.inf$stem.height<-as.numeric(length.inf$stem.height)
   length.inf$length.tissue.infected<-as.numeric(length.inf$length.tissue.infected)
+  length.inf$Date<-as.Date(length.inf$Date,tryFormats = "%m/%d/%y")
   ## make new data object for change in pustule size
   
   temp.rh.sub.func<-function(x,lower.bound,upper.bound) {out<-subset(x,temp.c>=lower.bound); out<-subset(out,temp.c<=upper.bound); out}
