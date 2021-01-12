@@ -1,4 +1,4 @@
-if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.length.inf.RDS")) | !(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/length.inf.RDS")))
+if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.stems.RDS")) | !(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/stems.RDS")))
 {
   # load model and data from pustule area analysis
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/pustule area data prep.R")
@@ -20,19 +20,23 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   within.host<-read.csv("~/Documents/GitHub/flax.rust/data/Withinhost.csv")
   
   ## pull out relevant columns
-  length.inf<-within.host[,c("Year","Site","Tag","Date","picture","stem.index","stem.height","percent.tissue.infected","length.tissue.infected")]
+  stems<-within.host[,c("Year","Site","Tag","Date","picture","stem.index","stem.height","percent.tissue.infected","length.tissue.infected","N.pustules.middle")]
   
   ## subset to unique data (duplicates exist because a separate row was entered for each measurment of an individual pustule)
-  length.inf<-length.inf[-which(length.inf$stem.index %in% c("","other")),]
-  length.inf<-unique(length.inf)
+  stems<-stems[-which(stems$stem.index %in% c("","other")),]
+  stems<-unique(stems)
   
   ## subset to 2020
-  length.inf<-length.inf[which(length.inf$Year=="2020"),]
+  stems<-stems[which(stems$Year=="2020"),]
   
   ## finish cleaning
-  length.inf$stem.height<-as.numeric(length.inf$stem.height)
-  length.inf$length.tissue.infected<-as.numeric(length.inf$length.tissue.infected)
-  length.inf$Date<-as.Date(length.inf$Date,tryFormats = "%m/%d/%y")
+  stems$stem.height<-as.numeric(stems$stem.height)
+  stems$length.tissue.infected<-as.numeric(stems$length.tissue.infected)
+  stems$Date<-as.Date(stems$Date,tryFormats = "%m/%d/%y")
+  
+  ## add on infection intensity
+  
+  stems$stem.inf.intens<-stems$length.tissue.infected*stems$N.pustules.middle
   ## make new data object for change in pustule size
   
   temp.rh.sub.func<-function(x,lower.bound,upper.bound) {out<-subset(x,temp.c>=lower.bound); out<-subset(out,temp.c<=upper.bound); out}
@@ -41,8 +45,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   stem.iters<-c()
   start.lengths<-c()
   end.lengths<-c()
-  start.length.infs<-c()
-  end.length.infs<-c()
+  start.stem.inf.intens<-c()
+  end.stem.inf.intens<-c()
   days<-c()
   temp.days<-c()
   temp.days.16.22<-c()
@@ -63,39 +67,39 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   pred.pustule.num.increases<-c()
   
   
-  for (tag in unique(length.inf$Tag))
+  for (tag in unique(stems$Tag))
   {
-    sub.length.inf.1<-length.inf[which(length.inf$Tag==tag),]
+    sub.stems.1<-stems[which(stems$Tag==tag),]
     
-    for (stem.index in unique(sub.length.inf.1$stem.index))
+    for (stem.index in unique(sub.stems.1$stem.index))
     {
-      sub.length.inf.2<-sub.length.inf.1[which(sub.length.inf.1$stem.index==stem.index),]
-      sub.length.inf.2<-sub.length.inf.2[-which(is.na(sub.length.inf.2$length.tissue.infected)),]
+      sub.stems.2<-sub.stems.1[which(sub.stems.1$stem.index==stem.index),]
+      if(any(is.na(sub.stems.2$stem.inf.intens))) {sub.stems.2<-sub.stems.2[-which(is.na(sub.stems.2$stem.inf.intens)),]}
       
-      if(dim(sub.length.inf.2)[1]>=2)
+      if(dim(sub.stems.2)[1]>=2)
       {
         ### get rid of duplicate data resulting from two pics of same pustule on same date
-        if(length(unique(as.Date(sub.length.inf.2$Date,tryFormats = c("%m/%d/%Y"))))<dim(sub.length.inf.2)[1])
+        if(length(unique(as.Date(sub.stems.2$Date,tryFormats = c("%m/%d/%Y"))))<dim(sub.stems.2)[1])
         {
-          for(date in unique(as.Date(sub.length.inf.2$Date,tryFormats = c("%m/%d/%Y"))))
+          for(date in unique(as.Date(sub.stems.2$Date,tryFormats = c("%m/%d/%Y"))))
           {
-            date.indicies<-which(as.Date(sub.length.inf.2$Date,tryFormats = c("%m/%d/%Y"))==date)
-            if(length(date.indicies)>1) {sub.length.inf.2<-sub.length.inf.2[-date.indicies[2:length(date.indicies)],]}
+            date.indicies<-which(as.Date(sub.stems.2$Date,tryFormats = c("%m/%d/%Y"))==date)
+            if(length(date.indicies)>1) {sub.stems.2<-sub.stems.2[-date.indicies[2:length(date.indicies)],]}
           }
         }
         
-        for(i in 1:(dim(sub.length.inf.2)[1]-1))
+        for(i in 1:(dim(sub.stems.2)[1]-1))
         {
           ### pull reference data
           #### use pictures to get date times for plant, average
-          date0.pic<-sub.length.inf.2[i,"picture"]
+          date0.pic<-sub.stems.2[i,"picture"]
           date0<-pustules[which(pustules$picture==date0.pic)[1],"date"]
-          date1.pic<-sub.length.inf.2[i+1,"picture"]
+          date1.pic<-sub.stems.2[i+1,"picture"]
           date1<-pustules[which(pustules$picture==date1.pic)[1],"date"]
           #### if unable to line up pic with date time, use mean date time of all measurments at site on given day
           if(is.na(date0))
           {
-            simple.date<-sub.length.inf.2[i,"Date"]
+            simple.date<-sub.stems.2[i,"Date"]
             sub.pustules<-pustules[which(pustules$site==site),]
             sub.pustules<-sub.pustules[which(as.Date(sub.pustules$date)==as.Date(simple.date,tryFormats = "%m/%d/%y")),]
             alt.date.0.pics<-unique(sub.pustules$picture)
@@ -104,14 +108,14 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
           }
           if(is.na(date1))
           {
-            simple.date<-sub.length.inf.2[i+1,"Date"]
+            simple.date<-sub.stems.2[i+1,"Date"]
             sub.pustules<-pustules[which(pustules$site==site),]
             sub.pustules<-sub.pustules[which(as.Date(sub.pustules$date)==as.Date(simple.date,tryFormats = "%m/%d/%y")),]
             alt.date.1.pics<-unique(sub.pustules$picture)
             alt.dates<-pustules[which(pustules$picture %in% alt.date.1.pics),"date"]
             date1<-mean(unique(alt.dates))
           }
-          site<-sub.length.inf.2[i,"Site"]
+          site<-sub.stems.2[i,"Site"]
           
           ### subset temp data to relevant window
           temp.rh.sub<-all.temp.rh[which(all.temp.rh$site==site),] #pull out temp data for site
@@ -148,10 +152,10 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
           new.temp.7.30.wetness.days<-sum(weath.sub$temp.7.30*weath.sub$wetness*weath.sub$interval.length,na.rm = T)
           
           #pull out core predictors
-          start.length.inf<-sub.length.inf.2[i,"length.tissue.infected"]
-          end.length.inf<-sub.length.inf.2[i+1,"length.tissue.infected"]
-          start.length<-sub.length.inf.2[i,"stem.height"]
-          end.length<-sub.length.inf.2[i+1,"stem.height"]
+          new.start.stem.inf.intens<-sub.stems.2[i,"length.tissue.infected"]*sub.stems.2[i,"N.pustules.middle"]
+          new.end.stem.inf.intens<-sub.stems.2[i+1,"length.tissue.infected"]*sub.stems.2[i+1,"N.pustules.middle"]
+          start.length<-sub.stems.2[i,"stem.height"]
+          end.length<-sub.stems.2[i+1,"stem.height"]
           delta.days<-as.numeric(date1-date0)
           
           #predict pustule growth from pustule growth model and enviro conditions
@@ -172,8 +176,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
           tags<-c(tags,tag)
           stem.iters<-c(stem.iters,stem.index)
           
-          start.length.infs<-c(start.length.infs,start.length.inf)
-          end.length.infs<-c(end.length.infs,end.length.inf)
+          start.stem.inf.intens<-c(start.stem.inf.intens,new.start.stem.inf.intens)
+          end.stem.inf.intens<-c(end.stem.inf.intens,new.end.stem.inf.intens)
           start.lengths<-c(start.lengths,start.length)
           end.lengths<-c(end.lengths,end.length)
           days<-c(days,delta.days)
@@ -202,17 +206,17 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
     }    
   }
   
-  delta.length.inf<-data.frame(tag=factor(tags),stem.iter=stem.iters,time=days,start.length=as.numeric(start.lengths),end.length=as.numeric(end.lengths),start.length.inf=as.numeric(start.length.infs),end.length.inf=as.numeric(end.length.infs),
+  delta.stems<-data.frame(tag=factor(tags),stem.iter=stem.iters,time=days,start.length=start.lengths,end.length=end.lengths,stem.inf.intens=start.stem.inf.intens,stem.inf.intens.next=end.stem.inf.intens,
                                temp.days=temp.days,temp.days.16.22=temp.days.16.22,temp.days.7.30=temp.days.7.30,
                                dew.point.days=dew.point.days,temp.dew.point.days=temp.dew.point.days,temp.16.22.dew.point.days=temp.16.22.dew.point.days,temp.7.30.dew.point.days=temp.7.30.dew.point.days,
                                wetness.days=wetness.days,temp.wetness.days=temp.wetness.days,temp.16.22.wetness.days=temp.16.22.wetness.days,temp.7.30.wetness.days=temp.7.30.wetness.days,
-                               tot.rain=tot.rains,solar.days=solar.days,wind.speed.days=wind.speed.days,gust.speed.days=gust.speed.days,pred.pustule.diam.growth=pred.pustule.diam.growths)
+                               tot.rain=tot.rains,solar.days=solar.days,wind.speed.days=wind.speed.days,gust.speed.days=gust.speed.days,pred.pustule.diam.growth=pred.pustule.diam.growths,pred.pustule.num.increase=pred.pustule.num.increases)
   
-  saveRDS(length.inf,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/length.inf.RDS")
-  saveRDS(delta.length.inf,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.length.inf.RDS")
+  saveRDS(stems,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/stems.RDS")
+  saveRDS(delta.stems,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.stems.RDS")
 }
 
-length.inf<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/length.inf.RDS")
-delta.length.inf<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.length.inf.RDS")
+stems<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/stems.RDS")
+delta.stems<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.stems.RDS")
 
 
