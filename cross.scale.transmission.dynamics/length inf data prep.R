@@ -93,7 +93,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
           {
             simple.date<-sub.length.inf.2[i,"Date"]
             sub.pustules<-pustules[which(pustules$site==site),]
-            sub.pustules<-sub.pustules[which(as.Date(sub.pustules$date)==as.Date(simple.date,tryFormats = "%m/%d/%Y")),]
+            sub.pustules<-sub.pustules[which(as.Date(sub.pustules$date)==as.Date(simple.date,tryFormats = "%m/%d/%y")),]
             alt.date.0.pics<-unique(sub.pustules$picture)
             alt.dates<-pustules[which(pustules$picture %in% alt.date.0.pics),"date"]
             date0<-mean(unique(alt.dates))
@@ -102,7 +102,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
           {
             simple.date<-sub.length.inf.2[i+1,"Date"]
             sub.pustules<-pustules[which(pustules$site==site),]
-            sub.pustules<-sub.pustules[which(as.Date(sub.pustules$date)==as.Date(simple.date,tryFormats = "%m/%d/%Y")),]
+            sub.pustules<-sub.pustules[which(as.Date(sub.pustules$date)==as.Date(simple.date,tryFormats = "%m/%d/%y")),]
             alt.date.1.pics<-unique(sub.pustules$picture)
             alt.dates<-pustules[which(pustules$picture %in% alt.date.1.pics),"date"]
             date1<-mean(unique(alt.dates))
@@ -154,15 +154,14 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
           #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
           pustule.model.new.area<-.01 #predict change for small pustule, arbitrarily pick .01
           obs.time<-delta.days
-          pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,"temp.7.30.dew.point.days"=new.temp.7.30.dew.point.days/delta.days,"tot.rain"=new.tot.rain/delta.days,"gust.speed.days"=new.gust.speed.days/delta.days)
+          pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,"temp.days.16.22"=new.temp.days.16.22/delta.days,"temp.16.22.dew.point.days"=new.temp.16.22.dew.point.days/delta.days)
           pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,re.form=~0)
           
           #predict change in number of pustules from enviro conditions
           #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
-          n.pustules.model.new.time<-1
           n.pustules.model.new.n.pustules<-0 #included only for offset, picked 0 for ease of interpretability
           obs.time<-delta.days
-          n.pustules.model.pred.data<-data.frame("n.pustules"=n.pustules.model.new.n.pustules,"time"=n.pustules.model.new.time,"temp.days.16.22"=new.temp.days.16.22/delta.days)
+          n.pustules.model.pred.data<-data.frame("n.pustules"=n.pustules.model.new.n.pustules,"temp.days.16.22"=new.temp.days.16.22/delta.days)
           pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,re.form=~0)
           
           #store values
@@ -205,8 +204,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
                                wetness.days=wetness.days,temp.wetness.days=temp.wetness.days,temp.16.22.wetness.days=temp.16.22.wetness.days,temp.7.30.wetness.days=temp.7.30.wetness.days,
                                tot.rain=tot.rains,solar.days=solar.days,wind.speed.days=wind.speed.days,gust.speed.days=gust.speed.days,pred.pustule.diam.growth=pred.pustule.diam.growths)
   
-  saveRDS(n.pustules,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/length.inf.RDS")
-  saveRDS(delta.n.pustules,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.length.inf.RDS")
+  saveRDS(length.inf,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/length.inf.RDS")
+  saveRDS(delta.length.inf,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.length.inf.RDS")
 }
 
 length.inf<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/length.inf.RDS")
