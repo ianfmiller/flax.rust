@@ -123,7 +123,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
             #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
             pustule.model.new.area<-.01 #predict change for small pustule, arbitrarily pick .01
             obs.time<-delta.days
-            pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,"temp.7.30.dew.point.days"=new.temp.7.30.dew.point.days/delta.days,"tot.rain"=new.tot.rain/delta.days,"gust.speed.days"=new.gust.speed.days/delta.days)
+            pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,"temp.days.16.22"=new.temp.days.16.22/delta.days,"temp.16.22.dew.point.days"=new.temp.16.22.dew.point.days/delta.days)
             pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,re.form=~0)
             
             #store values
