@@ -19,6 +19,9 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   ## load data
   within.host<-read.csv("~/Documents/GitHub/flax.rust/data/Withinhost.csv")
   
+  ## cut out incomplete records
+  within.host<-within.host[-intersect(which(within.host$Site=="HM"),which(as.Date(within.host$Date,tryFormats = "%m/%d/%y")>as.Date("2020-07-10"))),]
+  
   ## pull out relevant columns
   stems<-within.host[,c("Year","Site","Tag","Date","picture","stem.index","stem.height","percent.tissue.infected","length.tissue.infected","N.pustules.middle")]
   
