@@ -69,7 +69,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
     for (stem.index in unique(sub.length.inf.1$stem.index))
     {
       sub.length.inf.2<-sub.length.inf.1[which(sub.length.inf.1$stem.index==stem.index),]
-      sub.length.inf.2<-sub.length.inf.2[-which(sub.length.inf.2$length.tissue.infected==""),]
+      sub.length.inf.2<-sub.length.inf.2[-which(is.na(sub.length.inf.2$length.tissue.infected)),]
       
       if(dim(sub.length.inf.2)[1]>=2)
       {
