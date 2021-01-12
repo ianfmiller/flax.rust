@@ -68,41 +68,36 @@ abline(0,1)
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/length.inf.model.RDS"))
 {
   ### construct all combinations of predictors
-  source("n.pustules.model.set.creation.R")
+  source("length.inf.model.set.creation.R")
   
   ### create all sets of models
-  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("n.pustules.next ~ offset(n.pustules)",predictors[x],'(1|tag)'),collapse=" + ")))
+  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("end.length.inf ~ offset(start.length.inf)",predictors[x],'(1|tag)'),collapse=" + ")))
   names(model.set)<-seq(1,length(model.set),1)
   
   ## run to search for best  model
   all.fit.models<-c()
-  AIC.benchmark<- AIC(lmer(n.pustules.next~offset(n.pustules)+n.pustules+(1|tag),data=delta.n.pustules)) #cutoff to limit memory usage
+  #AIC.benchmark<- AIC(lmer(end.length.inf~offset(start.length.inf)+start.length.inf+(1|tag),data=delta.length.inf)) #cutoff to limit memory usage
+  AIC.benchmark<-1050
   pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
   for (i in 1:length(model.set))
   {
-    suppressMessages(new.mod<-lmer(model.set[[i]],data=delta.n.pustules))
+    suppressMessages(new.mod<-lmer(model.set[[i]],data=delta.length.inf))
     AIC.new.mod<-AIC(new.mod)
     if(AIC.new.mod<=(AIC.benchmark)) {all.fit.models<-append(all.fit.models,list(new.mod))}
     pb$tick()
   }
-  
   
   ## compare between models
   AICs<-unlist(lapply(all.fit.models,AIC))
   delta.AICs<-AICs-min(AICs)
   index<-1
   best.model<-all.fit.models[[order(AICs)[index]]]
-  saveRDS(best.model,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS")
+  saveRDS(best.model,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/length.inf.model.RDS")
 }
 
 ## load best model
 
-n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS")
+length.inf.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/length.inf.model.RDS")
 
 ## visualize model
-
-par(mfrow=c(1,1))
-plot(delta.n.pustules$temp.days.16.22,delta.n.pustules$n.pustules.next-delta.n.pustules$n.pustules,xlab="temp.days.16.22",ylab="change in n pustules",ylim=c(-20,20))
-
-curve(fixef(n.pustules.model)["(Intercept)"]+fixef(n.pustules.model)["temp.days.16.22"]*x,add=T,col="blue")
 
