@@ -6,7 +6,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
   
   # prep enviro data
-  source("prep.enviro.data.R")
+  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
   
   # subset 'pustules' data set to get unqiue number of pustules data
   
@@ -122,8 +122,9 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
             #predict pustule growth from pustule growth model and enviro conditions
             #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
             pustule.model.new.area<-.01 #predict change for small pustule, arbitrarily pick .01
+            pustule.model.new.time<-1
             obs.time<-delta.days
-            pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,"temp.days.16.22"=new.temp.days.16.22/delta.days,"temp.16.22.dew.point.days"=new.temp.16.22.dew.point.days/delta.days)
+            pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,"time"=pustule.model.new.time,"temp.days.16.22"=new.temp.days.16.22/delta.days,"temp.16.22.dew.point.days"=new.temp.16.22.dew.point.days/delta.days,"temp.16.22.wetness.days"=new.temp.16.22.wetness.days/delta.days,"tot.rain"=new.tot.rain/delta.days)
             pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,re.form=~0)
             
             #store values
