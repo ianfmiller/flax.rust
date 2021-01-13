@@ -76,13 +76,43 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
     if(AIC.new.mod<=(AIC.benchmark)) {all.fit.models<-append(all.fit.models,list(new.mod))}
     pb$tick()
   }
-  
-  
+
   ## compare between models
   AICs<-unlist(lapply(all.fit.models,AIC))
   delta.AICs<-AICs-min(AICs)
+  
+  ### models with pred.pustule.diam.growth included as predictor show insignificant and inconsistent directional effect of pred.pustule.diam.growth.
+  ### As such we exclude models containing pred.pustule.diam.growth from the analysis.
+  candidate.models<-which(delta.AICs<4)
+  p.vals<-c()
+  coefs<-c()
+  for(i in 1:length(candidate.models))
+  {
+    mod.summary<-summary(all.fit.models[[candidate.models[i]]])
+    
+    new.p.val<-mod.summary$coefficients["pred.pustule.diam.growth","Pr(>|t|)"]
+    p.vals<-c(p.vals,new.p.val)
+    
+    new.coef<-mod.summary$coefficients["pred.pustule.diam.growth","Estimate"]
+    coefs<-c(coefs,new.coef)
+  }
+  par(mfrow=c(1,2))
+  plot(delta.AICs[candidate.models],p.vals,xlab="delta AIC",ylab="p",main="significance of pred.pustule.diam.growth")
+  plot(delta.AICs[candidate.models],coefs,xlab="delta AIC",ylab="p",main="coeficient of pred.pustule.diam.growth")
+  
+  drop.indicies<-c()
+  for(i in 1:length(all.fit.models))
+  {
+    model.vars<-names(fixef(all.fit.models[[i]]))
+    if("pred.pustule.diam.growth" %in% model.vars) {drop.indicies<-c(drop.indicies,i)}
+  }
+  
+  new.model.set<-all.fit.models[-drop.indicies]
+  new.AICs<-unlist(lapply(new.model.set,AIC))
+  new.delta.AICs<-new.AICs-min(new.AICs)
+  
   index<-1
-  best.model<-all.fit.models[[order(AICs)[index]]]
+  best.model<-new.model.set[[order(new.AICs)[index]]]
   saveRDS(best.model,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS")
 }
 
