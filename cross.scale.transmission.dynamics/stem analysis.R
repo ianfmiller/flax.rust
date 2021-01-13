@@ -81,18 +81,19 @@ stems.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dyna
 
 ## visualize model
 par(mfrow=c(1,1))
-plot(delta.stems$stem.inf.intens,delta.stems$stem.inf.intens.next-delta.stems$stem.inf.intens,xlim=c(0,1000))
+plot(delta.stems$stem.inf.intens,delta.stems$stem.inf.intens.next-delta.stems$stem.inf.intens)
 
-quant.time<-quantile(delta.stems$time,.5)
 quant.temp.days.16.22<-quantile(delta.stems$temp.days.16.22,.5)
-quant.dew.point.days<-quantile(delta.stems$dew.point.days,.5)
 quant.temp.16.22.dew.point.days<-quantile(delta.stems$temp.16.22.dew.point.days,.5)
-quant.wetness.days <-quantile(delta.stems$wetness.days ,.5)
-quant.temp.16.22.wetness.days <-quantile(delta.stems$temp.16.22.wetness.days ,.5)
+quant.temp.7.30.wetness.days <-quantile(delta.stems$temp.16.22.wetness.days ,.5)
 quant.tot.rain  <-quantile(delta.stems$tot.rain  ,.5)
-quant.wind.speed.days <-quantile(delta.stems$wind.speed.days ,.5)
-quant.pred.pustule.diam.growth <-quantile(delta.stems$pred.pustule.diam.growth ,.5)
-quant.pred.pustule.num.increase <-quantile(delta.stems$pred.pustule.num.increase ,.5)
 
 curve.col<-"blue"
-curve(fixef(stems.model)["(Intercept)"]+fixef(stems.model)["stem.inf.intens"]*x+fixef(stems.model)["time"]*quant.time+fixef(stems.model)["temp.days.16.22"]*quant.temp.days.16.22+fixef(stems.model)["dew.point.days"]*quant.dew.point.days+fixef(stems.model)["temp.16.22.dew.point.days"]*quant.temp.16.22.dew.point.days+fixef(stems.model)["wetness.days"]*quant.wetness.days+fixef(stems.model)["temp.16.22.wetness.days"]*quant.temp.16.22.wetness.days+fixef(stems.model)["tot.rain"]*quant.tot.rain+fixef(stems.model)["wind.speed.days"]*quant.wind.speed.days+fixef(stems.model)["pred.pustule.diam.growth"]*quant.pred.pustule.diam.growth+fixef(stems.model)["pred.pustule.num.increase"]*quant.pred.pustule.num.increase,add=T,col=curve.col)
+curve(fixef(stems.model)["(Intercept)"]+
+        fixef(stems.model)["stem.inf.intens"]*x+
+        fixef(stems.model)["temp.days.16.22"]*quant.temp.days.16.22+
+        fixef(stems.model)["temp.16.22.dew.point.days"]*quant.temp.16.22.dew.point.days+
+        fixef(stems.model)["temp.7.30.wetness.days"]*quant.temp.7.30.wetness.days+
+        fixef(stems.model)["tot.rain"]*quant.tot.rain
+        ,add=T,col=curve.col)
+
