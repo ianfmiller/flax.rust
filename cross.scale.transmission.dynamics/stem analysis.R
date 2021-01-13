@@ -6,7 +6,7 @@ library(progress)
 # load data
 
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/stem data prep.R")
-delta.stems<-subset(delta.stems,time<=7)
+delta.stems<-subset(delta.stems,time<=10)
 #delta.stems<-delta.stems[-which(delta.stems$end.stems>delta.stems$end.length),]
 # visualize data
 
@@ -56,11 +56,12 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   
   ## run to search for best  model
   all.fit.models<-c()
-  AIC.benchmark<- AIC(lmer(stem.inf.intens.next~offset(stem.inf.intens)+stem.inf.intens+(1|tag),data=delta.stems)) #cutoff to limit memory usage
+  AIC.benchmark<- AIC(lmer(stem.inf.intens.next~offset(stem.inf.intens)+stem.inf.intens+(1|tag),data=delta.stems,REML = F)) #cutoff to limit memory usage
+  #AIC.benchmark<- 8025
   pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
   for (i in 1:length(model.set))
   {
-    suppressMessages(new.mod<-lmer(model.set[[i]],data=delta.stems))
+    suppressMessages(new.mod<-lmer(model.set[[i]],data=delta.stems,REML = F))
     AIC.new.mod<-AIC(new.mod)
     if(AIC.new.mod<=(AIC.benchmark)) {all.fit.models<-append(all.fit.models,list(new.mod))}
     pb$tick()
@@ -79,4 +80,19 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 stems.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/stems.model.RDS")
 
 ## visualize model
+par(mfrow=c(1,1))
+plot(delta.stems$stem.inf.intens,delta.stems$stem.inf.intens.next-delta.stems$stem.inf.intens,xlim=c(0,1000))
 
+quant.time<-quantile(delta.stems$time,.5)
+quant.temp.days.16.22<-quantile(delta.stems$temp.days.16.22,.5)
+quant.dew.point.days<-quantile(delta.stems$dew.point.days,.5)
+quant.temp.16.22.dew.point.days<-quantile(delta.stems$temp.16.22.dew.point.days,.5)
+quant.wetness.days <-quantile(delta.stems$wetness.days ,.5)
+quant.temp.16.22.wetness.days <-quantile(delta.stems$temp.16.22.wetness.days ,.5)
+quant.tot.rain  <-quantile(delta.stems$tot.rain  ,.5)
+quant.wind.speed.days <-quantile(delta.stems$wind.speed.days ,.5)
+quant.pred.pustule.diam.growth <-quantile(delta.stems$pred.pustule.diam.growth ,.5)
+quant.pred.pustule.num.increase <-quantile(delta.stems$pred.pustule.num.increase ,.5)
+
+curve.col<-"blue"
+curve(fixef(stems.model)["(Intercept)"]+fixef(stems.model)["stem.inf.intens"]*x+fixef(stems.model)["time"]*quant.time+fixef(stems.model)["temp.days.16.22"]*quant.temp.days.16.22+fixef(stems.model)["dew.point.days"]*quant.dew.point.days+fixef(stems.model)["temp.16.22.dew.point.days"]*quant.temp.16.22.dew.point.days+fixef(stems.model)["wetness.days"]*quant.wetness.days+fixef(stems.model)["temp.16.22.wetness.days"]*quant.temp.16.22.wetness.days+fixef(stems.model)["tot.rain"]*quant.tot.rain+fixef(stems.model)["wind.speed.days"]*quant.wind.speed.days+fixef(stems.model)["pred.pustule.diam.growth"]*quant.pred.pustule.diam.growth+fixef(stems.model)["pred.pustule.num.increase"]*quant.pred.pustule.num.increase,add=T,col=curve.col)

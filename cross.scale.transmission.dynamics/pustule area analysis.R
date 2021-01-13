@@ -63,11 +63,11 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   
   ## run to search for best  model
   all.fit.models<-c()
-  AIC.benchmark<- AIC(lmer(area.next~offset(area)+area+(1|tag),data=delta.pustules)) #cutoff to limit memory usage
+  AIC.benchmark<- AIC(lmer(area.next~offset(area)+area+(1|tag),data=delta.pustules,REML = F)) #cutoff to limit memory usage
   pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
   for (i in 1:length(model.set))
   {
-    suppressMessages(new.mod<-lmer(model.set[[i]],data=delta.pustules))
+    suppressMessages(new.mod<-lmer(model.set[[i]],data=delta.pustules,REML = F))
     AIC.new.mod<-AIC(new.mod)
     if(AIC.new.mod<=(AIC.benchmark)) {all.fit.models<-append(all.fit.models,list(new.mod))}
     pb$tick()
