@@ -9,7 +9,6 @@ predictors<-c("time",
                "wetness.days",
                "temp.wetness.days","temp.16.22.wetness.days","temp.7.30.wetness.days",
                "tot.rain"
-               #"solar.days","wind.speed.days","gust.speed.days"
 )
 
 pred.mat<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F))
@@ -26,8 +25,6 @@ switch.vars<-list(
   list("temp.wetness.days",c("temp.16.22.wetness.days","temp.7.30.wetness.days")),
   list("temp.16.22.wetness.days",c("temp.wetness.days","temp.7.30.wetness.days")),
   list("temp.7.30.wetness.days",c("temp.wetness.days","temp.16.22.wetness.days"))
-  #list("wind.speed.days",c("gust.speed.days")),
-  #list("gust.speed.days",c("wind.speed.days"))
 )
 
 ### turn variables off
