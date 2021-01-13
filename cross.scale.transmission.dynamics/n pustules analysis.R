@@ -59,7 +59,7 @@ abline(0,1)
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS"))
 {
   ### construct all combinations of predictors
-  source("n.pustules.model.set.creation.R")
+  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/n.pustules.model.set.creation.R")
   
   ### create all sets of models
   model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("n.pustules.next ~ offset(n.pustules)",predictors[x],'(1|tag)'),collapse=" + ")))
@@ -80,39 +80,8 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   ## compare between models
   AICs<-unlist(lapply(all.fit.models,AIC))
   delta.AICs<-AICs-min(AICs)
-  
-  ### models with pred.pustule.diam.growth included as predictor show insignificant and inconsistent directional effect of pred.pustule.diam.growth.
-  ### As such we exclude models containing pred.pustule.diam.growth from the analysis.
-  candidate.models<-which(delta.AICs<4)
-  p.vals<-c()
-  coefs<-c()
-  for(i in 1:length(candidate.models))
-  {
-    mod.summary<-summary(all.fit.models[[candidate.models[i]]])
-    
-    new.p.val<-mod.summary$coefficients["pred.pustule.diam.growth","Pr(>|t|)"]
-    p.vals<-c(p.vals,new.p.val)
-    
-    new.coef<-mod.summary$coefficients["pred.pustule.diam.growth","Estimate"]
-    coefs<-c(coefs,new.coef)
-  }
-  par(mfrow=c(1,2))
-  plot(delta.AICs[candidate.models],p.vals,xlab="delta AIC",ylab="p",main="significance of pred.pustule.diam.growth")
-  plot(delta.AICs[candidate.models],coefs,xlab="delta AIC",ylab="p",main="coeficient of pred.pustule.diam.growth")
-  
-  drop.indicies<-c()
-  for(i in 1:length(all.fit.models))
-  {
-    model.vars<-names(fixef(all.fit.models[[i]]))
-    if("pred.pustule.diam.growth" %in% model.vars) {drop.indicies<-c(drop.indicies,i)}
-  }
-  
-  new.model.set<-all.fit.models[-drop.indicies]
-  new.AICs<-unlist(lapply(new.model.set,AIC))
-  new.delta.AICs<-new.AICs-min(new.AICs)
-  
   index<-1
-  best.model<-new.model.set[[order(new.AICs)[index]]]
+  best.model<-all.fit.models[[order(AICs)[index]]]
   saveRDS(best.model,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS")
 }
 
@@ -125,5 +94,7 @@ n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission
 par(mfrow=c(1,1))
 plot(delta.n.pustules$temp.days.16.22,delta.n.pustules$n.pustules.next-delta.n.pustules$n.pustules,xlab="temp.days.16.22",ylab="change in n pustules",ylim=c(-20,20))
 
-curve(fixef(n.pustules.model)["(Intercept)"]+fixef(n.pustules.model)["temp.days.16.22"]*x,add=T,col="blue")
+quant.temp.16.22.wetness.days<-quantile(delta.n.pustules$temp.16.22.wetness.days,.5)
+
+curve(fixef(n.pustules.model)["(Intercept)"]+fixef(n.pustules.model)["temp.days.16.22"]*x+fixef(n.pustules.model)["temp.16.22.wetness.days"]*quant.temp.16.22.wetness.days,add=T,col="blue")
 
