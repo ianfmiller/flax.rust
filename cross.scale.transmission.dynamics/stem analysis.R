@@ -13,7 +13,7 @@ delta.stems<-subset(delta.stems,time<=10)
 ## histograms
 par(mfrow=c(2,1))
 hist(stems$stem.inf.intens,main="stem infection intensity",breaks=100,xlab="stem infection intensity")
-hist(delta.stems$stem.inf.intens.next-delta.stems$stem.inf.intens,main="change in stem infection intensity",breaks=100,xlab="change in length stem inf")
+hist(delta.stems$stem.inf.intens.next-delta.stems$stem.inf.intens,main="change in stem infection intensity",breaks=100,xlab="change in stem infection intensity")
 
 ## plot trajectories
 par(mfrow=c(1,1))
