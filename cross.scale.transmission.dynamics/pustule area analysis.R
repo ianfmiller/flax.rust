@@ -58,12 +58,12 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/pustule.model.set.creation.R")
   
   ### create all sets of models
-  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ offset(area) + area",predictors[x],'(1|tag)'),collapse=" + ")))
+  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ area",predictors[x],'(1|tag)'),collapse=" + ")))
   names(model.set)<-seq(1,length(model.set),1)
   
   ## run to search for best  model
   all.fit.models<-c()
-  AIC.benchmark<- AIC(lmer(area.next~offset(area)+area+(1|tag),data=delta.pustules,REML = F)) #cutoff to limit memory usage
+  AIC.benchmark<- AIC(lmer(area.next~area+(1|tag),data=delta.pustules,REML = F)) #cutoff to limit memory usage
   pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
   for (i in 1:length(model.set))
   {
@@ -89,7 +89,7 @@ pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dy
 ## visualize model
 
 par(mfrow=c(1,1))
-plot(delta.pustules$area,delta.pustules$area.next-delta.pustules$area,xlab="area",ylab="change in pustule area")
+plot(delta.pustules$area,delta.pustules$area.next,xlab="area",ylab="next. obs. area")
 
 quant.time<-quantile(delta.pustules$time,.5)
 quant.temp.days.16.22<-quantile(delta.pustules$temp.days.16.22,.5)
