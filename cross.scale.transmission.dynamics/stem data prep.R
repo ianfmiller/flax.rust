@@ -12,7 +12,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   
   
   # prep enviro data
-  source("prep.enviro.data.R")
+  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
   
   # prep data
   
@@ -40,6 +40,11 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   ## add on infection intensity
   
   stems$stem.inf.intens<-stems$length.tissue.infected*stems$N.pustules.middle
+  
+  ## correct 0 intensities to .1, logic being that this is a measure of tot infection load, and it shouldn't be less than 1 pustule (coded as .1cm infected tissue, 1 pustule/leaf)
+  
+  stems$stem.inf.intens[which(stems$stem.inf.intens<.1)]<-.1
+  
   ## make new data object for change in pustule size
   
   temp.rh.sub.func<-function(x,lower.bound,upper.bound) {out<-subset(x,temp.c>=lower.bound); out<-subset(out,temp.c<=upper.bound); out}
@@ -155,8 +160,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
           new.temp.7.30.wetness.days<-sum(weath.sub$temp.7.30*weath.sub$wetness*weath.sub$interval.length,na.rm = T)
           
           #pull out core predictors
-          new.start.stem.inf.intens<-sub.stems.2[i,"length.tissue.infected"]*sub.stems.2[i,"N.pustules.middle"]
-          new.end.stem.inf.intens<-sub.stems.2[i+1,"length.tissue.infected"]*sub.stems.2[i+1,"N.pustules.middle"]
+          new.start.stem.inf.intens<-sub.stems.2[i,"stem.inf.intens"]
+          new.end.stem.inf.intens<-sub.stems.2[i+1,"stem.inf.intens"]
           start.length<-sub.stems.2[i,"stem.height"]
           end.length<-sub.stems.2[i+1,"stem.height"]
           delta.days<-as.numeric(date1-date0)
@@ -171,7 +176,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
           
           #predict change in number of pustules from enviro conditions
           #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
-          n.pustules.model.new.n.pustules<-0 #included only for offset, picked 0 for ease of interpretability
+          n.pustules.model.new.n.pustules<-1
           obs.time<-delta.days
           n.pustules.model.pred.data<-data.frame("n.pustules"=n.pustules.model.new.n.pustules,"temp.days.16.22"=new.temp.days.16.22/delta.days,"temp.16.22.wetness.days"=new.temp.16.22.wetness.days)
           pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,re.form=~0)
