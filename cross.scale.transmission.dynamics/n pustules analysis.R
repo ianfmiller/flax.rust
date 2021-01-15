@@ -45,10 +45,8 @@ for (tag in unique(n.pustules$tag))
 }
 
 ## plot change
-par(mfrow=c(1,2))
+par(mfrow=c(1,1))
 plot(delta.n.pustules$n.pustules,delta.n.pustules$n.pustules.next,col="grey",xlab = "area",ylab="next obs. area")
-abline(0,1)
-plot(delta.n.pustules$n.pustules,delta.n.pustules$n.pustules.next,col="grey",xlab = "area",ylab="next obs. area",xlim=c(0,20),ylim=c(0,20))
 abline(0,1)
 
 
@@ -62,12 +60,12 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/n.pustules.model.set.creation.R")
   
   ### create all sets of models
-  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("n.pustules.next ~ offset(n.pustules)",predictors[x],'(1|tag)'),collapse=" + ")))
+  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("n.pustules.next ~ ",predictors[x],'(1|tag)'),collapse=" + ")))
   names(model.set)<-seq(1,length(model.set),1)
   
   ## run to search for best  model
   all.fit.models<-c()
-  AIC.benchmark<- AIC(lmer(n.pustules.next~offset(n.pustules)+n.pustules+(1|tag),data=delta.n.pustules,REML = F)) #cutoff to limit memory usage
+  AIC.benchmark<- AIC(lmer(n.pustules.next~n.pustules+(1|tag),data=delta.n.pustules,REML = F)) #cutoff to limit memory usage
   pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
   for (i in 1:length(model.set))
   {
@@ -92,9 +90,10 @@ n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission
 ## visualize model
 
 par(mfrow=c(1,1))
-plot(delta.n.pustules$temp.days.16.22,delta.n.pustules$n.pustules.next-delta.n.pustules$n.pustules,xlab="temp.days.16.22",ylab="change in n pustules",ylim=c(-20,20))
+plot(delta.n.pustules$n.pustules,delta.n.pustules$n.pustules.next,xlab="n pustules",ylab="next obs. n pustules")
 
+quant.temp.days.16.22<-quantile(delta.n.pustules$temp.days.16.22,.5)
 quant.temp.16.22.wetness.days<-quantile(delta.n.pustules$temp.16.22.wetness.days,.5)
 
-curve(fixef(n.pustules.model)["(Intercept)"]+fixef(n.pustules.model)["temp.days.16.22"]*x+fixef(n.pustules.model)["temp.16.22.wetness.days"]*quant.temp.16.22.wetness.days,add=T,col="blue")
+curve(fixef(n.pustules.model)["(Intercept)"]+fixef(n.pustules.model)["n.pustules"]*x++fixef(n.pustules.model)["temp.days.16.22"]*quant.temp.days.16.22+fixef(n.pustules.model)["temp.16.22.wetness.days"]*quant.temp.16.22.wetness.days,add=T,col="blue")
 
