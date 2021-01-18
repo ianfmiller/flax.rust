@@ -7,6 +7,7 @@ library(progress)
 
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/stem data prep.R")
 delta.stems<-subset(delta.stems,time<=10)
+
 #delta.stems<-delta.stems[-which(delta.stems$end.stems>delta.stems$end.length),]
 # visualize data
 
@@ -36,11 +37,16 @@ for (tag in unique(stems$Tag))
 
 
 ## plot change
-par(mfrow=c(2,1))
+par(mfrow=c(1,1))
 plot(delta.stems$stem.inf.intens,delta.stems$stem.inf.intens.next,col="grey",xlab = "stem infection intensity",ylab="next obs. stem infection intensity")
 abline(0,1)
-plot(delta.stems$stem.inf.intens,delta.stems$stem.inf.intens.next-delta.stems$stem.inf.intens,col="grey",xlab = "stem infection intensity",ylab="change in stem infection intensity")
-abline(h=0)
+
+## plot log10 change
+### relationship doesn't appear obviously linear near 0--proceed with GAM approach
+par(mfrow=c(1,1))
+plot(log10(delta.stems$stem.inf.intens),log10(delta.stems$stem.inf.intens.next),col="grey",xlab = "stem infection intensity",ylab="next obs. stem infection intensity")
+abline(0,1)
+
 # analyze data
 
 ## fit models--only if not already fit
@@ -51,17 +57,16 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/stem.model.set.creation.R")
   
   ### create all sets of models
-  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("stem.inf.intens.next ~ offset(stem.inf.intens) + stem.inf.intens",predictors[x],'(1|tag)'),collapse=" + ")))
+  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("log10(stem.inf.intens.next) ~ s(log10(stem.inf.intens),k=3)",predictors[x],'s(tag,bs="re")'),collapse=" + ")))
   names(model.set)<-seq(1,length(model.set),1)
   
   ## run to search for best  model
   all.fit.models<-c()
-  AIC.benchmark<- AIC(lmer(stem.inf.intens.next~offset(stem.inf.intens)+stem.inf.intens+(1|tag),data=delta.stems,REML = F)) #cutoff to limit memory usage
-  #AIC.benchmark<- 8025
+  AIC.benchmark<- AIC(gam(log10(stem.inf.intens.next)~s(log10(stem.inf.intens),k=3)+s(tag,bs="re"),data=delta.stems,method = 'ML')) #cutoff to limit memory usage
   pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
   for (i in 1:length(model.set))
   {
-    suppressMessages(new.mod<-lmer(model.set[[i]],data=delta.stems,REML = F))
+    suppressMessages(new.mod<-gam(model.set[[i]],data=delta.stems,method = 'ML'))
     AIC.new.mod<-AIC(new.mod)
     if(AIC.new.mod<=(AIC.benchmark)) {all.fit.models<-append(all.fit.models,list(new.mod))}
     pb$tick()
@@ -81,7 +86,7 @@ stems.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dyna
 
 ## visualize model
 par(mfrow=c(1,1))
-plot(delta.stems$stem.inf.intens,delta.stems$stem.inf.intens.next-delta.stems$stem.inf.intens)
+plot(log10(delta.stems$stem.inf.intens),log10(delta.stems$stem.inf.intens.next))
 
 quant.temp.days.16.22<-quantile(delta.stems$temp.days.16.22,.5)
 quant.temp.16.22.dew.point.days<-quantile(delta.stems$temp.16.22.dew.point.days,.5)
