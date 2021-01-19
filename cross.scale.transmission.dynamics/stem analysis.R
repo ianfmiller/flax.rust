@@ -42,10 +42,27 @@ plot(delta.stems$stem.inf.intens,delta.stems$stem.inf.intens.next,col="grey",xla
 abline(0,1)
 
 ## plot log10 change
-### relationship doesn't appear obviously linear near 0--proceed with GAM approach
+### relationship doesn't appear obviously linear near 0--take polynomial fitting approach
 par(mfrow=c(1,1))
 plot(log10(delta.stems$stem.inf.intens),log10(delta.stems$stem.inf.intens.next),col="grey",xlab = "stem infection intensity",ylab="next obs. stem infection intensity")
 abline(0,1)
+
+## test different ordered polynomial fits
+plot(log10(delta.stems$stem.inf.intens),log10(delta.stems$stem.inf.intens.next))
+legend("bottomright",legend = c("linear","quadratic","cubic","quartic"),lty=1,col=c("blue","red","green","purple"))
+test.mod.1<-lmer(log10(stem.inf.intens.next)~log10(stem.inf.intens)+(1|tag),data=delta.stems,REML = F)
+abline(fixef(test.mod.1)[1],fixef(test.mod.1)[1],col="blue")
+
+test.mod.2<-lmer(log10(stem.inf.intens.next)~poly(log10(stem.inf.intens),2,raw = T)+(1|tag),data=delta.stems,REML = F)
+curve(fixef(test.mod.2)[1]+fixef(test.mod.2)[2]*x+fixef(test.mod.2)[3]*x^2,add=T,col="red")
+
+test.mod.3<-lmer(log10(stem.inf.intens.next)~poly(log10(stem.inf.intens),3,raw = T)+(1|tag),data=delta.stems,REML = F)
+curve(fixef(test.mod.3)[1]+fixef(test.mod.3)[2]*x+fixef(test.mod.3)[3]*x^2+fixef(test.mod.3)[4]*x^3,add=T,col="green")
+
+test.mod.4<-lmer(log10(stem.inf.intens.next)~poly(log10(stem.inf.intens),4,raw = T)+(1|tag),data=delta.stems,REML = F)
+curve(fixef(test.mod.4)[1]+fixef(test.mod.4)[2]*x+fixef(test.mod.4)[3]*x^2+fixef(test.mod.4)[4]*x^3+fixef(test.mod.4)[5]*x^4,add=T,col="purple")
+
+AIC(test.mod.1,test.mod.2,test.mod.3,test.mod.4) ### cubic gives best fit
 
 # analyze data
 
@@ -57,16 +74,16 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/stem.model.set.creation.R")
   
   ### create all sets of models
-  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("log10(stem.inf.intens.next) ~ s(log10(stem.inf.intens),k=3)",predictors[x],'s(tag,bs="re")'),collapse=" + ")))
+  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("log10(stem.inf.intens.next) ~ poly(log10(stem.inf.intens),2,raw=T)",predictors[x],'(1|tag)'),collapse=" + ")))
   names(model.set)<-seq(1,length(model.set),1)
   
   ## run to search for best  model
   all.fit.models<-c()
-  AIC.benchmark<- AIC(gam(log10(stem.inf.intens.next)~s(log10(stem.inf.intens),k=3)+s(tag,bs="re"),data=delta.stems,method = 'ML')) #cutoff to limit memory usage
+  AIC.benchmark<- AIC(lmer(log10(stem.inf.intens.next)~poly(log10(stem.inf.intens),2,raw = T)+(1|tag),data=delta.stems,REML = F)) #cutoff to limit memory usage
   pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
   for (i in 1:length(model.set))
   {
-    suppressMessages(new.mod<-gam(model.set[[i]],data=delta.stems,method = 'ML'))
+    suppressMessages(new.mod<-lmer(model.set[[i]],data=delta.stems,REML = F))
     AIC.new.mod<-AIC(new.mod)
     if(AIC.new.mod<=(AIC.benchmark)) {all.fit.models<-append(all.fit.models,list(new.mod))}
     pb$tick()
@@ -88,16 +105,13 @@ stems.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dyna
 par(mfrow=c(1,1))
 plot(log10(delta.stems$stem.inf.intens),log10(delta.stems$stem.inf.intens.next))
 
-quant.temp.days.16.22<-quantile(delta.stems$temp.days.16.22,.5)
-quant.temp.16.22.dew.point.days<-quantile(delta.stems$temp.16.22.dew.point.days,.5)
-quant.temp.7.30.wetness.days <-quantile(delta.stems$temp.16.22.wetness.days ,.5)
-quant.tot.rain  <-quantile(delta.stems$tot.rain  ,.5)
+quant.temp.7.30.wetness.days <-quantile(delta.stems$temp.7.30.wetness.days,.5)
+quant.tot.rain<-quantile(delta.stems$tot.rain,.5)
 
 curve.col<-"blue"
 curve(fixef(stems.model)["(Intercept)"]+
-        fixef(stems.model)["stem.inf.intens"]*x+
-        fixef(stems.model)["temp.days.16.22"]*quant.temp.days.16.22+
-        fixef(stems.model)["temp.16.22.dew.point.days"]*quant.temp.16.22.dew.point.days+
+        fixef(stems.model)["poly(log10(stem.inf.intens), 2, raw = T)1"]*x+
+        fixef(stems.model)["poly(log10(stem.inf.intens), 2, raw = T)2"]*x^2+
         fixef(stems.model)["temp.7.30.wetness.days"]*quant.temp.7.30.wetness.days+
         fixef(stems.model)["tot.rain"]*quant.tot.rain
         ,add=T,col=curve.col)
