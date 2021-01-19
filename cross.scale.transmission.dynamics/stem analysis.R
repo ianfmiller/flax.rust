@@ -62,7 +62,7 @@ curve(fixef(test.mod.3)[1]+fixef(test.mod.3)[2]*x+fixef(test.mod.3)[3]*x^2+fixef
 test.mod.4<-lmer(log10(stem.inf.intens.next)~poly(log10(stem.inf.intens),4,raw = T)+(1|tag),data=delta.stems,REML = F)
 curve(fixef(test.mod.4)[1]+fixef(test.mod.4)[2]*x+fixef(test.mod.4)[3]*x^2+fixef(test.mod.4)[4]*x^3+fixef(test.mod.4)[5]*x^4,add=T,col="purple")
 
-AIC(test.mod.1,test.mod.2,test.mod.3,test.mod.4) ### cubic gives best fit
+AIC(test.mod.1,test.mod.2,test.mod.3,test.mod.4) ### quadratic and cubic give similar AICs, go with quadratic
 
 # analyze data
 
