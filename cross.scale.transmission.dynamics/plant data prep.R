@@ -92,6 +92,9 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   
   plants<-data.frame("Year"=years,"Site"=sites,"Tag"=tags,"Date"=dates,"N.Stems"=n.stems,"N.D.Stems"=n.d.stems,"max.height"=max.heights,"picture"=reference.pictures,"plant.inf.intens"=plant.inf.intens)
 
+  ## correct 0 intensities to .1, logic being that this is a measure of tot infection load, and it shouldn't be less than 1 pustule (coded as .1cm infected tissue, 1 pustule/leaf)
+  plants$plant.inf.intens[which(plants$plant.inf.intens<.1)]<-.1
+  
   
   ## finish cleaning
   plants$Date<-as.Date(plants$Date,tryFormats = "%m/%d/%y")
