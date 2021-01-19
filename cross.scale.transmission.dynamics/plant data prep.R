@@ -223,7 +223,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         #stem.model.vars<-names(fixef(stems.model))[2:length(names(fixef(stems.model)))]
         stems.model.stem.inf.intens<-10  #predict change for lightly infected stem, arbitrarily pick .01
         obs.time<-delta.days
-        stems.model.pred.data<-data.frame("stem.inf.intens"=stems.model.stem.inf.intens,"temp.days.16.22"=new.temp.days.16.22/delta.days,"temp.16.22.dew.point.days"=new.temp.16.22.dew.point.days,"temp.7.30.wetness.days"=new.temp.7.30.wetness.days,"tot.rain"=new.tot.rain)
+        stems.model.pred.data<-data.frame("stem.inf.intens"=stems.model.stem.inf.intens,"temp.7.30.wetness.days"=new.temp.7.30.wetness.days/delta.days,"tot.rain"=new.tot.rain)
         pred.stem.inf.intens.increase<-predict(stems.model,newdata=stems.model.pred.data,re.form=~0)
         
         #store values
