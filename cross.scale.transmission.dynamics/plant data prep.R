@@ -219,14 +219,14 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         #n.pustule.model.vars<-names(fixef(n.pustule.model))[2:length(names(fixef(n.pustule.model)))]
         n.pustules.model.new.n.pustules<-0 #included only for offset, picked 0 for ease of interpretability
         obs.time<-delta.days
-        n.pustules.model.pred.data<-data.frame("n.pustules"=n.pustules.model.new.n.pustules,"temp.days.16.22"=new.temp.days.16.22/delta.days,"temp.16.22.wetness.days"=new.temp.16.22.wetness.days)
+        n.pustules.model.pred.data<-data.frame("n.pustules"=n.pustules.model.new.n.pustules,"temp.days.16.22"=new.temp.days.16.22/delta.days,"temp.16.22.wetness.days"=new.temp.16.22.wetness.days/delta.days)
         pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,re.form=~0)
         
         #predict change in stem infection intensity from enviro conditions
         #stem.model.vars<-names(fixef(stems.model))[2:length(names(fixef(stems.model)))]
         stems.model.stem.inf.intens<-1  #predict change for lightly infected stem, arbitrarily pick .01
         obs.time<-delta.days
-        stems.model.pred.data<-data.frame("stem.inf.intens"=stems.model.stem.inf.intens,"temp.7.30.wetness.days"=new.temp.7.30.wetness.days/delta.days,"tot.rain"=new.tot.rain)
+        stems.model.pred.data<-data.frame("stem.inf.intens"=stems.model.stem.inf.intens,"temp.7.30.wetness.days"=new.temp.7.30.wetness.days/delta.days,"tot.rain"=new.tot.rain/delta.days)
         pred.stem.inf.intens.increase<-predict(stems.model,newdata=stems.model.pred.data,re.form=~0)
         
         #store values
