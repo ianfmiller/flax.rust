@@ -33,7 +33,7 @@ for (tag in unique(plants$Tag))
 par(mfrow=c(2,1))
 plot(delta.plants$plant.inf.intens,delta.plants$plant.inf.intens.next,col="grey",xlab = "plant infection intensity",ylab="next obs. plant infection intensity")
 abline(0,1)
-plot(delta.plants$plant.inf.intens,delta.plants$plant.inf.intens.next-delta.plants$plant.inf.intens,col="grey",xlab = "stem infection intensity",ylab="change in stem infection intensity")
+plot(delta.plants$plant.inf.intens,delta.plants$plant.inf.intens.next-delta.plants$plant.inf.intens,col="grey",xlab = "plant infection intensity",ylab="change in plant infection intensity")
 abline(h=0)
 
 ## plot log10 change

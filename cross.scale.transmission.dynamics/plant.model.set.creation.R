@@ -8,10 +8,10 @@ predictors<-c("time",
               "temp.dew.point.days","temp.16.22.dew.point.days","temp.7.30.dew.point.days",
               "wetness.days",
               "temp.wetness.days","temp.16.22.wetness.days","temp.7.30.wetness.days",
-              "tot.rain","pred.pustule.diam.growth","pred.pustule.num.increase","pred.stem.inf.intens.increase"
+              "tot.rain","pred.pustule.diam.growth","pred.pustule.num.increase"
 )
 
-pred.mat<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F))
+pred.mat<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F))
 names(pred.mat)<-predictors
 
 ### define sets of variables that explain the same thing
