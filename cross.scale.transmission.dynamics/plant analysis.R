@@ -104,12 +104,18 @@ plot(log10(delta.plants$plant.inf.intens),log10(delta.plants$plant.inf.intens.ne
 
 quant.dew.point.days<-quantile(delta.plants$dew.point.days,.5)
 quant.temp.7.30.dew.point.days <-quantile(delta.plants$temp.7.30.dew.point.days ,.5)
+quant.temp.wetness.days<-quantile(delta.plants$temp.wetness.days,.5)
+quant.tot.rain<-quantile(delta.plants$tot.rain,.5)
+quant.pred.pustule.num.increase<-quantile(delta.plants$pred.pustule.num.increase,.5)
 
 curve.col<-"blue"
 curve(fixef(plants.model)["(Intercept)"]+
         fixef(plants.model)["poly(log10(plant.inf.intens), 2, raw = T)1"]*x+
         fixef(plants.model)["poly(log10(plant.inf.intens), 2, raw = T)2"]*x^2+
         fixef(plants.model)["dew.point.days"]*quant.dew.point.days+
-        fixef(plants.model)["temp.7.30.dew.point.days"]*quant.temp.7.30.dew.point.days
+        fixef(plants.model)["temp.7.30.dew.point.days"]*quant.temp.7.30.dew.point.days+
+        fixef(plants.model)["temp.wetness.days"]*quant.temp.wetness.days+
+        fixef(plants.model)["tot.rain"]*quant.tot.rain+
+        fixef(plants.model)["pred.pustule.num.increase"]*quant.pred.pustule.num.increase
       ,add=T,col=curve.col)
 
