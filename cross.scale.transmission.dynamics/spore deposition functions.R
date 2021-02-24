@@ -68,17 +68,34 @@ get.plume.xy<-function(degree,xorigin,yorigin,xtarget,ytarget,plot=F)
   
   s=-1*((y2-y1)/(x2-x1))^-1 #slope of perpendicular line
   
-  if(yp<(s*xp+y1+s*x1))
+  
+  if(y2>s*x2+y1+s*x1)
   {
-    newx<--1*((xp-x1)^2+(yp-y1)^2)^.5
-    c<-((x-x1)^2+(y-y1)^2)^.5
-    newy<-((c^2-newx^2))^.5
-  } else
-  {
-    newx<-((xp-x1)^2+(yp-y1)^2)^.5
-    c<-((x-x1)^2+(y-y1)^2)^.5
-    newy<-((c^2-newx^2))^.5
+    if(yp<(s*xp+y1+s*x1))
+    {
+      newx<--1*((xp-x1)^2+(yp-y1)^2)^.5
+      c<-((xtarget-x1)^2+(ytarget-y1)^2)^.5
+      newy<-((c^2-newx^2))^.5
+    } else
+    {
+      newx<-((xp-x1)^2+(yp-y1)^2)^.5
+      c<-((xtarget-x1)^2+(ytarget-y1)^2)^.5
+      newy<-((c^2-newx^2))^.5
+    }
+  } else {
+    if(yp>(s*xp+y1+s*x1))
+    {
+      newx<--1*((xp-x1)^2+(yp-y1)^2)^.5
+      c<-((xtarget-x1)^2+(ytarget-y1)^2)^.5
+      newy<-((c^2-newx^2))^.5
+    } else
+    {
+      newx<-((xp-x1)^2+(yp-y1)^2)^.5
+      c<-((xtarget-x1)^2+(ytarget-y1)^2)^.5
+      newy<-((c^2-newx^2))^.5
+    }
   }
+  
   
   if(plot)
   {
