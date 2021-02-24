@@ -29,6 +29,8 @@ n.d.stems<-c()
 max.heights<-c()
 plant.inf.intens<-c()
 
+
+i<-1
 par(mfrow=c(5,5))
 for(tag in unique(spores$Tag))
 {
@@ -36,9 +38,17 @@ for(tag in unique(spores$Tag))
   for(date in unique(sub.spores.1$Date.collected))
   {
     sub.spores.2<-sub.spores.1[which(sub.spores.1$Date.collected==date),]
-    plot(0,0,type="n",xlim=c(-100,100),ylim=c(-100,100),xlab="",ylab="")
-    points(unlist(lapply(sub.spores.2$Direction,get.x.direction))*sub.spores.2$Distance..cm.,unlist(lapply(sub.spores.2$Direction,get.y.direction))*sub.spores.2$Distance..cm.,cex=sub.spores.2$Pustules/100)
+    #plot(0,0,type="n",xlim=c(-100,100),ylim=c(-100,100),xlab="",ylab="")
+    #i<-i+1
+    #points(unlist(lapply(sub.spores.2$Direction,get.x.direction))*sub.spores.2$Distance..cm.,unlist(lapply(sub.spores.2$Direction,get.y.direction))*sub.spores.2$Distance..cm.,cex=sub.spores.2$Pustules/100,col=rainbow(77)[i])
     
+    plot(0,0,type="n",xlim=c(0,100),ylim=c(0,max(sub.spores.2$Pustules/sub.spores.2$X..squares.counted)),xlab="",ylab="")
+    for (direction in c("U","R","D","L"))
+    {
+      sub.spores.3<-subset(sub.spores.2,Direction==direction)
+      sub.spores.3<-sub.spores.3[order(sub.spores.3$Distance..cm.),]
+      points(sub.spores.3$Distance..cm.,sub.spores.3$Pustules/sub.spores.3$X..squares.counted,col=c("red","blue","green","black")[which(c("U","R","D","L")==direction)],type="l")
+    }
     zeros<-sub.spores.2[which(sub.spores.2$Distance..cm.==0),]
     mean.zero.depo<-mean(zeros$Pustules/zeros$X..squares.counted)
     
