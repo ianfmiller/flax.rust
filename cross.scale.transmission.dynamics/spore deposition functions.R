@@ -1,11 +1,18 @@
-#q is quantity of spores--need to change to function of wind speed and tot. infection intensity
-#H is height from which spores are disperesed--assume 0.5*plant height
-#s is wind speed
-#x is distance in direction of wind
-#y is distance orthoganal to direction of wind
-#alphay is sd of dispersal in y direction
-#alphaz is sd of dispersal in z direction (vertical)
-#Ws is falling velocity of spores
+# gaussian plume functions
+
+vis<-F # set to F so plots aren't generated on source
+
+## parameters
+
+### q is quantity of spores--need to change to function of wind speed and tot. infection intensity
+### H is height from which spores are disperesed--assume 0.5*plant height
+### s is wind speed
+### x is distance in direction of wind
+### y is distance orthoganal to direction of wind
+### alphay is sd of dispersal in y direction
+### alphaz is sd of dispersal in z direction (vertical)
+### Ws is falling velocity of spores
+### c is coefficient used to calculate decay constant along x as a function of s
 
 ## tilted gaussian plume https://www.jstor.org/stable/pdf/1937537.pdf?casa_token=wXe8JWI0TrIAAAAA:g6XJxzyOWPEPZd_yw_lMiam3aO9QRO6Usa_WYPKY7zNdRu3PGeXnCoeGv2tazU3CBimc0zfXEiHI39brv7GhMlG7zuUYAZGF2DrFWnH4GRIHul6m4Trcodel
 titled.plume<-function(q,H,s,x,y,alphay,alphaz)
@@ -18,10 +25,14 @@ titled.plume<-function(q,H,s,x,y,alphay,alphaz)
     )
 }
 
-test.mat<-data.frame(x=rep(seq(-100,100,1),each=201),y=rep(seq(-100,100,1),times=201))
-out<-mapply(D, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=1,H=5,s=500,alphay=10,alphaz=10))
-res.mat<-matrix(out,201,201,byrow = T)
-filled.contour(res.mat)
+## visualize
+if(vis)
+{
+  test.mat<-data.frame(x=rep(seq(-100,100,1),each=201),y=rep(seq(-100,100,1),times=201))
+  out<-mapply(D, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=1,H=5,s=500,alphay=10,alphaz=10))
+  res.mat<-matrix(out,201,201,byrow = T)
+  filled.contour(res.mat)
+}
 
 ## two D gaussian plume with decay along x a function of wind speed
 decay.plume<-function(q,s,x,y,alphay,c)
@@ -29,10 +40,13 @@ decay.plume<-function(q,s,x,y,alphay,c)
   ifelse(x>=0,1,0)*q*exp(-( x^2/(2*(c*s)^2) + y^2/(2*alphay^2)))
 }
 
-test.mat<-data.frame(x=rep(seq(-100,100,1),each=201),y=rep(seq(-100,100,1),times=201))
-out<-mapply(two.D.gauss, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=1,s=10,alphay=10,c=4))
-res.mat<-matrix(out,201,201,byrow = T)
-filled.contour(res.mat)
+if(vis)
+{
+  test.mat<-data.frame(x=rep(seq(-100,100,1),each=201),y=rep(seq(-100,100,1),times=201))
+  out<-mapply(two.D.gauss, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=1,s=10,alphay=10,c=4))
+  res.mat<-matrix(out,201,201,byrow = T)
+  filled.contour(res.mat)
+}
 
 ## options moving forward: fit tilted gaussian, estimate 4 params while including height; fit two D gaussian with 3 params
 
