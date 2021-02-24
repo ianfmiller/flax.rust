@@ -15,7 +15,7 @@ vis<-F # set to F so plots aren't generated on source
 ### c is coefficient used to calculate decay constant along x as a function of s
 
 ## tilted gaussian plume https://www.jstor.org/stable/pdf/1937537.pdf?casa_token=wXe8JWI0TrIAAAAA:g6XJxzyOWPEPZd_yw_lMiam3aO9QRO6Usa_WYPKY7zNdRu3PGeXnCoeGv2tazU3CBimc0zfXEiHI39brv7GhMlG7zuUYAZGF2DrFWnH4GRIHul6m4Trcodel
-titled.plume<-function(q,H,s,x,y,alphay,alphaz)
+tilted.plume<-function(q,H,s,x,y,alphay,alphaz)
 {
   Ws<-100 #terminal downward velocity of spores
   ifelse(x>=0,1,0)*((q*Ws)/(2*pi*s*alphay*alphaz))*
