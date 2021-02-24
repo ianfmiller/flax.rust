@@ -8,7 +8,7 @@
 #Ws is falling velocity of spores
 
 ## tilted gaussian plume https://www.jstor.org/stable/pdf/1937537.pdf?casa_token=wXe8JWI0TrIAAAAA:g6XJxzyOWPEPZd_yw_lMiam3aO9QRO6Usa_WYPKY7zNdRu3PGeXnCoeGv2tazU3CBimc0zfXEiHI39brv7GhMlG7zuUYAZGF2DrFWnH4GRIHul6m4Trcodel
-D<-function(q,H,s,x,y,alphay,alphaz)
+titled.plume<-function(q,H,s,x,y,alphay,alphaz)
 {
   Ws<-100 #terminal downward velocity of spores
   ifelse(x>=0,1,0)*((q*Ws)/(2*pi*s*alphay*alphaz))*
@@ -24,7 +24,7 @@ res.mat<-matrix(out,201,201,byrow = T)
 filled.contour(res.mat)
 
 ## two D gaussian plume with decay along x a function of wind speed
-two.D.gauss<-function(q,s,x,y,alphay,c)
+decay.plume<-function(q,s,x,y,alphay,c)
 {
   ifelse(x>=0,1,0)*q*exp(-( x^2/(2*(c*s)^2) + y^2/(2*alphay^2)))
 }
