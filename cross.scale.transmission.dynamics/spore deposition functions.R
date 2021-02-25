@@ -15,9 +15,8 @@ vis<-F # set to F so plots aren't generated on source
 ### c is coefficient used to calculate decay constant along x as a function of s
 
 ## tilted gaussian plume https://www.jstor.org/stable/pdf/1937537.pdf?casa_token=wXe8JWI0TrIAAAAA:g6XJxzyOWPEPZd_yw_lMiam3aO9QRO6Usa_WYPKY7zNdRu3PGeXnCoeGv2tazU3CBimc0zfXEiHI39brv7GhMlG7zuUYAZGF2DrFWnH4GRIHul6m4Trcodel
-tilted.plume<-function(q,H,s,x,y,alphay,alphaz)
+tilted.plume<-function(q,H,s,x,y,alphay,alphaz,Ws)
 {
-  Ws<-100 #terminal downward velocity of spores
   ifelse(x>=0,1,0)*((q*Ws)/(2*pi*s*alphay*alphaz))*
     exp(
     (-(y^2)/(2*alphay^2))+
@@ -28,23 +27,23 @@ tilted.plume<-function(q,H,s,x,y,alphay,alphaz)
 ## visualize
 if(vis)
 {
-  test.mat<-data.frame(x=rep(seq(-100,100,1),each=201),y=rep(seq(-100,100,1),times=201))
-  out<-mapply(D, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=1,H=5,s=500,alphay=10,alphaz=10))
+  test.mat<-data.frame(x=rep(seq(-1,1,.01),each=201),y=rep(seq(-1,1,.01),times=201))
+  out<-mapply(tilted.plume, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=266.4167,H=.19,s=.5,alphay=0.1246288,alphaz=0.1539293,Ws=1))
   res.mat<-matrix(out,201,201,byrow = T)
   filled.contour(res.mat)
 }
 
 ## two D gaussian plume with decay along x a function of wind speed
-decay.plume<-function(q,s,x,y,alphay,c)
+decay.plume<-function(q,k,s,x,y,alphay,c)
 {
-  ifelse(x>=0,1,0)*q*exp(-( x^2/(2*(c*s)^2) + y^2/(2*alphay^2)))
+  ifelse(x>=0,1,0)*q*k*exp(-( x^2/(2*(c*s)^2) + y^2/(2*alphay^2)))
 }
 
 if(vis)
 {
-  test.mat<-data.frame(x=rep(seq(-100,100,1),each=201),y=rep(seq(-100,100,1),times=201))
-  out<-mapply(two.D.gauss, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=1,s=10,alphay=10,c=4))
-  res.mat<-matrix(out,201,201,byrow = T)
+  test.mat<-data.frame(x=rep(seq(-2,2,.1),each=41),y=rep(seq(-2,2,.1),times=41))
+  out<-mapply(decay.plume, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=100,k=266.4167,s=.66,alphay=0.15909628,c=0.03381658))
+  res.mat<-matrix(out,41,41,byrow = T)
   filled.contour(res.mat)
 }
 
@@ -99,7 +98,7 @@ get.plume.xy<-function(degree,xorigin,yorigin,xtarget,ytarget,plot=F)
   
   if(plot)
   {
-    plot(0,0,type="n",xlim=c(min(x1,x2,xp,xtarget)-.5,max(x1,x2,xp,xtarget)+.5),ylim=c(min(y1,y2,yp,ytarget,-1.5),max(y1,y2,yp,ytarget,1.5)),asp=1)
+    plot(0,0,type="n",xlim=c(min(x1,x2,xp,xtarget)-.5,max(x1,x2,xp,xtarget)+.5),ylim=c(min(y1,y2,yp,ytarget,-1.5),max(y1,y2,yp,ytarget,1.5)),asp=1,xlab="plot X-axis",ylab="plot Y-axis")
     points(x1,y1,col="darkgreen",pch=16,cex=4)
     arrows(x1,y1,x2,y2)
     curve(((y2-y1)/(x2-x1))*x-((y2-y1)/(x2-x1))*x1+y1,add=T,lty=2)
