@@ -19,13 +19,13 @@ predict.kernel<-function(q,k,alphay,c,xtarget,ytarget)
   sum(tot.dep,na.rm = T)
 }
 
-param.search.plot<-function(cval,alphayval)
+param.search.plot<-function(cval,alphayval,k)
 {
-  k=.001
+  #k=.001
   q=266.4167
   (0-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=.25,ytarget=0))^2+
   (0-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=0,ytarget=-.25))^2+
-  (232-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=0.05,ytarget=0)^2)+
+  (232-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=0.05,ytarget=0))^2+
   (336-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=0,ytarget=-.05))^2+
   (81-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=0,ytarget=.05))^2+
   (134-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=-.05,ytarget=0))^2+
@@ -33,20 +33,27 @@ param.search.plot<-function(cval,alphayval)
   (18-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=-.25,ytarget=0))^2
 }
 
-test.mat<-data.frame(cval=rep(seq(0,.05,.005),each=11),alphayval=rep(seq(.05,.3,.025),times=11))
-out<-mcmapply(param.search.plot,  cval = test.mat[,1],alphayval=test.mat[,2],mc.cores = 4)
-contour(seq(.05,.3,.025),seq(0,.05,.005),res.mat,xlab="alphayval",ylab="cval")
+#test.mat<-data.frame(cval=rep(seq(0,.05,.01),each=11),alphayval=rep(seq(.05,.3,.025),times=11))
+test.mat<-expand.grid(cval=seq(0,.05,.005),alphayval=seq(.0,.3,.03),k=seq(8e-4,.002,.00024))
+out<-mcmapply(param.search.plot,  cval = test.mat[,1],alphayval=test.mat[,2],k=test.mat[,3],mc.cores = 4)
+par(mfrow=c(2,3))
+for(i in seq(.000,.001,.0002))
+{
+  res.mat<-matrix(out[which(test.mat$k==i)],11,11)
+  contour(seq(0,.05,.005),seq(.0,.3,.03),res.mat,xlab="cval",ylab="alphayval")
+}
+
 
 
 param.search.optim<-function(x)
 {
   alphayval=x[1]
   cval=x[2]
-  k=.001
+  k=1e-03
   q=266.4167
   (0-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=.25,ytarget=0))^2+
     (0-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=0,ytarget=-.25))^2+
-    (232-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=0.05,ytarget=0)^2)+
+    (232-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=0.05,ytarget=0))^2+
     (336-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=0,ytarget=-.05))^2+
     (81-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=0,ytarget=.05))^2+
     (134-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=-.05,ytarget=0))^2+
