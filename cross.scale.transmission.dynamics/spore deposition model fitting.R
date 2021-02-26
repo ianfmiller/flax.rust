@@ -1,11 +1,7 @@
 library(parallel)
 
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
-
-wind.data<-subset(all.weath,site=="BT")
-wind.data<-subset(wind.data,date>as.POSIXct("2020-07-09 12:00:00"))
-wind.data<-subset(wind.data,date<=as.POSIXct("2020-07-16 12:00:00"))
-
+spore.deposition<-read.csv("~/Documents/GitHub/flax.rust/data/spore counts.csv")
 
 predict.kernel<-function(q,k,alphay,c,xtarget,ytarget)
 {
@@ -37,19 +33,32 @@ param.search.plot<-function(cval,alphayval,k)
 test.mat<-expand.grid(cval=seq(0,.05,.005),alphayval=seq(.0,.3,.03),k=seq(8e-4,.002,.00024))
 out<-mcmapply(param.search.plot,  cval = test.mat[,1],alphayval=test.mat[,2],k=test.mat[,3],mc.cores = 4)
 par(mfrow=c(2,3))
-for(i in seq(.000,.001,.0002))
+for(i in seq(8e-4,.002,.00024))
 {
   res.mat<-matrix(out[which(test.mat$k==i)],11,11)
-  contour(seq(0,.05,.005),seq(.0,.3,.03),res.mat,xlab="cval",ylab="alphayval")
+  contour(seq(0,.05,.005),seq(.0,.3,.03),res.mat,xlab="cval",ylab="alphayval",main=paste("k=",i))
 }
 
 
 
 param.search.optim<-function(x)
 {
-  alphayval=x[1]
-  cval=x[2]
-  k=1e-03
+  for(tag in unique(spore.deposition$Tag))
+  {
+    sub.1.spore.deposition<-spore.deposition[which(spore.deposition$Tag==tag),]
+    for(date in unique(sub.1.spore.deposition$Date.collected))
+    {
+      wind.data<-subset(all.weath,site=="BT")
+      wind.data<-subset(wind.data,date>(as.POSIXct(paste0(as.Date(date,"%m/%d/%Y")," 12:00:00"),tz="UTC")-7*24*60*60))
+      wind.data<-subset(wind.data,date<=as.POSIXct(paste0(as.Date(date,"%m/%d/%Y")," 12:00:00"),tz="UTC"))
+      for(i in )
+    }
+  }
+
+  
+  cval=x[1]
+  alphayval=x[2]
+  k=x[3]
   q=266.4167
   (0-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=.25,ytarget=0))^2+
     (0-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=0,ytarget=-.25))^2+
@@ -61,9 +70,16 @@ param.search.optim<-function(x)
     (18-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=-.25,ytarget=0))^2
 }
 
-library(optimParallel)
-cl<-makeCluster(detectCores()-1,type="FORK")
-setDefaultCluster(cl=cl)
-opt<-optimParallel(par=c(.175,.035),fn=param.search.optim)
-stopCluster(cl)
-points(opt$par[1],opt$par[2])
+opt<-optim(par=c(.15,.03,0.00176),fn=param.search.optim)
+
+test.mat<-data.frame(x=rep(seq(-1,1,.01),each=201),y=rep(seq(-1,1,.01),times=201))
+out<-mapply(decay.plume, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=266.4167,k=opt$par[3],s=10,alphay=opt$par[2],c=opt$par[1]))
+res.mat<-matrix(out,201,201,byrow = T)
+filled.contour(x=seq(-1,1,.01),y=seq(-1,1,.01),z=res.mat)
+
+#library(optimParallel)
+#cl<-makeCluster(detectCores()-1,type="FORK")
+#setDefaultCluster(cl=cl)
+#opt<-optimParallel(par=c(.15,.03),fn=param.search.optim)
+#stopCluster(cl)
+#points(opt$par[1],opt$par[2])
