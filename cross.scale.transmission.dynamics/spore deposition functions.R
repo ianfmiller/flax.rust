@@ -41,9 +41,9 @@ decay.plume<-function(q,k,s,x,y,alphay,c)
 
 if(vis)
 {
-  test.mat<-data.frame(x=rep(seq(-2,2,.1),each=41),y=rep(seq(-2,2,.1),times=41))
-  out<-mapply(decay.plume, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=100,k=266.4167,s=.66,alphay=0.15909628,c=0.03381658))
-  res.mat<-matrix(out,41,41,byrow = T)
+  test.mat<-data.frame(x=rep(seq(-1,1,.1),each=21),y=rep(seq(-1,1,.1),times=21))
+  out<-mapply(decay.plume, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=266.4167,k=.001,s=1,alphay=0.15906877,c=0.03382694))
+  res.mat<-matrix(out,21,21,byrow = T)
   filled.contour(res.mat)
 }
 
