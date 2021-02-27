@@ -1,9 +1,17 @@
-library(parallel)
-
+# load data
+## load enviro data
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
+## load spore dep data
 spore.deposition<-read.csv("~/Documents/GitHub/flax.rust/data/spore counts.csv")
+spore.deposition[which(spore.deposition$Distance..cm.==0),"Distance..cm."]<-1 #set distance for "0" spore traps to 1cm
+## load demog data
+demog<-read.csv("~/Documents/GitHub/flax.rust/data/Demography.csv")
+demog<-demog[which(demog$year==2020),] #subset to 2020
+## load within host data
+plants<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plants.RDS")
 
-predict.kernel<-function(q,k,alphay,c,xtarget,ytarget)
+
+predict.kernel<-function(q,k,alphay,c,xtarget,ytarget,wind.data)
 {
   tot.dep<-0
   for (i in 1:(dim(wind.data)[1]-1))
@@ -43,22 +51,47 @@ for(i in seq(8e-4,.002,.00024))
 
 param.search.optim<-function(x)
 {
-  for(tag in unique(spore.deposition$Tag))
-  {
-    sub.1.spore.deposition<-spore.deposition[which(spore.deposition$Tag==tag),]
-    for(date in unique(sub.1.spore.deposition$Date.collected))
-    {
-      wind.data<-subset(all.weath,site=="BT")
-      wind.data<-subset(wind.data,date>(as.POSIXct(paste0(as.Date(date,"%m/%d/%Y")," 12:00:00"),tz="UTC")-7*24*60*60))
-      wind.data<-subset(wind.data,date<=as.POSIXct(paste0(as.Date(date,"%m/%d/%Y")," 12:00:00"),tz="UTC"))
-      for(i in )
-    }
-  }
-
-  
   cval=x[1]
   alphayval=x[2]
   k=x[3]
+  
+  val<-0
+  
+  for(tag in unique(spore.deposition$Tag))
+  {
+    site<-demog[which(demog$tag==tag),"Site"]
+    plantx<-demog[which(demog$tag==tag),"X"]+demog[which(demog$tag==tag),"x"]
+    planty<-demog[which(demog$tag==tag),"Y"]+demog[which(demog$tag==tag),"y"]
+    sub.1.spore.deposition<-spore.deposition[which(spore.deposition$Tag==tag),]
+    
+    for(date in unique(sub.1.spore.deposition$Date.collected))
+    {
+      wind.data<-all.weath[which(all.weath$site==site),]
+      wind.data<-wind.data[which(wind.data$date>(as.POSIXct(paste0(as.Date(date,"%m/%d/%Y")," 12:00:00"),tz="UTC")-7*24*60*60)),]
+      wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(date,"%m/%d/%Y")," 12:00:00"),tz="UTC"))),]
+      
+      q<-plants[intersect(which(plants$Tag==tag),which(plants$Date==as.Date(date,tryFormats = c("%m/%d/%y")))),"plant.inf.intens"]
+        
+      for(j in 1:dim(sub.1.spore.deposition)[1])
+      {
+        xtarget<-0
+        ytarget<-0
+        if(sub.1.spore.deposition[j,"Direction"]=="U") {ytarget<-as.numeric(sub.1.spore.deposition[j,"Distance..cm."])/100}
+        if(sub.1.spore.deposition[j,"Direction"]=="R") {xtarget<-as.numeric(sub.1.spore.deposition[j,"Distance..cm."])/100}
+        if(sub.1.spore.deposition[j,"Direction"]=="D") {ytarget<-(-1)*as.numeric(sub.1.spore.deposition[j,"Distance..cm."])/100}
+        if(sub.1.spore.deposition[j,"Direction"]=="L") {xtarget<-(-1)*as.numeric(sub.1.spore.deposition[j,"Distance..cm."])/100}
+        
+        pred<-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=xtarget,ytarget=ytarget,wind.data=wind.data)
+        obs<-sub.1.spore.deposition[j,"Pustules"]/sub.1.spore.deposition[j,"X..squares.counted"]
+        val<-val+(obs-pred)^2
+      }
+    }
+  }
+  val
+}
+
+  
+
   q=266.4167
   (0-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=.25,ytarget=0))^2+
     (0-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=0,ytarget=-.25))^2+
