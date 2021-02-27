@@ -1,4 +1,6 @@
 # load data
+## load functions
+source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/spore deposition functions.R")
 ## load enviro data
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
 ## load spore dep data
@@ -22,32 +24,6 @@ predict.kernel<-function(q,k,alphay,c,xtarget,ytarget,wind.data)
   }
   sum(tot.dep,na.rm = T)
 }
-
-param.search.plot<-function(cval,alphayval,k)
-{
-  #k=.001
-  q=266.4167
-  (0-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=.25,ytarget=0))^2+
-  (0-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=0,ytarget=-.25))^2+
-  (232-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=0.05,ytarget=0))^2+
-  (336-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=0,ytarget=-.05))^2+
-  (81-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=0,ytarget=.05))^2+
-  (134-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=-.05,ytarget=0))^2+
-  (7-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=0,ytarget=.25))^2+
-  (18-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=-.25,ytarget=0))^2
-}
-
-#test.mat<-data.frame(cval=rep(seq(0,.05,.01),each=11),alphayval=rep(seq(.05,.3,.025),times=11))
-test.mat<-expand.grid(cval=seq(0,.05,.005),alphayval=seq(.0,.3,.03),k=seq(8e-4,.002,.00024))
-out<-mcmapply(param.search.plot,  cval = test.mat[,1],alphayval=test.mat[,2],k=test.mat[,3],mc.cores = 4)
-par(mfrow=c(2,3))
-for(i in seq(8e-4,.002,.00024))
-{
-  res.mat<-matrix(out[which(test.mat$k==i)],11,11)
-  contour(seq(0,.05,.005),seq(.0,.3,.03),res.mat,xlab="cval",ylab="alphayval",main=paste("k=",i))
-}
-
-
 
 param.search.optim<-function(x)
 {
@@ -90,18 +66,6 @@ param.search.optim<-function(x)
   val
 }
 
-  
-
-  q=266.4167
-  (0-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=.25,ytarget=0))^2+
-    (0-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=0,ytarget=-.25))^2+
-    (232-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=0.05,ytarget=0))^2+
-    (336-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=0,ytarget=-.05))^2+
-    (81-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=0,ytarget=.05))^2+
-    (134-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=-.05,ytarget=0))^2+
-    (7-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=0,ytarget=.25))^2+
-    (18-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=-.25,ytarget=0))^2
-}
 
 opt<-optim(par=c(.15,.03,0.00176),fn=param.search.optim)
 
@@ -110,9 +74,20 @@ out<-mapply(decay.plume, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=266.
 res.mat<-matrix(out,201,201,byrow = T)
 filled.contour(x=seq(-1,1,.01),y=seq(-1,1,.01),z=res.mat)
 
-#library(optimParallel)
-#cl<-makeCluster(detectCores()-1,type="FORK")
-#setDefaultCluster(cl=cl)
-#opt<-optimParallel(par=c(.15,.03),fn=param.search.optim)
-#stopCluster(cl)
-#points(opt$par[1],opt$par[2])
+###### visualize parameter search
+library(parallel)
+
+param.search.plot<-function(cval,alphayval,k)
+{
+  param.search.optim(c(cval,alphayval,k))
+}
+
+#test.mat<-data.frame(cval=rep(seq(0,.05,.01),each=11),alphayval=rep(seq(.05,.3,.025),times=11))
+test.mat<-expand.grid(cval=seq(0,.05,.005),alphayval=seq(.0,.3,.03),k=seq(8e-4,.002,.00024))
+out<-mcmapply(param.search.plot,  cval = test.mat[,1],alphayval=test.mat[,2],k=test.mat[,3],mc.cores = 4)
+par(mfrow=c(2,3))
+for(i in seq(8e-4,.002,.00024))
+{
+  res.mat<-matrix(out[which(test.mat$k==i)],11,11)
+  contour(seq(0,.05,.005),seq(.0,.3,.03),res.mat,xlab="cval",ylab="alphayval",main=paste("k=",i))
+}
