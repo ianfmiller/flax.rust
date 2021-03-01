@@ -31,7 +31,7 @@ param.search.optim<-function(x)
   alphayval=x[2]
   k=x[3]
   
-  val<-0
+  val<-c()
   
   for(tag in unique(spore.deposition$Tag))
   {
@@ -42,28 +42,30 @@ param.search.optim<-function(x)
     
     for(date in unique(sub.1.spore.deposition$Date.collected))
     {
-      wind.data<-all.weath[which(all.weath$site==site),]
-      wind.data<-wind.data[which(wind.data$date>(as.POSIXct(paste0(as.Date(date,"%m/%d/%Y")," 12:00:00"),tz="UTC")-7*24*60*60)),]
-      wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(date,"%m/%d/%Y")," 12:00:00"),tz="UTC"))),]
+      sub.2.spore.deposition<-sub.1.spore.deposition[which(sub.1.spore.deposition$Date.collected==date),]
+      deploy.date<-sub.2.spore.deposition[1,"Date.deployed"]
+      q<-plants[intersect(which(plants$Tag==tag),which(plants$Date==as.Date(deploy.date,tryFormats = c("%m/%d/%y")))),"plant.inf.intens"]
       
-      q<-plants[intersect(which(plants$Tag==tag),which(plants$Date==as.Date(date,tryFormats = c("%m/%d/%y")))),"plant.inf.intens"]
-        
-      for(j in 1:dim(sub.1.spore.deposition)[1])
+      wind.data<-all.weath[which(all.weath$site==site),]
+      wind.data<-wind.data[which(wind.data$date>(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC"))),]
+      wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(date,"%m/%d/%y")," 12:00:00"),tz="UTC"))),]
+      
+      for(j in 1:dim(sub.2.spore.deposition)[1])
       {
         xtarget<-0
         ytarget<-0
-        if(sub.1.spore.deposition[j,"Direction"]=="U") {ytarget<-as.numeric(sub.1.spore.deposition[j,"Distance..cm."])/100}
-        if(sub.1.spore.deposition[j,"Direction"]=="R") {xtarget<-as.numeric(sub.1.spore.deposition[j,"Distance..cm."])/100}
-        if(sub.1.spore.deposition[j,"Direction"]=="D") {ytarget<-(-1)*as.numeric(sub.1.spore.deposition[j,"Distance..cm."])/100}
-        if(sub.1.spore.deposition[j,"Direction"]=="L") {xtarget<-(-1)*as.numeric(sub.1.spore.deposition[j,"Distance..cm."])/100}
+        if(sub.2.spore.deposition[j,"Direction"]=="U") {ytarget<-as.numeric(sub.2.spore.deposition[j,"Distance..cm."])/100}
+        if(sub.2.spore.deposition[j,"Direction"]=="R") {xtarget<-as.numeric(sub.2.spore.deposition[j,"Distance..cm."])/100}
+        if(sub.2.spore.deposition[j,"Direction"]=="D") {ytarget<-(-1)*as.numeric(sub.2.spore.deposition[j,"Distance..cm."])/100}
+        if(sub.2.spore.deposition[j,"Direction"]=="L") {xtarget<-(-1)*as.numeric(sub.2.spore.deposition[j,"Distance..cm."])/100}
         
         pred<-predict.kernel(q=q,k=k,alphay=alphayval,c=cval,xtarget=xtarget,ytarget=ytarget,wind.data=wind.data)
-        obs<-sub.1.spore.deposition[j,"Pustules"]/sub.1.spore.deposition[j,"X..squares.counted"]
-        val<-val+(obs-pred)^2
+        obs<-sub.2.spore.deposition[j,"Pustules"]/sub.2.spore.deposition[j,"X..squares.counted"]
+        val<-c(val,(obs-pred)^2)
       }
     }
   }
-  val
+  sum(val)
 }
 
 
