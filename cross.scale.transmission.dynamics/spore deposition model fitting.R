@@ -69,10 +69,12 @@ param.search.optim<-function(x)
 }
 
 
-opt<-optim(par=c(.15,.03,0.00176),fn=param.search.optim)
+opt<-optim(par=c(.15,.03,0.00176),fn=param.search.optim,control=list(trace=1))
+
+x<-c(1.563252e-01,2.931680e-02,4.718382e-07) #OPT output!!!
 
 test.mat<-data.frame(x=rep(seq(-1,1,.01),each=201),y=rep(seq(-1,1,.01),times=201))
-out<-mapply(decay.plume, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=266.4167,k=opt$par[3],s=10,alphay=opt$par[2],c=opt$par[1]))
+out<-mapply(decay.plume, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=266.4167,k=opt$par[3],s=5,alphay=opt$par[2],c=opt$par[1]))
 res.mat<-matrix(out,201,201,byrow = T)
 filled.contour(x=seq(-1,1,.01),y=seq(-1,1,.01),z=res.mat)
 
