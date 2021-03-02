@@ -47,8 +47,6 @@ if(vis)
   filled.contour(res.mat)
 }
 
-## options moving forward: fit tilted gaussian, estimate 4 params while including height; fit two D gaussian with 3 params
-
 ## function to find x and y coordinates to plug into tilted gaussian plume for a given wind direction and direction and distance of spore trap (assuming N/S/E/W cord system), assume counterclockwise is positive
 get.plume.xy<-function(degree,xorigin,yorigin,xtarget,ytarget,plot=F)
 {
@@ -110,4 +108,39 @@ get.plume.xy<-function(degree,xorigin,yorigin,xtarget,ytarget,plot=F)
     legend("topright",legend=c("source plant","target plant","wind","perpendicular","x","y"),pch=c(16,16,NA,NA,NA,NA),lty=c(NA,NA,1,2,1,1),col=c("darkgreen","lightgreen","black","red","lightblue","darkblue"))
   }
   return(c(newx,newy))
+}
+
+## function to correct wind direction to flip from direction of origin to direction of flow; correct for transect direction
+
+correct.wind.degree<-function(x,site="blank")
+{
+  ### correct wind direction so that 360/0 corresponds to plot "UP" direction
+  if(site=="GM")
+  {
+    newx<-x-309 #measured in google earth pro
+    if(newx<0) {newx<-360+newx}
+  }
+  
+  if(site=="HM")
+  {
+    newx<-x-40
+  if(newx<0) {newx<-360+newx}
+  }
+  if(site=="BT")
+  {
+    newx<-x-75
+    if(newx<0) {newx<-360+newx}
+  }
+  
+  if(site=="CC")
+  {
+    newx<-x-332
+    if(newx<0) {newx<-360+newx}
+  }
+  
+  if(site=="blank") {newx<-x}
+  
+  newx<-newx-180
+  if(newx<0) {newx<-360+newx}
+  newx
 }
