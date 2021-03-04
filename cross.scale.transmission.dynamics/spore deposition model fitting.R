@@ -46,7 +46,8 @@ param.search.optim.decay.plume<-function(x,return.vec=F)
   val<-c()
   preds<-c()
   obs<-c()
-  for(tag in unique(spore.deposition$Tag))
+  #for(tag in unique(spore.deposition$Tag))
+  for (tag in c(86,88))
   {
     site<-demog[which(demog$tag==tag),"Site"]
     plantx<-demog[which(demog$tag==tag),"X"]+demog[which(demog$tag==tag),"x"]
@@ -134,9 +135,10 @@ param.search.optim.tilted.plume<-function(x,return.vec=F)
 
 
 # optimize decay plume
-opt1<-optim(par=c(.15,.03,0.00176),fn=param.search.optim.decay.plume,control=list(trace=1))
+opt1<-optim(par=c(.005,.005,1e-6),fn=param.search.optim.decay.plume,control=list(trace=1))
 
 x<-c(1.563252e-01,2.931680e-02,4.718382e-07) #OPT1 output!!! value = 15372.3
+# for tag in c(86,88): x<-c(8.956821e-04 3.895783e-03 4.242871e-05) gives value of 23199.67
 
 test.mat<-data.frame(x=rep(seq(-1,1,.01),each=201),y=rep(seq(-1,1,.01),times=201))
 out<-mapply(decay.plume, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=4224.733,k=opt$par[3],s=1,alphay=opt$par[2],c=opt$par[1]))
@@ -170,14 +172,15 @@ param.search.tilted.plume.plot<-function(alphayval,alphazval,Wsval)
   param.search.optim.tilted.plume(c(alphayval,alphazval,Wsval))
 }
 
-#test.mat<-data.frame(cval=rep(seq(0,.05,.01),each=11),alphayval=rep(seq(.05,.3,.025),times=11))
-test.mat<-expand.grid(cval=seq(0,.05,.005),alphayval=seq(.0,.3,.03),k=seq(8e-4,.002,.00024))
-out<-mcmapply(param.search.plot,  cval = test.mat[,1],alphayval=test.mat[,2],k=test.mat[,3],mc.cores = 4)
+## experiment results:
+
+test.mat<-expand.grid(cval=seq(0,.05,.005),alphayval=seq(0,.05,.005),k=1e-6) 
+out<-mcmapply(param.search.decay.plume.plot,  cval = test.mat[,1],alphayval=test.mat[,2],k=test.mat[,3],mc.cores = 6)
 par(mfrow=c(2,3))
-for(i in seq(8e-4,.002,.00024))
+for(i in seq(0,1,.1))
 {
   res.mat<-matrix(out[which(test.mat$k==i)],11,11)
-  contour(seq(0,.05,.005),seq(.0,.3,.03),res.mat,xlab="cval",ylab="alphayval",main=paste("k=",i))
+  contour(seq(0,.05,.005),seq(0,.05,.005),res.mat,xlab="cval",ylab="alphayval",main=paste("k=",i))
 }
 
 library(parallel)
