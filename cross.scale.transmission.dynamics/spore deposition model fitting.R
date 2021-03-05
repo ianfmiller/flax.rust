@@ -46,8 +46,7 @@ param.search.optim.decay.plume<-function(x,return.vec=F)
   val<-c()
   preds<-c()
   obs<-c()
-  #for(tag in unique(spore.deposition$Tag))
-  for (tag in c(86,88))
+  for(tag in unique(spore.deposition$Tag))
   {
     site<-demog[which(demog$tag==tag),"Site"]
     plantx<-demog[which(demog$tag==tag),"X"]+demog[which(demog$tag==tag),"x"]
@@ -136,7 +135,7 @@ param.search.optim.tilted.plume<-function(x,return.vec=F)
 
 
 # optimize decay plume
-opt1<-optim(par=c(0.45, 0.875,2.69176e-07),fn=param.search.optim.decay.plume,control=list(trace=1))
+opt1<-optim(par=c(1.858651e+00, 4.903428e-01,9.161020e-07),fn=param.search.optim.decay.plume,control=list(trace=1))
 
 # x<-c(4.283863e-01,7.454097e-01,2.814154e-07) #OPT1 output!!! value = 22847.04 for full period
 # x<-c(1.858651e+00,4.903428e-01,9.161020e-07) #OPT1 output!!! value = 22815.71 for two days
