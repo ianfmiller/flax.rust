@@ -136,11 +136,11 @@ param.search.optim.tilted.plume<-function(x,return.vec=F)
 
 
 # optimize decay plume
-opt1<-optim(par=c(1.858651e+00,4.903428e-01,9.161020e-07),fn=param.search.optim.decay.plume,control=list(trace=1))
+opt1<-optim(par=c(.12,.12,9e-07),fn=param.search.optim.decay.plume,control=list(trace=1))
 
-# x<-c(4.283863e-01,7.454097e-01,2.814154e-07) #OPT1 output!!! value = 22847.04 for full period
-# x<-c(1.858651e+00,4.903428e-01,9.161020e-07) #OPT1 output!!! value = 22815.71 for two days
-# x<-c(2.624685e+00,5.127938e-01,1.784182e-06) #OPT1 output!!! value = 22832.76 for one day
+# (NEED TO REDO) x<-c(4.283863e-01,7.454097e-01,2.814154e-07) #OPT1 output!!! value = 22847.04 for full period
+# x<-c(6.929344e-02,7.717773e-02,5.565447e-06) #OPT1 output!!! value = 3562.495 for two days
+# (NEED TO REDO) x<-c(2.624685e+00,5.127938e-01,1.784182e-06) #OPT1 output!!! value = 22832.76 for one day
 
 test.mat<-data.frame(x=rep(seq(-1,1,.01),each=201),y=rep(seq(-1,1,.01),times=201))
 out<-mapply(decay.plume, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=4224.733,k=opt$par[3],s=1,alphay=opt$par[2],c=opt$par[1]))
@@ -176,13 +176,13 @@ param.search.tilted.plume.plot<-function(alphayval,alphazval,Wsval)
 
 ## experiment results:
 
-test.mat<-expand.grid(cval=seq(1.6,2,.04),alphayval=seq(.4,.6,.02),k=9.161020e-07) 
+test.mat<-expand.grid(cval=seq(0.06,.08,.002),alphayval=seq(0.075,.085,.001),k=5.565447e-06) 
 out<-mcmapply(param.search.decay.plume.plot,  cval = test.mat[,1],alphayval=test.mat[,2],k=test.mat[,3],mc.cores = 6)
 par(mfrow=c(2,3))
 for(i in seq(0,1,.1))
 {
   res.mat<-matrix(out[which(test.mat$k==i)],11,11)
-  contour(seq(1.6,2,.04),seq(.4,.6,.02),res.mat,xlab="cval",ylab="alphayval",main=paste("k=",i),nlevels = 20)
+  contour(seq(0.06,.08,.002),seq(0.075,.085,.001),res.mat,xlab="cval",ylab="alphayval",main=paste("k=",i),nlevels = 20)
 }
 
 library(parallel)
