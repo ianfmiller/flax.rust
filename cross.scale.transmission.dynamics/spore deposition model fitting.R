@@ -46,7 +46,8 @@ param.search.optim.decay.plume<-function(x,return.vec=F)
   val<-c()
   preds<-c()
   obs<-c()
-  for(tag in unique(spore.deposition$Tag))
+  #for(tag in unique(spore.deposition$Tag))
+  for (tag in c(86,88))
   {
     site<-demog[which(demog$tag==tag),"Site"]
     plantx<-demog[which(demog$tag==tag),"X"]+demog[which(demog$tag==tag),"x"]
@@ -73,10 +74,10 @@ param.search.optim.decay.plume<-function(x,return.vec=F)
         if(sub.2.spore.deposition[j,"Direction"]=="D") {ytarget<-(-1)*as.numeric(sub.2.spore.deposition[j,"Distance..cm."])/100}
         if(sub.2.spore.deposition[j,"Direction"]=="L") {xtarget<-(-1)*as.numeric(sub.2.spore.deposition[j,"Distance..cm."])/100}
         
-        pred<-predict.kernel.decay.plume(q=q,k=k,alphay=alphayval,c=cval,xtarget=xtarget,ytarget=ytarget,wind.data=wind.data)
+        new.pred<-predict.kernel.decay.plume(q=q,k=k,alphay=alphayval,c=cval,xtarget=xtarget,ytarget=ytarget,wind.data=wind.data)
         new.obs<-sub.2.spore.deposition[j,"Pustules"]/sub.2.spore.deposition[j,"X..squares.counted"]
-        val<-c(val,(obs-pred)^2)
-        preds<-c(preds,pred)
+        val<-c(val,(new.obs-new.pred)^2)
+        preds<-c(preds,new.pred)
         obs<-c(obs,new.obs)
       }
     }
@@ -122,10 +123,10 @@ param.search.optim.tilted.plume<-function(x,return.vec=F)
         if(sub.2.spore.deposition[j,"Direction"]=="D") {ytarget<-(-1)*as.numeric(sub.2.spore.deposition[j,"Distance..cm."])/100}
         if(sub.2.spore.deposition[j,"Direction"]=="L") {xtarget<-(-1)*as.numeric(sub.2.spore.deposition[j,"Distance..cm."])/100}
         
-        pred<-predict.kernel.tilted.plume(q=q,H=H,alphay=alphayval,alphaz=alphazval,Ws=Wsval,xtarget=xtarget,ytarget=ytarget,wind.data=wind.data)
+        new.pred<-predict.kernel.tilted.plume(q=q,H=H,alphay=alphayval,alphaz=alphazval,Ws=Wsval,xtarget=xtarget,ytarget=ytarget,wind.data=wind.data)
         new.obs<-sub.2.spore.deposition[j,"Pustules"]/sub.2.spore.deposition[j,"X..squares.counted"]
-        val<-c(val,(obs-pred)^2)
-        preds<-c(preds,pred)
+        val<-c(val,(new.obs-new.pred)^2)
+        preds<-c(preds,new.pred)
         obs<-c(obs,new.obs)
       }
     }
@@ -135,7 +136,7 @@ param.search.optim.tilted.plume<-function(x,return.vec=F)
 
 
 # optimize decay plume
-opt1<-optim(par=c(1.858651e+00, 4.903428e-01,9.161020e-07),fn=param.search.optim.decay.plume,control=list(trace=1))
+opt1<-optim(par=c(1.858651e+00,4.903428e-01,9.161020e-07),fn=param.search.optim.decay.plume,control=list(trace=1))
 
 # x<-c(4.283863e-01,7.454097e-01,2.814154e-07) #OPT1 output!!! value = 22847.04 for full period
 # x<-c(1.858651e+00,4.903428e-01,9.161020e-07) #OPT1 output!!! value = 22815.71 for two days
