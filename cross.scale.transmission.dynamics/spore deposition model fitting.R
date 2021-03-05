@@ -62,8 +62,8 @@ param.search.optim.decay.plume<-function(x,return.vec=F)
       
       wind.data<-all.weath[which(all.weath$site==site),]
       wind.data<-wind.data[which(wind.data$date>(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC"))),]
-      wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC")+60*60*24*2)),]
-      #wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(date,"%m/%d/%y")," 12:00:00"),tz="UTC"))),]
+      #wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC")+60*60*24*1)),]
+      wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(date,"%m/%d/%y")," 12:00:00"),tz="UTC"))),]
       
       for(j in 1:dim(sub.2.spore.deposition)[1])
       {
@@ -138,8 +138,8 @@ param.search.optim.tilted.plume<-function(x,return.vec=F)
 # optimize decay plume
 opt1<-optim(par=c(1.25, 0.43,2e-6),fn=param.search.optim.decay.plume,control=list(trace=1))
 
-x<-c(1.858651e+00,4.903428e-01,9.161020e-07) #OPT1 output!!! value = 22815.71 for one day
-
+# x<-c(1.858651e+00,4.903428e-01,9.161020e-07) #OPT1 output!!! value = 22815.71 for two days
+# x<-c(2.624685e+00,5.127938e-01,1.784182e-06) #OPT1 output!!! value = 22832.76 for one day
 
 test.mat<-data.frame(x=rep(seq(-1,1,.01),each=201),y=rep(seq(-1,1,.01),times=201))
 out<-mapply(decay.plume, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=4224.733,k=opt$par[3],s=1,alphay=opt$par[2],c=opt$par[1]))
