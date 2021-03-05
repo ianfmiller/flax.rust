@@ -62,8 +62,8 @@ param.search.optim.decay.plume<-function(x,return.vec=F)
       
       wind.data<-all.weath[which(all.weath$site==site),]
       wind.data<-wind.data[which(wind.data$date>(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC"))),]
-      #wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC")+60*60*24*1)),]
-      wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(date,"%m/%d/%y")," 12:00:00"),tz="UTC"))),]
+      wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC")+60*60*24*2)),]
+      #wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(date,"%m/%d/%y")," 12:00:00"),tz="UTC"))),]
       
       for(j in 1:dim(sub.2.spore.deposition)[1])
       {
@@ -136,8 +136,9 @@ param.search.optim.tilted.plume<-function(x,return.vec=F)
 
 
 # optimize decay plume
-opt1<-optim(par=c(1.25, 0.43,2e-6),fn=param.search.optim.decay.plume,control=list(trace=1))
+opt1<-optim(par=c(0.45, 0.875,2.69176e-07),fn=param.search.optim.decay.plume,control=list(trace=1))
 
+# x<-c(4.283863e-01,7.454097e-01,2.814154e-07) #OPT1 output!!! value = 22847.04 for full period
 # x<-c(1.858651e+00,4.903428e-01,9.161020e-07) #OPT1 output!!! value = 22815.71 for two days
 # x<-c(2.624685e+00,5.127938e-01,1.784182e-06) #OPT1 output!!! value = 22832.76 for one day
 
@@ -175,13 +176,13 @@ param.search.tilted.plume.plot<-function(alphayval,alphazval,Wsval)
 
 ## experiment results:
 
-test.mat<-expand.grid(cval=seq(0,.05,.005),alphayval=seq(0,.05,.005),k=1e-6) 
+test.mat<-expand.grid(cval=seq(1.6,2,.04),alphayval=seq(.4,.6,.02),k=9.161020e-07) 
 out<-mcmapply(param.search.decay.plume.plot,  cval = test.mat[,1],alphayval=test.mat[,2],k=test.mat[,3],mc.cores = 6)
 par(mfrow=c(2,3))
 for(i in seq(0,1,.1))
 {
   res.mat<-matrix(out[which(test.mat$k==i)],11,11)
-  contour(seq(0,.05,.005),seq(0,.05,.005),res.mat,xlab="cval",ylab="alphayval",main=paste("k=",i))
+  contour(seq(1.6,2,.04),seq(.4,.6,.02),res.mat,xlab="cval",ylab="alphayval",main=paste("k=",i),nlevels = 20)
 }
 
 library(parallel)
