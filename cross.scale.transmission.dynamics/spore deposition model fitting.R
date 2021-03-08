@@ -34,8 +34,7 @@ param.search.optim.decay.plume<-function(x,return.vec=F)
   val<-c()
   preds<-c()
   obs<-c()
-  #for(tag in unique(spore.deposition$Tag))
-  for (tag in c(86,88))
+  for(tag in unique(spore.deposition$Tag))
   {
     site<-demog[which(demog$tag==tag),"Site"]
     plantx<-demog[which(demog$tag==tag),"X"]+demog[which(demog$tag==tag),"x"]
@@ -50,8 +49,9 @@ param.search.optim.decay.plume<-function(x,return.vec=F)
       
       wind.data<-all.weath[which(all.weath$site==site),]
       wind.data<-wind.data[which(wind.data$date>(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC"))),]
-      #wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC")+60*60*24*1)),]
-      wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(date,"%m/%d/%y")," 12:00:00"),tz="UTC"))),]
+      wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC")+60*60*24*1)),] ### fit to one day post spore trap deploy
+      #wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC")+60*60*24*2)),] ### fit to two days post spore trap deploy
+      #wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(date,"%m/%d/%y")," 12:00:00"),tz="UTC"))),] ### fit to full spore trap deploy period
       
       for(j in 1:dim(sub.2.spore.deposition)[1])
       {
