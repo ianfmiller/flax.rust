@@ -138,7 +138,7 @@ param.search.optim.tilted.plume<-function(x,return.vec=F)
 # optimize decay plume
 opt1<-optim(par=c(.12,.12,9e-07),fn=param.search.optim.decay.plume,control=list(trace=1))
 
-# x<-c(6.845809e-03,7.640827e-01,2.265886e-06) #OPT1 output value = 3678.804 for full period <-pancake like distribution, looks like crap
+# x<-c(6.845809e-03,7.640827e-01,2.265886e-06) #OPT1 output value = 3678.804 for full period <-pancake like distribution, looks unrealistic
 # x<-c(6.929344e-02,7.717773e-02,5.565447e-06) #OPT1 output value = 3562.495 for two days
 # x<-c(7.332391e-02,7.595204e-02,1.146244e-05) #OPT1 output value = 3512.003 for one day
 
