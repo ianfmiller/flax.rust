@@ -75,7 +75,7 @@ param.search.optim.decay.plume<-function(x,return.vec=F)
         if(sub.2.spore.deposition[j,"Direction"]=="L") {xtarget<-(-1)*as.numeric(sub.2.spore.deposition[j,"Distance..cm."])/100}
         
         new.pred<-predict.kernel.decay.plume(q=q,k=k,alphay=alphayval,c=cval,xtarget=xtarget,ytarget=ytarget,wind.data=wind.data)
-        new.obs<-sub.2.spore.deposition[j,"Pustules"]/sub.2.spore.deposition[j,"X..squares.counted"]
+        new.obs<-sub.2.spore.deposition[j,"spores"]/sub.2.spore.deposition[j,"X..squares.counted"]
         val<-c(val,(new.obs-new.pred)^2)
         preds<-c(preds,new.pred)
         obs<-c(obs,new.obs)
@@ -124,7 +124,7 @@ param.search.optim.tilted.plume<-function(x,return.vec=F)
         if(sub.2.spore.deposition[j,"Direction"]=="L") {xtarget<-(-1)*as.numeric(sub.2.spore.deposition[j,"Distance..cm."])/100}
         
         new.pred<-predict.kernel.tilted.plume(q=q,H=H,alphay=alphayval,alphaz=alphazval,Ws=Wsval,xtarget=xtarget,ytarget=ytarget,wind.data=wind.data)
-        new.obs<-sub.2.spore.deposition[j,"Pustules"]/sub.2.spore.deposition[j,"X..squares.counted"]
+        new.obs<-sub.2.spore.deposition[j,"spores"]/sub.2.spore.deposition[j,"X..squares.counted"]
         val<-c(val,(new.obs-new.pred)^2)
         preds<-c(preds,new.pred)
         obs<-c(obs,new.obs)
@@ -138,8 +138,8 @@ param.search.optim.tilted.plume<-function(x,return.vec=F)
 # optimize decay plume
 opt1<-optim(par=c(.12,.12,9e-07),fn=param.search.optim.decay.plume,control=list(trace=1))
 
-# x<-c(6.845809e-03,7.640827e-01,2.265886e-06) #OPT1 output!!! value = 367.804 for full period <-pancake like distribution, looks like crap
-# x<-c(6.929344e-02,7.717773e-02,5.565447e-06) #OPT1 output!!! value = 3562.495 for two days
+# x<-c(6.845809e-03,7.640827e-01,2.265886e-06) #OPT1 output value = 3678.804 for full period <-pancake like distribution, looks like crap
+# x<-c(6.929344e-02,7.717773e-02,5.565447e-06) #OPT1 output value = 3562.495 for two days
 # x<-c(7.332391e-02,7.595204e-02,1.146244e-05) #OPT1 output value = 3512.003 for one day
 
 test.mat<-data.frame(x=rep(seq(-1,1,.01),each=201),y=rep(seq(-1,1,.01),times=201))
@@ -176,13 +176,13 @@ param.search.tilted.plume.plot<-function(alphayval,alphazval,Wsval)
 
 ## experiment results:
 
-test.mat<-expand.grid(cval=seq(0.06,.08,.002),alphayval=seq(0.075,.085,.001),k=1.146244e-05) 
+test.mat<-expand.grid(cval=seq(0.005,.01,.0005),alphayval=seq(0.5,1,.05),k=2.265886e-06) 
 out<-mcmapply(param.search.decay.plume.plot,  cval = test.mat[,1],alphayval=test.mat[,2],k=test.mat[,3],mc.cores = 6)
 par(mfrow=c(2,3))
 for(i in seq(0,1,.1))
 {
   res.mat<-matrix(out[which(test.mat$k==i)],11,11)
-  contour(seq(0.06,.08,.002),seq(0.075,.085,.001),res.mat,xlab="cval",ylab="alphayval",main=paste("k=",i),nlevels = 20)
+  contour(seq(0.005,.01,.0005),seq(0.5,1,.05),res.mat,xlab="cval",ylab="alphayval",main=paste("k=",i),nlevels = 20)
 }
 
 library(parallel)
