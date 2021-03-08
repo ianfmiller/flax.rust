@@ -5,33 +5,13 @@ vis<-F # set to F so plots aren't generated on source
 ## parameters
 
 ### q is quantity of spores--need to change to function of wind speed and tot. infection intensity
-### H is height from which spores are disperesed--assume 0.5*plant height
+### k is constant realting infection intensity to spore availibility at source
 ### s is wind speed
 ### x is distance in direction of wind
 ### y is distance orthoganal to direction of wind
 ### alphay is sd of dispersal in y direction
-### alphaz is sd of dispersal in z direction (vertical)
-### Ws is falling velocity of spores
 ### c is coefficient used to calculate decay constant along x as a function of s
 
-## tilted gaussian plume https://www.jstor.org/stable/pdf/1937537.pdf?casa_token=wXe8JWI0TrIAAAAA:g6XJxzyOWPEPZd_yw_lMiam3aO9QRO6Usa_WYPKY7zNdRu3PGeXnCoeGv2tazU3CBimc0zfXEiHI39brv7GhMlG7zuUYAZGF2DrFWnH4GRIHul6m4Trcodel
-tilted.plume<-function(q,H,s,x,y,alphay,alphaz,Ws)
-{
-  ifelse(x>=0,1,0)*((q*Ws)/(2*pi*s*alphay*alphaz))*
-    exp(
-    (-(y^2)/(2*alphay^2))+
-      (-((0-(H-Ws*x/s))^2)/(2*alphaz^2))
-    )
-}
-
-## visualize
-if(vis)
-{
-  test.mat<-data.frame(x=rep(seq(-1,1,.01),each=201),y=rep(seq(-1,1,.01),times=201))
-  out<-mapply(tilted.plume, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=266.4167,H=.19,s=.5,alphay=0.1246288,alphaz=0.1539293,Ws=1))
-  res.mat<-matrix(out,201,201,byrow = T)
-  filled.contour(res.mat)
-}
 
 ## two D gaussian plume with decay along x a function of wind speed
 decay.plume<-function(q,k,s,x,y,alphay,c)
