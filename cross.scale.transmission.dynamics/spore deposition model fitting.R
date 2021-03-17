@@ -49,9 +49,9 @@ param.search.optim.decay.plume<-function(x,return.vec=F)
       
       wind.data<-all.weath[which(all.weath$site==site),]
       wind.data<-wind.data[which(wind.data$date>(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC"))),]
-      #wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC")+60*60*24*1)),] ### fit to one day post spore trap deploy
+      wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC")+60*60*24*1)),] ### fit to one day post spore trap deploy
       #wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC")+60*60*24*2)),] ### fit to two days post spore trap deploy
-      wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(date,"%m/%d/%y")," 12:00:00"),tz="UTC"))),] ### fit to full spore trap deploy period
+      #wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(date,"%m/%d/%y")," 12:00:00"),tz="UTC"))),] ### fit to full spore trap deploy period
       
       for(j in 1:dim(sub.2.spore.deposition)[1])
       {
@@ -77,7 +77,7 @@ param.search.optim.decay.plume<-function(x,return.vec=F)
 # optimize decay plume
 
 ## optimize
-opt<-optim(par=c(.028,.07,8.488930e-07),fn=param.search.optim.decay.plume,control=list(trace=1))
+opt<-optim(par=c(.5,.022,6.434187e-06),fn=param.search.optim.decay.plume,control=list(trace=1))
 
 ## results for test-run fitting model to just tag %in% c(86,88)
 ### x<-c(6.845809e-03,7.640827e-01,2.265886e-06) #OPT1 output value = 3678.804 for full period <-pancake like distribution, looks unrealistic
@@ -87,7 +87,7 @@ opt<-optim(par=c(.028,.07,8.488930e-07),fn=param.search.optim.decay.plume,contro
 ## results for model fitting to full data set
 ### sum squared obs = 15833.73
 ### total sum of squares = 15563.23 (total sum of squares = sum((spores/squares - mean(spores/squares))^2) )
-### x<-c(4.596715e-01,2.249808e-02,6.434187e-06) #OPT1 output value = 14653.24 for one day
+### x<-c(4.718717e-01,2.258340e-02,6.428169e-06) #OPT1 output value = 14652.07 for one day
 ### x<-c(4.049630e-01,1.947706e-02,3.275685e-06) #OPT1 output value = 14675.19 for two days
 ### x<-c(1.470363e-02,1.355715e-02,1.128306e-06) #OPT1 output value = 14871.98 for full period
 
@@ -111,13 +111,13 @@ param.search.decay.plume.plot<-function(cval,alphayval,k)
   param.search.optim.decay.plume(c(cval,alphayval,k))
 }
 
-test.mat<-expand.grid(cval=seq(0.01,.02,.001),alphayval=seq(0.01,.02,.001),k=1.128306e-06) 
+test.mat<-expand.grid(cval=seq(0.3,.7,.04),alphayval=seq(0.01,.03,.002),k=6.434187e-06) 
 out<-mcmapply(param.search.decay.plume.plot,  cval = test.mat[,1],alphayval=test.mat[,2],k=test.mat[,3],mc.cores = 6)
 par(mfrow=c(2,3))
 for(i in seq(0,1,.1))
 {
   res.mat<-matrix(out[which(test.mat$k==i)],11,11)
-  contour(seq(0.01,.02,.001),seq(0.01,.02,.001),res.mat,xlab="cval",ylab="alphayval",main=paste("k=",i),nlevels = 20)
+  contour(seq(0.3,.7,.04),seq(0.01,.03,.002),res.mat,xlab="cval",ylab="alphayval",main=paste("k=",i),nlevels = 20)
 }
 
 
