@@ -5,7 +5,7 @@ source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/spore dep
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
 ## load spore dep data
 spore.deposition<-read.csv("~/Documents/GitHub/flax.rust/data/spore counts.csv")
-spore.deposition[which(spore.deposition$Distance..cm.==0),"Distance..cm."]<-1 #set distance for "0" spore traps to 1cm
+spore.deposition[which(spore.deposition$Distance..cm.==0),"Distance..cm."]<-5 #set distance for "0" spore traps to 1cm
 ## load demog data
 demog<-read.csv("~/Documents/GitHub/flax.rust/data/Demography.csv")
 demog<-demog[which(demog$year==2020),] #subset to 2020
@@ -77,7 +77,7 @@ param.search.optim.decay.plume<-function(x,return.vec=F)
 # optimize decay plume
 
 ## optimize
-opt<-optim(par=c(.5,.022,6.434187e-06),fn=param.search.optim.decay.plume,control=list(trace=1))
+opt<-optim(par=c(4.049630e-01,1.947706e-02,3.275685e-06),fn=param.search.optim.decay.plume,control=list(trace=1))
 
 ## results for test-run fitting model to just tag %in% c(86,88)
 ### x<-c(6.845809e-03,7.640827e-01,2.265886e-06) #OPT1 output value = 3678.804 for full period <-pancake like distribution, looks unrealistic
@@ -88,7 +88,7 @@ opt<-optim(par=c(.5,.022,6.434187e-06),fn=param.search.optim.decay.plume,control
 ### sum squared obs = 15833.73
 ### total sum of squares = 15563.23 (total sum of squares = sum((spores/squares - mean(spores/squares))^2) )
 ### x<-c(4.718717e-01,2.258340e-02,6.428169e-06) #OPT1 output value = 14652.07 for one day
-### x<-c(4.049630e-01,1.947706e-02,3.275685e-06) #OPT1 output value = 14675.19 for two days
+### x<-c(5.514282e+00,1.886189e-02,3.285846e-06) #OPT1 output value = 14675.07 for two days ALMOST NO DECAY IN X DIRECTION but similar output value for all values of cval (opt$par[1])
 ### x<-c(1.470363e-02,1.355715e-02,1.128306e-06) #OPT1 output value = 14871.98 for full period
 
 ## visualize kernel
@@ -111,13 +111,13 @@ param.search.decay.plume.plot<-function(cval,alphayval,k)
   param.search.optim.decay.plume(c(cval,alphayval,k))
 }
 
-test.mat<-expand.grid(cval=seq(0.3,.7,.04),alphayval=seq(0.01,.03,.002),k=6.434187e-06) 
+test.mat<-expand.grid(cval=seq(1,1.5,.05),alphayval=seq(0.01,.03,.002),k=3.275685e-06) 
 out<-mcmapply(param.search.decay.plume.plot,  cval = test.mat[,1],alphayval=test.mat[,2],k=test.mat[,3],mc.cores = 6)
 par(mfrow=c(2,3))
 for(i in seq(0,1,.1))
 {
   res.mat<-matrix(out[which(test.mat$k==i)],11,11)
-  contour(seq(0.3,.7,.04),seq(0.01,.03,.002),res.mat,xlab="cval",ylab="alphayval",main=paste("k=",i),nlevels = 20)
+  contour(seq(1.0,1.5,.05),seq(0.01,.03,.002),res.mat,xlab="cval",ylab="alphayval",main=paste("k=",i),nlevels = 20)
 }
 
 
