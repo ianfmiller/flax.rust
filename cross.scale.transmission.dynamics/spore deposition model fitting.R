@@ -5,7 +5,7 @@ source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/spore dep
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
 ## load spore dep data
 spore.deposition<-read.csv("~/Documents/GitHub/flax.rust/data/spore counts.csv")
-spore.deposition[which(spore.deposition$Distance..cm.==0),"Distance..cm."]<-5 #set distance for "0" spore traps to 1cm
+spore.deposition[which(spore.deposition$Distance..cm.==0),"Distance..cm."]<-1 #set distance for "0" spore traps to 1cm
 ## load demog data
 demog<-read.csv("~/Documents/GitHub/flax.rust/data/Demography.csv")
 demog<-demog[which(demog$year==2020),] #subset to 2020
@@ -77,7 +77,7 @@ param.search.optim.decay.plume<-function(x,return.vec=F)
 # optimize decay plume
 
 ## optimize
-opt<-optim(par=c(4.049630e-01,1.947706e-02,3.275685e-06),fn=param.search.optim.decay.plume,control=list(trace=1))
+opt<-optim(par=c(1.226695e-01,1.066038e-01,1.205203e-05),fn=param.search.optim.decay.plume,control=list(trace=1))
 
 ## results for test-run fitting model to just tag %in% c(86,88)
 ### x<-c(6.845809e-03,7.640827e-01,2.265886e-06) #OPT1 output value = 3678.804 for full period <-pancake like distribution, looks unrealistic
@@ -111,13 +111,14 @@ param.search.decay.plume.plot<-function(cval,alphayval,k)
   param.search.optim.decay.plume(c(cval,alphayval,k))
 }
 
-test.mat<-expand.grid(cval=seq(1,1.5,.05),alphayval=seq(0.01,.03,.002),k=3.275685e-06) 
+
+cvalset<-seq(.4,1,.06)
+alphayvalset<-seq(0,.2,.02)
+kset=6.428169e-06
+test.mat<-expand.grid(cval=cvalset,alphayval=alphayvalset,k=kset) 
 out<-mcmapply(param.search.decay.plume.plot,  cval = test.mat[,1],alphayval=test.mat[,2],k=test.mat[,3],mc.cores = 6)
-par(mfrow=c(2,3))
-for(i in seq(0,1,.1))
-{
-  res.mat<-matrix(out[which(test.mat$k==i)],11,11)
-  contour(seq(1.0,1.5,.05),seq(0.01,.03,.002),res.mat,xlab="cval",ylab="alphayval",main=paste("k=",i),nlevels = 20)
-}
+res.mat<-matrix(out[which(test.mat$k==kset)],length(cvalset),length(alphayvalset))
+contour(cvalset,alphayvalset,res.mat,xlab="cval",ylab="alphayval",main=paste("k=",i),nlevels = 1000)
+
 
 
