@@ -14,14 +14,14 @@ demog<-demog[which(demog$year==2020),] #subset to 2020
 
 ## optimize
 
-opt<-optim(par=c(4.718717e-01,2.258340e-02,6.428169e-06),fn=param.search.optim.decay.plume,control=list(trace=1))
+opt<-optim(par=c(1.470363e-02,1.355715e-02,1.128306e-06),fn=param.search.optim.decay.plume,control=list(trace=1))
 
 ## results for model fitting
 ### sum squared obs = 15552.27
 ### total sum of squares = 15563.23 (total sum of squares = sum((spores/squares - mean(spores/squares))^2) )
-### x<-c(4.718717e-01,2.258340e-02,6.428169e-06) #OPT1 output value = 14652.07 for one day
-### x<-c(5.514282e+00,1.886189e-02,3.285846e-06) #OPT1 output value = 14675.07 for two days ALMOST NO DECAY IN X DIRECTION but similar output value for all values of cval (opt$par[1])
-### x<-c(1.470363e-02,1.355715e-02,1.128306e-06) #OPT1 output value = 14871.98 for full period
+### x<-c(4.772329e-01,2.261641e-02,6.285425e-06) #OPT1 output value = 14637.1 for one day
+### x<-c(5.543098e+00,1.907743e-02,3.231231e-06) #OPT1 output value = 14651.75 for two days ALMOST NO DECAY IN X DIRECTION but similar output value for all values of cval (opt$par[1])
+### x<-c1.177116e-02,1.185136e-02,1.263117e-06) #OPT1 output value = 14843.28 for full period
 
 ## visualize kernel
 test.mat<-data.frame(x=rep(seq(-1,1,.01),each=201),y=rep(seq(-1,1,.01),times=201))
