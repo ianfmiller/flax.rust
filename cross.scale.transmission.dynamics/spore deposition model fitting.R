@@ -5,12 +5,10 @@ source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/spore dep
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
 ## load spore dep data
 spore.deposition<-read.csv("~/Documents/GitHub/flax.rust/data/spore counts.csv")
-spore.deposition[which(spore.deposition$Distance..cm.==0),"Distance..cm."]<-1 #set distance for "0" spore traps to 1cm
+spore.deposition[which(spore.deposition$Distance..cm.==0),"Distance.cm"]<-1 #set distance for "0" spore traps to 1cm
 ## load demog data
 demog<-read.csv("~/Documents/GitHub/flax.rust/data/Demography.csv")
 demog<-demog[which(demog$year==2020),] #subset to 2020
-## load within host data
-plants<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plants.RDS")
 
 # functions
 predict.kernel.decay.plume<-function(q,k,alphay,c,xtarget,ytarget,wind.data)
@@ -36,7 +34,7 @@ param.search.optim.decay.plume<-function(x,return.vec=F)
   obs<-c()
   for(tag in unique(spore.deposition$Tag))
   {
-    site<-demog[which(demog$tag==tag),"Site"]
+    site<-spore.deposition[which(spore.deposition$Tag==tag)[1],"Site"]
     plantx<-demog[which(demog$tag==tag),"X"]+demog[which(demog$tag==tag),"x"]
     planty<-demog[which(demog$tag==tag),"Y"]+demog[which(demog$tag==tag),"y"]
     sub.1.spore.deposition<-spore.deposition[which(spore.deposition$Tag==tag),]
@@ -45,7 +43,7 @@ param.search.optim.decay.plume<-function(x,return.vec=F)
     {
       sub.2.spore.deposition<-sub.1.spore.deposition[which(sub.1.spore.deposition$Date.collected==date),]
       deploy.date<-sub.2.spore.deposition[1,"Date.deployed"]
-      q<-plants[intersect(which(plants$Tag==tag),which(plants$Date==as.Date(deploy.date,tryFormats = c("%m/%d/%y")))),"plant.inf.intens"]
+      q<-sub.2.spore.deposition[1,"plant.inf.intens"]
       
       wind.data<-all.weath[which(all.weath$site==site),]
       wind.data<-wind.data[which(wind.data$date>(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC"))),]
@@ -57,13 +55,13 @@ param.search.optim.decay.plume<-function(x,return.vec=F)
       {
         xtarget<-0
         ytarget<-0
-        if(sub.2.spore.deposition[j,"Direction"]=="U") {ytarget<-as.numeric(sub.2.spore.deposition[j,"Distance..cm."])/100}
-        if(sub.2.spore.deposition[j,"Direction"]=="R") {xtarget<-as.numeric(sub.2.spore.deposition[j,"Distance..cm."])/100}
-        if(sub.2.spore.deposition[j,"Direction"]=="D") {ytarget<-(-1)*as.numeric(sub.2.spore.deposition[j,"Distance..cm."])/100}
-        if(sub.2.spore.deposition[j,"Direction"]=="L") {xtarget<-(-1)*as.numeric(sub.2.spore.deposition[j,"Distance..cm."])/100}
+        if(sub.2.spore.deposition[j,"Direction"]=="U") {ytarget<-as.numeric(sub.2.spore.deposition[j,"Distance.cm"])/100}
+        if(sub.2.spore.deposition[j,"Direction"]=="R") {xtarget<-as.numeric(sub.2.spore.deposition[j,"Distance.cm"])/100}
+        if(sub.2.spore.deposition[j,"Direction"]=="D") {ytarget<-(-1)*as.numeric(sub.2.spore.deposition[j,"Distance.cm"])/100}
+        if(sub.2.spore.deposition[j,"Direction"]=="L") {xtarget<-(-1)*as.numeric(sub.2.spore.deposition[j,"Distance.cm"])/100}
         
         new.pred<-predict.kernel.decay.plume(q=q,k=k,alphay=alphayval,c=cval,xtarget=xtarget,ytarget=ytarget,wind.data=wind.data)
-        new.obs<-sub.2.spore.deposition[j,"Spores"]/sub.2.spore.deposition[j,"X..squares.counted"]
+        new.obs<-sub.2.spore.deposition[j,"spores.per.square.mm"]
         val<-c(val,(new.obs-new.pred)^2)
         preds<-c(preds,new.pred)
         obs<-c(obs,new.obs)
