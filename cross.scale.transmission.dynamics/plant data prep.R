@@ -10,12 +10,6 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   delta.n.pustules<-subset(delta.n.pustules,time<=7)
   n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS")
   
-  # load model and data from stem analysis
-  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/stem data prep.R")
-  delta.stems<-subset(delta.stems,time<=7)
-  stems.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/stems.model.RDS")
-  
-  
   # prep enviro data
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
   
@@ -250,7 +244,6 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         
         pred.pustule.diam.growths<-c(pred.pustule.diam.growths,pred.pustule.diam.growth)
         pred.pustule.num.increases<-c(pred.pustule.num.increases,pred.pustule.num.increase)
-        pred.stem.inf.intens.increases<-c(pred.stem.inf.intens.increases,pred.stem.inf.intens.increase)
       } 
     }
   }
@@ -259,7 +252,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
                           temp.days=temp.days,temp.days.16.22=temp.days.16.22,temp.days.7.30=temp.days.7.30,
                           dew.point.days=dew.point.days,temp.dew.point.days=temp.dew.point.days,temp.16.22.dew.point.days=temp.16.22.dew.point.days,temp.7.30.dew.point.days=temp.7.30.dew.point.days,
                           wetness.days=wetness.days,temp.wetness.days=temp.wetness.days,temp.16.22.wetness.days=temp.16.22.wetness.days,temp.7.30.wetness.days=temp.7.30.wetness.days,
-                          tot.rain=tot.rains,solar.days=solar.days,wind.speed.days=wind.speed.days,gust.speed.days=gust.speed.days,pred.pustule.diam.growth=pred.pustule.diam.growths,pred.pustule.num.increase=pred.pustule.num.increases,pred.stem.inf.intens.increase=pred.stem.inf.intens.increases)
+                          tot.rain=tot.rains,solar.days=solar.days,wind.speed.days=wind.speed.days,gust.speed.days=gust.speed.days,pred.pustule.diam.growth=pred.pustule.diam.growths,pred.pustule.num.increase=pred.pustule.num.increases)
   
   saveRDS(plants,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plants.RDS")
   saveRDS(delta.plants,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.plants.RDS")
