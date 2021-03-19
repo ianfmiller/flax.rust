@@ -5,85 +5,16 @@ source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/spore dep
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
 ## load spore dep data
 spore.deposition<-read.csv("~/Documents/GitHub/flax.rust/data/spore counts.csv")
-spore.deposition[which(spore.deposition$Distance..cm.==0),"Distance.cm"]<-1 #set distance for "0" spore traps to 1cm
+spore.deposition[which(spore.deposition$Distance.cm==0),"Distance.cm"]<-1 #set distance for "0" spore traps to 1cm
 ## load demog data
 demog<-read.csv("~/Documents/GitHub/flax.rust/data/Demography.csv")
 demog<-demog[which(demog$year==2020),] #subset to 2020
 
-# functions
-predict.kernel.decay.plume.inst<-function(i,q,k,alphay,c,xtarget,ytarget,wind.data)
-{
-  delta.t<-wind.data[i+1,"date"]-wind.data[i,"date"]
-  cords<-get.plume.xy(2*pi*correct.wind.degree(wind.data[i,"wind.direction"],site = wind.data[i,"site"])/360,0,0,xtarget,ytarget,plot=F)
-  decay.plume(q=q,k=k,s=wind.data[i,"wind.speed"],x=cords[1],y=cords[2],alphay=alphay,c=c)
-}
-
-predict.kernel.decay.plume<-function(q,k,alphay,c,xtarget,ytarget,wind.data)
-{
-  sapply(1:(dim(wind.data)[1]-1),test.func)->tot.dep
-  sum(tot.dep,na.rm = T)
-}
-
-param.search.optim.decay.plume<-function(x,return.vec=F)
-{
-  cval=x[1]
-  alphayval=x[2]
-  k=x[3]
-  
-  val<-c()
-  preds<-c()
-  obs<-c()
-  for(tag in unique(spore.deposition$Tag))
-  {
-    site<-spore.deposition[which(spore.deposition$Tag==tag)[1],"Site"]
-    plantx<-demog[which(demog$tag==tag),"X"]+demog[which(demog$tag==tag),"x"]
-    planty<-demog[which(demog$tag==tag),"Y"]+demog[which(demog$tag==tag),"y"]
-    sub.1.spore.deposition<-spore.deposition[which(spore.deposition$Tag==tag),]
-    
-    for(date in unique(sub.1.spore.deposition$Date.collected))
-    {
-      sub.2.spore.deposition<-sub.1.spore.deposition[which(sub.1.spore.deposition$Date.collected==date),]
-      deploy.date<-sub.2.spore.deposition[1,"Date.deployed"]
-      q<-sub.2.spore.deposition[1,"plant.inf.intens"]
-      
-      wind.data<-all.weath[which(all.weath$site==site),]
-      wind.data<-wind.data[which(wind.data$date>(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC"))),]
-      wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC")+60*60*24*1)),] ### fit to one day post spore trap deploy
-      #wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC")+60*60*24*2)),] ### fit to two days post spore trap deploy
-      #wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(date,"%m/%d/%y")," 12:00:00"),tz="UTC"))),] ### fit to full spore trap deploy period
-      
-      for(j in 1:dim(sub.2.spore.deposition)[1])
-      {
-        xtarget<-0
-        ytarget<-0
-        if(sub.2.spore.deposition[j,"Direction"]=="U") {ytarget<-as.numeric(sub.2.spore.deposition[j,"Distance.cm"])/100}
-        if(sub.2.spore.deposition[j,"Direction"]=="R") {xtarget<-as.numeric(sub.2.spore.deposition[j,"Distance.cm"])/100}
-        if(sub.2.spore.deposition[j,"Direction"]=="D") {ytarget<-(-1)*as.numeric(sub.2.spore.deposition[j,"Distance.cm"])/100}
-        if(sub.2.spore.deposition[j,"Direction"]=="L") {xtarget<-(-1)*as.numeric(sub.2.spore.deposition[j,"Distance.cm"])/100}
-        
-        new.pred<-predict.kernel.decay.plume(q=q,k=k,alphay=alphayval,c=cval,xtarget=xtarget,ytarget=ytarget,wind.data=wind.data)
-        new.obs<-sub.2.spore.deposition[j,"spores.per.square.mm"]
-        val<-c(val,(new.obs-new.pred)^2)
-        preds<-c(preds,new.pred)
-        obs<-c(obs,new.obs)
-      }
-    }
-  }
-  if(return.vec==T) {data.frame(pred=preds,obs=obs)} else {sum(val)}
-}
-
-
 # optimize decay plume
 
 ## optimize
-library(optimParallel)
 
 opt<-optim(par=c(4.718717e-01,2.258340e-02,6.428169e-06),fn=param.search.optim.decay.plume,control=list(trace=1))
-
-#cl <- parallel::makeCluster(2, setup_strategy = "sequential",type = "FORK")
-#setDefaultCluster(cl=cl)
-#opt<-optimParallel(par=c(4.718717e-01,2.258340e-02,6.428169e-06),fn=param.search.optim.decay.plume,control=list(trace=1))
-#setDefaultCluster(cl=NULL); stopCluster(cl)
 
 ## results for model fitting
 ### sum squared obs = 15552.27

@@ -1,5 +1,8 @@
 # gaussian plume functions
 
+library(rlist)
+library(parallel)
+
 vis<-F # set to F so plots aren't generated on source
 
 ## parameters
@@ -134,18 +137,15 @@ predict.kernel.decay.plume.inst<-function(i,q,k,alphay,c,xtarget,ytarget,wind.da
 
 predict.kernel.decay.plume<-function(q,k,alphay,c,xtarget,ytarget,wind.data)
 {
-  sapply(1:(dim(wind.data)[1]-1),test.func)->tot.dep
+  mapply(predict.kernel.decay.plume.inst,1:(dim(wind.data)[1]-1),MoreArgs = list(q=q,k=k,alphay=alphay,c=c,xtarget=xtarget,ytarget=ytarget,wind.data=wind.data))->tot.dep
   sum(tot.dep,na.rm = T)
 }
 
-param.search.optim.decay.plume<-function(x,return.vec=F)
+param.search.optim.decay.plume<-function(x,return.out=F)
 {
-  cval=x[1]
-  alphayval=x[2]
-  k=x[3]
-  
+
   out<-list.rbind(mcmapply(param.search.optim.decay.plume.tag,unique(spore.deposition$Tag),MoreArgs = list(cval=x[1],alphayval=x[2],k=x[3]),SIMPLIFY=F,mc.cores = 6))
-  if(return.vec==T) {out} else {sum(out$val)}
+  if(return.out==T) {out} else {sum(out$val)}
   
 }
 
