@@ -3,12 +3,11 @@
 library(rlist)
 library(parallel)
 
-vis<-F # set to F so plots aren't generated on source
-
 ## parameters
 
 ### q is quantity of spores--need to change to function of wind speed and tot. infection intensity
 ### k is constant realting infection intensity to spore availibility at source
+### H is height from which spores are disperesed--assume 0.5*plant height
 ### s is wind speed
 ### x is distance in direction of wind
 ### y is distance orthoganal to direction of wind
@@ -22,15 +21,7 @@ decay.plume<-function(q,k,s,x,y,alphay,c)
   ifelse(x>=0,1,0)*q*k*exp(-( x^2/(2*(c*s)^2) + y^2/(2*alphay^2)))
 }
 
-if(vis)
-{
-  test.mat<-data.frame(x=rep(seq(-1,1,.1),each=21),y=rep(seq(-1,1,.1),times=21))
-  out<-mapply(decay.plume, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=266.4167,k=.001,s=1,alphay=0.15906877,c=0.03382694))
-  res.mat<-matrix(out,21,21,byrow = T)
-  filled.contour(res.mat)
-}
-
-## function to find x and y coordinates to plug into tilted gaussian plume for a given wind direction and direction and distance of spore trap (assuming N/S/E/W cord system), assume counterclockwise is positive
+## function to find x and y coordinates to plug into gaussian plume for a given wind direction and direction and distance of spore trap (assuming N/S/E/W cord system), assume counterclockwise is positive
 get.plume.xy<-function(degree,xorigin,yorigin,xtarget,ytarget,plot=F)
 {
   # find point on wind vector that when connected with x,y forms a right angle with wind vector
@@ -128,13 +119,6 @@ correct.wind.degree<-function(x,site="blank")
   newx
 }
 
-predict.kernel.decay.plume.inst<-function(i,q,k,alphay,c,xtarget,ytarget,wind.data)
-{
-  delta.t<-wind.data[i+1,"date"]-wind.data[i,"date"]
-  cords<-get.plume.xy(2*pi*correct.wind.degree(wind.data[i,"wind.direction"],site = wind.data[i,"site"])/360,0,0,xtarget,ytarget,plot=F)
-  decay.plume(q=q,k=k,s=wind.data[i,"wind.speed"],x=cords[1],y=cords[2],alphay=alphay,c=c)
-}
-
 predict.kernel.decay.plume<-function(q,k,alphay,c,xtarget,ytarget,wind.data)
 {
   mapply(predict.kernel.decay.plume.inst,1:(dim(wind.data)[1]-1),MoreArgs = list(q=q,k=k,alphay=alphay,c=c,xtarget=xtarget,ytarget=ytarget,wind.data=wind.data))->tot.dep
@@ -172,9 +156,9 @@ param.search.optim.decay.plume.tag<-function(tag,cval,alphayval,k)
     
     wind.data<-all.weath[which(all.weath$site==site),]
     wind.data<-wind.data[which(wind.data$date>(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC"))),]
-    #wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC")+60*60*24*1)),] ### fit to one day post spore trap deploy
+    wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC")+60*60*24*1)),] ### fit to one day post spore trap deploy
     #wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC")+60*60*24*2)),] ### fit to two days post spore trap deploy
-    wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(date,"%m/%d/%y")," 12:00:00"),tz="UTC"))),] ### fit to full spore trap deploy period
+    #wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(date,"%m/%d/%y")," 12:00:00"),tz="UTC"))),] ### fit to full spore trap deploy period
     
     for(j in 1:dim(sub.2.spore.deposition)[1])
     {
