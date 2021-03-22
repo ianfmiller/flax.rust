@@ -14,10 +14,10 @@ demog<-demog[which(demog$year==2020),] #subset to 2020
 
 ## optimize
 
-opt<-optim(par=c(1.470363e-02,1.355715e-02,1.128306e-06),fn=param.search.optim.decay.plume,control=list(trace=1))
+opt<-optim(par=c(4.772329e-01,2.261641e-02,6.285425e-06),fn=param.search.optim.decay.plume,control=list(trace=1))
 
 ## results for model fitting
-### sum squared obs = 15552.27
+### sum squared obs = 14764.22
 ### total sum of squares = 15563.23 (total sum of squares = sum((spores/squares - mean(spores/squares))^2) )
 ### x<-c(4.772329e-01,2.261641e-02,6.285425e-06) #OPT1 output value = 14637.1 for one day
 ### x<-c(5.543098e+00,1.907743e-02,3.231231e-06) #OPT1 output value = 14651.75 for two days ALMOST NO DECAY IN X DIRECTION but similar output value for all values of cval (opt$par[1])
