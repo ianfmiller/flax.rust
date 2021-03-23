@@ -17,10 +17,10 @@ demog<-demog[which(demog$year==2020),] #subset to 2020
 opt<-optim(par=c(4.772329e-01,2.261641e-02,6.285425e-06),fn=param.search.optim.decay.plume,control=list(trace=1))
 
 ## results for model fitting
-### sum squared obs = 14764.22
-### total sum of squares = 15563.23 (total sum of squares = sum((spores/squares - mean(spores/squares))^2) )
-### x<-c(4.772329e-01,2.261641e-02,6.285425e-06) #OPT1 output value = 14637.1 for one day
-### x<-c(5.543098e+00,1.907743e-02,3.231231e-06) #OPT1 output value = 14651.75 for two days ALMOST NO DECAY IN X DIRECTION but similar output value for all values of cval (opt$par[1])
+### sum squared obs = 14991.02
+### total sum of squares = 14764.22 (total sum of squares = sum((spores/squares - mean(spores/squares))^2) )
+### x<-c(0.0834738679, 0.1025881527, 0.0000049515) #OPT1 output value = 14305.1 for one day
+### x<-c(5.288992e-01 , -3.461082e-02 , 2.512734e-06) #OPT1 output value = 14319.83 for two days ALMOST NO DECAY IN X DIRECTION but similar output value for all values of cval (opt$par[1])
 ### x<-c(1.177116e-02,1.185136e-02,1.263117e-06) #OPT1 output value = 14843.28 for full period
 
 ## visualize kernel
@@ -44,9 +44,9 @@ param.search.decay.plume.plot<-function(cval,alphayval,k)
 }
 
 
-cvalset<-seq(.4,1,.06)
-alphayvalset<-seq(0,.2,.02)
-kset=6.428169e-06
+cvalset<-seq(0,1,.1)
+alphayvalset<-seq(0,1,.1)
+kset=0.0000049515
 test.mat<-expand.grid(cval=cvalset,alphayval=alphayvalset,k=kset) 
 out<-mcmapply(param.search.decay.plume.plot,  cval = test.mat[,1],alphayval=test.mat[,2],k=test.mat[,3],mc.cores = 6)
 res.mat<-matrix(out[which(test.mat$k==kset)],length(cvalset),length(alphayvalset))
