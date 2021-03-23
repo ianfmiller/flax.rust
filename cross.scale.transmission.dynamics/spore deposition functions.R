@@ -86,7 +86,7 @@ get.plume.xy<-function(degree,xorigin,yorigin,xtarget,ytarget,plot=F)
 
 ## function to correct wind direction to flip from direction of origin to direction of flow; correct for transect direction
 
-correct.wind.degree<-function(x,site="blank")
+correct.wind.degree.func<-function(x,site="blank")
 {
   ### correct wind direction so that 360/0 corresponds to plot "UP" direction
   if(site=="GM")
@@ -117,6 +117,24 @@ correct.wind.degree<-function(x,site="blank")
   newx<-newx-180
   if(newx<0) {newx<-360+newx}
   newx
+}
+
+correct.wind.degree<-function(x,site="blank")
+{
+  sapply(x,correct.wind.degree.func,site=site)
+}
+
+#plot(0,0,type="n",xlim=c(-max(wind.data$wind.speed),max(wind.data$wind.speed)),ylim=c(-max(wind.data$wind.speed),max(wind.data$wind.speed)))
+#arrows(0,0,wind.data$wind.speed*cos(2*pi*wind.data$wind.direction/360),wind.data$wind.speed*sin(2*pi*wind.data$wind.direction/360))
+#arrows(0,0,wind.data$wind.speed*cos(2*pi*correct.wind.degree(wind.data$wind.direction,site=site)/360),wind.data$wind.speed*sin(2*pi*correct.wind.degree(wind.data$wind.direction,site=site)/360),col="blue")
+#points(0,0,col="red",pch=15)
+
+
+predict.kernel.decay.plume.inst<-function(i,q,k,alphay,c,xtarget,ytarget,wind.data)
+{
+  delta.t<-wind.data[i+1,"date"]-wind.data[i,"date"]
+  cords<-get.plume.xy(2*pi*correct.wind.degree(wind.data[i,"wind.direction"],site = wind.data[i,"site"])/360,0,0,xtarget,ytarget,plot=F)
+  decay.plume(q=q,k=k,s=wind.data[i,"wind.speed"],x=cords[1],y=cords[2],alphay=alphay,c=c)
 }
 
 predict.kernel.decay.plume<-function(q,k,alphay,c,xtarget,ytarget,wind.data)
@@ -156,8 +174,8 @@ param.search.optim.decay.plume.tag<-function(tag,cval,alphayval,k)
     
     wind.data<-all.weath[which(all.weath$site==site),]
     wind.data<-wind.data[which(wind.data$date>(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC"))),]
-    wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC")+60*60*24*1)),] ### fit to one day post spore trap deploy
-    #wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC")+60*60*24*2)),] ### fit to two days post spore trap deploy
+    #wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC")+60*60*24*1)),] ### fit to one day post spore trap deploy
+    wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC")+60*60*24*2)),] ### fit to two days post spore trap deploy
     #wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(date,"%m/%d/%y")," 12:00:00"),tz="UTC"))),] ### fit to full spore trap deploy period
     
     for(j in 1:dim(sub.2.spore.deposition)[1])
