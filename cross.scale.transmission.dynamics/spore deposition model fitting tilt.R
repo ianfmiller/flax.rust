@@ -45,13 +45,13 @@ param.search.tilted.plume<-function(kval,alphayval,alphazval,Wsval)
 }
 
 kset=1.470378e-06
-alphayvalset<-seq(0,.01,.001)
+alphayvalset<-seq(0,.1,.01)
 alphazvalset<-seq(5,15,1)
 Wsset= 1.111622e+02
 test.mat<-expand.grid(kval=kset,alphayval=alphayvalset,alphazval=alphazvalset,Wsval=Wsset) 
 out<-mcmapply(param.search.tilted.plume,  kval = test.mat[,1],alphayval=test.mat[,2],alphazval=test.mat[,3],Wsval=test.mat[,4],mc.cores = 6)
 res.mat<-matrix(out[which(test.mat$k==kset)],length(alphayvalset),length(alphazvalset))
-filled.contour(alphayvalset,alphazvalset,res.mat,xlab="alphayval",ylab="Wsval",nlevels = 100)
+contour(alphayvalset,alphazvalset,res.mat,xlab="alphayval",ylab="Wsval",nlevels = 10000)
 
 
 
