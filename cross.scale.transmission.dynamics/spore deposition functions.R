@@ -124,10 +124,13 @@ correct.wind.degree<-function(x,site="blank")
   sapply(x,correct.wind.degree.func,site=site)
 }
 
-#plot(0,0,type="n",xlim=c(-max(wind.data$wind.speed),max(wind.data$wind.speed)),ylim=c(-max(wind.data$wind.speed),max(wind.data$wind.speed)))
-#arrows(0,0,wind.data$wind.speed*cos(2*pi*wind.data$wind.direction/360),wind.data$wind.speed*sin(2*pi*wind.data$wind.direction/360))
-#arrows(0,0,wind.data$wind.speed*cos(2*pi*correct.wind.degree(wind.data$wind.direction,site=site)/360),wind.data$wind.speed*sin(2*pi*correct.wind.degree(wind.data$wind.direction,site=site)/360),col="blue")
-#points(0,0,col="red",pch=15)
+#flip across x axis to account for difference in angle direction between sin/cosine funcs and wind data, rotate 90 degrees counterclockwise to put up facing up
+## change y cords to - y cords
+## set x = -y, y = x
+plot(0,0,type="n",xlim=c(-max(wind.data$wind.speed),max(wind.data$wind.speed)),ylim=c(-max(wind.data$wind.speed),max(wind.data$wind.speed)))
+arrows(0,0,wind.data$wind.speed*sin(2*pi*wind.data$wind.direction/360),wind.data$wind.speed*cos(2*pi*wind.data$wind.direction/360),)
+arrows(0,0,wind.data$wind.speed*sin(2*pi*correct.wind.degree(wind.data$wind.direction,site=site)/360),wind.data$wind.speed*cos(2*pi*correct.wind.degree(wind.data$wind.direction,site=site)/360),col="blue")
+points(0,0,col="red",pch=15)
 
 
 predict.kernel.decay.plume.inst<-function(i,q,k,alphay,c,xtarget,ytarget,wind.data)
