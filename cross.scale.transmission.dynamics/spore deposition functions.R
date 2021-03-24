@@ -133,16 +133,16 @@ correct.wind.degree<-function(x,site="blank")
 #points(0,0,col="red",pch=15)
 
 
-predict.kernel.decay.plume.inst<-function(i,q,k,alphay,c,xtarget,ytarget,wind.data)
+predict.kernel.decay.plume.inst<-function(i,q,k,alphay,c,xtarget,ytarget,wind.data,site)
 {
   delta.t<-wind.data[i+1,"date"]-wind.data[i,"date"]
-  cords<-get.plume.xy(2*pi*correct.wind.degree(wind.data[i,"wind.direction"],site = wind.data[i,"site"])/360,0,0,xtarget,ytarget,plot=F)
-  decay.plume(q=q,k=k,s=wind.data[i,"wind.speed"],x=cords[1],y=cords[2],alphay=alphay,c=c)
+  cords<-mapply(get.plume.xy,2*pi*correct.wind.degree(wind.data[i,"wind.direction"],site = site)/360,MoreArgs=list(xorigin=0,yorigin=0,xtarget=xtarget,ytarget=ytarget))
+  decay.plume(q=q,k=k,s=wind.data[i,"wind.speed"],x=cords[1,],y=cords[2,],alphay=alphay,c=c)
 }
 
 predict.kernel.decay.plume<-function(q,k,alphay,c,xtarget,ytarget,wind.data)
 {
-  mapply(predict.kernel.decay.plume.inst,1:(dim(wind.data)[1]-1),MoreArgs = list(q=q,k=k,alphay=alphay,c=c,xtarget=xtarget,ytarget=ytarget,wind.data=wind.data))->tot.dep
+  predict.kernel.decay.plume.inst(1:dim(wind.data)[1],q,k,alphay,c,xtarget,ytarget,wind.data,site=wind.data[1,"site"])->tot.dep
   sum(tot.dep,na.rm = T)
 }
 
