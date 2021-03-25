@@ -20,8 +20,7 @@ tilted.plume<-function(q,H,s,x,y,k,alphay,alphaz,Ws)
 {
   ifelse(x>=0,1,0)*((q*k*Ws)/(2*pi*s*alphay*alphaz))*
     exp(
-      (-(y^2)/(2*alphay^2))+
-        (-((0-(H-Ws*x/s))^2)/(2*alphaz^2))
+      ((y^2)/(2*alphay^2))-((H-Ws*x/s)^2/(2*alphaz^2))
     )
 }
 
