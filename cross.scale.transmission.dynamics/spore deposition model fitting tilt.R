@@ -14,7 +14,7 @@ demog<-demog[which(demog$year==2020),] #subset to 2020
 
 ## optimize
 
-opt<-optim(par=c(2.831844e-07, 5.653991e-02, 2.132874e+01, 1.120532e+02),fn=param.search.optim.tilted.plume,control=list(trace=1))
+opt<-optim(par=c(2.831844e-07, 5.653991e-02, 1.120532e+02),fn=param.search.optim.tilted.plume,control=list(trace=1))
 
 ## results for model fitting
 ### sum squared obs = 14991.02
@@ -26,7 +26,7 @@ opt<-optim(par=c(2.831844e-07, 5.653991e-02, 2.132874e+01, 1.120532e+02),fn=para
 ## visualize kernel
 test.mat<-data.frame(x=rep(seq(-1,1,.01),each=201),y=rep(seq(-1,1,.01),times=201))
 #opt<-list(par=c(5e-5,.1,2,100))
-out<-mapply(tilted.plume, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=4224.733,H=.5,s=1,k=opt$par[1],alphay=opt$par[2],alphaz=opt$par[3],Ws=opt$par[4]))
+out<-mapply(tilted.plume, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=4224.733,H=.5,s=5,k=opt$par[1],alpha=opt$par[2],Ws=opt$par[3]))
 res.mat<-matrix(out,201,201,byrow = T)
 filled.contour(x=seq(-1,1,.01),y=seq(-1,1,.01),z=res.mat)
 
@@ -39,19 +39,18 @@ plot(pred.mat$dist,pred.mat$pred-pred.mat$obs)
 # visualize parameter search
 library(parallel)
 
-param.search.tilted.plume<-function(kval,alphayval,alphazval,Wsval)
+param.search.tilted.plume<-function(kval,alphaval,Wsval)
 {
-  param.search.optim.tilted.plume(c(kval,alphayval,alphazval,Wsval))
+  param.search.optim.tilted.plume(c(kval,alphaval,Wsval))
 }
 
 kset=2.532057e-07
-alphayvalset<-seq(.07,.08,.001)
-alphazvalset<-seq(11.5,12.5,.1)
-Wsset= 9.574686e+01
-test.mat<-expand.grid(kval=kset,alphayval=alphayvalset,alphazval=alphazvalset,Wsval=Wsset) 
-out<-mcmapply(param.search.tilted.plume,  kval = test.mat[,1],alphayval=test.mat[,2],alphazval=test.mat[,3],Wsval=test.mat[,4],mc.cores = 6)
-res.mat<-matrix(out[which(test.mat$k==kset)],length(alphayvalset),length(alphazvalset))
-contour(alphayvalset,alphazvalset,res.mat,xlab="alphayval",ylab="alphazval",nlevels = 100)
+alphavalset<-seq(.07,.08,.001)
+Wsset= seq(0,10,1)
+test.mat<-expand.grid(kval=kset,alphaval=alphavalset,Wsval=Wsset) 
+out<-mcmapply(param.search.tilted.plume,  kval = test.mat[,1],alphaval=test.mat[,2],Wsval=test.mat[,3],mc.cores = 6)
+res.mat<-matrix(out[which(test.mat$k==kset)],length(alphavalset),length(Wsset))
+contour(alphavalset,Wsset,res.mat,xlab="alphaval",ylab="Wsval",nlevels = 100)
 
 
 
