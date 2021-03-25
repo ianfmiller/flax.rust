@@ -14,12 +14,12 @@ demog<-demog[which(demog$year==2020),] #subset to 2020
 
 ## optimize
 
-opt<-optim(par=c(1.470378e-06, 8.371566e-02, 1.065001e+01, 1.111622e+02),fn=param.search.optim.tilted.plume,control=list(trace=1))
+opt<-optim(par=c(2.831844e-07, 5.653991e-02, 2.132874e+01, 1.120532e+02),fn=param.search.optim.tilted.plume,control=list(trace=1))
 
 ## results for model fitting
 ### sum squared obs = 14991.02
 ### total sum of squares = 14764.22 (total sum of squares = sum((spores/squares - mean(spores/squares))^2) )
-### x<-c(1.470378e-06, 8.371566e-02, 1.065001e+01, 1.111622e+02) # output value = 14232.8 for one day
+### x<-c(2.532057e-07, 7.091044e-02, 1.300097e+01, 9.574686e+01) # output value = 14167.62 for one day
 ### x<-c(5.288992e-01 , -3.461082e-02 , 2.512734e-06) # output value = 14319.83 for two days ALMOST NO DECAY IN X DIRECTION but similar output value for all values of cval (opt$par[1])
 ### x<-c(1.177116e-02,1.185136e-02,1.263117e-06) # output value = 14843.28 for full period
 
@@ -44,14 +44,14 @@ param.search.tilted.plume<-function(kval,alphayval,alphazval,Wsval)
   param.search.optim.tilted.plume(c(kval,alphayval,alphazval,Wsval))
 }
 
-kset=1.470378e-06
-alphayvalset<-seq(0,.1,.01)
-alphazvalset<-seq(5,15,1)
-Wsset= 1.111622e+02
+kset=2.532057e-07
+alphayvalset<-seq(.07,.08,.001)
+alphazvalset<-seq(11.5,12.5,.1)
+Wsset= 9.574686e+01
 test.mat<-expand.grid(kval=kset,alphayval=alphayvalset,alphazval=alphazvalset,Wsval=Wsset) 
 out<-mcmapply(param.search.tilted.plume,  kval = test.mat[,1],alphayval=test.mat[,2],alphazval=test.mat[,3],Wsval=test.mat[,4],mc.cores = 6)
 res.mat<-matrix(out[which(test.mat$k==kset)],length(alphayvalset),length(alphazvalset))
-contour(alphayvalset,alphazvalset,res.mat,xlab="alphayval",ylab="Wsval",nlevels = 10000)
+contour(alphayvalset,alphazvalset,res.mat,xlab="alphayval",ylab="alphazval",nlevels = 100)
 
 
 
