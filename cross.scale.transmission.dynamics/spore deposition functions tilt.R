@@ -195,7 +195,7 @@ param.search.optim.tilted.plume.tag<-function(tag,kval,alphayval,alphazval,Wsval
       if(sub.2.spore.deposition[j,"Direction"]=="L") {xtarget<-(-1)*as.numeric(sub.2.spore.deposition[j,"Distance.cm"])/100}
       
       new.pred<-predict.kernel.tilted.plume(q=q,H=H,k=kval,alphay=alphayval,alphaz=alphazval,Ws=Wsval,xtarget=xtarget,ytarget=ytarget,wind.data=wind.data)
-      if(alphayval>1) {new.pred<- -888}
+      if(alphayval>.25) {new.pred<- -888}
       new.obs<-sub.2.spore.deposition[j,"spores.per.square.mm"]
       tags<-c(tags,tag)
       dists<-c(dists,as.numeric(sub.2.spore.deposition[j,"Distance.cm"]))
