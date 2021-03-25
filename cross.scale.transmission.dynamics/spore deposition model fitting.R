@@ -14,7 +14,7 @@ demog<-demog[which(demog$year==2020),] #subset to 2020
 
 ## optimize
 
-opt<-optim(par=c(4.772329e-01,2.261641e-02,6.285425e-06),fn=param.search.optim.decay.plume,control=list(trace=1))
+opt<-optim(par=c(0.0834738679, 0.1025881527, 0.0000049515),fn=param.search.optim.decay.plume,control=list(trace=1))
 
 ## results for model fitting
 ### sum squared obs = 14991.02
