@@ -4,8 +4,8 @@ source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/spore dep
 ## load enviro data
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
 ## load spore dep data
-spore.deposition<-read.csv("~/Documents/GitHub/flax.rust/data/spore counts tmp.csv")
-spore.deposition[which(spore.deposition$Distance.cm==0),"Distance.cm"]<-1 #set distance for "0" spore traps to 1cm
+spore.deposition<-read.csv("~/Documents/GitHub/flax.rust/data/spore counts.csv")
+spore.deposition[which(spore.deposition$Distance.cm==0),"Distance.cm"]<-5 #set distance for "0" spore traps to 1cm
 ## load demog data
 demog<-read.csv("~/Documents/GitHub/flax.rust/data/Demography.csv")
 demog<-demog[which(demog$year==2020),] #subset to 2020
@@ -14,20 +14,25 @@ demog<-demog[which(demog$year==2020),] #subset to 2020
 
 ## optimize
 
-opt<-optim(par=c(2.831844e-07, 5.653991e-02, 2.132874e+01, 1.120532e+02),fn=param.search.optim.tilted.plume,control=list(trace=1))
+#opt<-optim(par=c(9.318341e-07,1.897060e-01,1.085956e+00),fn=param.search.optim.tilted.plume,control=list(trace=1))
 
+## NEED TO REFIT ALL--FIX k or get rid of k--three params making liklihood ridge
 ## results for model fitting
 ### sum squared obs = 14991.02
 ### total sum of squares = 14764.22 (total sum of squares = sum((spores/squares - mean(spores/squares))^2) )
-### x<-c(2.532057e-07, 7.091044e-02, 1.300097e+01, 9.574686e+01) # output value = 14167.62 for one day
-### x<-c(5.288992e-01 , -3.461082e-02 , 2.512734e-06) # output value = 14319.83 for two days ALMOST NO DECAY IN X DIRECTION but similar output value for all values of cval (opt$par[1])
-### x<-c(1.177116e-02,1.185136e-02,1.263117e-06) # output value = 14843.28 for full period
+### x<-c(9.318341e-07,1.897060e-01,1.085956e+00) # output value = 12297 for one day
+### x<-c(5.805303e-07 , 1.604449e-01 , 1.100592e+00) # output value = 12283.02 for two days ALMOST NO DECAY IN X DIRECTION but similar output value for all values of cval (opt$par[1])
+### x<-c(4.355849e-08,1.714472e-06,1.384859e+00) # output value = 14084.46 for full period
+
+opt<-list(par=c(9.318341e-07,1.897060e-01,1.085956e+00))
 
 ## visualize kernel
 test.mat<-data.frame(x=rep(seq(-1,1,.01),each=201),y=rep(seq(-1,1,.01),times=201))
-#opt<-list(par=c(5e-5,.1,2,100))
-out<-mapply(tilted.plume, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=4224.733,H=.5,s=1,k=opt$par[1],alphay=opt$par[2],alphaz=opt$par[3],Ws=opt$par[4]))
+out<-mapply(tilted.plume, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=4224.733,H=.18,s=3,k=opt$par[1],alphaz=opt$par[2],Ws=opt$par[3]))
 res.mat<-matrix(out,201,201,byrow = T)
+contour(x=seq(-1,1,.01),y=seq(-1,1,.01),z=res.mat)
+points(c(.05,.25,.5,1),c(0,0,0,0),col="red")
+points(0,0,col="blue")
 filled.contour(x=seq(-1,1,.01),y=seq(-1,1,.01),z=res.mat)
 
 ## visualize fit
@@ -39,19 +44,18 @@ plot(pred.mat$dist,pred.mat$pred-pred.mat$obs)
 # visualize parameter search
 library(parallel)
 
-param.search.tilted.plume<-function(kval,alphayval,alphazval,Wsval)
+param.search.tilted.plume<-function(kval,alphazval,Wsval)
 {
-  param.search.optim.tilted.plume(c(kval,alphayval,alphazval,Wsval))
+  param.search.optim.tilted.plume(c(kval,alphazval,Wsval))
 }
 
-kset=2.532057e-07
-alphayvalset<-seq(.07,.08,.001)
-alphazvalset<-seq(11.5,12.5,.1)
-Wsset= 9.574686e+01
-test.mat<-expand.grid(kval=kset,alphayval=alphayvalset,alphazval=alphazvalset,Wsval=Wsset) 
-out<-mcmapply(param.search.tilted.plume,  kval = test.mat[,1],alphayval=test.mat[,2],alphazval=test.mat[,3],Wsval=test.mat[,4],mc.cores = 6)
-res.mat<-matrix(out[which(test.mat$k==kset)],length(alphayvalset),length(alphazvalset))
-contour(alphayvalset,alphazvalset,res.mat,xlab="alphayval",ylab="alphazval",nlevels = 100)
+kset=4.355849e-08
+alphazvalset<-seq(1e-6,2e-6,length.out = 11)
+Wsset= seq(1.35,1.4,length.out = 11)
+test.mat<-expand.grid(kval=kset,alphazval=alphazvalset,Wsval=Wsset) 
+out<-mcmapply(param.search.tilted.plume,  kval = test.mat[,1],alphazval=test.mat[,2],Wsval=test.mat[,3],mc.cores = 6)
+res.mat<-matrix(out[which(test.mat$k==kset)],length(alphazvalset),length(Wsset))
+contour(alphazvalset,Wsset,res.mat,xlab="alphazval",ylab="Wsval",nlevels = 100)
 
 
 

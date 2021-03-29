@@ -16,12 +16,16 @@ library(parallel)
 
 
 ## tilted gaussian plume
-tilted.plume<-function(q,H,s,x,y,k,alphay,alphaz,Ws)
+tilted.plume<-function(q,H,s,x,y,k,alphaz,Ws)
 {
-  ifelse(x>=0,1,0)*((q*k*Ws)/(2*pi*s*alphay*alphaz))*
+  alphazeff<-.125*(1+abs(alphaz))*H #assume that at a maximum of ~ 96% of spores are distributed within 50% of max plant height in the z plane--avoids overfitting via unrealistically small z distribution
+  alphay<-.125*2*H #assume ~96% of spores fall within .5 * plant height (H=.5*height)
+  out<-((q*k*Ws)/(2*pi*s*alphay*alphazeff))*
     exp(
-      ((y^2)/(2*alphay^2))-((H-Ws*x/s)^2/(2*alphaz^2))
+      ((-y^2)/(2*alphay^2))-((H-Ws*x/s)^2/(2*alphazeff^2))
     )
+  if(s==0 & is.nan(out)) {out<-0}
+  out
 }
 
 ## function to find x and y coordinates to plug into gaussian plume for a given wind direction and direction and distance of spore trap (assuming N/S/E/W cord system), assume counterclockwise is positive
@@ -132,28 +136,28 @@ correct.wind.degree<-function(x,site="blank")
 #arrows(0,0,wind.data$wind.speed*cos(2*pi*correct.wind.degree(wind.data$wind.direction,site=site)/360),wind.data$wind.speed*sin(2*pi*correct.wind.degree(wind.data$wind.direction,site=site)/360),col="blue")
 #points(0,0,col="red",pch=15)
 
-predict.kernel.tilted.plume.inst<-function(i,q,H,k,alphay,alphaz,Ws,xtarget,ytarget,wind.data,site)
+predict.kernel.tilted.plume.inst<-function(i,q,H,k,alphaz,Ws,xtarget,ytarget,wind.data,site)
 {
   delta.t<-wind.data[i+1,"date"]-wind.data[i,"date"]
   cords<-mapply(get.plume.xy,2*pi*correct.wind.degree(wind.data[i,"wind.direction"],site = site)/360,MoreArgs=list(xorigin=0,yorigin=0,xtarget=xtarget,ytarget=ytarget))
-  tilted.plume(q=q,H=H,s=wind.data[i,"wind.speed"],x=cords[1,],y=cords[2,],k=k,alphay=alphay,alphaz=alphaz,Ws=Ws)
+  tilted.plume(q=q,H=H,s=wind.data[i,"wind.speed"],x=cords[1,],y=cords[2,],k=k,alphaz=alphaz,Ws=Ws)
 }
 
-predict.kernel.tilted.plume<-function(q,H,k,alphay,alphaz,Ws,xtarget,ytarget,wind.data)
+predict.kernel.tilted.plume<-function(q,H,k,alphaz,Ws,xtarget,ytarget,wind.data)
 {
-  predict.kernel.tilted.plume.inst(1:(dim(wind.data)[1]-1),q=q,H=H,k=k,alphay=alphay,alphaz=alphaz,Ws=Ws,xtarget=xtarget,ytarget=ytarget,wind.data=wind.data,site=wind.data[1,"site"])->tot.dep
+  predict.kernel.tilted.plume.inst(1:(dim(wind.data)[1]-1),q=q,H=H,k=k,alphaz=alphaz,Ws=Ws,xtarget=xtarget,ytarget=ytarget,wind.data=wind.data,site=wind.data[1,"site"])->tot.dep
   sum(tot.dep,na.rm = T)
 }
 
 param.search.optim.tilted.plume<-function(x,return.out=F)
 {
-
-  out<-list.rbind(mcmapply(param.search.optim.tilted.plume.tag,unique(spore.deposition$Tag),MoreArgs = list(kval=x[1],alphayval=x[2],alphazval=x[3],Wsval=x[4]),SIMPLIFY=F,mc.cores = 6))
+  
+  out<-list.rbind(mcmapply(param.search.optim.tilted.plume.tag,unique(spore.deposition$Tag),MoreArgs = list(kval=x[1],alphazval=x[2],Wsval=x[3]),SIMPLIFY=F,mc.cores = 6))
   if(return.out==T) {out} else {sum(out$val)}
   
 }
 
-param.search.optim.tilted.plume.tag<-function(tag,kval,alphayval,alphazval,Wsval)
+param.search.optim.tilted.plume.tag<-function(tag,kval,alphazval,Wsval)
 {
   tags<-c()
   dists<-c()
@@ -177,8 +181,8 @@ param.search.optim.tilted.plume.tag<-function(tag,kval,alphayval,alphazval,Wsval
     
     wind.data<-all.weath[which(all.weath$site==site),]
     wind.data<-wind.data[which(wind.data$date>(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC"))),]
-    wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC")+60*60*24*1)),] ### fit to one day post spore trap deploy
-    #wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC")+60*60*24*2)),] ### fit to two days post spore trap deploy
+    #wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC")+60*60*24*1)),] ### fit to one day post spore trap deploy
+    wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(deploy.date,"%m/%d/%y")," 12:00:00"),tz="UTC")+60*60*24*2)),] ### fit to two days post spore trap deploy
     #wind.data<-wind.data[which(wind.data$date<=(as.POSIXct(paste0(as.Date(date,"%m/%d/%y")," 12:00:00"),tz="UTC"))),] ### fit to full spore trap deploy period
     
     for(j in 1:dim(sub.2.spore.deposition)[1])
@@ -186,15 +190,15 @@ param.search.optim.tilted.plume.tag<-function(tag,kval,alphayval,alphazval,Wsval
       xtarget<-0
       ytarget<-0
       
-      H<-sub.2.spore.deposition[1,"Height.cm"]/100
+      H<-.5*sub.2.spore.deposition[1,"Height.cm"]/100
       
       if(sub.2.spore.deposition[j,"Direction"]=="U") {ytarget<-as.numeric(sub.2.spore.deposition[j,"Distance.cm"])/100}
       if(sub.2.spore.deposition[j,"Direction"]=="R") {xtarget<-as.numeric(sub.2.spore.deposition[j,"Distance.cm"])/100}
       if(sub.2.spore.deposition[j,"Direction"]=="D") {ytarget<-(-1)*as.numeric(sub.2.spore.deposition[j,"Distance.cm"])/100}
       if(sub.2.spore.deposition[j,"Direction"]=="L") {xtarget<-(-1)*as.numeric(sub.2.spore.deposition[j,"Distance.cm"])/100}
       
-      new.pred<-predict.kernel.tilted.plume(q=q,H=H,k=kval,alphay=alphayval,alphaz=alphazval,Ws=Wsval,xtarget=xtarget,ytarget=ytarget,wind.data=wind.data)
-      if(alphayval>.25) {new.pred<- -888}
+      new.pred<-predict.kernel.tilted.plume(q=q,H=H,k=kval,alphaz=alphazval,Ws=Wsval,xtarget=xtarget,ytarget=ytarget,wind.data=wind.data)
+      if(Wsval>5) {new.pred<- -888}
       new.obs<-sub.2.spore.deposition[j,"spores.per.square.mm"]
       tags<-c(tags,tag)
       dists<-c(dists,as.numeric(sub.2.spore.deposition[j,"Distance.cm"]))
