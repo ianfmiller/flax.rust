@@ -61,7 +61,7 @@ for(site in sites)
         distances<-sapply(1:dim(loc.data)[1],min.dist.func)
         if(min(distances)<=.25) 
         {
-          print(paste0("site = ",site," dist = ",min(distances)))
+          #print(paste0("site = ",site," dist = ",min(distances)))
           loc.data<-loc.data[-which.min(distances),]
           loc.data<-rbind(loc.data,data.frame("Site"=site,"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"tag"=sub.epi.data[index,"Tag"]))
         } else {
@@ -97,7 +97,7 @@ for(site in sites)
         distances<-sapply(1:dim(loc.data)[1],min.dist.func)
         if(min(distances)<=.25) 
         {
-          print(paste0("site = ",site," dist = ",min(distances)))
+          #print(paste0("site = ",site," dist = ",min(distances)))
           loc.data<-loc.data[-which.min(distances),]
           loc.data<-rbind(loc.data,data.frame("Site"=site,"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"tag"=sub.epi.data[index,"Tag"]))
         } else {
@@ -125,7 +125,7 @@ for(site in sites)
         distances<-sapply(1:dim(loc.data)[1],min.dist.func)
         if(min(distances)<=.25) 
         {
-          print(paste0("site = ",site," dist = ",min(distances)))
+          #print(paste0("site = ",site," dist = ",min(distances)))
           loc.data<-loc.data[-which.min(distances),]
           loc.data<-rbind(loc.data,data.frame("Site"=site,"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"tag"=NA))
         } else {
