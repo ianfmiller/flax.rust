@@ -141,7 +141,7 @@ for(site in sites)
 }
 
 # loop for correcting discrepancies between tagged plant location recorded in epi data and location recorded in demog--default to demog value
-
+### SOMETHINGS NOT RIGHT
 for(tag in na.omit(corrected.plant.locs$tag))
 {
   epi.index<-which(corrected.plant.locs$tag==tag)
@@ -153,10 +153,10 @@ for(tag in na.omit(corrected.plant.locs$tag))
   if(length(epi.index)>1) {print(tag)}
   
   demog.index<-which(demog$tag==tag)
-  demog.Xval<-corrected.plant.locs[demog.index,"X"]
-  demog.xval<-corrected.plant.locs[demog.index,"x"]
-  demog.Yval<-corrected.plant.locs[demog.index,"Y"]
-  demog.yval<-corrected.plant.locs[demog.index,"y"]
+  demog.Xval<-demog[demog.index,"X"]
+  demog.xval<-demog[demog.index,"x"]
+  demog.Yval<-demog[demog.index,"Y"]
+  demog.yval<-demog[demog.index,"y"]
   
   if(!(epi.Xval==demog.Xval)) {corrected.plant.locs[epi.index,"X"]<-demog.Xval}
   if(!(epi.xval==demog.xval)) {corrected.plant.locs[epi.index,"x"]<-demog.xval}
@@ -173,6 +173,5 @@ for(site0 in sites)
   plot(xx$X+xx$x,xx$Y+xx$y,xlim=c(0,10),ylim=c(0,20),xlab="X",ylab="Y",main=site0,pch=16,col="black",cex=.9)
   points(yy$X+yy$x,yy$Y+yy$y,col="red",cex=)
 }
-
 
 
