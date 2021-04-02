@@ -31,6 +31,7 @@ plant.loc.survey.dates<-list("CC"=c(as.Date("06/15/2020",tryFormats=c("%m/%d/%Y"
 epi.obs.dates<-list("CC"=c("2020-06-22","2020-06-29","2020-07-06","2020-07-13","2020-07-20","2020-07-27"),"BT"=c("2020-06-24","2020-07-01","2020-07-08"),"GM"=c("2020-06-23","2020-06-30","2020-07-02","2020-07-07","2020-07-09","2020-07-15"),"HM"=c("2020-06-25","2020-07-15","2020-07-21","2020-07-22","2020-07-28"))    
 data.dates<-list("CC"=c("2020-06-22","2020-06-29","2020-07-06","2020-07-13","2020-07-20"),"BT"=c("2020-06-24","2020-07-01"),"GM"=c("2020-06-23","2020-06-30","2020-07-02","2020-07-07","2020-07-09"),"HM"=c("2020-06-25","2020-07-15","2020-07-21","2020-07-22"))
 
+# loop for compiling corrected plant locations
 corrected.plant.locs<-c()
 for(site in sites)
 {
@@ -38,7 +39,7 @@ for(site in sites)
   loc.data<-plant.locs[which(plant.locs$Site==site),]
   loc.data<-loc.data[which(as.Date(loc.data$Date,tryFormats=c("%m/%d/%Y")) %in% plant.loc.survey.dates[which(sites==site)][[1]]),c("Site","X","Y","x","y","tag")]
   
-  ## switch record for newly tagged plants not in loc.data for record of closest untagged plant
+  ## switch record for newly diseased and tagged plants not in loc.data for record of closest untagged plant
   for(date in plant.loc.survey.dates[which(sites==site)][[1]])
   {
     sub.epi.data<-epi[which(epi$Site==site),]
@@ -71,7 +72,7 @@ for(site in sites)
     }
   }
   
-  ## switch record for newly diseased plants not in loc.data for record of closest untagged plant
+  ## switch record for newly diseased and untagged plants not in loc.data for record of closest untagged plant
   for(date in epi.obs.dates[which(sites==site)][[1]])
   {
     sub.epi.data<-epi[which(epi$Site==site),]
@@ -136,6 +137,28 @@ for(site in sites)
     }
   }
   corrected.plant.locs<-rbind(corrected.plant.locs,loc.data)
+}
+
+# loop for correcting discrepancies between tagged plant location recorded in epi data and location recorded in demog--default to demog value
+
+for(tag in corrected.plant.locs$tag)
+{
+  epi.index<-which(corrected.plant.locs$tag==tag)
+  epi.Xval<-corrected.plant.locs[epi.index,"X"]
+  epi.xval<-corrected.plant.locs[epi.index,"x"]
+  Yepi.val<-corrected.plant.locs[epi.index,"Y"]
+  epi.yval<-corrected.plant.locs[epi.index,"y"]
+  
+  demog.index<-which(demog$tag==tag)
+  demog.Xval<-corrected.plant.locs[demog.index,"X"]
+  demog.xval<-corrected.plant.locs[demog.index,"x"]
+  demog.Yval<-corrected.plant.locs[demog.index,"Y"]
+  demog.yval<-corrected.plant.locs[demog.index,"y"]
+  
+  if(!(epi.Xval==demog.Xval)) {corrected.plant.locs[epi.index,"X"]<-demog.Xval}
+  if(!(epi.xval==demog.xval)) {corrected.plant.locs[epi.index,"x"]<-demog.xval}
+  if(!(epi.Yval==demog.Yval)) {corrected.plant.locs[epi.index,"Y"]<-demog.Yval}
+  if(!(epi.yval==demog.yval)) {corrected.plant.locs[epi.index,"y"]<-demog.yval}
 }
 
 # vis loc adjustment
