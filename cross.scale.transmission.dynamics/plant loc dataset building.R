@@ -42,7 +42,7 @@ for(site in sites)
   for(date in plant.loc.survey.dates[which(sites==site)][[1]])
   {
     sub.epi.data<-epi[which(epi$Site==site),]
-    sub.epi.data<-epi[which(as.Date(epi$Date.First.Observed.Diseased)==date),]
+    sub.epi.data<-sub.epi.data[which(as.Date(sub.epi.data$Date.First.Observed.Diseased)==date),]
     
     for(index in which(!(sub.epi.data$Tag %in% loc.data$tag)))
     {
@@ -58,11 +58,11 @@ for(site in sites)
       )
       {
         min.dist.func<-function(i) {dist(rbind(c(sub.epi.data[index,"X"]+sub.epi.data[index,"x"],sub.epi.data[index,"Y"]+sub.epi.data[index,"y"]),c(loc.data[i,"X"]+loc.data[i,"x"],loc.data[i,"Y"]+loc.data[i,"y"])))[1]}
-        distances<-sapply(1:dim(loc.data)[1],min.dist.func)
+        distances<-sapply(which(is.na(loc.data$tag)),min.dist.func)
         if(min(distances)<=.25) 
         {
           #print(paste0("site = ",site," dist = ",min(distances)))
-          loc.data<-loc.data[-which.min(distances),]
+          loc.data<-loc.data[-which(is.na(loc.data$tag))[which.min(distances)],]
           loc.data<-rbind(loc.data,data.frame("Site"=site,"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"tag"=sub.epi.data[index,"Tag"]))
         } else {
           loc.data<-rbind(loc.data,data.frame("Site"=site,"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"tag"=sub.epi.data[index,"Tag"]))
@@ -75,7 +75,7 @@ for(site in sites)
   for(date in epi.obs.dates[which(sites==site)][[1]])
   {
     sub.epi.data<-epi[which(epi$Site==site),]
-    sub.epi.data<-epi[which(as.Date(epi$Date.First.Observed.Diseased)==date),]
+    sub.epi.data<-sub.epi.data[which(as.Date(sub.epi.data$Date.First.Observed.Diseased)==date),]
     
     ### newly taggd plants
     #tagset<-sub.epi.data$Tag[-which(is.na(sub.epi.data$Tag))]
@@ -94,11 +94,11 @@ for(site in sites)
       )
       {
         min.dist.func<-function(i) {dist(rbind(c(sub.epi.data[index,"X"]+sub.epi.data[index,"x"],sub.epi.data[index,"Y"]+sub.epi.data[index,"y"]),c(loc.data[i,"X"]+loc.data[i,"x"],loc.data[i,"Y"]+loc.data[i,"y"])))[1]}
-        distances<-sapply(1:dim(loc.data)[1],min.dist.func)
+        distances<-sapply(which(is.na(loc.data$tag)),min.dist.func)
         if(min(distances)<=.25) 
         {
           #print(paste0("site = ",site," dist = ",min(distances)))
-          loc.data<-loc.data[-which.min(distances),]
+          loc.data<-loc.data[-which(is.na(loc.data$tag))[which.min(distances)],]
           loc.data<-rbind(loc.data,data.frame("Site"=site,"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"tag"=sub.epi.data[index,"Tag"]))
         } else {
           loc.data<-rbind(loc.data,data.frame("Site"=site,"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"tag"=sub.epi.data[index,"Tag"]))
@@ -122,11 +122,11 @@ for(site in sites)
       )
       {
         min.dist.func<-function(i) {dist(rbind(c(sub.epi.data[index,"X"]+sub.epi.data[index,"x"],sub.epi.data[index,"Y"]+sub.epi.data[index,"y"]),c(loc.data[i,"X"]+loc.data[i,"x"],loc.data[i,"Y"]+loc.data[i,"y"])))[1]}
-        distances<-sapply(1:dim(loc.data)[1],min.dist.func)
+        distances<-sapply(which(is.na(loc.data$tag)),min.dist.func)
         if(min(distances)<=.25) 
         {
           #print(paste0("site = ",site," dist = ",min(distances)))
-          loc.data<-loc.data[-which.min(distances),]
+          loc.data<-loc.data[-which(is.na(loc.data$tag))[which.min(distances)],]
           loc.data<-rbind(loc.data,data.frame("Site"=site,"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"tag"=NA))
         } else {
           loc.data<-rbind(loc.data,data.frame("Site"=site,"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"tag"=NA))
