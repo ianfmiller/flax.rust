@@ -81,7 +81,8 @@ for(site in sites)
     ### newly taggd plants
     #tagset<-sub.epi.data$Tag[-which(is.na(sub.epi.data$Tag))]
     tagset<-na.omit(sub.epi.data$Tag)
-    for(index in which(!(tagset %in% loc.data$tag)))
+    index.set<-which(sub.epi.data$Tag %in% tagset[which(!(tagset %in% loc.data$tag))])
+    for(index in index.set)
     {
       ### condition to exclude data in unsurveyed region of CC
       if(
@@ -141,13 +142,15 @@ for(site in sites)
 
 # loop for correcting discrepancies between tagged plant location recorded in epi data and location recorded in demog--default to demog value
 
-for(tag in corrected.plant.locs$tag)
+for(tag in na.omit(corrected.plant.locs$tag))
 {
   epi.index<-which(corrected.plant.locs$tag==tag)
   epi.Xval<-corrected.plant.locs[epi.index,"X"]
   epi.xval<-corrected.plant.locs[epi.index,"x"]
-  Yepi.val<-corrected.plant.locs[epi.index,"Y"]
+  epi.Yval<-corrected.plant.locs[epi.index,"Y"]
   epi.yval<-corrected.plant.locs[epi.index,"y"]
+  
+  if(length(epi.index)>1) {print(tag)}
   
   demog.index<-which(demog$tag==tag)
   demog.Xval<-corrected.plant.locs[demog.index,"X"]
