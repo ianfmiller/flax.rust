@@ -32,21 +32,28 @@ epi.obs.dates<-list("CC"=c("2020-06-22","2020-06-29","2020-07-06","2020-07-13","
 data.dates<-list("CC"=c("2020-06-22","2020-06-29","2020-07-06","2020-07-13","2020-07-20"),"BT"=c("2020-06-24","2020-07-01"),"GM"=c("2020-06-23","2020-06-30","2020-07-02","2020-07-07","2020-07-09"),"HM"=c("2020-06-25","2020-07-15","2020-07-21","2020-07-22"))
 
 # loop for compiling corrected plant locations
-corrected.plant.locs<-c()
+corrected.epi<-epi
+corrected.locs<-c()
+
 for(site in sites)
 {
   ## get plant location data
-  loc.data<-plant.locs[which(plant.locs$Site==site),]
-  loc.data<-loc.data[which(as.Date(loc.data$Date,tryFormats=c("%m/%d/%Y")) %in% plant.loc.survey.dates[which(sites==site)][[1]]),c("Site","X","Y","x","y","tag")]
+  sub.loc.data<-plant.locs[which(plant.locs$Site==site),]
+  sub.loc.data<-sub.loc.data[which(as.Date(sub.loc.data$Date,tryFormats=c("%m/%d/%Y")) %in% plant.loc.survey.dates[which(sites==site)][[1]]),c("Site","X","Y","x","y","tag")]
+  sub.loc.data<-data.frame(sub.loc.data,"matched"=F)
+  sub.loc.data[which(!(is.na(sub.loc.data$tag))),"matched"]<-T
   
-  ## switch record for newly diseased and tagged plants not in loc.data for record of closest untagged plant
-  for(date in plant.loc.survey.dates[which(sites==site)][[1]])
+  dates<-unique(corrected.epi[which(corrected.epi$Site==site),"Date.First.Observed.Diseased"])
+
+  for(date in dates)
   {
+    ## for newly diseased and tagged plants not in loc.data: edit location in epi data to location of closest untagged plant
     sub.epi.data<-epi[which(epi$Site==site),]
     sub.epi.data<-sub.epi.data[which(as.Date(sub.epi.data$Date.First.Observed.Diseased)==date),]
     
-    for(index in which(!(sub.epi.data$Tag %in% loc.data$tag)))
+    for(tag in sub.epi.data$Tag[!(sub.epi.data$Tag %in% sub.loc.data$tag)])
     {
+      index<-which(sub.epi.data$Tag==tag)
       ### condition to exclude data in unsurveyed region of CC
       if(
         any(
@@ -58,31 +65,32 @@ for(site in sites)
         )
       )
       {
-        min.dist.func<-function(i) {dist(rbind(c(sub.epi.data[index,"X"]+sub.epi.data[index,"x"],sub.epi.data[index,"Y"]+sub.epi.data[index,"y"]),c(loc.data[i,"X"]+loc.data[i,"x"],loc.data[i,"Y"]+loc.data[i,"y"])))[1]}
-        distances<-sapply(which(is.na(loc.data$tag)),min.dist.func)
+        min.dist.func<-function(i) {dist(rbind(c(sub.epi.data[index,"X"]+sub.epi.data[index,"x"],sub.epi.data[index,"Y"]+sub.epi.data[index,"y"]),c(sub.loc.data[i,"X"]+sub.loc.data[i,"x"],sub.loc.data[i,"Y"]+sub.loc.data[i,"y"])))[1]}
+        distances<-sapply(which(sub.loc.data$matched==F),min.dist.func)
+        #replace data if there's a close match
         if(min(distances)<=.25) 
         {
-          #print(paste0("site = ",site," dist = ",min(distances)))
-          loc.data<-loc.data[-which(is.na(loc.data$tag))[which.min(distances)],]
-          loc.data<-rbind(loc.data,data.frame("Site"=site,"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"tag"=sub.epi.data[index,"Tag"]))
-        } else {
-          loc.data<-rbind(loc.data,data.frame("Site"=site,"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"tag"=sub.epi.data[index,"Tag"]))
+          corrected.epi[which(corrected.epi$Tag==tag),c("X","Y","x","y")]<-sub.loc.data[which(sub.loc.data$matched==F)[which.min(distances)],c("X",'Y',"x","y")]
+          sub.loc.data[intersect(which(is.na(sub.loc.data$tag)),which(sub.loc.data$matched==F))[which.min(distances)],"matched"]<-T
+        } 
+        # add a new record if there's not a close match
+        if(min(distances)>.25) 
+        {
+          sub.loc.data<-rbind(sub.loc.data,data.frame("Site"=site,"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"tag"=sub.epi.data[index,"Tag"],"matched"=T))
         }
       }
     }
-  }
-  
-  ## switch record for newly diseased and untagged plants not in loc.data for record of closest untagged plant
-  for(date in epi.obs.dates[which(sites==site)][[1]])
-  {
-    sub.epi.data<-epi[which(epi$Site==site),]
-    sub.epi.data<-sub.epi.data[which(as.Date(sub.epi.data$Date.First.Observed.Diseased)==date),]
     
-    ### newly taggd plants
-    #tagset<-sub.epi.data$Tag[-which(is.na(sub.epi.data$Tag))]
-    tagset<-na.omit(sub.epi.data$Tag)
-    index.set<-which(sub.epi.data$Tag %in% tagset[which(!(tagset %in% loc.data$tag))])
-    for(index in index.set)
+    ## for newly diseased and tagged plants in loc.data: edit location in epi data to location of plant in loc data
+    for(tag in sub.epi.data$Tag[sub.epi.data$Tag %in% sub.loc.data$tag])
+    {
+      corrected.epi.index<-which(corrected.epi$Tag==tag)
+      sub.loc.index<-which(sub.loc.data$tag==tag)
+      corrected.epi[corrected.epi.index,c("X","Y","x","y")]<-sub.loc.data[sub.loc.index,c("X","Y","x","y")]
+    }
+    
+    ## for newly diseased and untagged plants in loc.data: edit location in epi data to location of nearest unmatched plant in loc data
+    for(index in which(is.na(sub.epi.data$Tag)))
     {
       ### condition to exclude data in unsurveyed region of CC
       if(
@@ -95,83 +103,59 @@ for(site in sites)
         )
       )
       {
-        min.dist.func<-function(i) {dist(rbind(c(sub.epi.data[index,"X"]+sub.epi.data[index,"x"],sub.epi.data[index,"Y"]+sub.epi.data[index,"y"]),c(loc.data[i,"X"]+loc.data[i,"x"],loc.data[i,"Y"]+loc.data[i,"y"])))[1]}
-        distances<-sapply(which(is.na(loc.data$tag)),min.dist.func)
+        min.dist.func<-function(i) {dist(rbind(c(sub.epi.data[index,"X"]+sub.epi.data[index,"x"],sub.epi.data[index,"Y"]+sub.epi.data[index,"y"]),c(sub.loc.data[i,"X"]+sub.loc.data[i,"x"],sub.loc.data[i,"Y"]+sub.loc.data[i,"y"])))[1]}
+        distances<-sapply(which(sub.loc.data$matched==F),min.dist.func)
+        #replace data if there's a close match
         if(min(distances)<=.25) 
         {
-          #print(paste0("site = ",site," dist = ",min(distances)))
-          loc.data<-loc.data[-which(is.na(loc.data$tag))[which.min(distances)],]
-          loc.data<-rbind(loc.data,data.frame("Site"=site,"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"tag"=sub.epi.data[index,"Tag"]))
-        } else {
-          loc.data<-rbind(loc.data,data.frame("Site"=site,"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"tag"=sub.epi.data[index,"Tag"]))
-        }
-      }
-    }
-    
-    ### untagged plants
-    NAset<-which(is.na(sub.epi.data$Tag))
-    for(index in NAset)
-    {
-      ### condition to exclude data in unsurveyed region of CC
-      if(
-        any(
-          c(
-            (!(site=="CC")),
-            (sub.epi.data[index,"Y"] %in% c(0:8,18,19)),
-            all(sub.epi.data[index,"Y"] %in% c(15,17),sub.epi.data[index,"x"] %in% 7:9)
-          )
-        )
-      )
-      {
-        min.dist.func<-function(i) {dist(rbind(c(sub.epi.data[index,"X"]+sub.epi.data[index,"x"],sub.epi.data[index,"Y"]+sub.epi.data[index,"y"]),c(loc.data[i,"X"]+loc.data[i,"x"],loc.data[i,"Y"]+loc.data[i,"y"])))[1]}
-        distances<-sapply(which(is.na(loc.data$tag)),min.dist.func)
-        if(min(distances)<=.25) 
+          corrected.epi.index<-intersect(which(corrected.epi$Site==site),which(corrected.epi$X==sub.epi.data[index,"X"]))
+          corrected.epi.index<-intersect(corrected.epi.index,which(corrected.epi$Y==sub.epi.data[index,"Y"]))
+          corrected.epi.index<-intersect(corrected.epi.index,which(corrected.epi$x==sub.epi.data[index,"x"]))
+          corrected.epi.index<-intersect(corrected.epi.index,which(corrected.epi$y==sub.epi.data[index,"y"]))
+          corrected.epi.index<-corrected.epi.index[1]
+          corrected.epi[corrected.epi.index,c("X","Y","x","y")]<-sub.loc.data[which(sub.loc.data$matched==F)[which.min(distances)],c("X",'Y',"x","y")]
+          sub.loc.data[intersect(which(is.na(sub.loc.data$tag)),which(sub.loc.data$matched==F))[which.min(distances)],"matched"]<-T
+        } 
+        # add a new record if there's not a close match
+        if(min(distances)>.25) 
         {
-          #print(paste0("site = ",site," dist = ",min(distances)))
-          loc.data<-loc.data[-which(is.na(loc.data$tag))[which.min(distances)],]
-          loc.data<-rbind(loc.data,data.frame("Site"=site,"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"tag"=NA))
-        } else {
-          loc.data<-rbind(loc.data,data.frame("Site"=site,"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"tag"=NA))
+          sub.loc.data<-rbind(sub.loc.data,data.frame("Site"=site,"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"tag"=sub.epi.data[index,"Tag"],"matched"=T))
         }
       }
-
     }
   }
-  corrected.plant.locs<-rbind(corrected.plant.locs,loc.data)
+  corrected.locs<-rbind(corrected.locs,sub.loc.data)
 }
-
-# loop for correcting discrepancies between tagged plant location recorded in epi data and location recorded in demog--default to demog value
-### SOMETHINGS NOT RIGHT
-for(tag in na.omit(corrected.plant.locs$tag))
+  
+# vis loc agreement between corrected epi and loc data
+layout(matrix(c(1,2,5,3,4,5),2,3,byrow = T))
+for(site0 in sites)
 {
-  epi.index<-which(corrected.plant.locs$tag==tag)
-  epi.Xval<-corrected.plant.locs[epi.index,"X"]
-  epi.xval<-corrected.plant.locs[epi.index,"x"]
-  epi.Yval<-corrected.plant.locs[epi.index,"Y"]
-  epi.yval<-corrected.plant.locs[epi.index,"y"]
-  
-  if(length(epi.index)>1) {print(tag)}
-  
-  demog.index<-which(demog$tag==tag)
-  demog.Xval<-demog[demog.index,"X"]
-  demog.xval<-demog[demog.index,"x"]
-  demog.Yval<-demog[demog.index,"Y"]
-  demog.yval<-demog[demog.index,"y"]
-  
-  if(!(epi.Xval==demog.Xval)) {corrected.plant.locs[epi.index,"X"]<-demog.Xval}
-  if(!(epi.xval==demog.xval)) {corrected.plant.locs[epi.index,"x"]<-demog.xval}
-  if(!(epi.Yval==demog.Yval)) {corrected.plant.locs[epi.index,"Y"]<-demog.Yval}
-  if(!(epi.yval==demog.yval)) {corrected.plant.locs[epi.index,"y"]<-demog.yval}
+  xx<-corrected.locs[which(corrected.locs$Site==site0),]
+  yy<-corrected.epi[which(corrected.epi$Site==site0),]
+  plot(xx$X+xx$x,xx$Y+xx$y,xlim=c(0,10),ylim=c(0,20),xlab="X",ylab="Y",main=site0,pch=16,col="black",cex=.9)
+  points(yy$X+yy$x,yy$Y+yy$y,col="red",cex=1)
+  # shade out unsurveyed region of CC
+  if(site0=="CC")
+  {
+    rect(0,9,15,15,col="black",density = 25,border=NA)
+    rect(0,15,7,16,col="black",density = 25,border=NA)
+    rect(0,16,10,17,col="black",density = 25,border=NA)
+    rect(0,17,7,18,col="black",density = 25,border=NA) 
+  }
 }
+plot(0,0,type="n",axes = F,xlab="",ylab="")
+legend("center",legend = c("location data + additions","corrected epi data location"),col=c("black","red"),pch = c(16,1),cex=.9,1)
 
-# vis loc adjustment
-par(mfrow=c(2,2))
+# view individual plants added to loc data
+layout(matrix(c(1,2,5,3,4,5),2,3,byrow = T))
 for(site0 in sites)
 {
   xx<-plant.locs[which(plant.locs$Site==site0),]
-  yy<-corrected.plant.locs[which(corrected.plant.locs$Site==site0),]
+  yy<-corrected.locs[which(corrected.locs$Site==site0),]
   plot(xx$X+xx$x,xx$Y+xx$y,xlim=c(0,10),ylim=c(0,20),xlab="X",ylab="Y",main=site0,pch=16,col="black",cex=.9)
-  points(yy$X+yy$x,yy$Y+yy$y,col="red",cex=)
+  points(yy$X+yy$x,yy$Y+yy$y,col="red",cex=1)
 }
-
+plot(0,0,type="n",axes = F,xlab="",ylab="")
+legend("center",legend = c("original location data","location data + additions"),col=c("black","red"),pch = c(16,1),cex=.9,1)
 
