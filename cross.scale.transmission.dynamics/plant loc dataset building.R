@@ -61,9 +61,10 @@ for(site in sites)
         #replace data if there's a close match
         if(min(distances)<=.25) 
         {
-          corrected.epi[which(corrected.epi$Tag==tag),c("X","Y","x","y")]<-sub.loc.data[which(sub.loc.data$matched==F)[which.min(distances)[1]],c("X",'Y',"x","y")]
-          sub.loc.data[intersect(which(is.na(sub.loc.data$tag)),which(sub.loc.data$matched==F))[which.min(distances)[1]],"matched"]<-T
-          sub.loc.data[intersect(which(is.na(sub.loc.data$tag)),which(sub.loc.data$matched==F))[which.min(distances)[1]],"tag"]<-tag
+          sub.loc.data.edit.index<-intersect(which(is.na(sub.loc.data$tag)),which(sub.loc.data$matched==F))[which.min(distances)[1]]
+          corrected.epi[which(corrected.epi$Tag==tag),c("X","Y","x","y")]<-sub.loc.data[sub.loc.data.edit.index,c("X",'Y',"x","y")]
+          sub.loc.data[sub.loc.data.edit.index,"matched"]<-T
+          sub.loc.data[sub.loc.data.edit.index,"tag"]<-tag
         } 
         # add a new record if there's not a close match
         if(min(distances)>.25) 
@@ -81,7 +82,7 @@ for(site in sites)
       corrected.epi[corrected.epi.index,c("X","Y","x","y")]<-sub.loc.data[sub.loc.index,c("X","Y","x","y")]
     }
     
-    ## for newly diseased and untagged plants in loc.data: edit location in epi data to location of nearest unmatched plant in loc data
+    ## for newly diseased and untagged plants: edit location in epi data to location of nearest unmatched plant in loc data
     for(index in which(is.na(sub.epi.data$Tag)))
     {
       ### condition to exclude data in unsurveyed region of CC
