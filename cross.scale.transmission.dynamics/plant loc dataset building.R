@@ -57,12 +57,13 @@ for(site in sites)
       )
       {
         min.dist.func<-function(i) {dist(rbind(c(sub.epi.data[index,"X"]+sub.epi.data[index,"x"],sub.epi.data[index,"Y"]+sub.epi.data[index,"y"]),c(sub.loc.data[i,"X"]+sub.loc.data[i,"x"],sub.loc.data[i,"Y"]+sub.loc.data[i,"y"])))[1]}
-        distances<-sapply(which(sub.loc.data$matched==F),min.dist.func)
+        distances<-sapply(intersect(which(is.na(sub.loc.data$tag)),which(sub.loc.data$matched==F)),min.dist.func)
         #replace data if there's a close match
         if(min(distances)<=.25) 
         {
           corrected.epi[which(corrected.epi$Tag==tag),c("X","Y","x","y")]<-sub.loc.data[which(sub.loc.data$matched==F)[which.min(distances)[1]],c("X",'Y',"x","y")]
           sub.loc.data[intersect(which(is.na(sub.loc.data$tag)),which(sub.loc.data$matched==F))[which.min(distances)[1]],"matched"]<-T
+          sub.loc.data[intersect(which(is.na(sub.loc.data$tag)),which(sub.loc.data$matched==F))[which.min(distances)[1]],"tag"]<-tag
         } 
         # add a new record if there's not a close match
         if(min(distances)>.25) 
