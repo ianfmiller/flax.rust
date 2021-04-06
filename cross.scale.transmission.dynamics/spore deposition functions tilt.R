@@ -146,7 +146,7 @@ predict.kernel.tilted.plume.inst<-function(i,q,H,k,alphaz,Ws,xtarget,ytarget,win
 
 predict.kernel.tilted.plume<-function(q,H,k,alphaz,Ws,xtarget,ytarget,wind.data)
 {
-  predict.kernel.tilted.plume.inst(1:(dim(wind.data)[1]-1),q=q,H=H,k=k,alphaz=alphaz,Ws=Ws,xtarget=xtarget,ytarget=ytarget,wind.data=wind.data,site=wind.data[1,"site"])->tot.dep
+  suppressWarnings(predict.kernel.tilted.plume.inst(1:(dim(wind.data)[1]-1),q=q,H=H,k=k,alphaz=alphaz,Ws=Ws,xtarget=xtarget,ytarget=ytarget,wind.data=wind.data,site=wind.data[1,"site"]))->tot.dep
   sum(tot.dep,na.rm = T)
 }
 
