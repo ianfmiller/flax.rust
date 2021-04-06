@@ -21,7 +21,7 @@ demog<-demog[which(demog$year==2020),] #subset to 2020
 ### sum squared obs = 14991.02
 ### total sum of squares = 14764.22 (total sum of squares = sum((spores/squares - mean(spores/squares))^2) )
 ### x<-c(9.318341e-07,1.897060e-01,1.085956e+00) # output value = 12297 for one day
-### x<-c(5.805303e-07 , 1.604449e-01 , 1.100592e+00) # output value = 12283.02 for two days ALMOST NO DECAY IN X DIRECTION but similar output value for all values of cval (opt$par[1])
+### x<-c(5.805303e-07 , 1.604449e-01 , 1.100592e+00) # output value = 12283.02 for two days
 ### x<-c(4.355849e-08,1.714472e-06,1.384859e+00) # output value = 14084.46 for full period
 
 opt<-list(par=c(9.318341e-07,1.897060e-01,1.085956e+00))
