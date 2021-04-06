@@ -25,6 +25,7 @@ tilted.plume<-function(q,H,s,x,y,k,alphaz,Ws)
       ((-y^2)/(2*alphay^2))-((H-Ws*x/s)^2/(2*alphazeff^2))
     )
   if(s==0 & is.nan(out)) {out<-0}
+  out[intersect(which(s==0),which(is.nan(out)))]<-0
   out
 }
 
