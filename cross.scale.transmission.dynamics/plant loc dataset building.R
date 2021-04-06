@@ -21,7 +21,7 @@ plant.loc.survey.dates<-list("CC"=c(as.Date("06/15/2020",tryFormats=c("%m/%d/%Y"
 
 
 # turn off plotting by default
-vis<-T
+vis<-F
 # loop for compiling corrected plant locations
 corrected.epi<-epi
 corrected.locs<-c()
