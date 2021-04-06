@@ -61,8 +61,8 @@ for(site in sites)
         #replace data if there's a close match
         if(min(distances)<=.25) 
         {
-          corrected.epi[which(corrected.epi$Tag==tag),c("X","Y","x","y")]<-sub.loc.data[which(sub.loc.data$matched==F)[which.min(distances)],c("X",'Y',"x","y")]
-          sub.loc.data[intersect(which(is.na(sub.loc.data$tag)),which(sub.loc.data$matched==F))[which.min(distances)],"matched"]<-T
+          corrected.epi[which(corrected.epi$Tag==tag),c("X","Y","x","y")]<-sub.loc.data[which(sub.loc.data$matched==F)[which.min(distances)[1]],c("X",'Y',"x","y")]
+          sub.loc.data[intersect(which(is.na(sub.loc.data$tag)),which(sub.loc.data$matched==F))[which.min(distances)[1]],"matched"]<-T
         } 
         # add a new record if there's not a close match
         if(min(distances)>.25) 
@@ -104,8 +104,8 @@ for(site in sites)
           corrected.epi.index<-intersect(corrected.epi.index,which(corrected.epi$x==sub.epi.data[index,"x"]))
           corrected.epi.index<-intersect(corrected.epi.index,which(corrected.epi$y==sub.epi.data[index,"y"]))
           corrected.epi.index<-corrected.epi.index[1]
-          corrected.epi[corrected.epi.index,c("X","Y","x","y")]<-sub.loc.data[which(sub.loc.data$matched==F)[which.min(distances)],c("X",'Y',"x","y")]
-          sub.loc.data[intersect(which(is.na(sub.loc.data$tag)),which(sub.loc.data$matched==F))[which.min(distances)],"matched"]<-T
+          corrected.epi[corrected.epi.index,c("X","Y","x","y")]<-sub.loc.data[which(sub.loc.data$matched==F)[which.min(distances)[1]],c("X",'Y',"x","y")]
+          sub.loc.data[intersect(which(is.na(sub.loc.data$tag)),which(sub.loc.data$matched==F))[which.min(distances)[1]],"matched"]<-T
         } 
         # add a new record if there's not a close match
         if(min(distances)>.25) 
