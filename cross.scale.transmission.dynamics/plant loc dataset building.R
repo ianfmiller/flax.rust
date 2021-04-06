@@ -15,22 +15,10 @@ plant.locs<-plant.locs[which(plant.locs$Year==2020),]
 demog<-demog[which(demog$year==2020),]
 demog<-demog[which(demog$status %in% c("H","D")),]
 
-# Time periods for fitting glm of infection~foi to data:
-#CC: 6/22(first data)->7/27(last prediction)
-#BT: 6/24(first data)->7/8(last prediction)
-#GM: 6/16(first data)->7/15(last prediction)
-#BT: 6/25(first data)->7/28(last prediction)
-## These periods were selected such that the plant infection intensity metric was recorded for every infected plant in the transect for the observation prior to the observed changes in infection status
-## Exceptions wer emade for:
-### Infected seedling, which were assumed to have 0.1 starting inf intensity
-### Miissing plant inf intensity measurments that could be fore/hindcasted from existing observations using using plant inf intens model. THe window for fore/hindcasting was limited to +/- 1 week frpm existing data
-### Tag #15 in "CC" which was assumed to have 0 inf intensity as indicated by an observation on 6/22
-
 sites<-c("CC","BT","GM","HM")
-plant.loc.survey.dates<-list("CC"=c(as.Date("06/15/2020",tryFormats=c("%m/%d/%Y")),as.Date("06/22/2020",tryFormats=c("%m/%d/%Y"))),"BT"=as.Date("06/17/2020",tryFormats=c("%m/%d/%Y")),"GM"=as.Date("06/16/2020",tryFormats=c("%m/%d/%Y")),"HM"=as.Date("06/18/2020",tryFormats=c("%m/%d/%Y")))
-epi.obs.dates<-list("CC"=c("2020-06-22","2020-06-29","2020-07-06","2020-07-13","2020-07-20","2020-07-27"),"BT"=c("2020-06-24","2020-07-01","2020-07-08"),"GM"=c("2020-06-23","2020-06-30","2020-07-02","2020-07-07","2020-07-09","2020-07-15"),"HM"=c("2020-06-25","2020-07-15","2020-07-21","2020-07-22","2020-07-28"))    
-data.dates<-list("CC"=c("2020-06-22","2020-06-29","2020-07-06","2020-07-13","2020-07-20"),"BT"=c("2020-06-24","2020-07-01"),"GM"=c("2020-06-23","2020-06-30","2020-07-02","2020-07-07","2020-07-09"),"HM"=c("2020-06-25","2020-07-15","2020-07-21","2020-07-22"))
 
+# turn off plotting by default
+vis<-F
 # loop for compiling corrected plant locations
 corrected.epi<-epi
 corrected.locs<-c()
@@ -128,34 +116,37 @@ for(site in sites)
 }
   
 # vis loc agreement between corrected epi and loc data
-layout(matrix(c(1,2,5,3,4,5),2,3,byrow = T))
-for(site0 in sites)
-{
-  xx<-corrected.locs[which(corrected.locs$Site==site0),]
-  yy<-corrected.epi[which(corrected.epi$Site==site0),]
-  plot(xx$X+xx$x,xx$Y+xx$y,xlim=c(0,10),ylim=c(0,20),xlab="X",ylab="Y",main=site0,pch=16,col="black",cex=.9)
-  points(yy$X+yy$x,yy$Y+yy$y,col="red",cex=1)
-  # shade out unsurveyed region of CC
-  if(site0=="CC")
+if(vis){
+  layout(matrix(c(1,2,5,3,4,5),2,3,byrow = T))
+  for(site0 in sites)
   {
-    rect(0,9,15,15,col="black",density = 25,border=NA)
-    rect(0,15,7,16,col="black",density = 25,border=NA)
-    rect(0,16,10,17,col="black",density = 25,border=NA)
-    rect(0,17,7,18,col="black",density = 25,border=NA) 
+    xx<-corrected.locs[which(corrected.locs$Site==site0),]
+    yy<-corrected.epi[which(corrected.epi$Site==site0),]
+    plot(xx$X+xx$x,xx$Y+xx$y,xlim=c(0,10),ylim=c(0,20),xlab="X",ylab="Y",main=site0,pch=16,col="black",cex=.9)
+    points(yy$X+yy$x,yy$Y+yy$y,col="red",cex=1)
+    # shade out unsurveyed region of CC
+    if(site0=="CC")
+    {
+      rect(0,9,15,15,col="black",density = 25,border=NA)
+      rect(0,15,7,16,col="black",density = 25,border=NA)
+      rect(0,16,10,17,col="black",density = 25,border=NA)
+      rect(0,17,7,18,col="black",density = 25,border=NA) 
+    }
   }
+  plot(0,0,type="n",axes = F,xlab="",ylab="")
+  legend("center",legend = c("location data + additions","corrected epi data location"),col=c("black","red"),pch = c(16,1),cex=.9,1)
+  
+  # view individual plants added to loc data
+  layout(matrix(c(1,2,5,3,4,5),2,3,byrow = T))
+  for(site0 in sites)
+  {
+    xx<-plant.locs[which(plant.locs$Site==site0),]
+    yy<-corrected.locs[which(corrected.locs$Site==site0),]
+    plot(xx$X+xx$x,xx$Y+xx$y,xlim=c(0,10),ylim=c(0,20),xlab="X",ylab="Y",main=site0,pch=16,col="black",cex=.9)
+    points(yy$X+yy$x,yy$Y+yy$y,col="red",cex=1)
+  }
+  plot(0,0,type="n",axes = F,xlab="",ylab="")
+  legend("center",legend = c("original location data","location data + additions"),col=c("black","red"),pch = c(16,1),cex=.9,1)
 }
-plot(0,0,type="n",axes = F,xlab="",ylab="")
-legend("center",legend = c("location data + additions","corrected epi data location"),col=c("black","red"),pch = c(16,1),cex=.9,1)
 
-# view individual plants added to loc data
-layout(matrix(c(1,2,5,3,4,5),2,3,byrow = T))
-for(site0 in sites)
-{
-  xx<-plant.locs[which(plant.locs$Site==site0),]
-  yy<-corrected.locs[which(corrected.locs$Site==site0),]
-  plot(xx$X+xx$x,xx$Y+xx$y,xlim=c(0,10),ylim=c(0,20),xlab="X",ylab="Y",main=site0,pch=16,col="black",cex=.9)
-  points(yy$X+yy$x,yy$Y+yy$y,col="red",cex=1)
-}
-plot(0,0,type="n",axes = F,xlab="",ylab="")
-legend("center",legend = c("original location data","location data + additions"),col=c("black","red"),pch = c(16,1),cex=.9,1)
 
