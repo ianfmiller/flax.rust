@@ -15,10 +15,13 @@ plant.locs<-plant.locs[which(plant.locs$Year==2020),]
 demog<-demog[which(demog$year==2020),]
 demog<-demog[which(demog$status %in% c("H","D")),]
 
+## set convenicence vars
 sites<-c("CC","BT","GM","HM")
+plant.loc.survey.dates<-list("CC"=c(as.Date("06/15/2020",tryFormats=c("%m/%d/%Y")),as.Date("06/22/2020",tryFormats=c("%m/%d/%Y"))),"BT"=as.Date("06/17/2020",tryFormats=c("%m/%d/%Y")),"GM"=as.Date("06/16/2020",tryFormats=c("%m/%d/%Y")),"HM"=as.Date("06/18/2020",tryFormats=c("%m/%d/%Y")))
+
 
 # turn off plotting by default
-vis<-F
+vis<-T
 # loop for compiling corrected plant locations
 corrected.epi<-epi
 corrected.locs<-c()
@@ -26,8 +29,8 @@ corrected.locs<-c()
 for(site in sites)
 {
   ## get plant location data
-  sub.loc.data<-plant.locs[which(plant.locs$Site==site),]
-  sub.loc.data<-sub.loc.data[which(as.Date(sub.loc.data$Date,tryFormats=c("%m/%d/%Y")) %in% plant.loc.survey.dates[which(sites==site)][[1]]),c("Site","X","Y","x","y","tag")]
+  sub.loc.data<-plant.locs[which(plant.locs$Site==site),c("Site","X","Y","x","y","tag")]
+  #sub.loc.data<-sub.loc.data[which(as.Date(sub.loc.data$Date,tryFormats=c("%m/%d/%Y")) %in% plant.loc.survey.dates[which(sites==site)][[1]]),c("Site","X","Y","x","y","tag")]
   sub.loc.data<-data.frame(sub.loc.data,"matched"=F)
   sub.loc.data[which(!(is.na(sub.loc.data$tag))),"matched"]<-T
   
