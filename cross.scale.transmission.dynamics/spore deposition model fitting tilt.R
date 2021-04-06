@@ -14,17 +14,17 @@ demog<-demog[which(demog$year==2020),] #subset to 2020
 
 ## optimize
 
-#opt<-optim(par=c(9.318341e-07,1.897060e-01,1.085956e+00),fn=param.search.optim.tilted.plume,control=list(trace=1))
+#opt<-optim(par=c(5.803369e-07 , 1.596314e-01 , 1.100707e+00),fn=param.search.optim.tilted.plume,control=list(trace=1))
 
 ## NEED TO REFIT ALL--FIX k or get rid of k--three params making liklihood ridge
 ## results for model fitting
 ### sum squared obs = 14991.02
 ### total sum of squares = 14764.22 (total sum of squares = sum((spores/squares - mean(spores/squares))^2) )
 ### x<-c(9.318341e-07,1.897060e-01,1.085956e+00) # output value = 12297 for one day
-### x<-c(5.805303e-07 , 1.604449e-01 , 1.100592e+00) # output value = 12283.02 for two days
+### x<-c(5.803369e-07 , 1.596314e-01 , 1.100707e+00) # output value = 12283.01 for two days
 ### x<-c(4.355849e-08,1.714472e-06,1.384859e+00) # output value = 14084.46 for full period
 
-opt<-list(par=c(9.318341e-07,1.897060e-01,1.085956e+00))
+opt<-list(par=c(5.803369e-07 , 1.596314e-01 , 1.100707e+00))
 
 ## visualize kernel
 test.mat<-data.frame(x=rep(seq(-1,1,.01),each=201),y=rep(seq(-1,1,.01),times=201))
