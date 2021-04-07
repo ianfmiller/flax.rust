@@ -1,6 +1,8 @@
-# load plant loc dataset
+# load datasets and functions
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant loc dataset building.R")
-
+source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/predict plant inf intens change funcs.R")
+source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/spore deposition functions tilt.R")
+plant.inf.intens<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plants.RDS")
 # Time periods for fitting glm of infection~foi to data:
 #CC: 6/22(first data)->7/27(last prediction)
 #BT: 6/24(first data)->7/8(last prediction)
@@ -11,6 +13,80 @@ source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant loc
 ### Infected seedling, which were assumed to have 0.1 starting inf intensity
 ### Miissing plant inf intensity measurments that could be fore/hindcasted from existing observations using using plant inf intens model. THe window for fore/hindcasting was limited to +/- 1 week frpm existing data
 ### Tag #15 in "CC" which was assumed to have 0 inf intensity as indicated by an observation on 6/22
+
+# function for calculating foi
+foi.func<-function(site,date0,date1,epi.data=corrected.epi,xcord,ycord)
+{
+  ## get wind data from site and dates
+  wind.data<-all.weath[which(all.weath$site==site),]
+  wind.data<-wind.data[which(wind.data$date>as.POSIXct(paste0(date0," 12:00:00"),tz="UTC")),]
+  wind.data<-wind.data[which(wind.data$date<=as.POSIXct(paste0(date1," 12:00:00"),tz="UTC")),]
+  
+  ## get data about sources of spores
+  source.data<-epi.data[intersect(which(epi.data$Site==site),which(epi.data$Date.First.Observed.Diseased<=date0)),]
+  
+  ## loop to calculate summed foi from all sources
+  tot.dep<-c()
+  for(i in 1:dim(source.data)[1])
+  {
+    ### get cords of source
+    sourceX<-source.data[i,"X"]+source.data[i,"x"]
+    sourceY<-source.data[i,"Y"]+source.data[i,"y"]
+    ### get half height
+    half.height<-.5*source.data[i,"max.height"]/100
+    ### get q val
+    #### if the source plant is tagged
+    if(!is.na(source.data[i,"Tag"]))
+    {
+      if(source.data[i,"Tag"]==15) {q<-0; half.height=10} #### set q = 0 for tag 15, half.height doesn't matter
+      else{
+        #### set q to 0.1 if the plant is a seedling
+        if(source.data[i,"max.height"]<=5 | source.data[i,"notes"]=="seedling") {q<-.1; half.height<-source.data[i,"max.height"]}
+        #### extract q from data
+        else {
+          plant.inf.intens.index<-intersect(which(plant.inf.intens$Date==date0),which(plant.inf.intens$Tag==source.data[i,"Tag"]))
+          ##### if there's an actual measurment use that
+          if(length(plant.inf.intens.index)==1) {q<-plant.inf.intens[plant.inf.intens.index,"plant.inf.intens"]; half.height<-plant.inf.intens[plant.inf.intens.index,"max.height"]}
+          ##### if not, forecast or hindcast from closest observation
+          if(length(plant.inf.intens.index)==0)
+          {
+            obs.dates<-as.Date(plant.inf.intens[which(plant.inf.intens$Tag==source.data[i,"Tag"]),"Date"]) ###### get dates that have plant inf intens observations
+            if(as.Date(date0) %in% obs.dates) {obs.dates<-obs.dates[-which(obs.dates==as.Date(date0))]}
+            date.diffs<-as.Date(date0)-obs.dates ### calculate time differences
+            closest.date.index<-which(abs(date.diffs)==min(abs(date.diffs))) ###### find closest observation
+            if(length(closest.date.index)>1) {closest.date.index<-closest.date.index[which(date.diffs[closest.date.index]<0)]} ###### if there's a tie, default to future observation
+            closest.date<-obs.dates[closest.date.index]
+            plant.inf.intens.index<-intersect(which(plant.inf.intens$Date==closest.date),which(plant.inf.intens$Tag==source.data[i,"Tag"]))
+            if(closest.date>date0) ###### hindcast
+            {
+              q<-predict.plant.inf.intens.last(plant.inf.intens.next=plant.inf.intens[plant.inf.intens.index,"plant.inf.intens"],site=site,date0=as.POSIXct(paste0(date0," 12:00:00")),date1=as.POSIXct(paste0(closest.date," 12:00:00")))
+              half.height<-plant.inf.intens[plant.inf.intens.index,"max.height"]
+            }
+            if(closest.date<date0) ###### forecast
+            {
+              q<-predict.plant.inf.intens(plant.inf.intens.last=plant.inf.intens[plant.inf.intens.index,"plant.inf.intens"],site=site,date0=as.POSIXct(paste0(closest.date," 12:00:00")),date1=as.POSIXct(paste0(date0," 12:00:00")))
+              half.height<-plant.inf.intens[plant.inf.intens.index,"max.height"]
+            }
+          }
+        } 
+      }
+    }
+    #### if the source plant is tagged
+    if(is.na(source.data[i,"Tag"]))
+    {
+      #### set q to 0.1 if the plant is a seedling
+      if(source.data[i,"max.height"]<=5 | source.data[i,"notes"]=="seedling")
+      {
+        q<-.1
+        half.height<-source.data[i,"max.height"]
+      } else {print('error--missing plant inf intens data'); print(i)}
+    }
+    
+    ### calculate foi from source plant
+    tot.dep<-c(tot.dep,predict.kernel.tilted.plume(q=q,H=half.height,k=5.803369e-07,alphaz=1.596314e-01,Ws=1.100707e+00,xtarget=xcord-sourceX,ytarget=ycord-sourceY,wind.data=wind.data)) 
+  }
+  sum(tot.dep)
+}
 
 # convenience pars
 sites<-c("CC","BT","GM","HM")
@@ -23,7 +99,6 @@ foi.data<-data.frame("site"=character(),"date"=as.Date(character()),"status"=cha
 # fill data object
 for(site in sites)
 {
-  print(site)
   ## subset data by site
   sub.loc.data<-corrected.locs[which(corrected.locs$Site==site),]
   sub.1.epi.data<-corrected.epi[which(corrected.epi$Site==site),]
@@ -45,7 +120,6 @@ for(site in sites)
     sub.2.epi.data<-sub.1.epi.data[which(sub.1.epi.data$Date.First.Observed.Diseased<=date0),] ### epi data up until date0
     sub.3.epi.data<-sub.1.epi.data[which(sub.1.epi.data$Date.First.Observed.Diseased<=date1),] ### epi date up until date1
     
-    print(dim(sub.3.epi.data)[1]-dim(sub.2.epi.data)[1])
     ## build set of ID strings for plants that have become infected by date0
     epi.ID.strings<-c()
     for(i in 1:dim(sub.2.epi.data)[1]) 
@@ -72,7 +146,7 @@ for(site in sites)
       {
         status<-ifelse(ID.string %in% epi.ID.strings,1,0) #### count plant as currently infected if its ID string shows up in the set of plants that have been infected by date0
         new.status<-ifelse(ID.string %in% epi.ID.strings.next,1,0) #### count plant as becoming infected by next obs if its ID string shows up in the set of plants that have been infected by date1
-        foi<-NA #### calculate foi experienced
+        foi<-foi.func(site=site,date0=date0,date1=date1,epi.data=corrected.epi,xcord=sub.loc.data[index,"X"]+sub.loc.data[index,"x"],ycord=sub.loc.data[index,"Y"]+sub.loc.data[index,"y"]) #### calculate foi experienced
         foi.data<-rbind(foi.data,data.frame("site"=site,"date"=date0,"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"foi"=foi)) #### add new entry to data object
       }
       ### if that ID string is not unique
@@ -82,11 +156,15 @@ for(site in sites)
         order<-which(which(ID.strings==ID.string)==index) #### figure out which repeat (e.g. 2nd) this plant is
         status<-ifelse(length(which(epi.ID.strings==ID.string))>=order,1,0) #### for plant that is the nth repeat, count as currently infected if at least n matching ID strings show up in epi.ID.strings
         new.status<-ifelse(length(which(epi.ID.strings.next==ID.string))>=order,1,0) #### for plant that is the nth repeat, count as becoming infected by next obs if at least n matching ID strings show up in epi.ID.strings.next
+        foi<-foi.func(site=site,date0=date0,date1=date1,epi.data=corrected.epi,xcord=sub.loc.data[index,"X"]+sub.loc.data[index,"x"],ycord=sub.loc.data[index,"Y"]+sub.loc.data[index,"y"]) #### calculate foi experienced
         foi.data<-rbind(foi.data,data.frame("site"=site,"date"=date0,"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"foi"=foi)) #### add new entry to data object
       }
+      print(paste0("site = ",site," date = ",date0," ",index,"/",dim(sub.loc.data)[1]," complete"))
     }
   }
 }
 
-
-
+# NEED TO SUBSET OUT CC DATA w/o PROPER LOC RECORDING
+xx<-foi.data[which(foi.data$status==0),]
+plot(xx$foi,jitter(xx$status.next))
+mod<-glm(status.next~foi,data=xx)
