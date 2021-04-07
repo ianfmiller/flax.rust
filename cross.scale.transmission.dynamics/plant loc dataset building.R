@@ -29,7 +29,7 @@ corrected.locs<-c()
 for(site in sites)
 {
   ## get plant location data
-  sub.loc.data<-plant.locs[which(plant.locs$Site==site),c("Site","X","Y","x","y","tag")]
+  sub.loc.data<-plant.locs[which(plant.locs$Site==site),c("Site","X","Y","x","y","height.cm","tag")]
   #sub.loc.data<-sub.loc.data[which(as.Date(sub.loc.data$Date,tryFormats=c("%m/%d/%Y")) %in% plant.loc.survey.dates[which(sites==site)][[1]]),c("Site","X","Y","x","y","tag")]
   sub.loc.data<-data.frame(sub.loc.data,"matched"=F)
   sub.loc.data[which(!(is.na(sub.loc.data$tag))),"matched"]<-T
