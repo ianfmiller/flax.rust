@@ -69,7 +69,7 @@ for(site in sites)
         # add a new record if there's not a close match
         if(min(distances)>.25) 
         {
-          sub.loc.data<-rbind(sub.loc.data,data.frame("Site"=site,"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"tag"=sub.epi.data[index,"Tag"],"matched"=T))
+          sub.loc.data<-rbind(sub.loc.data,data.frame("Site"=site,"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"height.cm"=NA,"tag"=sub.epi.data[index,"Tag"],"matched"=T))
         }
       }
     }
@@ -112,7 +112,7 @@ for(site in sites)
         # add a new record if there's not a close match
         if(min(distances)>.25) 
         {
-          sub.loc.data<-rbind(sub.loc.data,data.frame("Site"=site,"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"tag"=sub.epi.data[index,"Tag"],"matched"=T))
+          sub.loc.data<-rbind(sub.loc.data,data.frame("Site"=site,"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"height.cm"=NA,"tag"=sub.epi.data[index,"Tag"],"matched"=T))
         }
       }
     }
