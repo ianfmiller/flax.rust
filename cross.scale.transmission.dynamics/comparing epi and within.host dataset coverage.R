@@ -34,7 +34,6 @@ for (site in unique(epi$Site))
       sub.data.3b<-sub.data.2a[intersect(which(!(sub.data.2a$Tag %in% sub.data.2b$Tag)),which(sub.data.2a$notes=="seedling")),]
       # data with observed plant inf intens
       sub.data.3c<-sub.data.2a[which(sub.data.2a$Tag %in% sub.data.2b$Tag),]
-      print(as.Date(date,origin = "1970-01-01"))
       points(sub.data.3a$X+sub.data.3a$x,sub.data.3a$Y+sub.data.3a$y,col="black") 
       points(sub.data.3b$X+sub.data.3b$x,sub.data.3b$Y+sub.data.3b$y,col="green") 
       points(sub.data.3c$X+sub.data.3c$x,sub.data.3c$Y+sub.data.3c$y,col="red") 
