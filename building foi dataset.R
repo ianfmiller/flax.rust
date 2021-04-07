@@ -39,7 +39,7 @@ foi.func<-function(site,date0,date1,epi.data=corrected.epi,xcord,ycord)
       if(source.data[i,"Tag"]==15) {q<-0; half.height=10} #### set q = 0 for tag 15, half.height doesn't matter
       else{
         #### set q to 0.1 if the plant is a seedling
-        if(source.data[i,"max.height"]<=5 | source.data[i,"notes"]=="seedling") {q<-.1; half.height<-source.data[i,"max.height"]}
+        if(source.data[i,"notes"]=="seedling") {q<-.1; half.height<-source.data[i,"max.height"]}
         #### extract q from data
         else {
           plant.inf.intens.index<-intersect(which(plant.inf.intens$Date==date0),which(plant.inf.intens$Tag==source.data[i,"Tag"]))
@@ -88,7 +88,7 @@ foi.func<-function(site,date0,date1,epi.data=corrected.epi,xcord,ycord)
 
 # convenience pars
 sites<-c("CC","BT","GM","HM")
-epi.obs.dates<-list("CC"=c("2020-06-22","2020-06-29","2020-07-06","2020-07-13","2020-07-20","2020-07-27"),"BT"=c("2020-06-24","2020-07-01","2020-07-08"),"GM"=c("2020-06-23","2020-06-30","2020-07-02","2020-07-07","2020-07-09","2020-07-15"),"HM"=c("2020-06-25","2020-07-02","2020-07-07","2020-07-09","2020-07-09"))    
+epi.obs.dates<-list("CC"=c("2020-06-22","2020-06-29","2020-07-06","2020-07-13","2020-07-20","2020-07-27"),"BT"=c("2020-06-24","2020-07-01","2020-07-08"),"GM"=c("2020-06-23","2020-06-30","2020-07-02","2020-07-07","2020-07-09","2020-07-15"),"HM"=c("2020-06-25","2020-07-02","2020-07-07","2020-07-09","2020-07-15"))    
 data.dates<-list("CC"=c("2020-06-22","2020-06-29","2020-07-06","2020-07-13","2020-07-20"),"BT"=c("2020-06-24","2020-07-01"),"GM"=c("2020-06-23","2020-06-30","2020-07-02","2020-07-07","2020-07-09"),"HM"=c("2020-06-25","2020-07-02","2020-07-07","2020-07-09"))
 
 # build empty data object for foi vs outcome data
@@ -161,6 +161,8 @@ for(site in sites)
     }
   }
 }
+
+saveRDS(foi.data,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/foi.data.RDS")
 
 # NEED TO SUBSET OUT CC DATA w/o PROPER LOC RECORDING
 xx<-foi.data[which(foi.data$status==0),]
