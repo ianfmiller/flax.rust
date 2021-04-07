@@ -39,7 +39,7 @@ foi.func<-function(site,date0,date1,epi.data=corrected.epi,xcord,ycord)
       if(source.data[i,"Tag"]==15) {q<-0; half.height=10} #### set q = 0 for tag 15, half.height doesn't matter
       else{
         #### set q to 0.1 if the plant is a seedling
-        if(source.data[i,"notes"]=="seedling") {q<-.1; half.height<-source.data[i,"max.height"]}
+        if((!source.data[i,"Tag"] %in% plant.inf.intens$Tag & source.data[i,"max.height"]<=5) | source.data[i,"notes"]=="seedling") {q<-.1; half.height<-source.data[i,"max.height"]}
         #### extract q from data
         else {
           plant.inf.intens.index<-intersect(which(plant.inf.intens$Date==date0),which(plant.inf.intens$Tag==source.data[i,"Tag"]))
