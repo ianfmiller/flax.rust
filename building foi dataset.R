@@ -32,8 +32,6 @@ foi.func<-function(site,date0,date1,epi.data=corrected.epi,xcord,ycord)
     ### get cords of source
     sourceX<-source.data[i,"X"]+source.data[i,"x"]
     sourceY<-source.data[i,"Y"]+source.data[i,"y"]
-    ### get half height
-    half.height<-.5*source.data[i,"max.height"]/100
     ### get q val
     #### if the source plant is tagged
     if(!is.na(source.data[i,"Tag"]))
@@ -90,8 +88,8 @@ foi.func<-function(site,date0,date1,epi.data=corrected.epi,xcord,ycord)
 
 # convenience pars
 sites<-c("CC","BT","GM","HM")
-epi.obs.dates<-list("CC"=c("2020-06-22","2020-06-29","2020-07-06","2020-07-13","2020-07-20","2020-07-27"),"BT"=c("2020-06-24","2020-07-01","2020-07-08"),"GM"=c("2020-06-23","2020-06-30","2020-07-02","2020-07-07","2020-07-09","2020-07-15"),"HM"=c("2020-06-25","2020-07-15","2020-07-21","2020-07-22","2020-07-28"))    
-data.dates<-list("CC"=c("2020-06-22","2020-06-29","2020-07-06","2020-07-13","2020-07-20"),"BT"=c("2020-06-24","2020-07-01"),"GM"=c("2020-06-23","2020-06-30","2020-07-02","2020-07-07","2020-07-09"),"HM"=c("2020-06-25","2020-07-15","2020-07-21","2020-07-22"))
+epi.obs.dates<-list("CC"=c("2020-06-22","2020-06-29","2020-07-06","2020-07-13","2020-07-20","2020-07-27"),"BT"=c("2020-06-24","2020-07-01","2020-07-08"),"GM"=c("2020-06-23","2020-06-30","2020-07-02","2020-07-07","2020-07-09","2020-07-15"),"HM"=c("2020-06-25","2020-07-02","2020-07-07","2020-07-09","2020-07-09"))    
+data.dates<-list("CC"=c("2020-06-22","2020-06-29","2020-07-06","2020-07-13","2020-07-20"),"BT"=c("2020-06-24","2020-07-01"),"GM"=c("2020-06-23","2020-06-30","2020-07-02","2020-07-07","2020-07-09"),"HM"=c("2020-06-25","2020-07-02","2020-07-07","2020-07-09"))
 
 # build empty data object for foi vs outcome data
 foi.data<-data.frame("site"=character(),"date"=as.Date(character()),"status"=character(),"status.next"=character(),"tag"=character(),"X"=numeric(),"Y"=numeric(),"x"=numeric(),"y"=numeric(),"foi"=numeric())
@@ -166,5 +164,5 @@ for(site in sites)
 
 # NEED TO SUBSET OUT CC DATA w/o PROPER LOC RECORDING
 xx<-foi.data[which(foi.data$status==0),]
-plot(xx$foi,jitter(xx$status.next))
+plot(log10(xx$foi+10e-10),jitter(xx$status.next))
 mod<-glm(status.next~foi,data=xx)
