@@ -234,6 +234,22 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
     }
   }
   
+  ## rescale predictors to be time independent
+  foi.data<-data.frame(foi.data,"delta.days"=NA)
+  
+  for (i in 1:dim(foi.data)[1])
+  {
+    date0<-foi.data[i,"date"]
+    site<-foi.data[i,"site"]
+    site.date.set<-epi.obs.dates[which(sites==site)][[1]]
+    date1<-site.date.set[which(site.date.set==date0)+1]
+    delta.days<-as.numeric(as.Date(date1)-as.Date(date0))
+    foi.data[i,"delta.days"]<-delta.days
+  }
+  
+  foi.data[,c("temp.days","temp.days.16.22","temp.days.7.30","dew.point.days","wetness.days","tot.rain","solar.days","wind.speed.days","gust.speed.days","temp.16.22.dew.point.days","temp.7.30.dew.point.days","temp.wetness.days","temp.16.22.wetness.days","temp.7.30.wetness.days")]<-foi.data[,c("temp.days","temp.days.16.22","temp.days.7.30","dew.point.days","wetness.days","tot.rain","solar.days","wind.speed.days","gust.speed.days","temp.16.22.dew.point.days","temp.7.30.dew.point.days","temp.wetness.days","temp.16.22.wetness.days","temp.7.30.wetness.days")]/foi.data[,"delta.days"]
+  colnames(foi.data)[which(colnames(foi.data) %in% c("temp.days","temp.days.16.22","temp.days.7.30","dew.point.days","wetness.days","tot.rain","solar.days","wind.speed.days","gust.speed.days","temp.16.22.dew.point.days","temp.7.30.dew.point.days","temp.wetness.days","temp.16.22.wetness.days","temp.7.30.wetness.days"))]<-paste0("mean.",c("temp.days","temp.days.16.22","temp.days.7.30","dew.point.days","wetness.days","tot.rain","solar.days","wind.speed.days","gust.speed.days","temp.16.22.dew.point.days","temp.7.30.dew.point.days","temp.wetness.days","temp.16.22.wetness.days","temp.7.30.wetness.days"))
+  
   saveRDS(foi.data,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/foi.data.RDS")
 }
 
