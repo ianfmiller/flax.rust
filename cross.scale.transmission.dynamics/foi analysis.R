@@ -45,3 +45,33 @@ axis(2,at=c(0,1),labels = c("healthy","infected"))
 plot(jitter(log10(foi.data[which(foi.data$site=="HM"),"foi"]+1e-10)),jitter(foi.data[which(foi.data$site=="HM"),"status.next"]),xlab="log10 foi",ylab="outcome",axes=F,col="purple",xlim=c(min(log10(foi.data$foi+1e-10)),max(log10(foi.data$foi+1e-10))),main="HM")
 axis(2,at=c(0,1),labels = c("healthy","infected"))
 
+
+if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS"))
+{
+  ### construct all combinations of predictors
+  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/foi.model.set.creation.R")
+  
+  ### create all sets of models
+  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("status.next ~ foi",predictors[x]),collapse=" + ")))
+  names(model.set)<-seq(1,length(model.set),1)
+  
+  ## run to search for best  model
+  all.fit.models<-c()
+  AIC.benchmark<- AIC(glm(status.next~foi,data=foi.data,family = "binomial")) #cutoff to limit memory usage
+  pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
+  for (i in 1:length(model.set))
+  {
+    suppressMessages(new.mod<-glm(model.set[[i]],data=foi.data))
+    AIC.new.mod<-AIC(new.mod)
+    if(AIC.new.mod<=(AIC.benchmark)) {all.fit.models<-append(all.fit.models,list(new.mod))}
+    pb$tick()
+  }
+  
+  ## compare between models
+  AICs<-unlist(lapply(all.fit.models,AIC))
+  delta.AICs<-AICs-min(AICs)
+  index<-1
+  best.model<-all.fit.models[[order(AICs)[index]]]
+  saveRDS(best.model,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS")
+}
+
