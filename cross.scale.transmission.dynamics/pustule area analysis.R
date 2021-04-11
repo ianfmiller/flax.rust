@@ -58,12 +58,12 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/pustule.model.set.creation.R")
   
   ### create all sets of models
-  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ area",predictors[x],'(1|tag)'),collapse=" + ")))
+  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ area",predictors[x],'(1|site)'),collapse=" + ")))
   names(model.set)<-seq(1,length(model.set),1)
   
   ## run to search for best  model
   all.fit.models<-c()
-  AIC.benchmark<- AIC(lmer(area.next~area+(1|tag),data=delta.pustules,REML = F)) #cutoff to limit memory usage
+  AIC.benchmark<- AIC(lmer(area.next~area+(1|site),data=delta.pustules,REML = F)) #cutoff to limit memory usage
   pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
   for (i in 1:length(model.set))
   {
@@ -91,18 +91,19 @@ pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dy
 par(mfrow=c(1,1))
 plot(delta.pustules$area,delta.pustules$area.next,xlab="area",ylab="next. obs. area")
 
-quant.time<-quantile(delta.pustules$time,.5)
 quant.temp.days.16.22<-quantile(delta.pustules$temp.days.16.22,.5)
+quant.dew.point.days<-quantile(delta.pustules$dew.point.days,.5)
 quant.temp.16.22.dew.point.days<-quantile(delta.pustules$temp.16.22.dew.point.days,.5)
-quant.temp.16.22.wetness.days<-quantile(delta.pustules$temp.16.22.wetness.days,.5)
+quant.temp.wetness.days<-quantile(delta.pustules$temp.wetness.days,.5)
 quant.tot.rain<-quantile(delta.pustules$tot.rain,.5)
 
 curve.col<-"blue"
 curve(fixef(pustule.model)["(Intercept)"]+
         fixef(pustule.model)["area"]*x+
         fixef(pustule.model)["temp.days.16.22"]*quant.temp.days.16.22+
+        fixef(pustule.model)["dew.point.days"]*quant.dew.point.days+
         fixef(pustule.model)["temp.16.22.dew.point.days"]*quant.temp.16.22.dew.point.days+
-        fixef(pustule.model)["temp.16.22.wetness.days"]*quant.temp.16.22.wetness.days+
+        fixef(pustule.model)["temp.wetness.days"]*quant.temp.wetness.days+
         fixef(pustule.model)["tot.rain"]*quant.tot.rain
       ,add=T,col=curve.col)
 
