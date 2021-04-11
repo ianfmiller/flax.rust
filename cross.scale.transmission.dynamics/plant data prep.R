@@ -102,6 +102,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   temp.rh.sub.func<-function(x,lower.bound,upper.bound) {out<-subset(x,temp.c>=lower.bound); out<-subset(out,temp.c<=upper.bound); out}
   
   tags<-c()
+  sites<-c()
   n.stems<-c()
   n.d.stems<-c()
   max.heights<-c()
@@ -208,9 +209,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         #predict pustule growth from pustule growth model and enviro conditions
         #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
         pustule.model.new.area<-.01 #predict change for small pustule, arbitrarily pick .01
-        pustule.model.new.time<-1
         obs.time<-delta.days
-        pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,"time"=pustule.model.new.time,"temp.days.16.22"=new.temp.days.16.22/delta.days,"temp.16.22.dew.point.days"=new.temp.16.22.dew.point.days/delta.days,"temp.16.22.wetness.days"=new.temp.16.22.wetness.days/delta.days,"tot.rain"=new.tot.rain/delta.days)
+        pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,"temp.days.16.22"=new.temp.days.16.22/delta.days,"dew.point.days"=new.dew.point.days/delta.days,"temp.16.22.dew.point.days"=new.temp.16.22.dew.point.days/delta.days,"temp.wetness.days"=new.temp.wetness.days/delta.days,"tot.rain"=new.tot.rain/delta.days)
         pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,re.form=~0)
         
         #predict change in number of pustules from enviro conditions
@@ -222,6 +222,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         
         #store values
         tags<-c(tags,tag)
+        sites<-c(sites,site)
         start.plant.inf.intens<-c(start.plant.inf.intens,new.start.plant.inf.intens)
         end.plant.inf.intens<-c(end.plant.inf.intens,new.end.plant.inf.intens)
         n.stems<-c(n.stems,new.n.stems)
@@ -252,7 +253,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
     }
   }
   
-  delta.plants<-data.frame(tag=factor(tags),time=days,N.stems=n.stems,N.D.Stems=n.d.stems,max.height=max.heights,plant.inf.intens=start.plant.inf.intens,plant.inf.intens.next=end.plant.inf.intens,
+  delta.plants<-data.frame(tag=factor(tags),site=factor(sites),time=days,N.stems=n.stems,N.D.Stems=n.d.stems,max.height=max.heights,plant.inf.intens=start.plant.inf.intens,plant.inf.intens.next=end.plant.inf.intens,
                           temp.days=temp.days,temp.days.16.22=temp.days.16.22,temp.days.7.30=temp.days.7.30,
                           dew.point.days=dew.point.days,temp.dew.point.days=temp.dew.point.days,temp.16.22.dew.point.days=temp.16.22.dew.point.days,temp.7.30.dew.point.days=temp.7.30.dew.point.days,
                           wetness.days=wetness.days,temp.wetness.days=temp.wetness.days,temp.16.22.wetness.days=temp.16.22.wetness.days,temp.7.30.wetness.days=temp.7.30.wetness.days,
