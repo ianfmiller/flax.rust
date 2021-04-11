@@ -24,6 +24,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   temp.rh.sub.func<-function(x,lower.bound,upper.bound) {out<-subset(x,temp.c>=lower.bound); out<-subset(out,temp.c<=upper.bound); out}
   
   tags<-c()
+  sites<-c()
   stem.iters<-c()
   leaf.iters<-c()
   start.vals<-c()
@@ -122,13 +123,13 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
             #predict pustule growth from pustule growth model and enviro conditions
             #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
             pustule.model.new.area<-.01 #predict change for small pustule, arbitrarily pick .01
-            pustule.model.new.time<-1
             obs.time<-delta.days
-            pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,"time"=pustule.model.new.time,"temp.days.16.22"=new.temp.days.16.22/delta.days,"temp.16.22.dew.point.days"=new.temp.16.22.dew.point.days/delta.days,"temp.16.22.wetness.days"=new.temp.16.22.wetness.days/delta.days,"tot.rain"=new.tot.rain/delta.days)
+            pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,"temp.days.16.22"=new.temp.days.16.22/delta.days,"dew.point.days"=new.dew.point.days/delta.days,"temp.16.22.dew.point.days"=new.temp.16.22.dew.point.days/delta.days,"temp.wetness.days"=new.temp.wetness.days/delta.days,"tot.rain"=new.tot.rain/delta.days)
             pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,re.form=~0)
             
             #store values
             tags<-c(tags,tag)
+            sites<-c(sites,site)
             stem.iters<-c(stem.iters,color)
             leaf.iters<-c(leaf.iters,leaf.iteration)
   
@@ -162,7 +163,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
     }
   }
   
-  delta.n.pustules<-data.frame(tag=factor(tags),stem.iter=stem.iters,leaf.iter=leaf.iters,n.pustules=start.vals,n.pustules.next=end.vals,time=days,
+  delta.n.pustules<-data.frame(tag=factor(tags),site=factor(sites),stem.iter=stem.iters,leaf.iter=leaf.iters,n.pustules=start.vals,n.pustules.next=end.vals,time=days,
                              temp.days=temp.days,temp.days.16.22=temp.days.16.22,temp.days.7.30=temp.days.7.30,
                              dew.point.days=dew.point.days,temp.dew.point.days=temp.dew.point.days,temp.16.22.dew.point.days=temp.16.22.dew.point.days,temp.7.30.dew.point.days=temp.7.30.dew.point.days,
                              wetness.days=wetness.days,temp.wetness.days=temp.wetness.days,temp.16.22.wetness.days=temp.16.22.wetness.days,temp.7.30.wetness.days=temp.7.30.wetness.days,
