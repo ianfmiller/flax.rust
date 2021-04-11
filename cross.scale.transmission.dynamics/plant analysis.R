@@ -31,7 +31,7 @@ for (tag in unique(plants$Tag))
 
 ## plot change
 par(mfrow=c(2,1))
-plot(delta.plants$plant.inf.intens,delta.plants$plant.inf.intens.next,col="grey",xlab = "plant infection intensity",ylab="next obs. plant infection intensity")
+plot(delta.plants$plant.inf.intens,delta.plants$plant.inf.intens.next,col="grey",xlab = "plant infection intensity",ylab="next obs. plant infection intensity",xlim=c(0,1000),ylim=c(0,200))
 abline(0,1)
 plot(delta.plants$plant.inf.intens,delta.plants$plant.inf.intens.next-delta.plants$plant.inf.intens,col="grey",xlab = "plant infection intensity",ylab="change in plant infection intensity")
 abline(h=0)
@@ -42,22 +42,11 @@ par(mfrow=c(1,1))
 plot(log10(delta.plants$plant.inf.intens),log10(delta.plants$plant.inf.intens.next),col="grey",xlab = "plant infection intensity",ylab="next obs. plant infection intensity")
 abline(0,1)
 
-## test different ordered polynomial fits
-plot(log10(delta.plants$plant.inf.intens),log10(delta.plants$plant.inf.intens.next))
-legend("bottomright",legend = c("linear","quadratic","cubic","quartic"),lty=1,col=c("blue","red","green","purple"))
-test.mod.1<-lmer(log10(plant.inf.intens.next)~log10(plant.inf.intens)+(1|tag),data=delta.plants,REML = F)
-abline(fixef(test.mod.1)[1],fixef(test.mod.1)[1],col="blue")
-
-test.mod.2<-lmer(log10(plant.inf.intens.next)~poly(log10(plant.inf.intens),2,raw = T)+(1|tag),data=delta.plants,REML = F)
-curve(fixef(test.mod.2)[1]+fixef(test.mod.2)[2]*x+fixef(test.mod.2)[3]*x^2,add=T,col="red")
-
-test.mod.3<-lmer(log10(plant.inf.intens.next)~poly(log10(plant.inf.intens),3,raw = T)+(1|tag),data=delta.plants,REML = F)
-curve(fixef(test.mod.3)[1]+fixef(test.mod.3)[2]*x+fixef(test.mod.3)[3]*x^2+fixef(test.mod.3)[4]*x^3,add=T,col="green")
-
-test.mod.4<-lmer(log10(plant.inf.intens.next)~poly(log10(plant.inf.intens),4,raw = T)+(1|tag),data=delta.plants,REML = F)
-curve(fixef(test.mod.4)[1]+fixef(test.mod.4)[2]*x+fixef(test.mod.4)[3]*x^2+fixef(test.mod.4)[4]*x^3+fixef(test.mod.4)[5]*x^4,add=T,col="purple")
-
-AIC(test.mod.1,test.mod.2,test.mod.3,test.mod.4) ### quadratic and cubic give similar AICs, go with quadratic
+## test gam fit
+par(mfrow=c(1,1))
+plot(log10(delta.plants$plant.inf.intens),log10(delta.plants$plant.inf.intens.next),col="grey",xlab = "plant infection intensity",ylab="next obs. plant infection intensity")
+test.mod<-gam(log10(plant.inf.intens.next)~s(log10(plant.inf.intens))+s(site,bs="re"),data = delta.plants)
+points(log10(delta.plants$plant.inf.intens),predict(test.mod,exclude = 's(site)'),col="red")
 
 
 # analyze data
@@ -70,17 +59,17 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant.model.set.creation.R")
   
   ### create all sets of models
-  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("log10(plant.inf.intens.next) ~ poly(log10(plant.inf.intens),2,raw=T)",predictors[x],'(1|site)'),collapse=" + ")))
+  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("log10(plant.inf.intens.next) ~ s(log10(plant.inf.intens))",predictors[x],'s(site,bs="re")'),collapse=" + ")))
   names(model.set)<-seq(1,length(model.set),1)
   
   ## run to search for best  model
   all.fit.models<-c()
-  AIC.benchmark<- AIC(lmer(log10(plant.inf.intens.next)~poly(log10(plant.inf.intens),2,raw=T)+(1|site),data=delta.plants,REML = F)) #cutoff to limit memory usage
+  AIC.benchmark<- AIC(gam(log10(plant.inf.intens.next)~s(log10(plant.inf.intens))+s(site,bs="re"),data = delta.plants)) #cutoff to limit memory usage
   #AIC.benchmark<- 8025
   pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
   for (i in 1:length(model.set))
   {
-    suppressMessages(new.mod<-lmer(model.set[[i]],data=delta.plants,REML = F))
+    suppressMessages(new.mod<-gam(model.set[[i]],data=delta.plants,REML = F))
     AIC.new.mod<-AIC(new.mod)
     if(AIC.new.mod<=(AIC.benchmark)) {all.fit.models<-append(all.fit.models,list(new.mod))}
     pb$tick()
@@ -102,20 +91,12 @@ plants.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dyn
 par(mfrow=c(1,1))
 plot(log10(delta.plants$plant.inf.intens),log10(delta.plants$plant.inf.intens.next))
 
-quant.dew.point.days<-quantile(delta.plants$dew.point.days,.5)
-quant.temp.7.30.dew.point.days <-quantile(delta.plants$temp.7.30.dew.point.days ,.5)
-quant.temp.wetness.days<-quantile(delta.plants$temp.wetness.days,.5)
-quant.tot.rain<-quantile(delta.plants$tot.rain,.5)
-quant.pred.pustule.num.increase<-quantile(delta.plants$pred.pustule.num.increase,.5)
+new.data.plant.inf.intens<-10^seq(-1,5,.01)
+new.data.dew.point.days<-rep(quantile(delta.plants$dew.point.days,.5),times=length(new.data.log10.plant.inf.intens))
+new.data.temp.7.30.dew.point.days<-rep(quantile(delta.plants$temp.7.30.dew.point.days,.5),times=length(new.data.log10.plant.inf.intens))
+new.data.pred.pustule.diam.growth<-rep(quantile(delta.plants$pred.pustule.diam.growth,.5),times=length(new.data.log10.plant.inf.intens))
+new.data.site<-rep("BT",times=length(new.data.log10.plant.inf.intens))
 
-curve.col<-"blue"
-curve(fixef(plants.model)["(Intercept)"]+
-        fixef(plants.model)["poly(log10(plant.inf.intens), 2, raw = T)1"]*x+
-        fixef(plants.model)["poly(log10(plant.inf.intens), 2, raw = T)2"]*x^2+
-        fixef(plants.model)["dew.point.days"]*quant.dew.point.days+
-        fixef(plants.model)["temp.7.30.dew.point.days"]*quant.temp.7.30.dew.point.days+
-        fixef(plants.model)["temp.wetness.days"]*quant.temp.wetness.days+
-        fixef(plants.model)["tot.rain"]*quant.tot.rain+
-        fixef(plants.model)["pred.pustule.num.increase"]*quant.pred.pustule.num.increase
-      ,add=T,col=curve.col)
+new.data<-data.frame("plant.inf.intens"=new.data.plant.inf.intens,"dew.point.days"=new.data.dew.point.days,"temp.7.30.dew.point.days"=new.data.temp.7.30.dew.point.days,"pred.pustule.diam.growth"=new.data.pred.pustule.diam.growth,"site"=new.data.site)
+points(log10(new.data.plant.inf.intens),predict(plants.model,newdata = new.data,exclude = 's(site)'),type="l",col="red")
 
