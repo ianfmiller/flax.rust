@@ -70,12 +70,12 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant.model.set.creation.R")
   
   ### create all sets of models
-  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("log10(plant.inf.intens.next) ~ poly(log10(plant.inf.intens),2,raw=T)",predictors[x],'(1|tag)'),collapse=" + ")))
+  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("log10(plant.inf.intens.next) ~ poly(log10(plant.inf.intens),2,raw=T)",predictors[x],'(1|site)'),collapse=" + ")))
   names(model.set)<-seq(1,length(model.set),1)
   
   ## run to search for best  model
   all.fit.models<-c()
-  AIC.benchmark<- AIC(lmer(log10(plant.inf.intens.next)~poly(log10(plant.inf.intens),2,raw=T)+(1|tag),data=delta.plants,REML = F)) #cutoff to limit memory usage
+  AIC.benchmark<- AIC(lmer(log10(plant.inf.intens.next)~poly(log10(plant.inf.intens),2,raw=T)+(1|site),data=delta.plants,REML = F)) #cutoff to limit memory usage
   #AIC.benchmark<- 8025
   pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
   for (i in 1:length(model.set))
