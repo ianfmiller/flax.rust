@@ -47,16 +47,16 @@ predict.plant.inf.intens<-function(plant.inf.intens.last,site,date0,date1)
   
   delta.days<-as.numeric(date1-date0)
   
-  #predict change in number of pustules from enviro conditions
-  #n.pustule.model.vars<-names(fixef(n.pustule.model))[2:length(names(fixef(n.pustule.model)))]
-  n.pustules.model.new.n.pustules<-0 #included only for offset, picked 0 for ease of interpretability
+  #predict pustule growth from pustule growth model and enviro conditions
+  #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
+  pustule.model.new.area<-.01 #predict change for small pustule, arbitrarily pick .01
   obs.time<-delta.days
-  n.pustules.model.pred.data<-data.frame("n.pustules"=n.pustules.model.new.n.pustules,"temp.days.16.22"=new.temp.days.16.22/delta.days,"temp.16.22.wetness.days"=new.temp.16.22.wetness.days/delta.days)
-  pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,re.form=~0)
+  pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,"temp.days.16.22"=new.temp.days.16.22/delta.days,"dew.point.days"=new.dew.point.days/delta.days,"temp.16.22.dew.point.days"=new.temp.16.22.dew.point.days/delta.days,"temp.wetness.days"=new.temp.wetness.days/delta.days,"tot.rain"=new.tot.rain/delta.days)
+  pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,re.form=~0)
   
   # make forward prediction
-  pred.data<-data.frame("plant.inf.intens"=plant.inf.intens.last,"dew.point.days"=new.dew.point.days,"temp.7.30.dew.point.days"=new.temp.7.30.dew.point.days,"temp.wetness.days"=new.temp.wetness.days,"tot.rain"=new.tot.rain,"pred.pustule.num.increase"=pred.pustule.num.increase)
-  change<-predict(plant.model,newdata=pred.data,re.form=NA)
+  pred.data<-data.frame("plant.inf.intens"=plant.inf.intens.last,"dew.point.days"=new.dew.point.days,"temp.7.30.dew.point.days"=new.temp.7.30.dew.point.days,"pred.pustule.diam.growth"=pred.pustule.diam.growth,"site"=site)
+  change<-10^predict(plant.model,newdata=pred.data,exclude = 's(site)')
   plant.inf.intens.next<-plant.inf.intens.last+change
   if(plant.inf.intens.next<.01) {plant.inf.intens.next<-.01}
   plant.inf.intens.next
@@ -102,19 +102,19 @@ predict.plant.inf.intens.last<-function(plant.inf.intens.next,site,date0,date1)
   
   delta.days<-as.numeric(date1-date0)
   
-  #predict change in number of pustules from enviro conditions
-  #n.pustule.model.vars<-names(fixef(n.pustule.model))[2:length(names(fixef(n.pustule.model)))]
-  n.pustules.model.new.n.pustules<-0 #included only for offset, picked 0 for ease of interpretability
+  #predict pustule growth from pustule growth model and enviro conditions
+  #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
+  pustule.model.new.area<-.01 #predict change for small pustule, arbitrarily pick .01
   obs.time<-delta.days
-  n.pustules.model.pred.data<-data.frame("n.pustules"=n.pustules.model.new.n.pustules,"temp.days.16.22"=new.temp.days.16.22/delta.days,"temp.16.22.wetness.days"=new.temp.16.22.wetness.days/delta.days)
-  pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,re.form=~0)
+  pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,"temp.days.16.22"=new.temp.days.16.22/delta.days,"dew.point.days"=new.dew.point.days/delta.days,"temp.16.22.dew.point.days"=new.temp.16.22.dew.point.days/delta.days,"temp.wetness.days"=new.temp.wetness.days/delta.days,"tot.rain"=new.tot.rain/delta.days)
+  pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,re.form=~0)
   
   # make backwards prediction
   pred.func<-function(x)
   {
     plant.inf.intens.last.test<-x
-    pred.data<-data.frame("plant.inf.intens"=plant.inf.intens.last.test,"dew.point.days"=new.dew.point.days,"temp.7.30.dew.point.days"=new.temp.7.30.dew.point.days,"temp.wetness.days"=new.temp.wetness.days,"tot.rain"=new.tot.rain,"pred.pustule.num.increase"=pred.pustule.num.increase)
-    change<-predict(plant.model,newdata=pred.data,re.form=NA)
+    pred.data<-data.frame("plant.inf.intens"=plant.inf.intens.last.test,"dew.point.days"=new.dew.point.days,"temp.7.30.dew.point.days"=new.temp.7.30.dew.point.days,"pred.pustule.diam.growth"=pred.pustule.diam.growth,"site"=site)
+    change<-10^predict(plant.model,newdata=pred.data,exclude = 's(site)')
     plant.inf.intens.next.pred<-plant.inf.intens.last.test+change
     abs(plant.inf.intens.next.pred-plant.inf.intens.next)
   }
