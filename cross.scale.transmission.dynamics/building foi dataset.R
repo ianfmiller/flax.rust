@@ -177,7 +177,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       #plant.model.vars<-names(fixef(plant.model))[2:length(names(fixef(plant.model)))]
       plant.model.new.plant.inf.intens<-.1
       obs.time<-delta.days
-      plant.model.pred.data<-data.frame("plant.inf.intens"=plant.model.new.plant.inf.intens,"dew.point.days"=new.dew.point.days,"temp.7.30.dew.point.days"=new.temp.7.30.dew.point.days,"pred.pustule.diam.growth"=pred.pustule.diam.growth,"site"=site)
+      plant.model.pred.data<-data.frame("plant.inf.intens"=plant.model.new.plant.inf.intens,"dew.point.days"=new.dew.point.days/delta.days,"temp.7.30.dew.point.days"=new.temp.7.30.dew.point.days/delta.days,"pred.pustule.diam.growth"=pred.pustule.diam.growth,"site"=site)
       pred.plant.inf.intens.increase<-10^predict(plant.model,newdata=plant.model.pred.data,exclude = 's(site)')
       
       sub.2.epi.data<-sub.1.epi.data[which(sub.1.epi.data$Date.First.Observed.Diseased<=date0),] ### epi data up until date0
