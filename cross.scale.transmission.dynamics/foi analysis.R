@@ -48,30 +48,13 @@ axis(2,at=c(0,1),labels = c("healthy","infected"))
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS"))
 {
-  ### construct all combinations of predictors
-  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/foi.model.set.creation.R")
-  
-  ### create all sets of models
-  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("status.next ~ foi",predictors[x],"(1|site)"),collapse=" + ")))
-  names(model.set)<-seq(1,length(model.set),1)
-  
-  ## run to search for best  model
-  all.fit.models<-c()
-  AIC.benchmark<- AIC(glmer(status.next~foi+(1|site),data=foi.data,family = "binomial")) #cutoff to limit memory usage
-  pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
-  for (i in 1:length(model.set))
-  {
-    suppressMessages(new.mod<-glmer(model.set[[i]],data=foi.data))
-    AIC.new.mod<-AIC(new.mod)
-    if(AIC.new.mod<=(AIC.benchmark)) {all.fit.models<-append(all.fit.models,list(new.mod))}
-    pb$tick()
-  }
-  
-  ## compare between models
-  AICs<-unlist(lapply(all.fit.models,AIC))
-  delta.AICs<-AICs-min(AICs)
-  index<-1
-  best.model<-all.fit.models[[order(AICs)[index]]]
+  ### create all sets of models--Only use foi and first obs height due to low sample size for environmental vars within several sites
+  mod00<-glm(status.next~foi,data=foi.data,family = "binomial")
+  mod0<-glm(status.next~foi,data=foi.data[which(!is.na(foi.data$first.obs.height)),],family = "binomial") #included as check to make sure coefficient of foi is relatively insensitive to data subsetting
+  mod1<-glm(status.next~foi+first.obs.height,data=foi.data,family = "binomial") #subset data to make same n observations between mod0,mod1,mod2
+  mod2<-glm(status.next~foi*first.obs.height,data=foi.data,family = "binomial")
+  AIC(mod0,mod1,mod2)
+  best.model<-mod1 #mod1 has lowest AIC, interaction insignificant in mod2
   saveRDS(best.model,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
 }
 
