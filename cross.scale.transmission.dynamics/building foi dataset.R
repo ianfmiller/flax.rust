@@ -44,12 +44,12 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         if(source.data[i,"Tag"]==15) {q<-0; half.height=10} #### set q = 0 for tag 15, half.height doesn't matter
         else{
           #### set q to 0.1 if the plant is a seedling
-          if((!source.data[i,"Tag"] %in% plant.inf.intens$Tag & source.data[i,"max.height"]<=5) | source.data[i,"notes"]=="seedling") {q<-.1; half.height<-source.data[i,"max.height"]}
+          if((!source.data[i,"Tag"] %in% plant.inf.intens$Tag & source.data[i,"max.height"]<=5) | source.data[i,"notes"]=="seedling") {q<-.1; if(is.na(source.data[i,"max.height"])) {half.height<-2.5} else {half.height<-source.data[i,"max.height"]*.5}}
           #### extract q from data
           else {
             plant.inf.intens.index<-intersect(which(plant.inf.intens$Date==date0),which(plant.inf.intens$Tag==source.data[i,"Tag"]))
             ##### if there's an actual measurment use that
-            if(length(plant.inf.intens.index)==1) {q<-plant.inf.intens[plant.inf.intens.index,"plant.inf.intens"]; half.height<-plant.inf.intens[plant.inf.intens.index,"max.height"]}
+            if(length(plant.inf.intens.index)==1) {q<-plant.inf.intens[plant.inf.intens.index,"plant.inf.intens"]; half.height<-plant.inf.intens[plant.inf.intens.index,"max.height"]*.5}
             ##### if not, forecast or hindcast from closest observation
             if(length(plant.inf.intens.index)==0)
             {
@@ -63,12 +63,12 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
               if(closest.date>date0) ###### hindcast
               {
                 q<-predict.plant.inf.intens.last(plant.inf.intens.next=plant.inf.intens[plant.inf.intens.index,"plant.inf.intens"],site=site,date0=as.POSIXct(paste0(date0," 12:00:00")),date1=as.POSIXct(paste0(closest.date," 12:00:00")))
-                half.height<-plant.inf.intens[plant.inf.intens.index,"max.height"]
+                half.height<-plant.inf.intens[plant.inf.intens.index,"max.height"]*.5
               }
               if(closest.date<date0) ###### forecast
               {
                 q<-predict.plant.inf.intens(plant.inf.intens.last=plant.inf.intens[plant.inf.intens.index,"plant.inf.intens"],site=site,date0=as.POSIXct(paste0(closest.date," 12:00:00")),date1=as.POSIXct(paste0(date0," 12:00:00")))
-                half.height<-plant.inf.intens[plant.inf.intens.index,"max.height"]
+                half.height<-plant.inf.intens[plant.inf.intens.index,"max.height"]*.5
               }
             }
           } 
@@ -81,7 +81,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         if(source.data[i,"max.height"]<=5 | source.data[i,"notes"]=="seedling")
         {
           q<-.1
-          half.height<-source.data[i,"max.height"]
+          if(is.na(source.data[i,"max.height"])) {half.height<-2.5} else {half.height<-source.data[i,"max.height"]*.5}
         } else {print('error--missing plant inf intens data'); print(i)}
       }
       
