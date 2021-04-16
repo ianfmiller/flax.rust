@@ -129,6 +129,25 @@ corrected.epi<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dy
 
 # vis loc agreement between corrected epi and loc data
 if(vis){
+  sites<-c("CC","BT","GM","HM")
+  
+  par(mfrow=c(2,2))
+  for(site0 in sites)
+  {
+    xx<-corrected.locs[which(corrected.locs$Site==site0),]
+    yy<-corrected.epi[which(corrected.epi$Site==site0),]
+    plot(xx$X+xx$x,xx$Y+xx$y,xlim=c(0,10),ylim=c(0,20),xlab="X",ylab="Y",main=site0,pch=16,col="black",cex=.9,cex.main=2)
+    #points(yy$X+yy$x,yy$Y+yy$y,col="red",cex=1)
+    # shade out unsurveyed region of CC
+    if(site0=="CC")
+    {
+      rect(0,9,15,15,col="black",density = 25,border=NA)
+      rect(0,15,7,16,col="black",density = 25,border=NA)
+      rect(0,16,10,17,col="black",density = 25,border=NA)
+      rect(0,17,7,18,col="black",density = 25,border=NA) 
+    }
+  }
+  
   layout(matrix(c(1,2,5,3,4,5),2,3,byrow = T))
   for(site0 in sites)
   {
