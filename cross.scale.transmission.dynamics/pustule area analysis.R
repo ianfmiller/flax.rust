@@ -86,11 +86,6 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 
 pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
 
-## visualize model
-
-par(mfrow=c(1,1))
-plot(delta.pustules$area,predict(pustule.model),xlab="data",ylab="model")
-
 # predict climate change effect
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
 par(mfrow=c(1,2),mar=c(6,6,6,6))
