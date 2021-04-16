@@ -74,9 +74,9 @@ for (tag in tags)
 
 ## plot change
 par(mfrow=c(1,1))
-plot(delta.n.pustules$n.pustules,delta.n.pustules$n.pustules.next,col="grey",xlab = "N pustules",ylab="next obs. N pustules")
-abline(0,1)
-
+plot(delta.n.pustules$n.pustules,delta.n.pustules$n.pustules.next,col="black",xlab = "N pustules",ylab="next obs. N pustules",cex.lab=2,cex.axis=2)
+abline(0,1,lty=2)
+mtext(text="N = 650",cex=2)
 
 # analyze data
 
@@ -115,13 +115,47 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 
 n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS")
 
-## visualize model
+# predict climate change effect
+source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
+par(mfrow=c(1,2),mar=c(6,6,6,6))
+plot(0,0,xlim=c(0,26),ylim=c(-2,3),type="n",xlab="N pustules",ylab="pred. change in N pustules",cex.axis=2,cex.lab=2)
+day.indicies<-c(75,113,135)
+colors<-c("orange","red","purple")
+for(day in day.indicies)
+{
+  index<-which(day.indicies==day)
+  lower<-data.frame(x=numeric(),y=numeric())
+  upper<-data.frame(x=numeric(),y=numeric())
+  for(i in seq(1,26,5))
+  {
+    pred.data<-get.pred.data.temp.mean.quantile.n.pustules.model(day,i)
+    y<-bootMer(n.pustules.model, FUN=function(x)predict(x,newdata=pred.data, re.form=NA),nsim=100)$t
+    lower=rbind(lower,data.frame(x=i,y=quantile(y,.05)-i))
+    upper=rbind(upper,data.frame(x=i,y=quantile(y,.95)-i))
+    points(i,mean(y)-i,col=colors[index],pch=16,cex=2)
+  }
+  polygon<-rbind(lower,upper[dim(upper)[1]:1,])
+  polygon(polygon$x,polygon$y,col=colors[index],density=25)
+}
+legend("topright",legend = c("50% quantile hottest days","75% quantile hottest days","90% quantile hottest days"),col = c("orange","red","purple"),pch=16,cex=2,bty="n")
 
-par(mfrow=c(1,1))
-plot(delta.n.pustules$n.pustules,delta.n.pustules$n.pustules.next,xlab="n pustules",ylab="next obs. n pustules")
-
-quant.temp.days.16.22<-quantile(delta.n.pustules$temp.days.16.22,.5)
-quant.temp.16.22.wetness.days<-quantile(delta.n.pustules$temp.16.22.wetness.days,.5)
-
-curve(fixef(n.pustules.model)["(Intercept)"]+fixef(n.pustules.model)["n.pustules"]*x+fixef(n.pustules.model)["temp.days.16.22"]*quant.temp.days.16.22+fixef(n.pustules.model)["temp.16.22.wetness.days"]*quant.temp.16.22.wetness.days,add=T,col="blue")
-
+plot(0,0,xlim=c(0,26),ylim=c(-2,3),type="n",xlab="N pustules",ylab="pred. change in N pustules",cex.axis=2,cex.lab=2)
+temp.additions<-c(0,1.8,3.7)
+colors<-c("orange","red","purple")
+for(temp.addition in temp.additions)
+{
+  index<-which(temp.additions==temp.addition)
+  lower<-data.frame(x=numeric(),y=numeric())
+  upper<-data.frame(x=numeric(),y=numeric())
+  for(i in seq(1,26,5))
+  {
+    pred.data<-get.pred.data.temp.mean.quantile.n.pustules.model(75,i,temp.addition = temp.addition)
+    y<-bootMer(n.pustules.model, FUN=function(x)predict(x,newdata=pred.data, re.form=NA),nsim=100)$t
+    lower=rbind(lower,data.frame(x=i,y=quantile(y,.05)-i))
+    upper=rbind(upper,data.frame(x=i,y=quantile(y,.95)-i))
+    points(i,mean(y)-i,col=colors[index],pch=16,cex=2)
+  }
+  polygon<-rbind(lower,upper[dim(upper)[1]:1,])
+  polygon(polygon$x,polygon$y,col=colors[index],density=25)
+}
+legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),pch=16,cex=2,bty="n")
