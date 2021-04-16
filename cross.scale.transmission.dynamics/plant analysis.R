@@ -17,14 +17,14 @@ hist(delta.plants$plant.inf.intens.next-delta.plants$plant.inf.intens,main="chan
 
 ## plot trajectories
 par(mfrow=c(1,1))
-plot(c(min(as.Date(plants$Date,tryFormats = "%m/%d/%Y")),max(as.Date(plants$Date,tryFormats = "%m/%d/%Y"))),c(0,max(plants$plant.inf.intens)),type="n",xlab="date",ylab="plant infection intensity",main="plant infection intensity")
+plot(c(min(as.Date(plants$Date,tryFormats = "%m/%d/%Y")),max(as.Date(plants$Date,tryFormats = "%m/%d/%Y"))),c(-1,max(log10(plants$plant.inf.intens))),type="n",xlab="date",ylab="plant infection intensity",main="plant infection intensity",cex.lab=2,cex.axis=2,cex.main=2)
 i<-0
-plot.cols<-sample(rainbow(95))
+plot.cols<-sample(rainbow(101))
 
 for (tag in unique(plants$Tag))
 {
   sub.plants.1<-plants[which(plants$Tag==tag),]
-  points(sub.plants.1$Date,sub.plants.1$plant.inf.intens,col=plot.cols[i],type="l",lwd=.5)
+  points(sub.plants.1$Date,log10(sub.plants.1$plant.inf.intens),col=plot.cols[i],type="l",lwd=2)
   i<-i+1
 }
 
@@ -39,8 +39,8 @@ abline(h=0)
 ## plot log10 change
 ### relationship doesn't appear obviously linear near 0--take polynomial fitting approach
 par(mfrow=c(1,1))
-plot(log10(delta.plants$plant.inf.intens),log10(delta.plants$plant.inf.intens.next),col="grey",xlab = "plant infection intensity",ylab="next obs. plant infection intensity")
-abline(0,1)
+plot(log10(delta.plants$plant.inf.intens),log10(delta.plants$plant.inf.intens.next),col="black",xlab = "plant infection intensity",ylab="next obs. plant infection intensity",cex.lab=2,cex.axis=2,cex.main=2,main="N = 327")
+abline(0,1,lty=2)
 
 ## test gam fit
 par(mfrow=c(1,1))
@@ -87,16 +87,58 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 
 plants.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS")
 
-## visualize model
-par(mfrow=c(1,1))
-plot(log10(delta.plants$plant.inf.intens),log10(delta.plants$plant.inf.intens.next))
+# predict climate change effect
+source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
+library("MASS")
+par(mfrow=c(1,2),mar=c(6,6,6,6))
+plot(0,0,xlim=c(-1,5),ylim=c(-1,5),type="n",xlab="plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
+day.indicies<-c(75,113,135)
+colors<-c("orange","red","purple")
+for(day in day.indicies)
+{
+  index<-which(day.indicies==day)
+  lower<-data.frame(x=numeric(),y=numeric())
+  upper<-data.frame(x=numeric(),y=numeric())
+  for(i in 10^seq(-1,5,.5))
+  {
+    pred.data<-get.pred.data.temp.mean.quantile.plants.model(day,i)
+    Xp <- predict(plants.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
+    beta <- coef(plants.model) ## posterior mean of coefs
+    Vb   <- vcov(plants.model) ## posterior  cov of coefs
+    n <- 10000
+    mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
+    preds <- rep(NA, n)
+    ilink <- family(plants.model)$linkinv
+    for (j in seq_len(n)) { 
+      preds[j]   <- ilink(Xp %*% mrand[j, ])
+    }
+    y<-preds
+    lower=rbind(lower,data.frame(x=log10(i),y=quantile(y,.05)-log10(i)))
+    upper=rbind(upper,data.frame(x=log10(i),y=quantile(y,.95)-log10(i)))
+    points(log10(i),mean(y)-log10(i),col=colors[index],pch=16,cex=2)
+  }
+  polygon<-rbind(lower,upper[dim(upper)[1]:1,])
+  polygon(polygon$x,polygon$y,col=colors[index],density=25)
+}
+legend("topright",legend = c("50% quantile hottest days","75% quantile hottest days","90% quantile hottest days"),col = c("orange","red","purple"),pch=16,cex=2,bty="n")
 
-new.data.plant.inf.intens<-10^seq(-1,5,.01)
-new.data.dew.point.days<-rep(quantile(delta.plants$dew.point.days,.5),times=length(new.data.log10.plant.inf.intens))
-new.data.temp.7.30.dew.point.days<-rep(quantile(delta.plants$temp.7.30.dew.point.days,.5),times=length(new.data.log10.plant.inf.intens))
-new.data.pred.pustule.diam.growth<-rep(quantile(delta.plants$pred.pustule.diam.growth,.5),times=length(new.data.log10.plant.inf.intens))
-new.data.site<-rep("BT",times=length(new.data.log10.plant.inf.intens))
-
-new.data<-data.frame("plant.inf.intens"=new.data.plant.inf.intens,"dew.point.days"=new.data.dew.point.days,"temp.7.30.dew.point.days"=new.data.temp.7.30.dew.point.days,"pred.pustule.diam.growth"=new.data.pred.pustule.diam.growth,"site"=new.data.site)
-points(log10(new.data.plant.inf.intens),predict(plants.model,newdata = new.data,exclude = 's(site)'),type="l",col="red")
-
+plot(0,0,xlim=c(0,26),ylim=c(-2,3),type="n",xlab="N pustules",ylab="pred. change in N pustules",cex.axis=2,cex.lab=2)
+temp.additions<-c(0,1.8,3.7)
+colors<-c("orange","red","purple")
+for(temp.addition in temp.additions)
+{
+  index<-which(temp.additions==temp.addition)
+  lower<-data.frame(x=numeric(),y=numeric())
+  upper<-data.frame(x=numeric(),y=numeric())
+  for(i in seq(1,26,5))
+  {
+    pred.data<-get.pred.data.temp.mean.quantile.n.pustules.model(75,i,temp.addition = temp.addition)
+    y<-bootMer(n.pustules.model, FUN=function(x)predict(x,newdata=pred.data, re.form=NA),nsim=100)$t
+    lower=rbind(lower,data.frame(x=i,y=quantile(y,.05)-i))
+    upper=rbind(upper,data.frame(x=i,y=quantile(y,.95)-i))
+    points(i,mean(y)-i,col=colors[index],pch=16,cex=2)
+  }
+  polygon<-rbind(lower,upper[dim(upper)[1]:1,])
+  polygon(polygon$x,polygon$y,col=colors[index],density=25)
+}
+legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),pch=16,cex=2,bty="n")
