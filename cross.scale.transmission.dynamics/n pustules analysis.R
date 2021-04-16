@@ -44,6 +44,34 @@ for (tag in unique(n.pustules$tag))
   }
 }
 
+## one trajectory
+par(mfrow=c(1,1),mar=c(6,6,6,6))
+tags<-c(86,88,106,112,124)
+i<-0
+plot.cols<-sample(rainbow(36))
+plot(c(min(n.pustules[which(n.pustules$tag %in% tags),]$date),max(n.pustules[which(n.pustules$tag %in% tags),]$date)),c(0,max(n.pustules[which(n.pustules$tag %in% tags),]$N.pustules)),type="n",xlab="date",ylab="N pustules",cex.lab=2,cex.axis=2)
+sub.n.pustules1<-n.pustules[which(n.pustules$tag==tag),]
+for (tag in tags)
+{
+  sub.n.pustules1<-n.pustules[which(n.pustules$tag==tag),]
+  
+  for (color in unique(sub.n.pustules1$color))
+  {
+    sub.n.pustules2<-sub.n.pustules1[which(sub.n.pustules1$color==color),]
+    
+    for(leaf.iteration in unique(sub.n.pustules2$leaf.iteration)) 
+    {
+      sub.n.pustules3<-sub.n.pustules2[which(sub.n.pustules2$leaf.iteration==leaf.iteration),]
+      
+      i<-i+1
+      points(sub.n.pustules3$date,sub.n.pustules3$N.pustules,col=plot.cols[i],type="l",lwd=5)
+      
+    }
+  }
+}
+#plot(c(min(n.pustules$date),max(n.pustules$date)),c(0,50),type="n",xlab="date",ylab="pustule area")
+
+
 ## plot change
 par(mfrow=c(1,1))
 plot(delta.n.pustules$n.pustules,delta.n.pustules$n.pustules.next,col="grey",xlab = "N pustules",ylab="next obs. N pustules")
