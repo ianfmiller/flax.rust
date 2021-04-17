@@ -91,7 +91,7 @@ plants.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dyn
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
 library("MASS")
 par(mfrow=c(1,2),mar=c(6,6,6,6))
-plot(0,0,xlim=c(-1,5),ylim=c(-1,5),type="n",xlab="plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
+plot(0,0,xlim=c(-1,5),ylim=c(-1,2),type="n",xlab="plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
 day.indicies<-c(75,113,135)
 colors<-c("orange","red","purple")
 for(day in day.indicies)
@@ -122,7 +122,7 @@ for(day in day.indicies)
 }
 legend("topright",legend = c("50% quantile hottest days","75% quantile hottest days","90% quantile hottest days"),col = c("orange","red","purple"),pch=16,cex=2,bty="n")
 
-plot(0,0,xlim=c(0,26),ylim=c(-2,3),type="n",xlab="N pustules",ylab="pred. change in N pustules",cex.axis=2,cex.lab=2)
+plot(0,0,xlim=c(-1,5),ylim=c(-1,2),type="n",xlab="plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
 temp.additions<-c(0,1.8,3.7)
 colors<-c("orange","red","purple")
 for(temp.addition in temp.additions)
@@ -130,15 +130,107 @@ for(temp.addition in temp.additions)
   index<-which(temp.additions==temp.addition)
   lower<-data.frame(x=numeric(),y=numeric())
   upper<-data.frame(x=numeric(),y=numeric())
-  for(i in seq(1,26,5))
+  for(i in 10^seq(-1,5,.5))
   {
-    pred.data<-get.pred.data.temp.mean.quantile.n.pustules.model(75,i,temp.addition = temp.addition)
-    y<-bootMer(n.pustules.model, FUN=function(x)predict(x,newdata=pred.data, re.form=NA),nsim=100)$t
-    lower=rbind(lower,data.frame(x=i,y=quantile(y,.05)-i))
-    upper=rbind(upper,data.frame(x=i,y=quantile(y,.95)-i))
-    points(i,mean(y)-i,col=colors[index],pch=16,cex=2)
+    pred.data<-get.pred.data.temp.mean.quantile.plants.model(75,i,temp.addition = temp.addition)
+    Xp <- predict(plants.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
+    beta <- coef(plants.model) ## posterior mean of coefs
+    Vb   <- vcov(plants.model) ## posterior  cov of coefs
+    n <- 10000
+    mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
+    preds <- rep(NA, n)
+    ilink <- family(plants.model)$linkinv
+    for (j in seq_len(n)) { 
+      preds[j]   <- ilink(Xp %*% mrand[j, ])
+    }
+    y<-preds
+    lower=rbind(lower,data.frame(x=log10(i),y=quantile(y,.05)-log10(i)))
+    upper=rbind(upper,data.frame(x=log10(i),y=quantile(y,.95)-log10(i)))
+    points(log10(i),mean(y)-log10(i),col=colors[index],pch=16,cex=2)
   }
   polygon<-rbind(lower,upper[dim(upper)[1]:1,])
   polygon(polygon$x,polygon$y,col=colors[index],density=25)
 }
 legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),pch=16,cex=2,bty="n")
+
+
+
+predict.plant.inf.trajectory<-function(maxreps,day,temp.addition,color,plot=T,output=F)
+{  
+  reps<-1
+  i<-rep(10^-1,times=100)
+  xcords<-rep(1,length(i))
+  ycords<-i
+  while(reps<maxreps)
+  {
+    pred.data<-get.pred.data.temp.mean.quantile.plants.model(day,i,temp.addition = temp.addition)
+    Xp <- predict(plants.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
+    beta <- coef(plants.model) ## posterior mean of coefs
+    Vb   <- vcov(plants.model) ## posterior  cov of coefs
+    n <- length(i)
+    mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
+    preds <- rep(NA,n)
+    ilink <- family(plants.model)$linkinv
+    for (j in seq_len(n)) { 
+      preds[j]   <- ilink(Xp %*% mrand[j, ])[1]
+    }
+    y<-preds
+    i<-10^y
+    reps<-reps+1
+    xcords<-cbind(xcords,rep(reps,length(i)))
+    ycords<-cbind(ycords,i)
+  }
+  if(plot)
+  {
+    for(k in 1:dim(xcords)[1])
+    {
+      points(xcords[k,],ycords[k,],type="l",col=color) 
+    } 
+  }
+  if(output)
+  {
+    ycords
+  }
+}
+
+t_col <- function(color, percent = 50, name = NULL) {
+  rgb.val <- col2rgb(color)
+  t.col <- rgb(rgb.val[1], rgb.val[2], rgb.val[3],
+               max = 255,
+               alpha = (100 - percent) * 255 / 100,
+               names = name)
+  invisible(t.col)
+}
+
+plot.purple<-t_col("purple",90)
+plot.red<-t_col("red",90)
+plot.orange<-t_col("orange",90)
+
+par(mfrow=c(1,2),mar=c(6,6,6,6))
+plot(0,0,type="n",xlim=c(1,6),ylim=c(0,10),ylab=expression(log[10]*' plant infection intensity'),xlab="week",cex.lab=1.5,cex.axis=1.5)
+
+dat<-predict.plant.inf.trajectory(6,75,0,plot.orange,T,T) 
+points(1:6,colMeans(dat),type="l",col="orange",lwd=3,lty=2)
+
+dat<-predict.plant.inf.trajectory(6,113,0,plot.red,T,T) 
+points(1:6,colMeans(dat),type="l",col="red",lwd=3,lty=2)
+
+dat<-predict.plant.inf.trajectory(6,135,0,plot.purple,T,T) 
+points(1:6,colMeans(dat),type="l",col="purple",lwd=3,lty=2)
+
+legend("topright",legend = c("50% quantile hottest days","75% quantile hottest days","90% quantile hottest days"),col = c("orange","red","purple"),pch=16,cex=1.5)
+
+
+plot(0,0,type="n",xlim=c(1,6),ylim=c(0,5),ylab=expression(log[10]*' plant infection intensity'),xlab="week",cex.lab=1.5,cex.axis=1.5)
+dat<-predict.plant.inf.trajectory(6,75,0,plot.orange,T,T) 
+points(1:6,colMeans(dat),type="l",col="orange",lwd=3,lty=2)
+
+dat<-predict.plant.inf.trajectory(6,75,1.8,plot.red,T,T) 
+points(1:6,colMeans(dat),type="l",col="red",lwd=3,lty=2)
+
+dat<-predict.plant.inf.trajectory(6,75,3.7,plot.purple,T,T) 
+points(1:6,colMeans(dat),type="l",col="purple",lwd=3,lty=2)
+
+legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
+
+
