@@ -45,6 +45,15 @@ axis(2,at=c(0,1),labels = c("healthy","infected"))
 plot(jitter(log10(foi.data[which(foi.data$site=="HM"),"foi"]+1e-10)),jitter(foi.data[which(foi.data$site=="HM"),"status.next"]),xlab="log10 foi",ylab="outcome",axes=F,col="purple",xlim=c(min(log10(foi.data$foi+1e-10)),max(log10(foi.data$foi+1e-10))),main="HM")
 axis(2,at=c(0,1),labels = c("healthy","infected"))
 
+par(mfrow=c(2,1),mar=c(6,6,6,6))
+plot(jitter(foi.data$foi),jitter(foi.data$status.next),xlab="predicted spore deposition",ylab="",axes=F,cex.lab=1.5)
+axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=1.5)
+axis(1,cex.axis=1.5)
+
+plot(jitter(log10(foi.data$foi)),jitter(foi.data$status.next),xlab=expression('predicted '*log[10]*'spore deposition'),ylab="",axes=F,cex.lab=1.5)
+axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=1.5)
+axis(1,cex.axis=1.5)
+
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS"))
 {
@@ -58,3 +67,24 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   saveRDS(best.model,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
 }
 
+par(mfrow=c(1,1),mar=c(6,8,6,6))
+plot(jitter(foi.data$foi),jitter(foi.data$status.next),xlab="predicted spore deposition",ylab="",axes=F,cex.lab=1.5)
+axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=1.5,line=3,tick = F)
+axis(2,cex.axis=1.5,col="red",col.axis="red")
+mtext("odds of infection",side=2,line=2.5,cex=1.5,col="red")
+axis(1,cex.axis=1.5)
+
+dummy.fois<-seq(0,.14,.0001)
+new.data1<-data.frame("foi"=dummy.fois,"first.obs.height"=rep(5,length(dummy.fois)))
+points(new.data1$foi,predict(best.model,newdata = new.data1,type = "response"),type="l",col="red",lwd=4,lty=1)
+
+new.data1<-data.frame("foi"=dummy.fois,"first.obs.height"=rep(10,length(dummy.fois)))
+points(new.data1$foi,predict(best.model,newdata = new.data1,type = "response"),type="l",col="red",lwd=4,lty=2)
+
+new.data1<-data.frame("foi"=dummy.fois,"first.obs.height"=rep(25,length(dummy.fois)))
+points(new.data1$foi,predict(best.model,newdata = new.data1,type = "response"),type="l",col="red",lwd=4,lty=3)
+
+new.data1<-data.frame("foi"=dummy.fois,"first.obs.height"=rep(50,length(dummy.fois)))
+points(new.data1$foi,predict(best.model,newdata = new.data1,type = "response"),type="l",col="red",lwd=4,lty=4)
+
+legend("topright",legend=c("height = 5cm","height = 10cm","height = 25cm","height = 50cm"),col="red",lwd=4,lty=c(1,2,3,4),cex=2,bty="n")
