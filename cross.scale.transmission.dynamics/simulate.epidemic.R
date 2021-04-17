@@ -9,7 +9,7 @@ plant.inf.intens<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission
 # simulate
 
 ## setup
-site<-"BT"
+site<-"GM"
 
 ### subset data
 sub.locs<-corrected.locs[which(corrected.locs$Site==site),]
@@ -110,7 +110,8 @@ for(date.index in 1:(length(unique(sub.epi$Date.First.Observed.Diseased))-1))
     if(last.epi[i,"status"]==1)
     {
       new.status<-1
-      new.plant.inf.intens<-predict.plant.inf.intens(plant.inf.intens.last = last.epi[i,"plant.inf.intens"],site = site,date0 = date0,date1 = date1)
+      
+      new.plant.inf.intens<-predict.plant.inf.intens.boot(plant.inf.intens.last = last.epi[i,"plant.inf.intens"],site = site,date0 = date0,date1 = date1)
     }
     new.row<-data.frame("site"=site,"tag"=sub.locs[i,"tag"],"X"=sub.locs[i,"X"],"Y"=sub.locs[i,"Y"],"x"=sub.locs[i,"x"],"y"=sub.locs[i,"y"],"date"= as.Date(date1),"status"=new.status,"max.height"=last.epi[i,"max.height"],"plant.inf.intens"=new.plant.inf.intens) ### new data row
     pred.epi<-rbind(pred.epi,new.row) ### join data
@@ -125,3 +126,14 @@ for(i in 2:7)
   points(date,dim(sub.epi[which(sub.epi$Date.First.Observed.Diseased<=date),])[1]/dim(sub.locs)[1],col="black")
   points(date,sum(pred.epi[which(pred.epi$date==date),"status"])/dim(sub.locs)[1],col="red")
 }
+
+par(mfrow=c(3,3))
+
+for(date in unique(pred.epi$date))
+{
+  dat<-pred.epi[which(pred.epi$date==date),]
+  sub.dat<-dat[which(dat$status==1),]
+  plot(dat$X+dat$x,dat$Y+dat$y,xlab="X",ylab="y",main=as.Date(date,origin="1970-01-01"),pch=16,cex=.9)
+  points(sub.dat$X+sub.dat$x,sub.dat$Y+sub.dat$y,col="red",cex=2)
+}
+
