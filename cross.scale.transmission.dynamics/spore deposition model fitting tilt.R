@@ -28,12 +28,12 @@ opt<-list(par=c(5.803369e-07 , 1.596314e-01 , 1.100707e+00))
 
 ## visualize kernel
 test.mat<-data.frame(x=rep(seq(-1,1,.01),each=201),y=rep(seq(-1,1,.01),times=201))
-out<-mapply(tilted.plume, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=4224.733,H=.18,s=3,k=opt$par[1],alphaz=opt$par[2],Ws=opt$par[3]))
+out<-mapply(tilted.plume, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=4224.733,H=.18,s=2.5,k=opt$par[1],alphaz=opt$par[2],Ws=opt$par[3]))
 res.mat<-matrix(out,201,201,byrow = T)
 contour(x=seq(-1,1,.01),y=seq(-1,1,.01),z=res.mat)
 points(c(.05,.25,.5,1),c(0,0,0,0),col="red")
 points(0,0,col="blue")
-filled.contour(x=seq(-1,1,.01),y=seq(-1,1,.01),z=res.mat)
+filled.contour(x=seq(-1,1,.01),y=seq(-1,1,.01),z=log10(res.mat),zlim=c(-10,3),xlim=c(-2,2),ylim=c(-2,2),key.title = mtext(expression(log[10]*'spores per mm'^2),cex=1.5),cex.lab=1.5,xlab="X (meters)",ylab="Y (meters)",)
 
 ## visualize fit
 pred.mat<-param.search.optim.tilted.plume(opt$par,return.out=T)
