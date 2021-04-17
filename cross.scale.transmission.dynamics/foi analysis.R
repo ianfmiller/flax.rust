@@ -88,3 +88,16 @@ new.data1<-data.frame("foi"=dummy.fois,"first.obs.height"=rep(50,length(dummy.fo
 points(new.data1$foi,predict(best.model,newdata = new.data1,type = "response"),type="l",col="red",lwd=4,lty=4)
 
 legend("topright",legend=c("height = 5cm","height = 10cm","height = 25cm","height = 50cm"),col="red",lwd=4,lty=c(1,2,3,4),cex=2,bty="n")
+
+par(mfrow=c(1,1),mar=c(6,6,6,6))
+plot(0,0,type="n",xlim=c(0,.14),ylim=c(1,10),xlab="predicted spore deposition",ylab="relative odds of infection",cex.lab=1.5,cex.axis=1.5)
+new.data1<-data.frame("foi"=dummy.fois,"first.obs.height"=rep(5,length(dummy.fois)))
+points(new.data1$foi,predict(best.model,newdata = new.data1,type = "response")/predict(best.model,newdata = new.data1,type = "response")[1],type="l",col="red",lwd=4,lty=1)
+new.data1<-data.frame("foi"=dummy.fois,"first.obs.height"=rep(10,length(dummy.fois)))
+points(new.data1$foi,predict(best.model,newdata = new.data1,type = "response")/predict(best.model,newdata = new.data1,type = "response")[1],type="l",col="red",lwd=4,lty=2)
+new.data1<-data.frame("foi"=dummy.fois,"first.obs.height"=rep(25,length(dummy.fois)))
+points(new.data1$foi,predict(best.model,newdata = new.data1,type = "response")/predict(best.model,newdata = new.data1,type = "response")[1],type="l",col="red",lwd=4,lty=3)
+new.data1<-data.frame("foi"=dummy.fois,"first.obs.height"=rep(50,length(dummy.fois)))
+points(new.data1$foi,predict(best.model,newdata = new.data1,type = "response")/predict(best.model,newdata = new.data1,type = "response")[1],type="l",col="red",lwd=4,lty=4)
+legend("bottomright",legend=c("height = 5cm","height = 10cm","height = 25cm","height = 50cm"),col="red",lwd=4,lty=c(1,2,3,4),cex=2,bty="n")
+
