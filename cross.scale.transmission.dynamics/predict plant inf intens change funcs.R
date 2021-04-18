@@ -57,8 +57,7 @@ predict.plant.inf.intens<-function(plant.inf.intens.last,site,date0,date1)
   
   # make forward prediction
   pred.data<-data.frame("plant.inf.intens"=plant.inf.intens.last,"dew.point.days"=new.dew.point.days,"temp.7.30.dew.point.days"=new.temp.7.30.dew.point.days,"pred.pustule.diam.growth"=pred.pustule.diam.growth,"site"=site)
-  change<-10^predict(plant.model,newdata=pred.data,exclude = 's(site)')
-  plant.inf.intens.next<-plant.inf.intens.last+change
+  plant.inf.intens.next<-10^predict(plant.model,newdata=pred.data,exclude = 's(site)')
   if(plant.inf.intens.next<.01) {plant.inf.intens.next<-.01}
   plant.inf.intens.next
 }
@@ -178,8 +177,7 @@ predict.plant.inf.intens.last<-function(plant.inf.intens.next,site,date0,date1)
   {
     plant.inf.intens.last.test<-x
     pred.data<-data.frame("plant.inf.intens"=plant.inf.intens.last.test,"dew.point.days"=new.dew.point.days,"temp.7.30.dew.point.days"=new.temp.7.30.dew.point.days,"pred.pustule.diam.growth"=pred.pustule.diam.growth,"site"=site)
-    change<-10^predict(plant.model,newdata=pred.data,exclude = 's(site)')
-    plant.inf.intens.next.pred<-plant.inf.intens.last.test+change
+    plant.inf.intens.next.pred<-10^predict(plant.model,newdata=pred.data,exclude = 's(site)')
     abs(plant.inf.intens.next.pred-plant.inf.intens.next)
   }
   plant.inf.intens.last<-optim(c(plant.inf.intens.next),pred.func,method = "Brent",lower=0,upper=10e6)$par
