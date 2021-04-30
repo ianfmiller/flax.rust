@@ -6,6 +6,8 @@ source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/spore dep
 foi.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
 plant.inf.intens<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plants.RDS")
 
+
+
 # simulate epi function
 
 simulate.epi<-function(site,temp.addition,print.progress=T)
@@ -16,6 +18,7 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
   sub.locs<-corrected.locs[which(corrected.locs$Site==site),]
   sub.epi<-corrected.epi[which(corrected.epi$Site==site),]
   start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased==min(sub.epi$Date.First.Observed.Diseased)),]
+  #start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased<=unique(sub.epi$Date.First.Observed.Diseased)[3]),] ## option for shorter sim
   
   ### data frame to fill
   pred.epi<-data.frame("site"=factor(),"tag"=factor(),"X"=numeric(),"Y"=numeric(),"x"=numeric(),"y"=numeric(),"date"=character(),"tot.stems"=numeric(),"status"=numeric(),"max.height"=numeric(),"plant.inf.intens"=numeric())
@@ -24,7 +27,7 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
   
   for(i in 1:dim(sub.locs)[1])
   {
-    date0<-min(start.epi$Date.First.Observed.Diseased) ### first observed date
+    date0<-max(start.epi$Date.First.Observed.Diseased) ### first observed date
     tag<-sub.locs[i,"tag"] ### tag
     if(sub.locs[i,"tag"] %in% start.epi$Tag) ### if plant is starting diseased
     {
@@ -51,7 +54,8 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
   
   ## loopt to simulate epi process
   
-  for(date.index in 1:(length(unique(sub.epi$Date.First.Observed.Diseased))-1)) 
+  for(date.index in 1:4) 
+  #for(date.index in 1:(length(unique(sub.epi$Date.First.Observed.Diseased))-1)) 
   {
     date0<-unique(sub.epi$Date.First.Observed.Diseased)[date.index] ### last date
     date0<-as.POSIXct(paste0(date0," 12:00:00")) ### convert format
@@ -108,7 +112,7 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
         }
       }
       
-      ### if plant is diseased increase infection intensity DETERMINISTIC FOR NOW
+      ### if plant is diseased increase infection intensity 
       if(last.epi[i,"status"]==1)
       {
         new.status<-1
@@ -123,16 +127,22 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
   pred.epi
 }
 
-#simulate.epi("GM",0,print.progress = T)
+simulate.epi("GM",0,print.progress = T)->pred.epi
+
+par(mfrow=c(3,3))
+for(date in unique(x$date))
+{
+  hist(x[which(x$date==date),"plant.inf.intens"],breaks=20)
+}
 
 library(parallel)
 library(doParallel)
-n.cores<-6
+n.cores<-5
 registerDoParallel(n.cores)
-site<-"GM"
-pred.epi.all.0<-foreach(k = 1:30, .multicombine = T) %dopar% simulate.epi(site,0,print.progress = F)
-pred.epi.all.1.8<-foreach(k = 1:30, .multicombine = T) %dopar% simulate.epi(site,1.8,print.progress = F)
-pred.epi.all.3.7<-foreach(k = 1:30, .multicombine = T) %dopar% simulate.epi(site,3.7,print.progress = F)
+site<-"BT"
+pred.epi.all.0<-foreach(k = 1:6, .multicombine = T) %dopar% simulate.epi(site,0,print.progress = F)
+pred.epi.all.1.8<-foreach(k = 1:6, .multicombine = T) %dopar% simulate.epi(site,1.8,print.progress = F)
+pred.epi.all.3.7<-foreach(k = 1:6, .multicombine = T) %dopar% simulate.epi(site,3.7,print.progress = F)
 
 t_col <- function(color, percent = 50, name = NULL) {
   rgb.val <- col2rgb(color)
@@ -152,7 +162,7 @@ sub.locs<-corrected.locs[which(corrected.locs$Site==site),]
 
 par(mfrow=c(1,1))
 par(mar=c(6,6,6,6))
-plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,.3),xlab="date",ylab="prev",type="n",cex.axis=2,cex.lab=2)
+plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,.05),xlab="date",ylab="prev",type="n",cex.axis=2,cex.lab=2)
 xvals<-c()
 yvals<-c()
 for(i in 1:9)
@@ -248,7 +258,7 @@ for(k in 1:length(unique(pred.epi.all.3.7[[1]]$date)))
 {
   sub.prevs<-c()
   date<-unique(pred.epi.all.3.7[[1]]$date)[k]
-  for(j in 1:length(pred.epi.all.0))
+  for(j in 1:length(pred.epi.all.3.7))
   {
     sub.dat<-pred.epi.all.3.7[[j]]
     sub.dat<-sub.dat[which(sub.dat$date==date),]
@@ -258,18 +268,22 @@ for(k in 1:length(unique(pred.epi.all.3.7[[1]]$date)))
   xvals<-c(xvals,date)
 }
 points(xvals,yvals,type="l",col="purple",lwd=4)
+legend("bottomright",legend=c("data","+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col=c("black","orange","red","purple"),lwd=4,cex=2)
 
 
 
 
+par(mfrow=c(2,3))
 
-par(mfrow=c(3,3))
-
+library(viridis)
+#pred.epi<-pred.epi.all.3.7[[1]]
+layout(matrix(c(1,1,2,2,3,3,6,4,4,5,5,7),2,6,byrow = T))
+#par(mar=c(6,6,6,6))
 for(date in unique(pred.epi$date))
 {
   dat<-pred.epi[which(pred.epi$date==date),]
   sub.dat<-dat[which(dat$status==1),]
-  plot(dat$X+dat$x,dat$Y+dat$y,xlab="X",ylab="y",main=as.Date(date,origin="1970-01-01"),pch=16,cex=.9)
-  points(sub.dat$X+sub.dat$x,sub.dat$Y+sub.dat$y,col="red",cex=2)
+  plot(dat$X+dat$x,dat$Y+dat$y,xlab="X",ylab="y",main=as.Date(date,origin="1970-01-01"),pch=16,cex=.9,cex.lab=1.25,cex.axis=1.25,cex.main=1.5)
+  points(sub.dat$X+sub.dat$x,sub.dat$Y+sub.dat$y,col="red",cex=2,lwd=2)
 }
 
