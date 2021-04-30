@@ -54,8 +54,7 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
   
   ## loopt to simulate epi process
   
-  for(date.index in 1:4) 
-  #for(date.index in 1:(length(unique(sub.epi$Date.First.Observed.Diseased))-1)) 
+  for(date.index in 1:(length(unique(sub.epi$Date.First.Observed.Diseased))-1)) 
   {
     date0<-unique(sub.epi$Date.First.Observed.Diseased)[date.index] ### last date
     date0<-as.POSIXct(paste0(date0," 12:00:00")) ### convert format
