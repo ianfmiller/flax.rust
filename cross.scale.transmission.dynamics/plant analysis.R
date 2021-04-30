@@ -158,7 +158,7 @@ legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),c
 predict.plant.inf.trajectory<-function(maxreps,day,temp.addition,color,plot=T,output=F)
 {  
   reps<-1
-  i<-rep(10^-1,times=100)
+  i<-rep(10^-1,times=1000)
   xcords<-rep(1,length(i))
   ycords<-i
   while(reps<maxreps)
@@ -202,11 +202,11 @@ t_col <- function(color, percent = 50, name = NULL) {
   invisible(t.col)
 }
 
-plot.purple<-t_col("purple",90)
-plot.red<-t_col("red",90)
-plot.orange<-t_col("orange",90)
+plot.purple<-t_col("purple",95)
+plot.red<-t_col("red",95)
+plot.orange<-t_col("orange",95)
 
-par(mfrow=c(1,2),mar=c(6,6,6,6))
+par(mfrow=c(1,1),mar=c(6,6,6,6))
 plot(0,0,type="n",xlim=c(1,6),ylim=c(0,10),ylab=expression(log[10]*' plant infection intensity'),xlab="week",cex.lab=1.5,cex.axis=1.5)
 
 dat<-predict.plant.inf.trajectory(6,75,0,plot.orange,T,T) 
@@ -223,14 +223,14 @@ legend("topright",legend = c("50% quantile hottest days","75% quantile hottest d
 
 plot(0,0,type="n",xlim=c(1,6),ylim=c(0,5),ylab=expression(log[10]*' plant infection intensity'),xlab="week",cex.lab=1.5,cex.axis=1.5)
 dat<-predict.plant.inf.trajectory(6,75,0,plot.orange,T,T) 
-points(1:6,colMeans(dat),type="l",col="orange",lwd=3,lty=2)
+points(1:6,colMeans(dat),type="l",col="orange",lwd=4,lty=2)
 
 dat<-predict.plant.inf.trajectory(6,75,1.8,plot.red,T,T) 
-points(1:6,colMeans(dat),type="l",col="red",lwd=3,lty=2)
+points(1:6,colMeans(dat),type="l",col="red",lwd=4,lty=2)
 
 dat<-predict.plant.inf.trajectory(6,75,3.7,plot.purple,T,T) 
-points(1:6,colMeans(dat),type="l",col="purple",lwd=3,lty=2)
+points(1:6,colMeans(dat),type="l",col="purple",lwd=4,lty=2)
 
-legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
+legend("topleft",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
 
 
