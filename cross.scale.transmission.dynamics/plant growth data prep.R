@@ -31,11 +31,11 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   
   ## merge data
   subs <- c("Year", "Site", "Tag", "Date", "max.height", "plant.inf.intens")
-  plantgrowth <- rbind(healthyindiv[subs], plants[subs])
-  colnames(plantgrowth) <- c("year", "site", "tag", "date", "max.height", "plant.inf.intens")
+  plant.heights <- rbind(healthyindiv[subs], plants[subs])
+  colnames(plant.heights) <- c("year", "site", "tag", "date", "max.height", "plant.inf.intens")
   
   ## cut out incomplete records
-  plantgrowth<-plantgrowth[-intersect(which(plantgrowth$site=="HM"),which(plantgrowth$date>"2020-07-10 00:00:00 UTC")),]
+  plant.heights<-plant.heights[-intersect(which(plant.heights$site=="HM"),which(plant.heights$date>"2020-07-10 00:00:00 UTC")),]
 
   temp.rh.sub.func<-function(x,lower.bound,upper.bound) {out<-subset(x,temp.c>=lower.bound); out<-subset(out,temp.c<=upper.bound); out}
   
@@ -60,18 +60,18 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   wind.speed.days<-c()
   gust.speed.days<-c()
 
-  for (tag in unique(plantgrowth$tag))
+  for (tag in unique(plant.heights$tag))
   {
     if(tag == "918") next # only one obs
     if(tag == "269") next # only one obs
-    sub.plantgrowth<-plantgrowth[which(plantgrowth$tag==tag),]
+    sub.plant.heights<-plant.heights[which(plant.heights$tag==tag),]
     
-    for(i in 1:(dim(sub.plantgrowth)[1]-1))
+    for(i in 1:(dim(sub.plant.heights)[1]-1))
     {
       #pull reference data
-      date0<-sub.plantgrowth[i,"date"]
-      date1<-sub.plantgrowth[i+1,"date"]
-      site<-sub.plantgrowth[i,"site"]
+      date0<-sub.plant.heights[i,"date"]
+      date1<-sub.plant.heights[i+1,"date"]
+      site<-sub.plant.heights[i,"site"]
       
       #subset temp data to relevant window
       temp.rh.sub<-all.temp.rh[which(all.temp.rh$site==site),] #pull out temp data for site
@@ -111,8 +111,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       new.temp.7.30.wetness.days<-sum(weath.sub$temp.7.30*weath.sub$wetness*weath.sub$interval.length,na.rm = T)
       
       #pull out core predictors
-      start.val<-sub.plantgrowth[i,"max.height"]
-      end.val<-sub.plantgrowth[i+1,"max.height"]
+      start.val<-sub.plant.heights[i,"max.height"]
+      end.val<-sub.plant.heights[i+1,"max.height"]
       delta.days<-date1-date0
       
       #store values
@@ -147,8 +147,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
                              wetness.days=wetness.days,temp.wetness.days=temp.wetness.days,temp.16.22.wetness.days=temp.16.22.wetness.days,temp.7.30.wetness.days=temp.7.30.wetness.days,
                              tot.rain=tot.rains,solar.days=solar.days,wind.speed.days=wind.speed.days,gust.speed.days=gust.speed.days)
   
-  saveRDS(plantgrowth,file="~/Dropbox/flax.rust/cross.scale.transmission.dynamics/summarized data/plantgrowth.RDS")
-  saveRDS(delta.height,file="~/Dropbox/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.height.RDS")
+  saveRDS(plant.heights,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plant.heights.RDS")
+  saveRDS(delta.height,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.height.RDS")
 }
-plantgrowth<-readRDS("~/Dropbox/flax.rust/cross.scale.transmission.dynamics/summarized data/plantgrowth.RDS")
-delta.height<-readRDS("~/Dropbox/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.height.RDS")
+plant.heights<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plant.heights.RDS")
+delta.height<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.height.RDS")
