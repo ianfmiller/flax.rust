@@ -1,11 +1,11 @@
 ## Plant Growth
 library(lubridate)
-if(!(file.exists("~/Dropbox/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.height.RDS")) | !(file.exists("~/Dropbox/flax.rust/cross.scale.transmission.dynamics/summarized data/heights.RDS")))
+if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.plant.heights.RDS")) | !(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plant.heights.RDS")))
 {
-  source("~/Dropbox/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
-
-  # clean data
-  healthyraw <- read.csv("~/Dropbox/flax.rust/data/healthyplants.csv")
+  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
+  
+  # clean healthy plant data
+  healthyraw <- read.csv("~/Documents/GitHub/flax.rust/data/healthyplants.csv")
   healthy <- healthyraw[!is.na(healthyraw$max.height),]
   tags <- unique(healthy$Tag)
   
@@ -25,11 +25,11 @@ if(!(file.exists("~/Dropbox/flax.rust/cross.scale.transmission.dynamics/summariz
   healthyindiv$Date <- mdy(healthyindiv$Date)
   healthyindiv$plant.inf.intens <- 0
   
-  ## load data
-  plantsraw <- readRDS("~/Dropbox/flax.rust/cross.scale.transmission.dynamics/summarized data/plants.RDS")
+  ## load diseased plant data
+  plantsraw <- readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plants.RDS")
   plants <- plantsraw[!is.na(plantsraw$max.height),]
   
-  ## clean data
+  ## merge data
   subs <- c("Year", "Site", "Tag", "Date", "max.height", "plant.inf.intens")
   plantgrowth <- rbind(healthyindiv[subs], plants[subs])
   colnames(plantgrowth) <- c("year", "site", "tag", "date", "max.height", "plant.inf.intens")
@@ -94,8 +94,7 @@ if(!(file.exists("~/Dropbox/flax.rust/cross.scale.transmission.dynamics/summariz
       weath.sub<-subset(weath.sub,date<=date1) #pull out relevant data
       weath.sub<-subset(weath.sub,date>=date0) #pull out relevant data
       weath.sub<-cbind(weath.sub,interval.length=c(diff(as.numeric(weath.sub$date))/(60*60*24),NA))
-      # that line is where 267 is crashing 
-      
+
       #calculate environmental variable metrics
       new.temp.days<-sum(temp.rh.sub$temp.c*temp.rh.sub$interval.length,na.rm = T) #temperature days
       new.temp.days.16.22<-sum(1*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T) #time (in days) during which temp between 16 and 22 celsius
