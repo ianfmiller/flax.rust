@@ -43,6 +43,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   sites<-c()
   start.vals<-c()
   end.vals<-c()
+  inf.intens.vals<-c()
   days<-c()
   temp.days<-c()
   temp.days.16.22<-c()
@@ -121,6 +122,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       
       start.vals<-c(start.vals,start.val)
       end.vals<-c(end.vals,end.val)
+      inf.intens.vals<-c(inf.intens.vals,sub.plant.heights[i,"plant.inf.intens"])
       days<-c(days,delta.days)
       
       temp.days.16.22<-c(temp.days.16.22,new.temp.days.16.22)
@@ -141,7 +143,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       gust.speed.days<-c(gust.speed.days,new.gust.speed.days)
     }
   }
-  delta.height<-data.frame(tag=factor(tags),site=factor(sites), height=start.vals, height.next=end.vals,time=days,
+  delta.height<-data.frame(tag=factor(tags),site=factor(sites), height=start.vals, height.next=end.vals,inf.intens=inf.intens.vals,time=days,
                              temp.days=temp.days,temp.days.16.22=temp.days.16.22,temp.days.7.30=temp.days.7.30,
                              dew.point.days=dew.point.days,temp.dew.point.days=temp.dew.point.days,temp.16.22.dew.point.days=temp.16.22.dew.point.days,temp.7.30.dew.point.days=temp.7.30.dew.point.days,
                              wetness.days=wetness.days,temp.wetness.days=temp.wetness.days,temp.16.22.wetness.days=temp.16.22.wetness.days,temp.7.30.wetness.days=temp.7.30.wetness.days,
