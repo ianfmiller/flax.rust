@@ -63,7 +63,6 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   for (tag in unique(plantgrowth$tag))
   {
     print(tag)
-    if(tag == "267") next # 0 weath.sub
     if(tag == "376") next # 0 weath.sub
     if(tag == "596") next # 0 temp.rh
     if(tag == "929") next # 0 temp.rh
@@ -93,8 +92,10 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       weath.sub<-all.weath[which(all.weath$site==site),] #pull out weath data for site
       weath.sub<-subset(weath.sub,date<=date1) #pull out relevant data
       weath.sub<-subset(weath.sub,date>=date0) #pull out relevant data
+      
+      if(dim(weath.sub)[1]==0) {next}
       weath.sub<-cbind(weath.sub,interval.length=c(diff(as.numeric(weath.sub$date))/(60*60*24),NA))
-
+      
       #calculate environmental variable metrics
       new.temp.days<-sum(temp.rh.sub$temp.c*temp.rh.sub$interval.length,na.rm = T) #temperature days
       new.temp.days.16.22<-sum(1*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T) #time (in days) during which temp between 16 and 22 celsius
