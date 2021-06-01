@@ -62,20 +62,12 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
 
   for (tag in unique(plantgrowth$tag))
   {
-    print(tag)
-    if(tag == "376") next # 0 weath.sub
-    if(tag == "596") next # 0 temp.rh
-    if(tag == "929") next # 0 temp.rh
     if(tag == "918") next # only one obs
     if(tag == "269") next # only one obs
     sub.plantgrowth<-plantgrowth[which(plantgrowth$tag==tag),]
     
     for(i in 1:(dim(sub.plantgrowth)[1]-1))
     {
-      
-      # debugging: for some reason, crashing at 267, first loop iteration
-      print(i)
-      
       #pull reference data
       date0<-sub.plantgrowth[i,"date"]
       date1<-sub.plantgrowth[i+1,"date"]
@@ -86,6 +78,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       temp.rh.sub<-subset(temp.rh.sub,date.time<=date1) #pull out relevant data
       temp.rh.sub<-subset(temp.rh.sub,date.time>=date0) #pull out relevant data
       temp.rh.sub<-subset(temp.rh.sub,!is.na(temp.c)) #throw out NAs
+      if(dim(temp.rh.sub)[1]==0) {next}
       temp.rh.sub<-cbind(temp.rh.sub,interval.length=c(diff(as.numeric(temp.rh.sub$date.time))/(60*60*24),NA)) #add interval length in days
       
       #subset weather data to relevant window
