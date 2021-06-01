@@ -2,7 +2,7 @@
 ################################################################################################################################
 
 ### construct all combinations of predictors
-predictors<-c("time",
+predictors<-c("time","inf.intens",
               "temp.days","temp.days.16.22","temp.days.7.30",
               "dew.point.days",
               "temp.dew.point.days","temp.16.22.dew.point.days","temp.7.30.dew.point.days",
@@ -11,7 +11,7 @@ predictors<-c("time",
               "tot.rain"
 )
 
-pred.mat<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F))
+pred.mat<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F))
 names(pred.mat)<-predictors
 
 ### define sets of variables that explain the same thing
