@@ -74,7 +74,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
           } 
         }
       }
-      #### if the source plant is tagged
+      #### if the source plant is not tagged
       if(is.na(source.data[i,"Tag"]))
       {
         #### set q to 0.1 if the plant is a seedling
