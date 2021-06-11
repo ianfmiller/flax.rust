@@ -187,7 +187,7 @@ for (site in sites)
           {
             record.dates<-as.Date(corrected.epi[which(epi.ID.strings==ID.string),"Date.First.Observed.Diseased"])
             min.date<-record.dates[which.min(abs(difftime(record.dates,date)))]
-            height<-corrected.epi[intersect(which(as.Date(corrected.epi[,"Date.First.Observed.Diseased"]==min.date)),which(epi.ID.strings==ID.string)),"max.height"]
+            height<-corrected.epi[intersect(which(as.Date(corrected.epi[,"Date.First.Observed.Diseased"])==min.date),which(epi.ID.strings==ID.string)),"max.height"]
             obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="corrected.epi","height"=height,"type"="obs"))
           }
           
