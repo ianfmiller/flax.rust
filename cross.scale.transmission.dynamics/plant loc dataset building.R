@@ -71,7 +71,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
           # add a new record if there's not a close match
           if(min(distances)>.25) 
           {
-            sub.loc.data<-rbind(sub.loc.data,data.frame("Site"=site,"Date"=format(as.Date(date),"%m/%d/%Y"),"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"height.cm"=NA,"tag"=sub.epi.data[index,"Tag"],"matched"=T))
+            sub.loc.data<-rbind(sub.loc.data,data.frame("Site"=site,"Date"=format(as.Date(date,origin="1970-01-01"),"%m/%d/%Y"),"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"height.cm"=NA,"tag"=sub.epi.data[index,"Tag"],"matched"=T))
           }
         }
       }
@@ -114,7 +114,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
           # add a new record if there's not a close match
           if(min(distances)>.25) 
           {
-            sub.loc.data<-rbind(sub.loc.data,data.frame("Site"=site,"Date"=format(as.Date(date),"%m/%d/%Y"),"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"height.cm"=NA,"tag"=sub.epi.data[index,"Tag"],"matched"=T))
+            sub.loc.data<-rbind(sub.loc.data,data.frame("Site"=site,"Date"=format(as.Date(date,origin="1970-01-01"),"%m/%d/%Y"),"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"height.cm"=NA,"tag"=sub.epi.data[index,"Tag"],"matched"=T))
           }
         }
       }
