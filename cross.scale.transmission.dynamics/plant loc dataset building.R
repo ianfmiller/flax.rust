@@ -31,7 +31,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   for(site in sites)
   {
     ## get plant location data
-    sub.loc.data<-plant.locs[which(plant.locs$Site==site),c("Site","X","Y","x","y","height.cm","tag")]
+    sub.loc.data<-plant.locs[which(plant.locs$Site==site),c("Site","Date","X","Y","x","y","height.cm","tag")]
     #sub.loc.data<-sub.loc.data[which(as.Date(sub.loc.data$Date,tryFormats=c("%m/%d/%Y")) %in% plant.loc.survey.dates[which(sites==site)][[1]]),c("Site","X","Y","x","y","tag")]
     sub.loc.data<-data.frame(sub.loc.data,"matched"=F)
     sub.loc.data[which(!(is.na(sub.loc.data$tag))),"matched"]<-T
@@ -71,7 +71,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
           # add a new record if there's not a close match
           if(min(distances)>.25) 
           {
-            sub.loc.data<-rbind(sub.loc.data,data.frame("Site"=site,"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"height.cm"=NA,"tag"=sub.epi.data[index,"Tag"],"matched"=T))
+            sub.loc.data<-rbind(sub.loc.data,data.frame("Site"=site,"Date"=format(as.Date(date),"%m/%d/%Y"),"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"height.cm"=NA,"tag"=sub.epi.data[index,"Tag"],"matched"=T))
           }
         }
       }
@@ -114,7 +114,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
           # add a new record if there's not a close match
           if(min(distances)>.25) 
           {
-            sub.loc.data<-rbind(sub.loc.data,data.frame("Site"=site,"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"height.cm"=NA,"tag"=sub.epi.data[index,"Tag"],"matched"=T))
+            sub.loc.data<-rbind(sub.loc.data,data.frame("Site"=site,"Date"=format(as.Date(date),"%m/%d/%Y"),"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"height.cm"=NA,"tag"=sub.epi.data[index,"Tag"],"matched"=T))
           }
         }
       }
