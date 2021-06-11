@@ -109,9 +109,9 @@ predict.plant.growth.last<-function(height.next,site,date0,date1,exclude.site=T)
     plant.height.last.test<-x
     pred.data<-data.frame("height"=plant.height.last.test,"dew.point.days"=new.dew.point.days,"temp.dew.point.days"=new.temp.dew.point.days,"site"=site)
     if(exclude.site) {plant.height.next.pred<-predict(plant.growth.model,newdata=pred.data,exclude = 's(site)')} else {plant.height.next.pred<-predict(plant.growth.model,newdata=pred.data)}
-    abs(plant.height.next.pred-plant.height.next)
+    abs(plant.height.next.pred-height.next)
   }
-  plant.height.last<-optim(c(plant.height.next),pred.func,method = "Brent",lower=0,upper=10e6)$par
+  plant.height.last<-optim(c(height.next),pred.func,method = "Brent",lower=0,upper=10e6)$par
   plant.height.last
 }
 
