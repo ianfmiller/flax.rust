@@ -8,6 +8,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS")
   plant.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS")
   plant.inf.intens<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plants.RDS")
+  corrected.heights<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/corrected.plant.heights.RDS")
   # Time periods for fitting glm of infection~foi to data:
   #CC: 6/22(first data)->7/27(last prediction)
   #BT: 6/24(first data)->7/8(last prediction)
@@ -30,6 +31,35 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
     ## get data about sources of spores
     source.data<-epi.data[intersect(which(epi.data$Site==site),which(epi.data$Date.First.Observed.Diseased<=date0)),]
     
+    ## substitute in corrected heights as average of height at date0 and date1
+    
+    ### loop to get corrected heights of source plants
+    corrected.heights.vec<-c()
+    for (k in 1:nrow(source.data))
+    {
+      #### tagged source plants
+      if(!is.na(source.data[k,"Tag"])) 
+      {
+        height0<-as.numeric(corrected.heights[intersect(which(corrected.heights$tag==source.data[k,"Tag"]),which(corrected.heights$Date==date0)),"height.cm"])
+        height1<-as.numeric(corrected.heights[intersect(which(corrected.heights$tag==source.data[k,"Tag"]),which(corrected.heights$Date==date1)),"height.cm"])
+        corrected.height<-mean(height0,height1)
+      }
+      #### untagged source plants
+      if(is.na(source.data[k,"Tag"])) 
+      {
+        index0<-Reduce(intersect,list(which(corrected.heights$X==source.data[k,"X"]),which(corrected.heights$Y==source.data[k,"Y"]),which(corrected.heights$x==source.data[k,"x"]),which(corrected.heights$y==source.data[k,"y"]),which(corrected.heights$Date==date0)))
+        index1<-Reduce(intersect,list(which(corrected.heights$X==source.data[k,"X"]),which(corrected.heights$Y==source.data[k,"Y"]),which(corrected.heights$x==source.data[k,"x"]),which(corrected.heights$y==source.data[k,"y"]),which(corrected.heights$Date==date1)))
+        height0<-as.numeric(corrected.heights[index0,"height.cm"])
+        height1<-as.numeric(corrected.heights[index1,"height.cm"])
+        corrected.height<-mean(height0,height1)
+      }
+      #### make vec
+      corrected.heights.vec<-c(corrected.heights.vec,corrected.height)
+    }
+    
+    ### add in courrected hieght data
+    source.data<-data.frame(source.data,"corrected.height"=corrected.heights.vec)
+    
     ## loop to calculate summed foi from all sources
     tot.dep<-c()
     for(i in 1:dim(source.data)[1])
@@ -44,12 +74,12 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         if(source.data[i,"Tag"]==15) {q<-0; half.height=10} #### set q = 0 for tag 15, half.height doesn't matter
         else{
           #### set q to 0.1 if the plant is a seedling
-          if((!source.data[i,"Tag"] %in% plant.inf.intens$Tag & source.data[i,"max.height"]<=5) | source.data[i,"notes"]=="seedling") {q<-.1; if(is.na(source.data[i,"max.height"])) {half.height<-2.5} else {half.height<-source.data[i,"max.height"]*.5}}
+          if(!source.data[i,"Tag"] %in% plant.inf.intens$Tag & source.data[i,"corrected.height"]<=5) {q<-.1; if(is.na(source.data[i,"corrected.height"])) {half.height<-2.5} else {half.height<-source.data[i,"corrected.height"]*.5}}
           #### extract q from data
           else {
             plant.inf.intens.index<-intersect(which(plant.inf.intens$Date==date0),which(plant.inf.intens$Tag==source.data[i,"Tag"]))
             ##### if there's an actual measurment use that
-            if(length(plant.inf.intens.index)==1) {q<-plant.inf.intens[plant.inf.intens.index,"plant.inf.intens"]; half.height<-plant.inf.intens[plant.inf.intens.index,"max.height"]*.5}
+            if(length(plant.inf.intens.index)==1) {q<-plant.inf.intens[plant.inf.intens.index,"plant.inf.intens"]; half.height<-plant.inf.intens[plant.inf.intens.index,"corrected.height"]*.5}
             ##### if not, forecast or hindcast from closest observation
             if(length(plant.inf.intens.index)==0)
             {
@@ -78,10 +108,10 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       if(is.na(source.data[i,"Tag"]))
       {
         #### set q to 0.1 if the plant is a seedling
-        if(source.data[i,"max.height"]<=5 | source.data[i,"notes"]=="seedling")
+        if(source.data[i,"corrected.height"]<=5)
         {
           q<-.1
-          if(is.na(source.data[i,"max.height"])) {half.height<-2.5} else {half.height<-source.data[i,"max.height"]*.5}
+          half.height<-2.5
         } else {print('error--missing plant inf intens data'); print(i)}
       }
       

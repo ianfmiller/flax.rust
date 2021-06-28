@@ -19,7 +19,7 @@ healthyplants<-read.csv("~/Documents/GitHub/flax.rust/data/healthyplants.csv")
 #### subset to relevant records
 healthyplants<-unique(healthyplants[,c("Site","Date","Tag","max.height")])
 
-## build data set 
+ ## build data set 
 corrected.plant.heights<-data.frame("Site"=factor(),"tag"=factor(),"X"=numeric(),"Y"=numeric(),"x"=numeric(),"y"=numeric(),"Date"=character(),"height.cm"=numeric(),"height.type"=factor())
 for (site in sites)
 {
