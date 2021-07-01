@@ -45,7 +45,7 @@ for (site in sites)
   
   for(i in 1:nrow(sub.loc.data))
   {
-    print(paste0(site," ",i," 120 height ",corrected.plant.heights[intersect(which(corrected.plant.heights$tag==120),which(corrected.plant.heights$Date=="2020-07-01")),"height.cm"]))
+    print(paste0(site," ",i))
     #### if plant is tagged
     if(!is.na(sub.loc.data[i,"tag"]))
     {
