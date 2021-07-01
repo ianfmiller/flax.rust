@@ -45,7 +45,7 @@ for (site in sites)
   
   for(i in 1:nrow(sub.loc.data))
   {
-    print(paste0(site," ",i))
+    #print(paste0(site," ",i))
     #### if plant is tagged
     if(!is.na(sub.loc.data[i,"tag"]))
     {
