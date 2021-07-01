@@ -45,7 +45,7 @@ for (site in sites)
   
   for(i in 1:nrow(sub.loc.data))
   {
-    print(paste0(site," ",i))
+    print(paste0(site," ",i," 120 height ",corrected.plant.heights[intersect(which(corrected.plant.heights$tag==120),which(corrected.plant.heights$Date=="2020-07-01")),"height.cm"]))
     #### if plant is tagged
     if(!is.na(sub.loc.data[i,"tag"]))
     {
@@ -168,13 +168,13 @@ for (site in sites)
           ###### if plant height was recorded in epi data
           if(length(corrected.epi.index)>0) 
           {
-            corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=tag,"X"=corrected.epi[corrected.epi.index,"X"],"Y"=corrected.epi[corrected.epi.index,"Y"],"x"=corrected.epi[corrected.epi.index,"x"],"y"=corrected.epi[corrected.epi.index,"y"],"Date"=date,"height.cm"=corrected.epi[corrected.epi.index,"Date.First.Observed.Diseased"],"height.type"="observed"))
+            corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=NA,"X"=corrected.epi[corrected.epi.index,"X"],"Y"=corrected.epi[corrected.epi.index,"Y"],"x"=corrected.epi[corrected.epi.index,"x"],"y"=corrected.epi[corrected.epi.index,"y"],"Date"=date,"height.cm"=corrected.epi[corrected.epi.index,"max.height"],"height.type"="observed"))
             
           }
           ###### if plant height was recorded in location data (includes demog data)
           if(length(corrected.locs.index)>0) 
           {
-            corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=tag,"X"=corrected.locs[corrected.locs.index,"X"],"Y"=corrected.locs[corrected.locs.index,"Y"],"x"=corrected.locs[corrected.locs.index,"x"],"y"=corrected.locs[corrected.locs.index,"y"],"Date"=date,"height.cm"=corrected.locs[corrected.locs.index,"Date"],"height.type"="observed"))
+            corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=NA,"X"=corrected.locs[corrected.locs.index,"X"],"Y"=corrected.locs[corrected.locs.index,"Y"],"x"=corrected.locs[corrected.locs.index,"x"],"y"=corrected.locs[corrected.locs.index,"y"],"Date"=date,"height.cm"=corrected.locs[corrected.locs.index,"height.cm"],"height.type"="observed"))
           }
         }
         ##### if plant height was not recorded
