@@ -10,6 +10,8 @@ temp.rh.sub.func<-function(x,lower.bound,upper.bound) {out<-subset(x,temp.c>=low
 #function for predicting plant height change
 predict.plant.growth<-function(height.last,site,date0,date1,exclude.site=T)
 {
+  if(class(date0)=="Date") {date0<-as.POSIXct(date0)}
+  if(class(date1)=="Date") {date1<-as.POSIXct(date1)}
   # load weather data
   ## subst temp rh data to relevant window
   temp.rh.sub<-all.temp.rh[which(all.temp.rh$site==site),] #pull out temp data for site
@@ -41,6 +43,9 @@ predict.plant.growth<-function(height.last,site,date0,date1,exclude.site=T)
 
 predict.plant.growth.boot<-function(height.last,site,date0,date1)
 {
+  if(class(date0)=="Date") {date0<-as.POSIXct(date0)}
+  if(class(date1)=="Date") {date1<-as.POSIXct(date1)}
+  
   # load weather data
   ## subst temp rh data to relevant window
   temp.rh.sub<-all.temp.rh[which(all.temp.rh$site==site),] #pull out temp data for site
@@ -82,6 +87,9 @@ predict.plant.growth.boot<-function(height.last,site,date0,date1)
 #function for predicting plant height change
 predict.plant.growth.last<-function(height.next,site,date0,date1,exclude.site=T)
 {
+  if(class(date0)=="Date") {date0<-as.POSIXct(date0)}
+  if(class(date1)=="Date") {date1<-as.POSIXct(date1)}
+  
   # load weather data
   ## subst temp rh data to relevant window
   temp.rh.sub<-all.temp.rh[which(all.temp.rh$site==site),] #pull out temp data for site
