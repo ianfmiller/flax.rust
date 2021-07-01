@@ -45,7 +45,7 @@ for (site in sites)
   
   for(i in 1:nrow(sub.loc.data))
   {
-    #print(paste0(site," ",i))
+    print(paste0(site," ",i))
     #### if plant is tagged
     if(!is.na(sub.loc.data[i,"tag"]))
     {
@@ -75,12 +75,12 @@ for (site in sites)
           ###### if plant height was recorded in epi data
           if(length(corrected.epi.index)>0)
           {
-            corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=tag,"X"=sub.loc.data[i,"X"],"Y"=sub.loc.data[i,"Y"],"x"=sub.loc.data[i,"x"],"y"=sub.loc.data[i,"y"],"Date"=date,"height.cm"=within.host[within.host.index,"max.height"],"height.type"="observed"))
+            corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=tag,"X"=sub.loc.data[i,"X"],"Y"=sub.loc.data[i,"Y"],"x"=sub.loc.data[i,"x"],"y"=sub.loc.data[i,"y"],"Date"=date,"height.cm"=corrected.epi[corrected.epi.index,"max.height"],"height.type"="observed"))
           }
           ###### if plant height was recorded in location data (includes demog data)
           if(length(corrected.locs.index)>0)
           {
-            corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=tag,"X"=sub.loc.data[i,"X"],"Y"=sub.loc.data[i,"Y"],"x"=sub.loc.data[i,"x"],"y"=sub.loc.data[i,"y"],"Date"=date,"height.cm"=within.host[within.host.index,"max.height"],"height.type"="observed"))
+            corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=tag,"X"=sub.loc.data[i,"X"],"Y"=sub.loc.data[i,"Y"],"x"=sub.loc.data[i,"x"],"y"=sub.loc.data[i,"y"],"Date"=date,"height.cm"=corrected.locs[corrected.locs.index,"height.cm"],"height.type"="observed"))
           }
         }
         ##### if plant height was not recorded
