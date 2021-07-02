@@ -4,7 +4,7 @@ library(plotKML)
 pop.data<-read.csv("~/Documents/GitHub/flax.rust/data/landscape.transect.data/prelim.landscape.transects.csv")
 path.data<-readGPX("~/Documents/GitHub/flax.rust/data/landscape.transect.data/gpx/RG.gpx")$tracks[[1]][[1]]
 
-RG<-data[which(data$transect=="RG"),]
+RG<-pop.data[which(pop.data$transect=="RG"),]
 
 map<-leaflet() %>% 
   setView(lng = mean(c(RG$start.long,RG$end.long)), lat = mean(c(RG$start.lat,RG$end.lat)), zoom = 13) %>% 
