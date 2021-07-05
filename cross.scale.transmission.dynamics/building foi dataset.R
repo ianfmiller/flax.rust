@@ -233,6 +233,15 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       ## for each plant in the transect:
       for(index in 1:dim(sub.loc.data)[1])
       {
+        if(
+          any(
+            c(
+              (!(site=="CC")),
+              (sub.epi.data[index,"Y"] %in% c(0:8,18,19)),
+              all(sub.epi.data[index,"Y"] %in% c(15,17),sub.epi.data[index,"x"] %in% 7:9)
+            )
+          )
+        ) {next}
         ### get ID string of plant
         if(!is.na(sub.loc.data[index,"tag"])) {ID.string<-sub.loc.data[index,"tag"]} else {ID.string<-paste0("X=",sub.loc.data[index,"X"],"Y=",sub.loc.data[index,"Y"],"x=",sub.loc.data[index,"x"],"y=",sub.loc.data[index,"y"])}
         ### if that ID string is unique

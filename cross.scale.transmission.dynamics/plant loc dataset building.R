@@ -77,16 +77,6 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
       ## for newly diseased and untagged plants: edit location in epi data to location of nearest unmatched plant in loc data
       for(index in which(is.na(sub.epi.data$Tag)))
       {
-        ### condition to exclude data in unsurveyed region of CC
-        if(
-          any(
-            c(
-              (!(site=="CC")),
-              (sub.epi.data[index,"Y"] %in% c(0:8,18,19)),
-              all(sub.epi.data[index,"Y"] %in% c(15,17),sub.epi.data[index,"x"] %in% 7:9)
-            )
-          )
-        )
         {
           min.dist.func<-function(i) {dist(rbind(c(sub.epi.data[index,"X"]+sub.epi.data[index,"x"],sub.epi.data[index,"Y"]+sub.epi.data[index,"y"]),c(sub.loc.data[i,"X"]+sub.loc.data[i,"x"],sub.loc.data[i,"Y"]+sub.loc.data[i,"y"])))[1]}
           distances<-sapply(which(sub.loc.data$matched==F),min.dist.func)
