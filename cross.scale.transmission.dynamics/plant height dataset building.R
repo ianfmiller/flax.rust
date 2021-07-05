@@ -259,4 +259,14 @@ for (site in sites)
 
 ### trim any duplicates
 corrected.plant.heights<-unique(corrected.plant.heights)
+
+###set missing values to mean for site at date
+
+for (i in which(is.na(corrected.plant.heights$height.cm)))
+{
+  site<-corrected.plant.heights[i,"Site"]
+  date<-corrected.plant.heights[i,"Date"]
+  sub.data<-corrected.plant.heights[intersect(which(corrected.plant.heights$Site==site),which(corrected.plant.heights$Date==date)),]
+  corrected.plant.heights[i,"height.cm"]<-mean(na.omit(sub.data$height.cm))
+}
 saveRDS(corrected.plant.heights,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/corrected.plant.heights.RDS")
