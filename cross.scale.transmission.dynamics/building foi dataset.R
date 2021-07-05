@@ -80,7 +80,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
           else {
             plant.inf.intens.index<-intersect(which(plant.inf.intens$Date==date0),which(plant.inf.intens$Tag==source.data[i,"Tag"]))
             ##### if there's an actual measurment use that
-            if(length(plant.inf.intens.index)==1) {q<-plant.inf.intens[plant.inf.intens.index,"plant.inf.intens"]; half.height<-plant.inf.intens[plant.inf.intens.index,"corrected.height"]*.5}
+            if(length(plant.inf.intens.index)==1) {q<-plant.inf.intens[plant.inf.intens.index,"plant.inf.intens"]; half.height<-source.data[i,"corrected.height"]*.5}
             ##### if not, forecast or hindcast from closest observation
             if(length(plant.inf.intens.index)==0)
             {
