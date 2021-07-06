@@ -174,6 +174,9 @@ for (site in sites)
         ##### get indicies of any existing records
         corrected.epi.index<-intersect(which(epi.ID.strings==ID.string),which(corrected.epi$Date.First.Observed.Diseased==as.Date(date)))
         corrected.locs.index<-intersect(which(loc.ID.strings==ID.string),which(as.Date(corrected.locs$Date,tryFormats = "%m/%d/%Y")==as.Date(date)))
+        if(isTRUE((is.na(corrected.epi[corrected.epi.index,"max.height"])))) {corrected.epi.index<-integer(0)} ###### check to make sure na values aren't accidentally counted
+        if(isTRUE((is.na(corrected.locs[corrected.locs.index,"height.cm"])))) {corrected.locs.index<-integer(0)} ###### check to make sure na values aren't accidentally counted
+            
         ##### if plant height was recorded
         if(length(corrected.epi.index)>0 || length(corrected.locs.index)>0)
         {
