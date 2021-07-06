@@ -56,10 +56,10 @@ for (site in sites)
         ##### get indicies of any existing records
         healthyplants.index<-intersect(which(healthyplants$Tag==tag),which(as.Date(healthyplants$Date,tryFormats = "%m/%d/%Y")==as.Date(date)))
         within.host.index<-intersect(which(within.host$Tag==tag),which(as.Date(within.host$Date,tryFormats = "%m/%d/%Y")==as.Date(date)))
-        corrected.epi.index<-intersect(which(corrected.epi$Tag==tag),which(corrected.epi$Date.First.Observed.Diseased==as.Date(date)))
-        corrected.locs.index<-intersect(which(corrected.locs$tag==tag),which(as.Date(corrected.locs$Date,tryFormats = "%m/%d/%Y")==as.Date(date)))
+        sub.epi.index<-intersect(which(sub.epi.data$Tag==tag),which(sub.epi.data$Date.First.Observed.Diseased==as.Date(date)))
+        sub.loc.index<-intersect(which(sub.loc.data$tag==tag),which(as.Date(sub.loc.data$Date,tryFormats = "%m/%d/%Y")==as.Date(date)))
         ##### if plant height was recorded
-        if(length(healthyplants.index)>0 || length(within.host.index)>0 || length(corrected.epi.index)>0 || length(corrected.locs.index>0))
+        if(length(healthyplants.index)>0 || length(within.host.index)>0 || length(sub.epi.index)>0 || length(sub.loc.index>0))
         {
           ###### if plant height was recorded in healthy plants
           if(length(healthyplants.index)>0)
@@ -79,25 +79,25 @@ for (site in sites)
           }
           
           ###### if plant height was recorded in epi data
-          if(length(corrected.epi.index)>0)
+          if(length(sub.epi.index)>0)
           {
-            if(!is.na(corrected.epi$max.height[corrected.epi.index]))
+            if(!is.na(sub.epi.data$max.height[sub.epi.index]))
             {
-              corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=tag,"X"=sub.loc.data[i,"X"],"Y"=sub.loc.data[i,"Y"],"x"=sub.loc.data[i,"x"],"y"=sub.loc.data[i,"y"],"Date"=date,"height.cm"=corrected.epi[corrected.epi.index,"max.height"],"height.type"="observed"))
+              corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=tag,"X"=sub.loc.data[i,"X"],"Y"=sub.loc.data[i,"Y"],"x"=sub.loc.data[i,"x"],"y"=sub.loc.data[i,"y"],"Date"=date,"height.cm"=sub.epi.data[sub.epi.index,"max.height"],"height.type"="observed"))
             }
           }
           ###### if plant height was recorded in location data (includes demog data)
-          if(length(corrected.locs.index)>0)
+          if(length(sub.loc.index)>0)
           {
-            if(!is.na(corrected.locs$height.cm[corrected.locs.index]))
+            if(!is.na(sub.loc.data$height.cm[sub.loc.index]))
             {
-              corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=tag,"X"=sub.loc.data[i,"X"],"Y"=sub.loc.data[i,"Y"],"x"=sub.loc.data[i,"x"],"y"=sub.loc.data[i,"y"],"Date"=date,"height.cm"=corrected.locs[corrected.locs.index,"height.cm"],"height.type"="observed"))
+              corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=tag,"X"=sub.loc.data[i,"X"],"Y"=sub.loc.data[i,"Y"],"x"=sub.loc.data[i,"x"],"y"=sub.loc.data[i,"y"],"Date"=date,"height.cm"=sub.loc.data[sub.loc.index,"height.cm"],"height.type"="observed"))
             }
           }
         }
         ##### if plant height was not recorded
         
-        if(length(healthyplants.index)==0 &&  length(within.host.index)==0 && length(corrected.epi.index)==0 && length(corrected.locs.index)==0)
+        if(length(healthyplants.index)==0 &&  length(within.host.index)==0 && length(sub.epi.index)==0 && length(sub.loc.index)==0)
         {
           ###### look for closest observation or existing forecast/hindcast
           obs.dates<-data.frame("Date"=character(),"diff"=numeric(),"source"=character(),"height"=numeric(),"type"=character())
@@ -118,19 +118,19 @@ for (site in sites)
             obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="healthyplants","height"=height,"type"="obs"))
           }
           
-          if(length(corrected.epi[which(corrected.epi$Tag==tag),"Date.First.Observed.Diseased"])>0)
+          if(length(sub.epi.data[which(sub.epi.data$Tag==tag),"Date.First.Observed.Diseased"])>0)
           {
-            record.dates<-as.Date(corrected.epi[which(corrected.epi$Tag==tag),"Date.First.Observed.Diseased"])
+            record.dates<-as.Date(sub.epi.data[which(sub.epi.data$Tag==tag),"Date.First.Observed.Diseased"])
             min.date<-record.dates[which.min(abs(difftime(record.dates,date)))]
-            height<-corrected.epi[intersect(which(as.Date(corrected.epi[,"Date.First.Observed.Diseased"])==min.date),which(corrected.epi$Tag==tag)),"max.height"]
+            height<-sub.epi.data[intersect(which(as.Date(sub.epi.data[,"Date.First.Observed.Diseased"])==min.date),which(sub.epi.data$Tag==tag)),"max.height"]
             obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="corrected.epi","height"=height,"type"="obs"))
           }
           
-          if(length(corrected.locs[which(corrected.locs$tag==tag),"Date"])>0)
+          if(length(sub.loc.data[which(sub.loc.data$tag==tag),"Date"])>0)
           {
-            record.dates<-as.Date(corrected.locs[which(corrected.locs$tag==tag),"Date"],tryFormats = "%m/%d/%Y")
+            record.dates<-as.Date(sub.loc.data[which(sub.loc.data$tag==tag),"Date"],tryFormats = "%m/%d/%Y")
             min.date<-record.dates[which.min(abs(difftime(record.dates,date)))]
-            height<-corrected.locs[intersect(which(as.Date(corrected.locs[,"Date"],tryFormats = "%m/%d/%Y")==min.date),which(corrected.locs$tag==tag)),"height.cm"]
+            height<-sub.loc.data[intersect(which(as.Date(sub.loc.data[,"Date"],tryFormats = "%m/%d/%Y")==min.date),which(sub.loc.data$tag==tag)),"height.cm"]
             obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="corrected.locs","height"=height,"type"="obs"))
           }
           
@@ -172,7 +172,7 @@ for (site in sites)
       {
         date<-as.Date(date)
         ##### get indicies of any existing records
-        sub.epi.index<-intersect(which(epi.ID.strings==ID.string),which(corrected.epi$Date.First.Observed.Diseased==as.Date(date)))
+        sub.epi.index<-intersect(which(epi.ID.strings==ID.string),which(sub.epi.data$Date.First.Observed.Diseased==as.Date(date)))
         sub.loc.index<-intersect(which(loc.ID.strings==ID.string),which(as.Date(sub.loc.data$Date,tryFormats = "%m/%d/%Y")==as.Date(date)))
         if(isTRUE((is.na(sub.epi.data[sub.epi.index,"max.height"])))) {sub.epi.index<-integer(0)} ###### check to make sure na values aren't accidentally counted
         if(isTRUE((is.na(sub.loc.data[sub.loc.index,"height.cm"])))) {sub.loc.index<-integer(0)} ###### check to make sure na values aren't accidentally counted
@@ -185,13 +185,13 @@ for (site in sites)
           {
             if(!is.na(sub.epi.data$max.height[sub.epi.index]))
             {
-              corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=NA,"X"=sub.epi.data[sub.epi.index,"X"],"Y"=sub.epi.data[sub.epi.index,"Y"],"x"=sub.epi.data[sub.epi.index,"x"],"y"=sub.epi.data[sub.epi.index,"y"],"Date"=date,"height.cm"=sub.epi.data[corrected.epi.index,"max.height"],"height.type"="observed"))
+              corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=NA,"X"=sub.epi.data[sub.epi.index,"X"],"Y"=sub.epi.data[sub.epi.index,"Y"],"x"=sub.epi.data[sub.epi.index,"x"],"y"=sub.epi.data[sub.epi.index,"y"],"Date"=date,"height.cm"=sub.epi.data[sub.epi.index,"max.height"],"height.type"="observed"))
             }
           }
           ###### if plant height was recorded in location data (includes demog data)
           if(length(sub.loc.index)>0) 
           {
-            if(!is.na(sub.loc.data$height.cm[corrected.locs.index]))
+            if(!is.na(sub.loc.data$height.cm[sub.loc.index]))
             {
               corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=NA,"X"=sub.loc.data[sub.loc.index,"X"],"Y"=sub.loc.data[sub.loc.index,"Y"],"x"=sub.loc.data[sub.loc.index,"x"],"y"=sub.loc.data[sub.loc.index,"y"],"Date"=date,"height.cm"=sub.loc.data[sub.loc.index,"height.cm"],"height.type"="observed"))
             }
