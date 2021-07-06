@@ -237,8 +237,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
           any(
             c(
               (!(site=="CC")),
-              (sub.epi.data[index,"Y"] %in% c(0:8,18,19)),
-              all(sub.epi.data[index,"Y"] %in% c(15,17),sub.epi.data[index,"x"] %in% 7:9)
+              (sub.loc.data[index,"Y"] %in% c(0:8,18,19)),
+              all(sub.loc.data[index,"Y"] %in% c(15,17),sub.loc.data[index,"x"] %in% 7:9)
             )
           )
         ) {next}
