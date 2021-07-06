@@ -172,50 +172,50 @@ for (site in sites)
       {
         date<-as.Date(date)
         ##### get indicies of any existing records
-        corrected.epi.index<-intersect(which(epi.ID.strings==ID.string),which(corrected.epi$Date.First.Observed.Diseased==as.Date(date)))
-        corrected.locs.index<-intersect(which(loc.ID.strings==ID.string),which(as.Date(corrected.locs$Date,tryFormats = "%m/%d/%Y")==as.Date(date)))
-        if(isTRUE((is.na(corrected.epi[corrected.epi.index,"max.height"])))) {corrected.epi.index<-integer(0)} ###### check to make sure na values aren't accidentally counted
-        if(isTRUE((is.na(corrected.locs[corrected.locs.index,"height.cm"])))) {corrected.locs.index<-integer(0)} ###### check to make sure na values aren't accidentally counted
+        sub.epi.index<-intersect(which(epi.ID.strings==ID.string),which(corrected.epi$Date.First.Observed.Diseased==as.Date(date)))
+        sub.loc.index<-intersect(which(loc.ID.strings==ID.string),which(as.Date(sub.loc.data$Date,tryFormats = "%m/%d/%Y")==as.Date(date)))
+        if(isTRUE((is.na(sub.epi.data[sub.epi.index,"max.height"])))) {sub.epi.index<-integer(0)} ###### check to make sure na values aren't accidentally counted
+        if(isTRUE((is.na(sub.loc.data[sub.loc.index,"height.cm"])))) {sub.loc.index<-integer(0)} ###### check to make sure na values aren't accidentally counted
             
         ##### if plant height was recorded
-        if(length(corrected.epi.index)>0 || length(corrected.locs.index)>0)
+        if(length(sub.epi.index)>0 || length(sub.loc.index)>0)
         {
           ###### if plant height was recorded in epi data
-          if(length(corrected.epi.index)>0 ) 
+          if(length(sub.epi.index)>0 ) 
           {
-            if(!is.na(corrected.epi$max.height[corrected.epi.index]))
+            if(!is.na(sub.epi.data$max.height[sub.epi.index]))
             {
-              corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=NA,"X"=corrected.epi[corrected.epi.index,"X"],"Y"=corrected.epi[corrected.epi.index,"Y"],"x"=corrected.epi[corrected.epi.index,"x"],"y"=corrected.epi[corrected.epi.index,"y"],"Date"=date,"height.cm"=corrected.epi[corrected.epi.index,"max.height"],"height.type"="observed"))
+              corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=NA,"X"=sub.epi.data[sub.epi.index,"X"],"Y"=sub.epi.data[sub.epi.index,"Y"],"x"=sub.epi.data[sub.epi.index,"x"],"y"=sub.epi.data[sub.epi.index,"y"],"Date"=date,"height.cm"=sub.epi.data[corrected.epi.index,"max.height"],"height.type"="observed"))
             }
           }
           ###### if plant height was recorded in location data (includes demog data)
-          if(length(corrected.locs.index)>0) 
+          if(length(sub.loc.index)>0) 
           {
-            if(!is.na(corrected.locs$height.cm[corrected.locs.index]))
+            if(!is.na(sub.loc.data$height.cm[corrected.locs.index]))
             {
-              corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=NA,"X"=corrected.locs[corrected.locs.index,"X"],"Y"=corrected.locs[corrected.locs.index,"Y"],"x"=corrected.locs[corrected.locs.index,"x"],"y"=corrected.locs[corrected.locs.index,"y"],"Date"=date,"height.cm"=corrected.locs[corrected.locs.index,"height.cm"],"height.type"="observed"))
+              corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=NA,"X"=sub.loc.data[sub.loc.index,"X"],"Y"=sub.loc.data[sub.loc.index,"Y"],"x"=sub.loc.data[sub.loc.index,"x"],"y"=sub.loc.data[sub.loc.index,"y"],"Date"=date,"height.cm"=sub.loc.data[sub.loc.index,"height.cm"],"height.type"="observed"))
             }
           }
         }
         ##### if plant height was not recorded
-        if(length(corrected.epi.index)==0 && length(corrected.locs.index)==0)
+        if(length(sub.epi.index)==0 && length(sub.loc.index)==0)
         {
           ###### look for closest observation or existing forecast/hindcast
           obs.dates<-data.frame("Date"=character(),"diff"=numeric(),"source"=character(),"height"=numeric(),"type"=character())
           
-          if(length(corrected.epi[which(epi.ID.strings==ID.string),"Date.First.Observed.Diseased"])>0)
+          if(length(sub.epi.data[which(epi.ID.strings==ID.string),"Date.First.Observed.Diseased"])>0)
           {
-            record.dates<-as.Date(corrected.epi[which(epi.ID.strings==ID.string),"Date.First.Observed.Diseased"])
+            record.dates<-as.Date(sub.epi.data[which(epi.ID.strings==ID.string),"Date.First.Observed.Diseased"])
             min.date<-record.dates[which.min(abs(difftime(record.dates,date)))]
-            height<-corrected.epi[intersect(which(as.Date(corrected.epi[,"Date.First.Observed.Diseased"])==min.date),which(epi.ID.strings==ID.string)),"max.height"]
+            height<-sub.epi.data[intersect(which(as.Date(sub.epi.data[,"Date.First.Observed.Diseased"])==min.date),which(epi.ID.strings==ID.string)),"max.height"]
             obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="corrected.epi","height"=height,"type"="obs"))
           }
           
-          if(length(corrected.locs[which(loc.ID.strings==ID.string),"Date"])>0)
+          if(length(sub.loc.data[which(loc.ID.strings==ID.string),"Date"])>0)
           {
-            record.dates<-as.Date(corrected.locs[which(loc.ID.strings==ID.string),"Date"],tryFormats = "%m/%d/%Y")
+            record.dates<-as.Date(sub.loc.data[which(loc.ID.strings==ID.string),"Date"],tryFormats = "%m/%d/%Y")
             min.date<-record.dates[which.min(abs(difftime(record.dates,date)))]
-            height<-corrected.locs[intersect(which(as.Date(corrected.locs[,"Date"],tryFormats = "%m/%d/%Y")==min.date),which(loc.ID.strings==ID.string)),"height.cm"]
+            height<-sub.loc.data[intersect(which(as.Date(sub.loc.data[,"Date"],tryFormats = "%m/%d/%Y")==min.date),which(loc.ID.strings==ID.string)),"height.cm"]
             obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="corrected.locs","height"=height,"type"="obs"))
           }
           
