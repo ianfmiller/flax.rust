@@ -233,12 +233,12 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       ## for each plant in the transect:
       for(index in 1:dim(sub.loc.data)[1])
       {
-        if(
+        if(!
           any(
             c(
               (!(site=="CC")),
               (sub.loc.data[index,"Y"] %in% c(0:8,18,19)),
-              all(sub.loc.data[index,"Y"] %in% c(15,17),sub.loc.data[index,"x"] %in% 7:9)
+              all(sub.loc.data[index,"Y"] %in% c(15,17),sub.loc.data[index,"X"] %in% 7:9)
             )
           )
         ) {next}
