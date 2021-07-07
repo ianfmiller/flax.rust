@@ -1,7 +1,7 @@
 library(leaflet)
 library(plotKML)
 
-pop.data<-read.csv("~/Documents/GitHub/flax.rust/data/landscape.transect.data/prelim.landscape.transects.csv")
+pop.data<-read.csv("~/Documents/GitHub/flax.rust/data/landscape.transect.data/landscape.transects.csv")
 path.data<-readGPX("~/Documents/GitHub/flax.rust/data/landscape.transect.data/gpx/RG.gpx")$tracks[[1]][[1]]
 
 RG<-pop.data[which(pop.data$transect=="RG"),]
