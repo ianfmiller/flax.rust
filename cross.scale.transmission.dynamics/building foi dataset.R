@@ -128,7 +128,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   data.dates<-list("CC"=c("2020-06-22","2020-06-29","2020-07-06","2020-07-13","2020-07-20"),"BT"=c("2020-06-24","2020-07-01"),"GM"=c("2020-06-23","2020-06-30","2020-07-02","2020-07-07","2020-07-09"),"HM"=c("2020-06-25","2020-07-02","2020-07-07","2020-07-09"))
   
   # build empty data object for foi vs outcome data
-  foi.data<-data.frame("site"=character(),"date"=as.Date(character()),"status"=character(),"status.next"=character(),"tag"=character(),"X"=numeric(),"Y"=numeric(),"x"=numeric(),"y"=numeric(),"first.obs.height"=numeric(),"foi"=numeric(),
+  foi.data<-data.frame("site"=character(),"date"=as.Date(character()),"status"=character(),"status.next"=character(),"tag"=character(),"X"=numeric(),"Y"=numeric(),"x"=numeric(),"y"=numeric(),"height.cm"=numeric(),"foi"=numeric(),
                        "temp.days"=numeric(),"temp.days.16.22"=numeric(),"temp.days.7.20"=numeric(),"dew.point.days"=numeric(),"wetness.days"=numeric(),"tot.rain"=numeric(),"solar.days"=numeric(),"wind.speed.days"=numeric(),
                        "gust.speed.days"=numeric(),"temp.16.22.dew.point.days"=numeric(),"temp.7.30.dew.point.days"=numeric(),"temp.wetness.days"=numeric(),"temp.16.22.wetness.days"=numeric(),"temp.7.30.wetness.days"=numeric(),
                        "pred.pustule.diam.growth"=numeric(),"pred.pustule.num.increase"=numeric(),"pred.plant.inf.intens.increase"=numeric())
@@ -248,10 +248,19 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         ### if that ID string is unique
         if(length(which(ID.strings==ID.string))==1)
         {
+          if(is.na(sub.loc.data[index,"tag"]))
+          {
+            target.index<-Reduce(intersect,list(which(corrected.heights$X==sub.loc.data[index,"X"]),which(corrected.heights$Y==sub.loc.data[index,"Y"]),which(corrected.heights$x==sub.loc.data[index,"x"]),which(corrected.heights$y==sub.loc.data[index,"y"]),which(corrected.heights$Date==date0)))
+            targt.height<-as.numeric(corrected.heights[target.index,"height.cm"])
+          }
+          if(!is.na(sub.loc.data[index,"tag"]))
+          {
+            target.height<-as.numeric(corrected.heights[intersect(which(corrected.heights$tag==sub.loc.data[index,"tag"]),which(corrected.heights$Date==date0)),"height.cm"])
+          }
           status<-ifelse(ID.string %in% epi.ID.strings,1,0) #### count plant as currently infected if its ID string shows up in the set of plants that have been infected by date0
           new.status<-ifelse(ID.string %in% epi.ID.strings.next,1,0) #### count plant as becoming infected by next obs if its ID string shows up in the set of plants that have been infected by date1
           foi<-foi.func(site=site,date0=date0,date1=date1,epi.data=corrected.epi,xcord=sub.loc.data[index,"X"]+sub.loc.data[index,"x"],ycord=sub.loc.data[index,"Y"]+sub.loc.data[index,"y"]) #### calculate foi experienced
-          foi.data<-rbind(foi.data,data.frame("site"=site,"date"=date0,"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"first.obs.height"=sub.loc.data[index,"height.cm"],"foi"=foi,
+          foi.data<-rbind(foi.data,data.frame("site"=site,"date"=date0,"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"height.cm"=target.height,"foi"=foi,
                                               "temp.days"=new.temp.days,"temp.days.16.22"=new.temp.days.16.22,"temp.days.7.30"=new.temp.days.7.30,"dew.point.days"=new.dew.point.days,"wetness.days"=new.wetness.days,"tot.rain"=new.tot.rain,"solar.days"=new.solar.days,"wind.speed.days"=new.wind.speed.days,
                                               "gust.speed.days"=new.gust.speed.days,"temp.dew.point.days"=new.temp.dew.point.days,"temp.16.22.dew.point.days"=new.temp.16.22.dew.point.days,"temp.7.30.dew.point.days"=new.temp.7.30.dew.point.days,"temp.wetness.days"=new.temp.wetness.days,"temp.16.22.wetness.days"=new.temp.16.22.wetness.days,"temp.7.30.wetness.days"=new.temp.7.30.wetness.days,
                                               "pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase,"pred.plant.inf.intens.increase"=pred.plant.inf.intens.increase)) #### add new entry to data object
@@ -259,12 +268,21 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         ### if that ID string is not unique
         if(length(which(ID.strings==ID.string))>1)
         {
+          if(is.na(sub.loc.data[index,"tag"]))
+          {
+            target.index<-Reduce(intersect,list(which(corrected.heights$X==sub.loc.data[index,"X"]),which(corrected.heights$Y==sub.loc.data[index,"Y"]),which(corrected.heights$x==sub.loc.data[index,"x"]),which(corrected.heights$y==sub.loc.data[index,"y"]),which(corrected.heights$Date==date0)))
+            targt.height<-as.numeric(corrected.heights[target.index,"height.cm"])
+          }
+          if(!is.na(sub.loc.data[index,"tag"]))
+          {
+            target.height<-as.numeric(corrected.heights[intersect(which(corrected.heights$tag==sub.loc.data[index,"tag"]),which(corrected.heights$Date==date0)),"height.cm"])
+          }
           n.repeats<-length(which(ID.strings==ID.string)) #### how many times ID string is repeated
           order<-which(which(ID.strings==ID.string)==index) #### figure out which repeat (e.g. 2nd) this plant is
           status<-ifelse(length(which(epi.ID.strings==ID.string))>=order,1,0) #### for plant that is the nth repeat, count as currently infected if at least n matching ID strings show up in epi.ID.strings
           new.status<-ifelse(length(which(epi.ID.strings.next==ID.string))>=order,1,0) #### for plant that is the nth repeat, count as becoming infected by next obs if at least n matching ID strings show up in epi.ID.strings.next
           foi<-foi.func(site=site,date0=date0,date1=date1,epi.data=corrected.epi,xcord=sub.loc.data[index,"X"]+sub.loc.data[index,"x"],ycord=sub.loc.data[index,"Y"]+sub.loc.data[index,"y"]) #### calculate foi experienced
-          foi.data<-rbind(foi.data,data.frame("site"=site,"date"=date0,"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"first.obs.height"=sub.loc.data[index,"height.cm"],"foi"=foi,
+          foi.data<-rbind(foi.data,data.frame("site"=site,"date"=date0,"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"height.cm"=targt.height,"foi"=foi,
                                               "temp.days"=new.temp.days,"temp.days.16.22"=new.temp.days.16.22,"temp.days.7.30"=new.temp.days.7.30,"dew.point.days"=new.dew.point.days,"wetness.days"=new.wetness.days,"tot.rain"=new.tot.rain,"solar.days"=new.solar.days,"wind.speed.days"=new.wind.speed.days,
                                               "gust.speed.days"=new.gust.speed.days,"temp.dew.point.days"=new.temp.dew.point.days,"temp.16.22.dew.point.days"=new.temp.16.22.dew.point.days,"temp.7.30.dew.point.days"=new.temp.7.30.dew.point.days,"temp.wetness.days"=new.temp.wetness.days,"temp.16.22.wetness.days"=new.temp.16.22.wetness.days,"temp.7.30.wetness.days"=new.temp.7.30.wetness.days,
                                               "pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase,"pred.plant.inf.intens.increase"=pred.plant.inf.intens.increase)) #### add new entry to data object
