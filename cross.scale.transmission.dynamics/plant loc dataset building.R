@@ -33,7 +33,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
     ## get plant location data
     sub.loc.data<-plant.locs[which(plant.locs$Site==site),c("Site","Date","X","Y","x","y","height.cm","tag")]
     #sub.loc.data<-sub.loc.data[which(as.Date(sub.loc.data$Date,tryFormats=c("%m/%d/%Y")) %in% plant.loc.survey.dates[which(sites==site)][[1]]),c("Site","X","Y","x","y","tag")]
-    sub.loc.data<-data.frame(sub.loc.data,"matched"=F)
+    sub.loc.data<-data.frame(sub.loc.data,"matched"=F,"added"=F)
     sub.loc.data[which(!(is.na(sub.loc.data$tag))),"matched"]<-T
     
     dates<-unique(corrected.epi[which(corrected.epi$Site==site),"Date.First.Observed.Diseased"])
@@ -50,7 +50,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
         {
           min.dist.func<-function(i) {dist(rbind(c(sub.epi.data[index,"X"]+sub.epi.data[index,"x"],sub.epi.data[index,"Y"]+sub.epi.data[index,"y"]),c(sub.loc.data[i,"X"]+sub.loc.data[i,"x"],sub.loc.data[i,"Y"]+sub.loc.data[i,"y"])))[1]}
           distances<-sapply(intersect(which(is.na(sub.loc.data$tag)),which(sub.loc.data$matched==F)),min.dist.func)
-          #replace data if there's a close match
+          #replace data in epi data set if there's a close match
           if(min(distances)<=.25) 
           {
             sub.loc.data.edit.index<-intersect(which(is.na(sub.loc.data$tag)),which(sub.loc.data$matched==F))[which.min(distances)[1]]
@@ -61,7 +61,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
           # add a new record if there's not a close match
           if(min(distances)>.25) 
           {
-            sub.loc.data<-rbind(sub.loc.data,data.frame("Site"=site,"Date"=format(as.Date(date,origin="1970-01-01"),"%m/%d/%Y"),"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"height.cm"=NA,"tag"=sub.epi.data[index,"Tag"],"matched"=T))
+            sub.loc.data<-rbind(sub.loc.data,data.frame("Site"=site,"Date"=format(as.Date(date,origin="1970-01-01"),"%m/%d/%Y"),"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"height.cm"=NA,"tag"=sub.epi.data[index,"Tag"],"matched"=T,"added"=T))
           }
         }
       }
@@ -80,7 +80,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
         {
           min.dist.func<-function(i) {dist(rbind(c(sub.epi.data[index,"X"]+sub.epi.data[index,"x"],sub.epi.data[index,"Y"]+sub.epi.data[index,"y"]),c(sub.loc.data[i,"X"]+sub.loc.data[i,"x"],sub.loc.data[i,"Y"]+sub.loc.data[i,"y"])))[1]}
           distances<-sapply(which(sub.loc.data$matched==F),min.dist.func)
-          #replace data if there's a close match
+          #replace data in epi data set if there's a close match
           if(min(distances)<=.25) 
           {
             corrected.epi.index<-intersect(which(corrected.epi$Site==site),which(corrected.epi$X==sub.epi.data[index,"X"]))
@@ -94,7 +94,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
           # add a new record if there's not a close match
           if(min(distances)>.25) 
           {
-            sub.loc.data<-rbind(sub.loc.data,data.frame("Site"=site,"Date"=format(as.Date(date,origin="1970-01-01"),"%m/%d/%Y"),"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"height.cm"=NA,"tag"=sub.epi.data[index,"Tag"],"matched"=T))
+            sub.loc.data<-rbind(sub.loc.data,data.frame("Site"=site,"Date"=format(as.Date(date,origin="1970-01-01"),"%m/%d/%Y"),"X"=sub.epi.data[index,"X"],"Y"=sub.epi.data[index,"Y"],"x"=sub.epi.data[index,"x"],"y"=sub.epi.data[index,"y"],"height.cm"=NA,"tag"=sub.epi.data[index,"Tag"],"matched"=T,"added"=T))
           }
         }
       }
