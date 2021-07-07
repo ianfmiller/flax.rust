@@ -109,7 +109,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       if(is.na(source.data[i,"Tag"]))
       {
         #### set q to 0.1 if the plant is a seedling
-        if(source.data[i,"corrected.height"]<=5)
+        if(source.data[i,"corrected.height"]<=5 | source.data[i,"notes"]=="seedling")
         {
           q<-.1
           half.height<-2.5
