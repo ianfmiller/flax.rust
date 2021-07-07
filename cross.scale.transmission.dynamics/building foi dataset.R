@@ -75,7 +75,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         if(source.data[i,"Tag"]==15) {q<-0; half.height=10} #### set q = 0 for tag 15, half.height doesn't matter
         else{
           #### set q to 0.1 if the plant is a seedling
-          if(!source.data[i,"Tag"] %in% plant.inf.intens$Tag & source.data[i,"corrected.height"]<=5) {q<-.1; if(is.na(source.data[i,"corrected.height"])) {half.height<-2.5} else {half.height<-source.data[i,"corrected.height"]*.5}}
+          if(!source.data[i,"Tag"] %in% plant.inf.intens$Tag & (source.data[i,"corrected.height"]<=5 | grepl("seedling",source.data[i,"notes"]))) {q<-.1; if(is.na(source.data[i,"corrected.height"])) {half.height<-2.5} else {half.height<-source.data[i,"corrected.height"]*.5}}
           #### extract q from data
           else {
             plant.inf.intens.index<-intersect(which(plant.inf.intens$Date==date0),which(plant.inf.intens$Tag==source.data[i,"Tag"]))
