@@ -3,6 +3,7 @@ library(lme4)
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant loc dataset building.R")
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/predict plant inf intens change funcs.R")
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/spore deposition functions tilt.R")
+source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/predict plant height change funcs.R")
 foi.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
 plant.inf.intens<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plants.RDS")
 
@@ -76,7 +77,14 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
     weath.sub<-subset(weath.sub,date>=date0) #### pull out relevant data
     weath.sub<-cbind(weath.sub,interval.length=c(diff(as.numeric(weath.sub$date))/(60*60*24),NA))
     
-    ### get date from previous date
+    ### compare weather data coverage to make sure foi is not being underestimated
+    time.diff.weather.data<-weath.sub$date[nrow(weath.sub)]-weath.sub$date[1]
+    units(time.diff.weather.data)<-"days"
+    time.diff.epi.data<-date1-date0
+    units(time.diff.epi.data)<-"days"
+    if(time.diff.epi.data>time.diff.weather.data) {foi.mod<-(as.numeric(time.diff.weather.data)/as.numeric(time.diff.epi.data))^-1} else{foi.mod<-1}
+    
+    ### get data from previous date
     last.epi<-pred.epi[which(pred.epi$date==as.Date(date0)),]
     ### get set of diseased plants from last date
     last.epi.dis.set<-last.epi[which(last.epi$status==1),]
@@ -97,8 +105,8 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
           q<-last.epi.dis.set[j,"plant.inf.intens"]
           foi<-foi+predict.kernel.tilted.plume(q=q,H=half.height,k=5.803369e-07,alphaz=1.596314e-01,Ws=1.100707e+00,xtarget=xcord-sourceX,ytarget=ycord-sourceY,wind.data=weath.sub)
         }
-        
-        pred.inf.odds<-predict(foi.model,newdata = data.frame("foi"=foi,"first.obs.height"=last.epi[i,"max.height"]),type="response") ### predict odds of becoming infected
+        foi<-foi*foi.mod ### correct for any gaps in weath data
+        pred.inf.odds<-predict(foi.model,newdata = data.frame("foi"=foi),type="response") ### predict odds of becoming infected
         draw<-runif(1) ### draw random number between 0 and 1
         
         if(draw<=pred.inf.odds) ### if draw <= odds make plant infected
@@ -118,7 +126,11 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
         
         new.plant.inf.intens<-predict.plant.inf.intens.boot(plant.inf.intens.last = last.epi[i,"plant.inf.intens"],site = site,date0 = date0,date1 = date1)
       }
-      new.row<-data.frame("site"=site,"tag"=sub.locs[i,"tag"],"X"=sub.locs[i,"X"],"Y"=sub.locs[i,"Y"],"x"=sub.locs[i,"x"],"y"=sub.locs[i,"y"],"date"= as.Date(date1),"status"=new.status,"max.height"=last.epi[i,"max.height"],"plant.inf.intens"=new.plant.inf.intens) ### new data row
+      
+      ### plant growth
+      new.height<-predict.plant.growth(last.epi[i,"max.height"],site,date0,date1,exclude.site = T)
+      
+      new.row<-data.frame("site"=site,"tag"=sub.locs[i,"tag"],"X"=sub.locs[i,"X"],"Y"=sub.locs[i,"Y"],"x"=sub.locs[i,"x"],"y"=sub.locs[i,"y"],"date"= as.Date(date1),"status"=new.status,"max.height"=new.height,"plant.inf.intens"=new.plant.inf.intens) ### new data row
       pred.epi<-rbind(pred.epi,new.row) ### join data
       if(print.progress) {print(paste0("finished ",site," ",as.Date(date1)," tag ",i,"/",dim(sub.locs)[1]))}
     }
