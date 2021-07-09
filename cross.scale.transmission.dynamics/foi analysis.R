@@ -58,12 +58,11 @@ axis(1,cex.axis=1.5)
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS"))
 {
   ### create all sets of models--Only use foi and first obs height due to low sample size for environmental vars within several sites
-  mod00<-glm(status.next~foi,data=foi.data,family = "binomial")
-  mod0<-glm(status.next~foi,data=foi.data[which(!is.na(foi.data$first.obs.height)),],family = "binomial") #included as check to make sure coefficient of foi is relatively insensitive to data subsetting
-  mod1<-glm(status.next~foi+first.obs.height,data=foi.data,family = "binomial") #subset data to make same n observations between mod0,mod1,mod2
-  mod2<-glm(status.next~foi*first.obs.height,data=foi.data,family = "binomial")
+  mod0<-glm(status.next~foi,data=foi.data,family = "binomial")
+  mod1<-glm(status.next~foi+height.cm,data=foi.data,family = "binomial") 
+  mod2<-glm(status.next~foi*height.cm,data=foi.data,family = "binomial")
   AIC(mod0,mod1,mod2)
-  best.model<-mod1 #mod1 has lowest AIC, interaction insignificant in mod2
+  best.model<-mod0 #mod1 has lowest AIC, interaction insignificant in mod2
   saveRDS(best.model,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
 }
 
@@ -76,30 +75,6 @@ axis(2,cex.axis=1.5,col="red",col.axis="red")
 mtext("odds of infection",side=2,line=2.5,cex=1.5,col="red")
 axis(1,cex.axis=1.5)
 
-dummy.fois<-seq(0,.14,.0001)
-new.data1<-data.frame("foi"=dummy.fois,"first.obs.height"=rep(5,length(dummy.fois)))
-points(new.data1$foi,predict(best.model,newdata = new.data1,type = "response"),type="l",col="red",lwd=4,lty=1)
-
-new.data1<-data.frame("foi"=dummy.fois,"first.obs.height"=rep(10,length(dummy.fois)))
-points(new.data1$foi,predict(best.model,newdata = new.data1,type = "response"),type="l",col="red",lwd=4,lty=2)
-
-new.data1<-data.frame("foi"=dummy.fois,"first.obs.height"=rep(25,length(dummy.fois)))
-points(new.data1$foi,predict(best.model,newdata = new.data1,type = "response"),type="l",col="red",lwd=4,lty=3)
-
-new.data1<-data.frame("foi"=dummy.fois,"first.obs.height"=rep(50,length(dummy.fois)))
-points(new.data1$foi,predict(best.model,newdata = new.data1,type = "response"),type="l",col="red",lwd=4,lty=4)
-
-legend("topright",legend=c("height = 5cm","height = 10cm","height = 25cm","height = 50cm"),col="red",lwd=4,lty=c(1,2,3,4),cex=2,bty="n")
-
-par(mfrow=c(1,1),mar=c(6,6,6,6))
-plot(0,0,type="n",xlim=c(0,.14),ylim=c(1,10),xlab="predicted spore deposition",ylab="relative odds of infection",cex.lab=1.5,cex.axis=1.5)
-new.data1<-data.frame("foi"=dummy.fois,"first.obs.height"=rep(5,length(dummy.fois)))
-points(new.data1$foi,predict(best.model,newdata = new.data1,type = "response")/predict(best.model,newdata = new.data1,type = "response")[1],type="l",col="red",lwd=4,lty=1)
-new.data1<-data.frame("foi"=dummy.fois,"first.obs.height"=rep(10,length(dummy.fois)))
-points(new.data1$foi,predict(best.model,newdata = new.data1,type = "response")/predict(best.model,newdata = new.data1,type = "response")[1],type="l",col="red",lwd=4,lty=2)
-new.data1<-data.frame("foi"=dummy.fois,"first.obs.height"=rep(25,length(dummy.fois)))
-points(new.data1$foi,predict(best.model,newdata = new.data1,type = "response")/predict(best.model,newdata = new.data1,type = "response")[1],type="l",col="red",lwd=4,lty=3)
-new.data1<-data.frame("foi"=dummy.fois,"first.obs.height"=rep(50,length(dummy.fois)))
-points(new.data1$foi,predict(best.model,newdata = new.data1,type = "response")/predict(best.model,newdata = new.data1,type = "response")[1],type="l",col="red",lwd=4,lty=4)
-legend("bottomright",legend=c("height = 5cm","height = 10cm","height = 25cm","height = 50cm"),col="red",lwd=4,lty=c(1,2,3,4),cex=2,bty="n")
+new.data<-data.frame("foi"=seq(0,.15,.0001))
+points(new.data$foi,predict(best.model,newdata = new.data,type = "response"),type="l",col="red",lwd=4,lty=1)
 
