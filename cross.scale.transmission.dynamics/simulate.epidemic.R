@@ -128,7 +128,7 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
       }
       
       ### plant growth
-      new.height<-predict.plant.growth(last.epi[i,"max.height"],site,date0,date1,exclude.site = T)
+      new.height<-predict.plant.growth.boot(last.epi[i,"max.height"],site,date0,date1)
       
       new.row<-data.frame("site"=site,"tag"=sub.locs[i,"tag"],"X"=sub.locs[i,"X"],"Y"=sub.locs[i,"Y"],"x"=sub.locs[i,"x"],"y"=sub.locs[i,"y"],"date"= as.Date(date1),"status"=new.status,"max.height"=new.height,"plant.inf.intens"=new.plant.inf.intens) ### new data row
       pred.epi<-rbind(pred.epi,new.row) ### join data
@@ -141,16 +141,16 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
 simulate.epi("GM",0,print.progress = T)->pred.epi
 
 par(mfrow=c(3,3))
-for(date in unique(x$date))
+for(date in unique(pred.epi$date))
 {
-  hist(x[which(x$date==date),"plant.inf.intens"],breaks=20)
+  hist(pred.epi[which(pred.epi$date==date),"plant.inf.intens"],breaks=20)
 }
 
 library(parallel)
 library(doParallel)
 n.cores<-5
 registerDoParallel(n.cores)
-site<-"BT"
+site<-"GM"
 pred.epi.all.0<-foreach(k = 1:6, .multicombine = T) %dopar% simulate.epi(site,0,print.progress = F)
 pred.epi.all.1.8<-foreach(k = 1:6, .multicombine = T) %dopar% simulate.epi(site,1.8,print.progress = F)
 pred.epi.all.3.7<-foreach(k = 1:6, .multicombine = T) %dopar% simulate.epi(site,3.7,print.progress = F)
@@ -173,7 +173,7 @@ sub.locs<-corrected.locs[which(corrected.locs$Site==site),]
 
 par(mfrow=c(1,1))
 par(mar=c(6,6,6,6))
-plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,.05),xlab="date",ylab="prev",type="n",cex.axis=2,cex.lab=2)
+plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,.3),xlab="date",ylab="prev",type="n",cex.axis=2,cex.lab=2)
 xvals<-c()
 yvals<-c()
 for(i in 1:9)
