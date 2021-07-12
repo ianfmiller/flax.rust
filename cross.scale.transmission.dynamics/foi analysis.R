@@ -80,14 +80,6 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   delta.AICs<-AICs-min(AICs)
   index<-1
   best.model<-all.fit.models[[order(AICs)[index]]]
-  
-  ### create all sets of models--Only use foi and first obs height due to low sample size for environmental vars within several sites
-  mod0<-glm(status.next~foi,data=foi.data,family = "binomial")
-  mod1<-glm(status.next~foi+height.cm,data=foi.data,family = "binomial") 
-  mod2<-glm(status.next~foi*height.cm,data=foi.data,family = "binomial")
-  AIC(mod0,mod1,mod2)
-  best.model<-mod0 #mod1 has lowest AIC, interaction insignificant in mod2
-  saveRDS(best.model,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
 }
 
 best.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
