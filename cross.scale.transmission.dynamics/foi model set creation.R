@@ -3,6 +3,7 @@
 
 ### construct all combinations of predictors
 predictors<-c(
+              "height.cm",
               "mean.temp.days","mean.temp.days.16.22","mean.temp.days.7.30",
               "mean.dew.point.days",
               "mean.temp.dew.point.days","mean.temp.16.22.dew.point.days","mean.temp.7.30.dew.point.days",
@@ -11,7 +12,7 @@ predictors<-c(
               "mean.tot.rain"
 )
 
-pred.mat<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F))
+pred.mat<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F))
 names(pred.mat)<-predictors
 
 ### define sets of variables that explain the same thing

@@ -59,17 +59,16 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 {
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/foi model set creation.R") ### load models
   
-  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("status.next ~ foi",predictors[x]),collapse=" + ")))
+  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("status.next ~ foi",predictors[x],"(1|site)"),collapse=" + ")))
   names(model.set)<-seq(1,length(model.set),1)
   
   ## run to search for best  model
   all.fit.models<-c()
-  AIC.benchmark<- AIC(glm(status.next~foi,data = foi.data)) #cutoff to limit memory usage
-  #AIC.benchmark<- 8025
+  AIC.benchmark<- AIC(glmer(status.next~foi + (1|site),data = foi.data,family = binomial)) #cutoff to limit memory usage
   pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
   for (i in 1:length(model.set))
   {
-    suppressMessages(new.mod<-glm(model.set[[i]],data=foi.data))
+    suppressMessages(new.mod<-glmer(model.set[[i]],data=foi.data,family=binomial,nAGQ=0))
     AIC.new.mod<-AIC(new.mod)
     if(AIC.new.mod<=(AIC.benchmark)) {all.fit.models<-append(all.fit.models,list(new.mod))}
     pb$tick()
@@ -80,6 +79,12 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   delta.AICs<-AICs-min(AICs)
   index<-1
   best.model<-all.fit.models[[order(AICs)[index]]]
+  saveRDS(best.model,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
+  #mod0<-glm(status.next~log10(foi),data=foi.data,family = "binomial")
+  #mod1<-glm(status.next~log10(foi)+height.cm,data=foi.data,family = "binomial") 
+  #mod2<-glm(status.next~log10(foi)*height.cm,data=foi.data,family = "binomial")
+  #AIC(mod0,mod1,mod2)
+  #saveRDS(mod0,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
 }
 
 best.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
@@ -93,11 +98,9 @@ axis(1,cex.axis=1.5)
 
 fois<-seq(0,.15,.0001)
 new.data<-data.frame("foi"=fois,
+                     "height.cm"=rep(mean(foi.data$height.cm),times=length(fois)),
                      "mean.temp.days.16.22"=rep(mean(foi.data$mean.temp.days.16.22),times=length(fois)),
-                     "mean.dew.point.days"=rep(mean(foi.data$mean.dew.point.days),times=length(fois)),
-                     "mean.temp.dew.point.days"=rep(mean(foi.data$mean.temp.dew.point.days ),times=length(fois)),
-                     "mean.temp.7.30.wetness.days"=rep(mean(foi.data$mean.temp.7.30.wetness.days),times=length(fois)),
-                     "mean.tot.rain"=rep(mean(foi.data$mean.tot.rain ),times=length(fois))
+                     "mean.temp.7.30.dew.point.days"=rep(mean(foi.data$mean.temp.7.30.wetness.days),times=length(fois))
                      )
 
 points(new.data$foi,predict(best.model,newdata = new.data,type = "response"),type="l",col="red",lwd=4,lty=1)
