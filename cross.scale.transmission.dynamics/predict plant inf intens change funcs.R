@@ -182,6 +182,7 @@ predict.plant.inf.intens.last<-function(plant.inf.intens.next,site,date0,date1)
     abs(plant.inf.intens.next.pred-plant.inf.intens.next)
   }
   plant.inf.intens.last<-optim(c(plant.inf.intens.next),pred.func,method = "Brent",lower=0,upper=10e6)$par
+  if(plant.inf.intens.last<0.1) {plant.inf.intens.last<-.1}
   plant.inf.intens.last
 }
 
