@@ -18,8 +18,8 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
   ### subset data
   sub.locs<-corrected.locs[which(corrected.locs$Site==site),]
   sub.epi<-corrected.epi[which(corrected.epi$Site==site),]
-  start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased==min(sub.epi$Date.First.Observed.Diseased)),]
-  #start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased<=unique(sub.epi$Date.First.Observed.Diseased)[3]),] ## option for shorter sim
+  #start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased==min(sub.epi$Date.First.Observed.Diseased)),]
+  start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased<=unique(sub.epi$Date.First.Observed.Diseased)[2]),] ## option for shorter sim
   
   ### data frame to fill
   pred.epi<-data.frame("site"=factor(),"tag"=factor(),"X"=numeric(),"Y"=numeric(),"x"=numeric(),"y"=numeric(),"date"=character(),"tot.stems"=numeric(),"status"=numeric(),"max.height"=numeric(),"plant.inf.intens"=numeric())
@@ -55,12 +55,13 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
   
   ## loopt to simulate epi process
   
-  for(date.index in 1:(length(unique(sub.epi$Date.First.Observed.Diseased))-1)) 
+  for(date.index in 1:(length(unique(sub.epi$Date.First.Observed.Diseased))-2)) 
   {
-    date0<-unique(sub.epi$Date.First.Observed.Diseased)[date.index] ### last date
+    date0<-unique(sub.epi$Date.First.Observed.Diseased)[date.index+1] ### last date
     date0<-as.POSIXct(paste0(date0," 12:00:00")) ### convert format
-    date1<-unique(sub.epi$Date.First.Observed.Diseased)[date.index+1] ### next date
+    date1<-unique(sub.epi$Date.First.Observed.Diseased)[date.index+2] ### next date
     date1<-as.POSIXct(paste0(date1," 12:00:00")) ### convert format
+    delta.days<-as.numeric(as.Date(date1)-as.Date(date0))
     
     ### load weather data
     #### subst temp rh data to relevant window
@@ -76,6 +77,28 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
     weath.sub<-subset(weath.sub,date<=date1) #### pull out relevant data
     weath.sub<-subset(weath.sub,date>=date0) #### pull out relevant data
     weath.sub<-cbind(weath.sub,interval.length=c(diff(as.numeric(weath.sub$date))/(60*60*24),NA))
+    
+    #### calculate environmental variable metrics
+    mean.temp.days<-sum(temp.rh.sub$temp.c*temp.rh.sub$interval.length,na.rm = T)/delta.days #temperature days
+    mean.temp.days.16.22<-sum(1*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T)/delta.days  #time (in days) during which temp between 16 and 22 celsius
+    mean.temp.days.7.30<-sum(1*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T)/delta.days  #time (in days) during which temp between 7 and 30 celsius
+    mean.dew.point.days<-sum(temp.rh.sub$dew.pt.c*temp.rh.sub$interval.length,na.rm = T)/delta.days  #Dew point days
+    
+    #calculate weather metrics
+    mean.wetness.days<-sum(weath.sub$wetness*weath.sub$interval.length,na.rm = T)/delta.days 
+    mean.tot.rain<-sum(weath.sub$rain,na.rm=T)/delta.days 
+    mean.solar.days<-sum(weath.sub$solar.radiation*weath.sub$interval.length,na.rm = T)/delta.days 
+    mean.wind.speed.days<-sum(weath.sub$wind.speed*weath.sub$interval.length,na.rm = T)/delta.days 
+    mean.gust.speed.days<-sum(weath.sub$wind.direction*weath.sub$interval.length,na.rm = T)/delta.days 
+    
+    #calculate joint environmental variable metrics--accounts for temporal co-occurence of environmental variables
+    mean.temp.dew.point.days<-sum(temp.rh.sub$temp.c*temp.rh.sub$dew.pt.c*temp.rh.sub$interval.length,na.rm = T)/delta.days 
+    mean.temp.16.22.dew.point.days<-sum(1*temp.rh.sub.func(temp.rh.sub,16,22)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T)/delta.days 
+    mean.temp.7.30.dew.point.days<-sum(1*temp.rh.sub.func(temp.rh.sub,7,30)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T)/delta.days 
+    mean.temp.wetness.days<-sum(weath.sub$temp*weath.sub$wetness*weath.sub$interval.length,na.rm = T)/delta.days 
+    mean.temp.16.22.wetness.days<-sum(weath.sub$temp.16.22*weath.sub$wetness*weath.sub$interval.length,na.rm = T)/delta.days 
+    mean.temp.7.30.wetness.days<-sum(weath.sub$temp.7.30*weath.sub$wetness*weath.sub$interval.length,na.rm = T)/delta.days 
+    
     
     ### compare weather data coverage to make sure foi is not being underestimated
     time.diff.weather.data<-weath.sub$date[nrow(weath.sub)]-weath.sub$date[1]
@@ -106,7 +129,9 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
           foi<-foi+predict.kernel.tilted.plume(q=q,H=half.height,k=5.803369e-07,alphaz=1.596314e-01,Ws=1.100707e+00,xtarget=xcord-sourceX,ytarget=ycord-sourceY,wind.data=weath.sub)
         }
         foi<-foi*foi.mod ### correct for any gaps in weath data
-        pred.inf.odds<-predict(foi.model,newdata = data.frame("foi"=foi),type="response") ### predict odds of becoming infected
+        pred.inf.odds<-predict(foi.model,newdata = data.frame("foi"=foi,"height.cm"=last.epi[i,"max.height"],"mean.temp.days.16.22"=mean.temp.days.16.22,"mean.temp.7.30.dew.point.days"=mean.temp.7.30.dew.point.days),type="response") ### predict odds of becoming infected
+        #pred.inf.odds<-predict(foi.model,newdata = data.frame("foi"=foi,"height.cm"=last.epi[i,"max.height"],"mean.temp.days.16.22"=mean.temp.days.16.22,"mean.temp.7.30.dew.point.days"=mean.temp.7.30.dew.point.days),type="response",re.form=NA) ### predict odds of becoming infected
+        #pred.inf.odds<-predict(foi.model,newdata=data.frame("foi"=foi),type="response")
         draw<-runif(1) ### draw random number between 0 and 1
         
         if(draw<=pred.inf.odds) ### if draw <= odds make plant infected
@@ -151,9 +176,9 @@ library(doParallel)
 n.cores<-5
 registerDoParallel(n.cores)
 site<-"GM"
-pred.epi.all.0<-foreach(k = 1:6, .multicombine = T) %dopar% simulate.epi(site,0,print.progress = F)
-pred.epi.all.1.8<-foreach(k = 1:6, .multicombine = T) %dopar% simulate.epi(site,1.8,print.progress = F)
-pred.epi.all.3.7<-foreach(k = 1:6, .multicombine = T) %dopar% simulate.epi(site,3.7,print.progress = F)
+pred.epi.all.0<-foreach(k = 1:1, .multicombine = T) %dopar% simulate.epi(site,0,print.progress = F)
+pred.epi.all.1.8<-foreach(k = 1:1, .multicombine = T) %dopar% simulate.epi(site,1.8,print.progress = F)
+pred.epi.all.3.7<-foreach(k = 1:1, .multicombine = T) %dopar% simulate.epi(site,3.7,print.progress = F)
 
 t_col <- function(color, percent = 50, name = NULL) {
   rgb.val <- col2rgb(color)
@@ -173,7 +198,7 @@ sub.locs<-corrected.locs[which(corrected.locs$Site==site),]
 
 par(mfrow=c(1,1))
 par(mar=c(6,6,6,6))
-plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,.3),xlab="date",ylab="prev",type="n",cex.axis=2,cex.lab=2)
+plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,1),xlab="date",ylab="prev",type="n",cex.axis=2,cex.lab=2)
 xvals<-c()
 yvals<-c()
 for(i in 1:9)
