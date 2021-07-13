@@ -5,7 +5,7 @@ source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/spore dep
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
 ## load spore dep data
 spore.deposition<-read.csv("~/Documents/GitHub/flax.rust/data/spore counts.csv")
-spore.deposition[which(spore.deposition$Distance.cm==0),"Distance.cm"]<-5 #set distance for "0" spore traps to 1cm
+spore.deposition[which(spore.deposition$Distance.cm==0),"Distance.cm"]<-5 #set distance for "0" spore traps to 5cm
 ## load demog data
 demog<-read.csv("~/Documents/GitHub/flax.rust/data/Demography.csv")
 demog<-demog[which(demog$year==2020),] #subset to 2020
