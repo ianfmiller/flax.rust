@@ -58,13 +58,12 @@ axis(1,cex.axis=1.5)
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS"))
 {
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/foi model set creation.R") ### load models
-  
-  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("status.next ~ foi",predictors[x],"(1|site)"),collapse=" + ")))
+  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("status.next ~ foi + (1|site)",predictors[x]),collapse=" + ")))
   names(model.set)<-seq(1,length(model.set),1)
-  
   ## run to search for best  model
   all.fit.models<-c()
-  AIC.benchmark<- AIC(glmer(status.next~foi + (1|site),data = foi.data,family = binomial)) #cutoff to limit memory usage
+  AIC.benchmark<- AIC(glmer(status.next~foi + (1|site),data = foi.data,family = binomial(link="logit"),nAGQ = 0)) #cutoff to limit memory usage
+  #AIC.benchmark<-830
   pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
   for (i in 1:length(model.set))
   {
@@ -79,6 +78,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   delta.AICs<-AICs-min(AICs)
   index<-1
   best.model<-all.fit.models[[order(AICs)[index]]]
+  summary(best.model)
   saveRDS(best.model,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
   #mod0<-glm(status.next~log10(foi),data=foi.data,family = "binomial")
   #mod1<-glm(status.next~log10(foi)+height.cm,data=foi.data,family = "binomial") 
@@ -87,10 +87,10 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   #saveRDS(mod0,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
 }
 
-best.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
+best.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.1RDS.RDS")
 
 par(mfrow=c(1,1),mar=c(6,8,6,6))
-plot(jitter(foi.data$foi),jitter(foi.data$status.next),xlab="predicted spore deposition",ylab="",axes=F,cex.lab=1.5)
+plot(jitter(foi.data$foi),jitter(foi.data$status.next),xlab="predicted spore deposition",ylab="",axes=F,cex.lab=1.5,ylim=c(0,.1))
 axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=1.5,line=3,tick = F)
 axis(2,cex.axis=1.5,col="red",col.axis="red")
 mtext("odds of infection",side=2,line=2.5,cex=1.5,col="red")
@@ -98,10 +98,19 @@ axis(1,cex.axis=1.5)
 
 fois<-seq(0,.15,.0001)
 new.data<-data.frame("foi"=fois,
-                     "height.cm"=rep(mean(foi.data$height.cm),times=length(fois)),
+                     "height.cm"=rep(quantile(foi.data$height.cm,.5),times=length(fois)),
+                     "mean.temp.days.7.30"=rep(mean(foi.data$mean.temp.days.7.30),times=length(fois)),
+                     "mean.dew.point.days"=rep(mean(foi.data$mean.dew.point.days),times=length(fois)),
+                     "mean.temp.7.30.dew.point.days"=rep(mean(foi.data$mean.temp.7.30.dew.point.days),times=length(fois)),
+                     "mean.wetness.days"=rep(mean(foi.data$mean.wetness.days),times=length(fois)),
+                     "mean.temp.wetness.days"=rep(quantile(foi.data$mean.temp.wetness.days,.5),times=length(fois)),
+                     "pred.pustule.diam.growth"=rep(mean(foi.data$pred.pustule.diam.growth ),times=length(fois)),
+                     "pred.pustule.num.increase"=rep(mean(foi.data$pred.pustule.num.increase ),times=length(fois)),
                      "mean.temp.days.16.22"=rep(mean(foi.data$mean.temp.days.16.22),times=length(fois)),
-                     "mean.temp.7.30.dew.point.days"=rep(mean(foi.data$mean.temp.7.30.wetness.days),times=length(fois))
+                     "mean.temp.7.30.dew.point.days"=rep(quantile(foi.data$mean.temp.7.30.dew.point.days,.5),times=length(fois)),
+                     "delta.days"=rep(mean(foi.data$delta.days),times=length(fois))
                      )
 
-points(new.data$foi,predict(best.model,newdata = new.data,type = "response"),type="l",col="red",lwd=4,lty=1)
+points(new.data$foi,predict(best.model,newdata = new.data,type = "response",re.form=NA),type="l",col="red",lwd=1,lty=1)
+plot(best.model$data$foi,predict(best.model,type="response"))
 
