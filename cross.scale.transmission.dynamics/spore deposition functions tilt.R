@@ -19,7 +19,7 @@ library(parallel)
 tilted.plume<-function(q,H,s,x,y,k,alphaz,Ws)
 {
   alphazeff<-.25*(1+abs(alphaz))*2*H #assume that at a maximum of ~ 96% of spores are distributed within 100% of max plant height in the z plane--avoids overfitting via unrealistically small z distribution
-  alphay<-.125*2*H #assume ~96% of spores fall within .5 * plant height (H=.5*height)
+  alphay<-.125*2*H #assume ~96% of spores fall within .5 * plant height (H=.5*height) in the y plane
   out<-((q*k*Ws)/(2*pi*s*alphay*alphazeff))*
     exp(
       ((-y^2)/(2*alphay^2))-((H-Ws*x/s)^2/(2*alphazeff^2))
