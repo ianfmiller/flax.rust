@@ -14,26 +14,26 @@ demog<-demog[which(demog$year==2020),] #subset to 2020
 
 ## optimize
 
-#opt<-optim(par=c(5.803369e-07 , 1.596314e-01 , 1.100707e+00),fn=param.search.optim.tilted.plume,control=list(trace=1))
+opt<-optim(par=c(5.803369e-07 , 1.596314e-01 , 1.100707e+00),fn=param.search.optim.tilted.plume,control=list(trace=1))
 
 ## NEED TO REFIT ALL--FIX k or get rid of k--three params making liklihood ridge
 ## results for model fitting
 ### sum squared obs = 14991.02
 ### total sum of squares = 14764.22 (total sum of squares = sum((spores/squares - mean(spores/squares))^2) )
 ### x<-c(9.318341e-07,1.897060e-01,1.085956e+00) # output value = 12297 for one day
-### x<-c(5.803369e-07 , 1.596314e-01 , 1.100707e+00) # output value = 12283.01 for two days
+### x<-c(2.630990e-07 , 4.236233e-07 , 9.278380e-01) # output value = 13271.89 for two days
 ### x<-c(4.355849e-08,1.714472e-06,1.384859e+00) # output value = 14084.46 for full period
 
 opt<-list(par=c(5.803369e-07 , 1.596314e-01 , 1.100707e+00))
 
 ## visualize kernel
-test.mat<-data.frame(x=rep(seq(-1,1,.01),each=201),y=rep(seq(-1,1,.01),times=201))
+test.mat<-data.frame(x=rep(seq(-2,2,.01),each=401),y=rep(seq(-2,2,.01),times=401))
 out<-mapply(tilted.plume, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=4224.733,H=.18,s=2.5,k=opt$par[1],alphaz=opt$par[2],Ws=opt$par[3]))
-res.mat<-matrix(out,201,201,byrow = T)
-contour(x=seq(-1,1,.01),y=seq(-1,1,.01),z=res.mat)
+res.mat<-matrix(out,401,401,byrow = T)
+contour(x=seq(-2,2,.01),y=seq(-2,2,.01),z=res.mat)
 points(c(.05,.25,.5,1),c(0,0,0,0),col="red")
 points(0,0,col="blue")
-filled.contour(x=seq(-1,1,.01),y=seq(-1,1,.01),z=log10(res.mat),zlim=c(-10,3),xlim=c(-2,2),ylim=c(-2,2),key.title = mtext(expression(log[10]*'spores per mm'^2),cex=1.5),cex.lab=1.5,xlab="X (meters)",ylab="Y (meters)",)
+filled.contour(x=seq(-2,2,.01),y=seq(-2,2,.01),z=log10(res.mat),zlim=c(-10,3),xlim=c(-2,2),ylim=c(-2,2),key.title = mtext(expression(log[10]*'spores per mm'^2),cex=1.5),cex.lab=1.5,xlab="X (meters)",ylab="Y (meters)",)
 
 ## visualize fit
 pred.mat<-param.search.optim.tilted.plume(opt$par,return.out=T)
@@ -49,13 +49,13 @@ param.search.tilted.plume<-function(kval,alphazval,Wsval)
   param.search.optim.tilted.plume(c(kval,alphazval,Wsval))
 }
 
-kset=4.355849e-08
-alphazvalset<-seq(1e-6,2e-6,length.out = 11)
-Wsset= seq(1.35,1.4,length.out = 11)
+kset=2.630990e-07
+alphazvalset<-seq(1e-7,1e-6,length.out = 11)
+Wsset= seq(.8,1.2,length.out = 11)
 test.mat<-expand.grid(kval=kset,alphazval=alphazvalset,Wsval=Wsset) 
 out<-mcmapply(param.search.tilted.plume,  kval = test.mat[,1],alphazval=test.mat[,2],Wsval=test.mat[,3],mc.cores = 6)
 res.mat<-matrix(out[which(test.mat$k==kset)],length(alphazvalset),length(Wsset))
 contour(alphazvalset,Wsset,res.mat,xlab="alphazval",ylab="Wsval",nlevels = 100)
-
+points(opt$par[2],opt$par[3])
 
 
