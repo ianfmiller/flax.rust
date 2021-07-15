@@ -4,6 +4,7 @@ source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant loc
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/predict plant inf intens change funcs.R")
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/spore deposition functions tilt.R")
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/predict plant height change funcs.R")
+source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/starting plant inf intens model.R")
 foi.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
 plant.inf.intens<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plants.RDS")
 
@@ -38,11 +39,16 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
         new.plant.inf.intens<-plant.inf.intens[intersect(which(plant.inf.intens$Date==date0),which(plant.inf.intens$Tag==tag)),"plant.inf.intens"] #### record plant.inf.intens as observed value
       } else ### if plant.inf.intens was not observed on that date
       {
-        target.date.set<-plant.inf.intens[which(plant.inf.intens$Tag==tag),"Date"] #### get set of dates w/ observations
-        target.date.set<-target.date.set[which(target.date.set>date0)] #### look at those after date0
-        target.date<-min(target.date.set) #### get closest date w/ observation after date0
-        target.date.plant.inf.intens<-plant.inf.intens[intersect(which(plant.inf.intens$Date==target.date),which(plant.inf.intens$Tag==tag)),"plant.inf.intens"] #### get observed plant.inf.intens on target date
-        new.plant.inf.intens<-predict.plant.inf.intens.last(target.date.plant.inf.intens,site,as.POSIXct(paste0(date0," 12:00:00")),as.POSIXct(paste0(target.date," 12:00:00"))) #### hindcast plant.inf.intens for date0
+        if(!tag %in% plant.inf.intens$Tag)
+        {
+          new.plant.inf.intens<-mean(plant.inf.intens$plant.inf.intens[intersect(which(plant.inf.intens$Date<=date0),which(plant.inf.intens$Site==site))])
+        } else {
+          target.date.set<-plant.inf.intens[which(plant.inf.intens$Tag==tag),"Date"] #### get set of dates w/ observations
+          target.date.set<-target.date.set[which(target.date.set>date0)] #### look at those after date0
+          target.date<-min(target.date.set) #### get closest date w/ observation after date0
+          target.date.plant.inf.intens<-plant.inf.intens[intersect(which(plant.inf.intens$Date==target.date),which(plant.inf.intens$Tag==tag)),"plant.inf.intens"] #### get observed plant.inf.intens on target date
+          new.plant.inf.intens<-predict.plant.inf.intens.last(target.date.plant.inf.intens,site,as.POSIXct(paste0(date0," 12:00:00")),as.POSIXct(paste0(target.date," 12:00:00"))) #### hindcast plant.inf.intens for date0 
+        }
       }
     } else ### if plant is starting healthy
     {
@@ -154,7 +160,7 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
           sourceY<-last.epi.dis.set[j,"Y"]+last.epi.dis.set[j,"y"]
           half.height<-last.epi.dis.set[j,"max.height"]/2
           q<-last.epi.dis.set[j,"plant.inf.intens"]
-          foi<-foi+predict.kernel.tilted.plume(q=q,H=half.height,k=5.803369e-07,alphaz=1.596314e-01,Ws=1.100707e+00,xtarget=xcord-sourceX,ytarget=ycord-sourceY,wind.data=weath.sub)
+          foi<-foi+predict.kernel.tilted.plume(q=q,H=half.height,k=4.828517e-07,alphaz=1.687830e-06,Ws=9.299220e-01,xtarget=xcord-sourceX,ytarget=ycord-sourceY,wind.data=weath.sub)
         }
         foi<-foi*foi.mod ### correct for any gaps in weath data
         pred.inf.odds<-predict(foi.model,newdata = data.frame("foi"=foi,"height.cm"=last.epi[i,"max.height"],"mean.temp.days.16.22"=mean.temp.days.16.22,"mean.temp.days.7.30"=mean.temp.days.7.30,"mean.dew.point.days"=mean.dew.point.days,"mean.temp.7.30.dew.point.days"=mean.temp.7.30.dew.point.days,"mean.wetness.days"=mean.wetness.days,"mean.temp.wetness.days"=mean.temp.wetness.days,"pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase),type="response") ### predict odds of becoming infected
@@ -165,7 +171,7 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
         if(draw<=pred.inf.odds) ### if draw <= odds make plant infected
         {
           new.status<-1
-          new.plant.inf.intens<-0.1
+          new.plant.inf.intens<-starting.plant.inf.intens.mod(runif(1)) # starting infection intensity draw from distribution fitted to empirical data
         } else { ### else plant stays healthy
           new.status<-0
           new.plant.inf.intens<-NA
@@ -204,7 +210,7 @@ library(doParallel)
 n.cores<-5
 registerDoParallel(n.cores)
 site<-"GM"
-pred.epi.all.0<-foreach(k = 1:1, .multicombine = T) %dopar% simulate.epi(site,0,print.progress = F)
+pred.epi.all.0<-foreach(k = 1:1, .multicombine = T) %dopar% simulate.epi(site,0,print.progress = T)
 pred.epi.all.1.8<-foreach(k = 1:1, .multicombine = T) %dopar% simulate.epi(site,1.8,print.progress = F)
 pred.epi.all.3.7<-foreach(k = 1:1, .multicombine = T) %dopar% simulate.epi(site,3.7,print.progress = F)
 
