@@ -14,17 +14,17 @@ demog<-demog[which(demog$year==2020),] #subset to 2020
 
 ## optimize
 
-opt<-optim(par=c(5.803369e-07 , 1.596314e-01 , 1.100707e+00),fn=param.search.optim.tilted.plume,control=list(trace=1))
+opt<-optim(par=c(4.828517e-07,1.687830e-06,9.299220e-01),fn=param.search.optim.tilted.plume,control=list(trace=1))
 
 ## NEED TO REFIT ALL--FIX k or get rid of k--three params making liklihood ridge
 ## results for model fitting
 ### sum squared obs = 14991.02
 ### total sum of squares = 14764.22 (total sum of squares = sum((spores/squares - mean(spores/squares))^2) )
-### x<-c(9.318341e-07,1.897060e-01,1.085956e+00) # output value = 12297 for one day
+### x<-c(4.828517e-07,1.687830e-06,9.299220e-01) # output value = 13106.09 for one day
 ### x<-c(2.630990e-07 , 4.236233e-07 , 9.278380e-01) # output value = 13271.89 for two days
-### x<-c(4.355849e-08,1.714472e-06,1.384859e+00) # output value = 14084.46 for full period
+### x<-c(7.165041e-08,-2.265877e-06,7.736455e-01) # output value = 14013.743799 for full period
 
-opt<-list(par=c(5.803369e-07 , 1.596314e-01 , 1.100707e+00))
+opt<-list(par=c(4.828517e-07,1.687830e-06,9.299220e-01))
 
 ## visualize kernel
 test.mat<-data.frame(x=rep(seq(-2,2,.01),each=401),y=rep(seq(-2,2,.01),times=401))
@@ -49,9 +49,9 @@ param.search.tilted.plume<-function(kval,alphazval,Wsval)
   param.search.optim.tilted.plume(c(kval,alphazval,Wsval))
 }
 
-kset=2.630990e-07
-alphazvalset<-seq(1e-7,1e-6,length.out = 11)
-Wsset= seq(.8,1.2,length.out = 11)
+kset=7.165041e-08
+alphazvalset<-seq(1e-6,3e-6,length.out = 11)
+Wsset= seq(.7,.8,length.out = 11)
 test.mat<-expand.grid(kval=kset,alphazval=alphazvalset,Wsval=Wsset) 
 out<-mcmapply(param.search.tilted.plume,  kval = test.mat[,1],alphazval=test.mat[,2],Wsval=test.mat[,3],mc.cores = 6)
 res.mat<-matrix(out[which(test.mat$k==kset)],length(alphazvalset),length(Wsset))
