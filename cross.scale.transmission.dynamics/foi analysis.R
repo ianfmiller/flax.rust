@@ -63,7 +63,6 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   ## run to search for best  model
   all.fit.models<-c()
   AIC.benchmark<- AIC(glmer(status.next~foi + (1|site),data = foi.data,family = binomial(link="logit"),nAGQ = 0)) #cutoff to limit memory usage
-  #AIC.benchmark<-830
   pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
   for (i in 1:length(model.set))
   {
@@ -106,6 +105,7 @@ new.data<-data.frame("foi"=fois,
                      "mean.temp.wetness.days"=rep(quantile(foi.data$mean.temp.wetness.days,.5),times=length(fois)),
                      "pred.pustule.diam.growth"=rep(mean(foi.data$pred.pustule.diam.growth ),times=length(fois)),
                      "pred.pustule.num.increase"=rep(mean(foi.data$pred.pustule.num.increase ),times=length(fois)),
+                     "pred.plant.inf.intens.increase"=rep(mean(foi.data$pred.plant.inf.intens.increase ),times=length(fois)),
                      "mean.temp.days.16.22"=rep(mean(foi.data$mean.temp.days.16.22),times=length(fois)),
                      "mean.temp.7.30.dew.point.days"=rep(quantile(foi.data$mean.temp.7.30.dew.point.days,.5),times=length(fois)),
                      "delta.days"=rep(mean(foi.data$delta.days),times=length(fois))
