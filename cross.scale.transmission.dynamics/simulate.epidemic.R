@@ -207,12 +207,12 @@ for(date in unique(pred.epi$date))
 
 library(parallel)
 library(doParallel)
-n.cores<-5
+n.cores<-4
 registerDoParallel(n.cores)
 site<-"GM"
-pred.epi.all.0<-foreach(k = 1:1, .multicombine = T) %dopar% simulate.epi(site,0,print.progress = T)
-pred.epi.all.1.8<-foreach(k = 1:1, .multicombine = T) %dopar% simulate.epi(site,1.8,print.progress = F)
-pred.epi.all.3.7<-foreach(k = 1:1, .multicombine = T) %dopar% simulate.epi(site,3.7,print.progress = F)
+pred.epi.all.0<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,0,print.progress = T)
+pred.epi.all.1.8<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,1.8,print.progress = F)
+pred.epi.all.3.7<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,3.7,print.progress = F)
 
 t_col <- function(color, percent = 50, name = NULL) {
   rgb.val <- col2rgb(color)
@@ -232,7 +232,7 @@ sub.locs<-corrected.locs[which(corrected.locs$Site==site),]
 
 par(mfrow=c(1,1))
 par(mar=c(6,6,6,6))
-plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,1),xlab="date",ylab="prev",type="n",cex.axis=2,cex.lab=2)
+plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,.4),xlab="date",ylab="prev",type="n",cex.axis=2,cex.lab=2)
 xvals<-c()
 yvals<-c()
 for(i in 1:9)
@@ -338,7 +338,7 @@ for(k in 1:length(unique(pred.epi.all.3.7[[1]]$date)))
   xvals<-c(xvals,date)
 }
 points(xvals,yvals,type="l",col="purple",lwd=4)
-legend("bottomright",legend=c("data","+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col=c("black","orange","red","purple"),lwd=4,cex=2)
+legend("top",legend=c("data","+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col=c("black","orange","red","purple"),lwd=4,cex=2,bty="n")
 
 
 
