@@ -343,17 +343,18 @@ legend("bottomright",legend=c("data","+0 degrees C","+1.8 degrees C","+3.7 degre
 
 
 
-par(mfrow=c(2,3))
+par(mfrow=c(2,4))
 
 library(viridis)
 #pred.epi<-pred.epi.all.3.7[[1]]
-layout(matrix(c(1,1,2,2,3,3,6,4,4,5,5,7),2,6,byrow = T))
+#layout(matrix(c(1,1,2,2,3,3,6,4,4,5,5,7),2,6,byrow = T))
 #par(mar=c(6,6,6,6))
-for(date in unique(pred.epi$date))
+data<-pred.epi.all.0[[1]]
+for(date in unique(data$date))
 {
-  dat<-pred.epi[which(pred.epi$date==date),]
+  dat<-data[which(data$date==date),]
   sub.dat<-dat[which(dat$status==1),]
-  plot(dat$X+dat$x,dat$Y+dat$y,xlab="X",ylab="y",main=as.Date(date,origin="1970-01-01"),pch=16,cex=.9,cex.lab=1.25,cex.axis=1.25,cex.main=1.5)
+  plot(dat$X+dat$x,dat$Y+dat$y,xlab="X",ylab="Y",main=as.Date(date,origin="1970-01-01"),pch=16,cex=.9,cex.lab=1.25,cex.axis=1.25,cex.main=1.5,asp=1)
   points(sub.dat$X+sub.dat$x,sub.dat$Y+sub.dat$y,col="red",cex=2,lwd=2)
 }
 
