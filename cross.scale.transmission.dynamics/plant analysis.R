@@ -154,32 +154,52 @@ for(temp.addition in temp.additions)
 legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),pch=16,cex=2,bty="n")
 
 
-
-predict.plant.inf.trajectory<-function(maxreps,day,temp.addition,color,plot=T,output=F)
+predict.plant.inf.trajectory<-function(site,temp.addition,color,plot=T,output=F)
 {  
-  reps<-1
-  i<-rep(10^-1,times=1000)
-  xcords<-rep(1,length(i))
-  ycords<-i
-  while(reps<maxreps)
+  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
+  weath.dat<-all.weath[which(all.weath$site==site),]
+  temp.rh.dat<-all.temp.rh[which(all.temp.rh$site==site),]
+  min.date<-max(min(unique(as.Date(weath.dat$date))),min(unique(as.Date(temp.rh.dat$date.time))))
+  max.date<-min(max(unique(as.Date(weath.dat$date))),max(unique(as.Date(temp.rh.dat$date.time))))
+  dates<-seq(min.date,max.date,7)
+  start.inf.intens<-.1
+  xcords<-rep(NA,length(dates))
+  ycords<-rep(NA,length(dates))
+  
+  for(j in 1:100) #simulation iteration
   {
-    pred.data<-get.pred.data.temp.mean.quantile.plants.model(day,i,temp.addition = temp.addition)
-    Xp <- predict(plants.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
+    reps<-1
+    i<-start.inf.intens
+    xcords.new<-c(1)
+    ycords.new<-c(log10(i))
     beta <- coef(plants.model) ## posterior mean of coefs
     Vb   <- vcov(plants.model) ## posterior  cov of coefs
-    n <- length(i)
     mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
-    preds <- rep(NA,n)
-    ilink <- family(plants.model)$linkinv
-    for (j in seq_len(n)) { 
-      preds[j]   <- ilink(Xp %*% mrand[j, ])[1]
+    for(k in 1:(length(dates)-1)) #date index
+    {
+      date0<-as.POSIXct(dates[k])
+      date1<-as.POSIXct(dates[k+1])
+      pred.data<-get.pred.data(site,date0,date1,i,temp.addition = temp.addition)
+      Xp <- predict(plants.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
+      n <-2
+      ilink <- family(plants.model)$linkinv
+      preds <- rep(NA,n)
+      for (l in seq_len(n)) { 
+        preds[l]   <- ilink(Xp %*% mrand[l, ])[1]
+      }
+      y<-preds[1]
+      i<-10^y
+      reps<-reps+1
+      xcords.new<-c(xcords.new,reps)
+      ycords.new<-c(ycords.new,log10(i))
     }
-    y<-preds
-    i<-10^y
-    reps<-reps+1
-    xcords<-cbind(xcords,rep(reps,length(i)))
-    ycords<-cbind(ycords,i)
+    xcords<-rbind(xcords,xcords.new)
+    ycords<-rbind(ycords,ycords.new)
+    print(j)
   }
+  xcords<-xcords[-1,]
+  ycords<-ycords[-1,]
+  
   if(plot)
   {
     for(k in 1:dim(xcords)[1])
@@ -202,35 +222,20 @@ t_col <- function(color, percent = 50, name = NULL) {
   invisible(t.col)
 }
 
-plot.purple<-t_col("purple",95)
-plot.red<-t_col("red",95)
-plot.orange<-t_col("orange",95)
+plot.purple<-t_col("purple",80)
+plot.red<-t_col("red",80)
+plot.orange<-t_col("orange",80)
 
-par(mfrow=c(1,1),mar=c(6,6,6,6))
-plot(0,0,type="n",xlim=c(1,6),ylim=c(0,10),ylab=expression(log[10]*' plant infection intensity'),xlab="week",cex.lab=1.5,cex.axis=1.5)
-
-dat<-predict.plant.inf.trajectory(6,75,0,plot.orange,T,T) 
-points(1:6,colMeans(dat),type="l",col="orange",lwd=3,lty=2)
-
-dat<-predict.plant.inf.trajectory(6,113,0,plot.red,T,T) 
-points(1:6,colMeans(dat),type="l",col="red",lwd=3,lty=2)
-
-dat<-predict.plant.inf.trajectory(6,135,0,plot.purple,T,T) 
-points(1:6,colMeans(dat),type="l",col="purple",lwd=3,lty=2)
-
-legend("topright",legend = c("50% quantile hottest days","75% quantile hottest days","90% quantile hottest days"),col = c("orange","red","purple"),pch=16,cex=1.5)
-
-
-plot(0,0,type="n",xlim=c(1,6),ylim=c(0,5),ylab=expression(log[10]*' plant infection intensity'),xlab="week",cex.lab=1.5,cex.axis=1.5)
-dat<-predict.plant.inf.trajectory(6,75,0,plot.orange,T,T) 
+plot(0,0,type="n",xlim=c(1,6),ylim=c(-1,2),ylab=expression(log[10]*' plant infection intensity'),xlab="week",cex.lab=1.5,cex.axis=1.5)
+dat<-predict.plant.inf.trajectory("GM",0,plot.orange,T,T) 
 points(1:6,colMeans(dat),type="l",col="orange",lwd=4,lty=2)
 
-dat<-predict.plant.inf.trajectory(6,75,1.8,plot.red,T,T) 
+dat<-predict.plant.inf.trajectory("GM",1.8,plot.red,T,T) 
 points(1:6,colMeans(dat),type="l",col="red",lwd=4,lty=2)
 
-dat<-predict.plant.inf.trajectory(6,75,3.7,plot.purple,T,T) 
+dat<-predict.plant.inf.trajectory("GM",3.7,plot.purple,T,T) 
 points(1:6,colMeans(dat),type="l",col="purple",lwd=4,lty=2)
 
-legend("topleft",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
+legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
 
 
