@@ -226,6 +226,7 @@ plot.purple<-t_col("purple",80)
 plot.red<-t_col("red",80)
 plot.orange<-t_col("orange",80)
 
+par(mar=c(6,6,5,5))
 plot(0,0,type="n",xlim=c(1,6),ylim=c(-1,2),ylab=expression(log[10]*' plant infection intensity'),xlab="week",cex.lab=1.5,cex.axis=1.5)
 dat<-predict.plant.inf.trajectory("GM",0,plot.orange,T,T) 
 points(1:6,colMeans(dat),type="l",col="orange",lwd=4,lty=2)
