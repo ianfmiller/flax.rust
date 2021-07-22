@@ -17,7 +17,7 @@ hist(delta.plants$plant.inf.intens.next-delta.plants$plant.inf.intens,main="chan
 
 ## plot trajectories
 par(mfrow=c(1,1))
-plot(c(min(as.Date(plants$Date,tryFormats = "%m/%d/%Y")),max(as.Date(plants$Date,tryFormats = "%m/%d/%Y"))),c(-1,max(log10(plants$plant.inf.intens))),type="n",xlab="date",ylab="plant infection intensity",main="plant infection intensity",cex.lab=2,cex.axis=2,cex.main=2)
+plot(c(min(as.Date(plants$Date,tryFormats = "%m/%d/%Y")),max(as.Date(plants$Date,tryFormats = "%m/%d/%Y"))),c(-1,max(log10(plants$plant.inf.intens))),type="n",xlab="date",ylab="log 10 plant infection intensity",main="plant infection intensity",cex.lab=2,cex.axis=2,cex.main=2)
 i<-0
 plot.cols<-sample(rainbow(101))
 
