@@ -9,69 +9,44 @@ metadata<-read.csv("~/Documents/GitHub/flax.rust/data/landscape.transect.data/la
 #  assign(paste0(metadata[i,"tag"],".path.data"),readGPX(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/gpx/",metadata[i,"tag"],".gpx"))$tracks[[1]][[1]])
 #}
 
-RG.path.data<-readGPX("~/Documents/GitHub/flax.rust/data/landscape.transect.data/gpx/RG.gpx")$tracks[[1]][[1]]
-TR.path.data<-readGPX("~/Documents/GitHub/flax.rust/data/landscape.transect.data/gpx/TR.gpx")$tracks[[1]][[1]]
-WM.path.data<-readGPX("~/Documents/GitHub/flax.rust/data/landscape.transect.data/gpx/WM.gpx")$tracks[[1]][[1]]
-NP.path.data<-readGPX("~/Documents/GitHub/flax.rust/data/landscape.transect.data/gpx/NP.gpx")$tracks[[1]][[1]]
+transects<-c("RG","TR","WM","NP","OBJ","BG","CM")
 
+for(transect in transects)
+{
+  assign(paste0(transect,".path.data"),readGPX(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/gpx/",transect,".gpx"))$tracks[[1]][[1]])
+}
 
-RG<-data[which(data$transect=="RG"),]
-TR<-data[which(data$transect=="TR"),]
-WM<-data[which(data$transect=="WM"),]
-NP<-data[which(data$transect=="NP"),]
-
+for(transect in transects)
+{
+  assign(paste0(transect),data[which(data[,"transect"]==transect),])
+}
 
 map<-leaflet() %>% 
   setView(lng = mean(c(data$start.long,data$end.long)), lat = mean(c(data$start.lat,data$end.lat)), zoom = 13) %>% 
   addProviderTiles(providers$Esri.WorldTopoMap)
 
-map<-addPolylines(map,lng = RG.path.data$lon,lat=RG.path.data$lat,colo="black",weight=5)
-map<-addPolylines(map,lng = TR.path.data$lon,lat=TR.path.data$lat,colo="black",weight=5)
-map<-addPolylines(map,lng = WM.path.data$lon,lat=WM.path.data$lat,colo="black",weight=5)
-map<-addPolylines(map,lng = NP.path.data$lon,lat=NP.path.data$lat,colo="black",weight=5)
-
-
-for(i in 1:nrow(RG))
+for(transect in transects)
 {
-  map<-addPolylines(map,lng=c(RG$start.long[i],RG$end.long[i]),lat=c(RG$start.lat[i],RG$end.lat[i]),color = "blue",opacity = .75)
+  dat.obj<-eval(parse(text=paste0(transect,".path.data")))
+  map<-addPolylines(map,lng = dat.obj$lon,lat=dat.obj$lat,colo="black",weight=5)
 }
 
-for(i in 1:nrow(TR))
+for(transect in transects)
 {
-  map<-addPolylines(map,lng=c(TR$start.long[i],TR$end.long[i]),lat=c(TR$start.lat[i],TR$end.lat[i]),color = "blue",opacity = .75)
+  dat.obj<-eval(parse(text=paste0(transect)))
+  for (i in 1:nrow(dat.obj))
+  {
+    map<-addPolylines(map,lng=c(dat.obj$start.long[i],dat.obj$end.long[i]),lat=c(dat.obj$start.lat[i],dat.obj$end.lat[i]),color = "blue",opacity = .75)
+  }
 }
 
-for(i in 1:nrow(WM))
+for(transect in transects)
 {
-  map<-addPolylines(map,lng=c(WM$start.long[i],WM$end.long[i]),lat=c(WM$start.lat[i],WM$end.lat[i]),color = "blue",opacity = .75)
+  dat.obj<-eval(parse(text=paste0(transect)))
+  for (i in 1:nrow(dat.obj))
+  {
+    map<-addCircles(map,lng=dat.obj$start.long[i],lat=dat.obj$start.lat[i],radius=5*(dat.obj$num.H[i]+dat.obj$num.D[i]),fillOpacity=0,color = switch(dat.obj$incidence[i]+1,"blue","yellow"))
+  }
 }
-
-
-for(i in 1:nrow(NP))
-{
-  map<-addPolylines(map,lng=c(NP$start.long[i],NP$end.long[i]),lat=c(NP$start.lat[i],NP$end.lat[i]),color = "blue",opacity = .75)
-}
-
-
-for(i in 1:nrow(RG))
-{
-  map<-addCircles(map,lng=RG$start.long[i],lat=RG$start.lat[i],radius=5*(RG$num.H[i]+RG$num.D[i]),fillOpacity=0,color = switch(RG$incidence[i]+1,"blue","yellow"))
-}
-
-for(i in 1:nrow(TR))
-{
-  map<-addCircles(map,lng=TR$start.long[i],lat=TR$start.lat[i],radius=5*(TR$num.H[i]+TR$num.D[i]),fillOpacity=0,color = switch(TR$incidence[i]+1,"blue","yellow"))
-}
- 
-for(i in 1:nrow(WM))
-{
-  map<-addCircles(map,lng=WM$start.long[i],lat=WM$start.lat[i],radius=5*(WM$num.H[i]+WM$num.D[i]),fillOpacity=0,color = switch(WM$incidence[i]+1,"blue","yellow"))
-}
-
-for(i in 1:nrow(NP))
-{
-  map<-addCircles(map,lng=NP$start.long[i],lat=NP$start.lat[i],radius=5*(NP$num.H[i]+NP$num.D[i]),fillOpacity=0,color = switch(NP$incidence[i]+1,"blue","yellow"))
-}
-
 
 map
