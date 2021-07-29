@@ -45,8 +45,10 @@ for(transect in transects)
   dat.obj<-eval(parse(text=paste0(transect)))
   for (i in 1:nrow(dat.obj))
   {
-    if(nrow(dat.obj)==1) {next}
-    map<-addCircles(map,lng=dat.obj$start.long[i],lat=dat.obj$start.lat[i],radius=5*(dat.obj$num.H[i]+dat.obj$num.D[i]),fillOpacity=0,color = switch(dat.obj$incidence[i]+1,"blue","yellow"))
+    if(nrow(dat.obj)>=1) 
+    {
+      map<-addCircles(map,lng=dat.obj$start.long[i],lat=dat.obj$start.lat[i],radius=5*(dat.obj$num.H[i]+dat.obj$num.D[i]),fillOpacity=0,color = switch(dat.obj$incidence[i]+1,"blue","yellow"))
+    }
   }
 }
 
