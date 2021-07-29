@@ -9,7 +9,7 @@ metadata<-read.csv("~/Documents/GitHub/flax.rust/data/landscape.transect.data/la
 #  assign(paste0(metadata[i,"tag"],".path.data"),readGPX(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/gpx/",metadata[i,"tag"],".gpx"))$tracks[[1]][[1]])
 #}
 
-transects<-c("RG","TR","WM","NP","OBJ","BG","CM","BC","CL","LG","HM","CT","DC","UL")
+transects<-c("RG","TR","WM","NP","OBJ","BG","CM","BC","CL","LG","HM","CT","DC","UL","ER","RL")
 
 for(transect in transects)
 {
@@ -45,6 +45,7 @@ for(transect in transects)
   dat.obj<-eval(parse(text=paste0(transect)))
   for (i in 1:nrow(dat.obj))
   {
+    if(nrow(dat.obj)==1) {next}
     map<-addCircles(map,lng=dat.obj$start.long[i],lat=dat.obj$start.lat[i],radius=5*(dat.obj$num.H[i]+dat.obj$num.D[i]),fillOpacity=0,color = switch(dat.obj$incidence[i]+1,"blue","yellow"))
   }
 }
