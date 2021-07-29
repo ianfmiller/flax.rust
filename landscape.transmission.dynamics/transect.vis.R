@@ -9,7 +9,7 @@ metadata<-read.csv("~/Documents/GitHub/flax.rust/data/landscape.transect.data/la
 #  assign(paste0(metadata[i,"tag"],".path.data"),readGPX(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/gpx/",metadata[i,"tag"],".gpx"))$tracks[[1]][[1]])
 #}
 
-transects<-c("RG","TR","WM","NP","OBJ","BG","CM","BC")
+transects<-c("RG","TR","WM","NP","OBJ","BG","CM","BC","CL","LG","HM","CT","DC","UL")
 
 for(transect in transects)
 {
