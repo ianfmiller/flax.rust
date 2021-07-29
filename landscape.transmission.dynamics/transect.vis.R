@@ -9,7 +9,7 @@ metadata<-read.csv("~/Documents/GitHub/flax.rust/data/landscape.transect.data/la
 #  assign(paste0(metadata[i,"tag"],".path.data"),readGPX(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/gpx/",metadata[i,"tag"],".gpx"))$tracks[[1]][[1]])
 #}
 
-transects<-c("RG","TR","WM","NP","OBJ","BG","CM")
+transects<-c("RG","TR","WM","NP","OBJ","BG","CM","BC")
 
 for(transect in transects)
 {
@@ -22,7 +22,7 @@ for(transect in transects)
 }
 
 map<-leaflet() %>% 
-  setView(lng = mean(c(data$start.long,data$end.long)), lat = mean(c(data$start.lat,data$end.lat)), zoom = 13) %>% 
+  setView(lng = mean(c(data$start.long,data$end.long)), lat = mean(c(data$start.lat,data$end.lat)), zoom = 10) %>% 
   addProviderTiles(providers$Esri.WorldTopoMap)
 
 for(transect in transects)
