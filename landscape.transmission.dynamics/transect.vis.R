@@ -4,12 +4,21 @@ library(plotKML)
 data<-read.csv("~/Documents/GitHub/flax.rust/data/landscape.transect.data/landscape.transects.csv")
 metadata<-read.csv("~/Documents/GitHub/flax.rust/data/landscape.transect.data/landscape.transects.metadata.csv")
 
+hist(data$num.H+data$num.D,main="population density",xlab="plants per 25 m2")
+hist(data$num.D/(data$num.H+data$num.D),main="prevalence",xlab="% D")
+dens<-data$num.D+data$num.H
+prev<-data$num.D/dens
+plot(dens,prev)
+summary(lm(prev~dens+0))
+summary(lm(prev~dens))
+
+
 #for (i in 1:nrow(metadata))
 #{
 #  assign(paste0(metadata[i,"tag"],".path.data"),readGPX(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/gpx/",metadata[i,"tag"],".gpx"))$tracks[[1]][[1]])
 #}
 
-transects<-c("RG","TR","WM","NP","OBJ","BG","CM","BC","CL","LG","HM","CT","DC","UL","ER","RL")
+transects<-c("RG","TR","WM","NP","OBJ","BG","CM","BC","CL","LG","HM","CT","DC","UL","ER","RL","CB","SH","VB","WS","ME","MB","TC")
 
 for(transect in transects)
 {
