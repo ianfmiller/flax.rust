@@ -58,16 +58,16 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/pustule.model.set.creation.R")
   
   ### create all sets of models
-  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ area",predictors[x],'(1|site)'),collapse=" + ")))
+  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ s(area",predictors[x],'site,bs="re")'),collapse=") + s(")))
   names(model.set)<-seq(1,length(model.set),1)
   
   ## run to search for best  model
   all.fit.models<-c()
-  AIC.benchmark<- AIC(lmer(area.next~area+(1|site),data=delta.pustules,REML = F)) #cutoff to limit memory usage
+  AIC.benchmark<- AIC(gam(area.next~s(area)+s(site,bs="re"),data=delta.pustules)) #cutoff to limit memory usage
   pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
   for (i in 1:length(model.set))
   {
-    suppressMessages(new.mod<-lmer(model.set[[i]],data=delta.pustules,REML = F))
+    suppressMessages(new.mod<-gam(model.set[[i]],data=delta.pustules,REML = F))
     AIC.new.mod<-AIC(new.mod)
     if(AIC.new.mod<=(AIC.benchmark)) {all.fit.models<-append(all.fit.models,list(new.mod))}
     pb$tick()
@@ -83,6 +83,8 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 }
 
 ## load best model
+
+### LEFT OFF HERE
 
 pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
 
