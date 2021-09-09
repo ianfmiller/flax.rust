@@ -1,5 +1,7 @@
 library(leaflet)
 library(plotKML)
+library(lme4)
+library(lmerTest)
 
 data<-read.csv("~/Documents/GitHub/flax.rust/data/landscape.transect.data/landscape.transects.csv")
 metadata<-read.csv("~/Documents/GitHub/flax.rust/data/landscape.transect.data/landscape.transects.metadata.csv")
@@ -9,8 +11,8 @@ hist(data$num.D/(data$num.H+data$num.D),main="prevalence",xlab="% D")
 dens<-data$num.D+data$num.H
 prev<-data$num.D/dens
 plot(dens,prev)
-summary(lm(prev~dens+0))
-summary(lm(prev~dens))
+mod0<-lmer(prev~dens+0+(1|data$transect))
+mod1<-lm(prev~dens)
 
 
 #for (i in 1:nrow(metadata))
