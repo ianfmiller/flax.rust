@@ -4,7 +4,7 @@
 ### construct all combinations of predictors
 predictors<-c("time",
                "mean.temp","max.temp","min.temp",
-               "mean.dew.point","max.dew.point","min.dew.point",
+               "mean.dew.point","max.dew.point","min.dew.point","vpd",
                "mean.wetness",
                "tot.rain",
                "mean.solar"
