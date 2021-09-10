@@ -4,22 +4,30 @@
 ### construct all combinations of predictors
 predictors<-c("time",
                "mean.temp","max.temp","min.temp",
-               "mean.dew.point","max.dew.point","min.dew.point","vpd",
+               "mean.abs.hum","max.abs.hum","min.abs.hum",
+               "mean.temp,mean.abs.hum",
+               "mean.vpd","max.vpd","min.vpd",
                "mean.wetness",
                "tot.rain",
                "mean.solar"
                
 )
 
+pred.mat<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F))
+names(pred.mat)<-predictors
+
 ### define sets of variables that explain the same thing
 switch.vars<-list( 
-  list("vpd",c("mean.temp","max.temp","min.temp","mean.dew.point","max.dew.point","min.dew.point")),
-  list("mean.temp",c("vpd")),
-  list("max.temp",c("vpd")),
-  list("min.temp",c("vpd")),
-  list("mean.dew.point",c("vpd")),
-  list("max.dew.point",c("vpd")),
-  list("min.dew.point",c("vpd"))
+  list("mean.vpd",c("mean.temp","max.temp","min.temp","mean.abs.hum","max.abs.hum","min.abs.hum","mean.temp,mean.abs.hum")),
+  list("max.vpd",c("mean.temp","max.temp","min.temp","mean.abs.hum","max.abs.hum","min.abs.hum","mean.temp,mean.abs.hum")),
+  list("min.vpd",c("mean.temp","max.temp","min.temp","mean.abs.hum","max.abs.hum","min.abs.hum","mean.temp,mean.abs.hum")),
+  list("mean.temp",c("mean.vpd","max.vpd","min.vpd","mean.temp,mean.abs.hum")),
+  list("max.temp",c("mean.vpd","max.vpd","min.vpd","mean.temp,mean.abs.hum")),
+  list("min.temp",c("mean.vpd","max.vpd","min.vpd","mean.temp,mean.abs.hum")),
+  list("mean.abs.hum",c("mean.vpd","max.vpd","min.vpd","mean.temp,mean.abs.hum")),
+  list("max.abs.hum",c("mean.vpd","max.vpd","min.vpd","mean.temp,mean.abs.hum")),
+  list("min.abs.hum",c("mean.vpd","max.vpd","min.vpd","mean.temp,mean.abs.hum")),
+  list("mean.temp,mean.abs.hum",c(c("mean.temp","max.temp","min.temp","mean.abs.hum","max.abs.hum","min.abs.hum","mean.vpd","max.vpd","min.vpd")))
 )
 
 ### turn variables off
@@ -31,8 +39,7 @@ for (i in 1:length(switch.vars))
   pred.mat[off.rows,off.vars]<-F
 }
 
-pred.mat<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F))
-names(pred.mat)<-predictors
+
 
 ### subset to only unique combinations
 pred.mat<-unique(pred.mat)
