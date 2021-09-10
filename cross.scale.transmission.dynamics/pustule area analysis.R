@@ -80,11 +80,11 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   
   ## run to search for best  model
   all.fit.models<-c()
-  AIC.benchmark<- AIC(gam(area.next~s(area)+s(site,bs="re"),data=delta.pustules.standardized)) #cutoff to limit memory usage
+  AIC.benchmark<- AIC(gam(area.next~s(area)+s(site,bs="re"),data=delta.pustules)) #cutoff to limit memory usage
   pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
   for (i in 1:length(model.set))
   {
-    suppressMessages(new.mod<-gam(model.set[[i]],data=delta.pustules.standardized,REML = F))
+    suppressMessages(new.mod<-gam(model.set[[i]],data=delta.pustules))
     AIC.new.mod<-AIC(new.mod)
     if(AIC.new.mod<=(AIC.benchmark)) {all.fit.models<-append(all.fit.models,list(new.mod))}
     pb$tick()
@@ -101,9 +101,9 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 
 ## load best model
 
-### LEFT OFF HERE
-
 pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
+plot(pustule.model,scale=0) #plot smooths
+plot(gam(best.model$formula,data=delta.pustules.standardized),scale=0) #plot standardized smooths
 
 # predict climate change effect
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
