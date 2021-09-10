@@ -31,7 +31,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   start.vals<-c()
   end.vals<-c()
   days<-c()
-  mean.temp-c()
+  mean.temp<-c()
   max.temp<-c()
   min.temp<-c()
   mean.dew.point<-c()

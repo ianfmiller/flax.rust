@@ -19,7 +19,7 @@ switch.vars<-list(
   list("min.temp",c("vpd")),
   list("mean.dew.point",c("vpd")),
   list("max.dew.point",c("vpd")),
-  list("min.dew.point",c("vpd")),
+  list("min.dew.point",c("vpd"))
 )
 
 ### turn variables off
