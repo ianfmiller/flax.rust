@@ -68,7 +68,9 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
     {
       #pull reference data
       date0<-sub.plant.heights[i,"date"]
+      date0<-as.POSIXct(paste0(date0," 12:00:00"),tz="UTC")
       date1<-sub.plant.heights[i+1,"date"]
+      date1<-as.POSIXct(paste0(date1," 12:00:00"),tz="UTC")
       site<-sub.plant.heights[i,"site"]
       
       #subset temp data to relevant window
