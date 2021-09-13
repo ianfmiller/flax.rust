@@ -9,7 +9,6 @@ predictors<-c( "mean.temp","max.temp","min.temp",
                "mean.wetness",
                "tot.rain",
                "mean.solar"
-               
 )
 
 pred.mat<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F))
