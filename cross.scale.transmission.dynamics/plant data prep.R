@@ -109,24 +109,20 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   start.plant.inf.intens<-c()
   end.plant.inf.intens<-c()
   days<-c()
-  temp.days<-c()
-  temp.days.16.22<-c()
-  temp.days.7.30<-c()
-  dew.point.days<-c()
-  temp.dew.point.days<-c()
-  temp.16.22.dew.point.days<-c()
-  temp.7.30.dew.point.days<-c()
-  wetness.days<-c()
-  temp.wetness.days<-c()
-  temp.16.22.wetness.days<-c()
-  temp.7.30.wetness.days<-c()
-  tot.rains<-c()
-  solar.days<-c()
-  wind.speed.days<-c()
-  gust.speed.days<-c()
+  mean.temp<-c()
+  max.temp<-c()
+  min.temp<-c()
+  mean.abs.hum<-c() #absolute humidity
+  max.abs.hum<-c()
+  min.abs.hum<-c()
+  mean.vpd<-c() #vapor pressure deficit
+  max.vpd<-c() 
+  min.vpd<-c() 
+  mean.wetness<-c()
+  tot.rain<-c()
+  mean.solar<-c()
   pred.pustule.diam.growths<-c()
   pred.pustule.num.increases<-c()
-  pred.stem.inf.intens.increases<-c()
   
   for (tag in unique(plants$Tag))
   {
@@ -176,26 +172,26 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         weath.sub<-subset(weath.sub,date>=date0) #### pull out relevant data
         weath.sub<-cbind(weath.sub,interval.length=c(diff(as.numeric(weath.sub$date))/(60*60*24),NA))
         
-        #### calculate environmental variable metrics
-        new.temp.days<-sum(temp.rh.sub$temp.c*temp.rh.sub$interval.length,na.rm = T) #temperature days
-        new.temp.days.16.22<-sum(1*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T) #time (in days) during which temp between 16 and 22 celsius
-        new.temp.days.7.30<-sum(1*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T) #time (in days) during which temp between 7 and 30 celsius
-        new.dew.point.days<-sum(temp.rh.sub$dew.pt.c*temp.rh.sub$interval.length,na.rm = T) #Dew point days
+        new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
+        new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
+        new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
         
-        #calculate weather metrics
-        new.wetness.days<-sum(weath.sub$wetness*weath.sub$interval.length,na.rm = T)
+        abs.hum<-6.112*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh*2.1674/(273.15+T)
+        new.mean.abs.hum<-mean(abs.hum,na.rm=T) #absolute humidity, see https://www.medrxiv.org/content/10.1101/2020.02.12.20022467v1.full.pdf
+        new.max.abs.hum<-max(abs.hum,na.rm=T)
+        new.min.abs.hum<-min(abs.hum,na.rm=T)
+        
+        svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
+        avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
+        vpds<-avps-svps
+        
+        new.mean.vpd<-mean(vpds,na.rm=T)
+        new.max.vpd<-max(vpds,na.rm=T)
+        new.min.vpd<-min(vpds,na.rm=T)
+        
+        new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
         new.tot.rain<-sum(weath.sub$rain,na.rm=T)
-        new.solar.days<-sum(weath.sub$solar.radiation*weath.sub$interval.length,na.rm = T)
-        new.wind.speed.days<-sum(weath.sub$wind.speed*weath.sub$interval.length,na.rm = T)
-        new.gust.speed.days<-sum(weath.sub$wind.direction*weath.sub$interval.length,na.rm = T)
-        
-        #calculate joint environmental variable metrics--accounts for temporal co-occurence of environmental variables
-        new.temp.dew.point.days<-sum(temp.rh.sub$temp.c*temp.rh.sub$dew.pt.c*temp.rh.sub$interval.length,na.rm = T)
-        new.temp.16.22.dew.point.days<-sum(1*temp.rh.sub.func(temp.rh.sub,16,22)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T)
-        new.temp.7.30.dew.point.days<-sum(1*temp.rh.sub.func(temp.rh.sub,7,30)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T)
-        new.temp.wetness.days<-sum(weath.sub$temp*weath.sub$wetness*weath.sub$interval.length,na.rm = T)
-        new.temp.16.22.wetness.days<-sum(weath.sub$temp.16.22*weath.sub$wetness*weath.sub$interval.length,na.rm = T)
-        new.temp.7.30.wetness.days<-sum(weath.sub$temp.7.30*weath.sub$wetness*weath.sub$interval.length,na.rm = T)
+        new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
         
         #pull out core predictors
         new.start.plant.inf.intens<-sub.plants.1[i,"plant.inf.intens"]
@@ -209,15 +205,14 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         #predict pustule growth from pustule growth model and enviro conditions
         #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
         pustule.model.new.area<-.01 #predict change for small pustule, arbitrarily pick .01
-        obs.time<-delta.days
-        pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,"temp.days.16.22"=new.temp.days.16.22/delta.days,"dew.point.days"=new.dew.point.days/delta.days,"temp.16.22.dew.point.days"=new.temp.16.22.dew.point.days/delta.days,"temp.wetness.days"=new.temp.wetness.days/delta.days,"tot.rain"=new.tot.rain/delta.days)
+        pustule.model.pred.data<-data.frame("time"=delta.days,"area"=pustule.model.new.area,"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"max.abs.hum"=new.min.abs.hum,"mean.solar"=new.mean.solar,"site"=NA)
         pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,re.form=~0)
         
         #predict change in number of pustules from enviro conditions
         #n.pustule.model.vars<-names(fixef(n.pustule.model))[2:length(names(fixef(n.pustule.model)))]
         n.pustules.model.new.n.pustules<-0 #included only for offset, picked 0 for ease of interpretability
         obs.time<-delta.days
-        n.pustules.model.pred.data<-data.frame("n.pustules"=n.pustules.model.new.n.pustules,"temp.days.16.22"=new.temp.days.16.22/delta.days,"temp.16.22.wetness.days"=new.temp.16.22.wetness.days/delta.days)
+        n.pustules.model.pred.data<-data.frame("time"=delta.days,"n.pustules"=n.pustules.model.new.n.pustules,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"tot.rain"=new.tot.rain,"pred.pustule.diam.growth"=pred.pustule.diam.growth,"site"=NA)
         pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,re.form=~0)
         
         #store values
@@ -230,22 +225,18 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         max.heights<-c(max.heights,new.max.heights)
         days<-c(days,delta.days)
         
-        temp.days.16.22<-c(temp.days.16.22,new.temp.days.16.22)
-        temp.days.7.30<-c(temp.days.7.30,new.temp.days.7.30)
-        temp.days<-c(temp.days,new.temp.days)
-        dew.point.days<-c(dew.point.days,new.dew.point.days)
-        temp.dew.point.days<-c(temp.dew.point.days,new.temp.dew.point.days)
-        temp.16.22.dew.point.days<-c(temp.16.22.dew.point.days,new.temp.16.22.dew.point.days)
-        temp.7.30.dew.point.days<-c(temp.7.30.dew.point.days,new.temp.7.30.dew.point.days)
-        
-        wetness.days<-c(wetness.days,new.wetness.days)
-        temp.wetness.days<-c(temp.wetness.days,new.temp.wetness.days)
-        temp.16.22.wetness.days<-c(temp.16.22.wetness.days,new.temp.16.22.wetness.days)
-        temp.7.30.wetness.days<-c(temp.7.30.wetness.days,new.temp.7.30.wetness.days)
-        tot.rains<-c(tot.rains,new.tot.rain)
-        solar.days<-c(solar.days,new.solar.days)
-        wind.speed.days<-c(wind.speed.days,new.wind.speed.days)
-        gust.speed.days<-c(gust.speed.days,new.gust.speed.days)
+        mean.temp<-c(mean.temp,new.mean.temp)
+        max.temp<-c(max.temp,new.max.temp)
+        min.temp<-c(min.temp,new.min.temp)
+        mean.abs.hum<-c(mean.abs.hum,new.mean.abs.hum)
+        max.abs.hum<-c(max.abs.hum,new.max.abs.hum)
+        min.abs.hum<-c(min.abs.hum,new.min.abs.hum)
+        mean.vpd<-c(mean.vpd,new.mean.vpd)
+        max.vpd<-c(max.vpd,new.max.vpd)
+        min.vpd<-c(min.vpd,new.min.vpd)
+        mean.wetness<-c(mean.wetness,new.mean.wetness)
+        tot.rain<-c(tot.rain,new.tot.rain)
+        mean.solar<-c(mean.solar,new.mean.solar)
         
         pred.pustule.diam.growths<-c(pred.pustule.diam.growths,pred.pustule.diam.growth)
         pred.pustule.num.increases<-c(pred.pustule.num.increases,pred.pustule.num.increase)
@@ -254,10 +245,11 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   }
   
   delta.plants<-data.frame(tag=factor(tags),site=factor(sites),time=days,N.stems=n.stems,N.D.Stems=n.d.stems,max.height=max.heights,plant.inf.intens=start.plant.inf.intens,plant.inf.intens.next=end.plant.inf.intens,
-                          temp.days=temp.days,temp.days.16.22=temp.days.16.22,temp.days.7.30=temp.days.7.30,
-                          dew.point.days=dew.point.days,temp.dew.point.days=temp.dew.point.days,temp.16.22.dew.point.days=temp.16.22.dew.point.days,temp.7.30.dew.point.days=temp.7.30.dew.point.days,
-                          wetness.days=wetness.days,temp.wetness.days=temp.wetness.days,temp.16.22.wetness.days=temp.16.22.wetness.days,temp.7.30.wetness.days=temp.7.30.wetness.days,
-                          tot.rain=tot.rains,solar.days=solar.days,wind.speed.days=wind.speed.days,gust.speed.days=gust.speed.days,pred.pustule.diam.growth=pred.pustule.diam.growths,pred.pustule.num.increase=pred.pustule.num.increases)
+                           mean.temp=mean.temp,max.temp=max.temp,min.temp=min.temp,
+                           mean.abs.hum=mean.abs.hum,max.abs.hum=max.abs.hum,min.abs.hum=min.abs.hum,
+                           mean.vpd=mean.vpd,max.vpd=max.vpd,min.vpd=min.vpd,
+                           mean.wetness=mean.wetness,tot.rain=tot.rain,mean.solar=mean.solar,
+                           pred.pustule.diam.growth=pred.pustule.diam.growths,pred.pustule.num.increase=pred.pustule.num.increases)
   
   saveRDS(delta.plants,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.plants.RDS")
 }
