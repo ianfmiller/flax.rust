@@ -75,7 +75,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/pustule.model.set.creation.R")
   
   ### create all sets of models
-  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ s(area",predictors[x],'site,bs="re")'),collapse=") + s(")))
+  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ s(area",predictors[x],'site,k=10,bs="re")'),collapse=",k=10) + s(")))
   names(model.set)<-seq(1,length(model.set),1)
   
   ## run to search for best  model
@@ -102,8 +102,17 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 ## load best model
 
 pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
-plot(pustule.model,scale=0) #plot smooths
-plot(gam(best.model$formula,data=delta.pustules.standardized),scale=0) #plot standardized smooths
+
+## model checking
+plot(pustule.model,scale=0,pages=1) #plot smooths
+#gam.check(pustule.model) #indicates more knots needed
+#more.knots.mod<-gam(area.next ~ s(area, k = 20) + s(mean.temp, k = 20) + s(max.temp, k = 20) + s(min.abs.hum, k = 20) + s(mean.wetness, k = 20) + s(mean.solar, k = 20) + s(site, k = 20, bs = "re"),data=delta.pustules)
+#gam.check(more.knots.mod) #indicates that increasing number of knots doesn't solve the issue of unevenly distributed residuals. This indicates that the data is the root cause and original model is OK
+
+## visualize model with standardized effects
+standardized.var.model<-gam(best.model$formula,data=delta.pustules.standardized,)
+plot(standardized.var.model,scale=0,pages=1) #plot standardized smooths
+
 
 # predict climate change effect
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
