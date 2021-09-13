@@ -8,6 +8,23 @@ library(progress)
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/n pustules data prep.R")
 
 delta.n.pustules<-subset(delta.n.pustules,time<=7)
+delta.n.pustules.standardized<-delta.n.pustules
+delta.n.pustules.standardized$time<-(delta.n.pustules$time-mean(delta.n.pustules$time,na.rm=T))/sd(delta.n.pustules$time)
+delta.n.pustules.standardized$n.pustules<-(delta.n.pustules$n.pustules-mean(delta.n.pustules$n.pustules,na.rm=T))/sd(delta.n.pustules$n.pustules)
+delta.n.pustules.standardized$mean.temp<-(delta.n.pustules$mean.temp-mean(delta.n.pustules$mean.temp,na.rm=T))/sd(delta.n.pustules$mean.temp)
+delta.n.pustules.standardized$max.temp<-(delta.n.pustules$max.temp-mean(delta.n.pustules$max.temp,na.rm=T))/sd(delta.n.pustules$max.temp)
+delta.n.pustules.standardized$min.temp<-(delta.n.pustules$min.temp-mean(delta.n.pustules$min.temp,na.rm=T))/sd(delta.n.pustules$min.temp)
+delta.n.pustules.standardized$mean.abs.hum<-(delta.n.pustules$mean.abs.hum-mean(delta.n.pustules$mean.abs.hum,na.rm=T))/sd(delta.n.pustules$mean.abs.hum)
+delta.n.pustules.standardized$max.abs.hum<-(delta.n.pustules$max.abs.hum-mean(delta.n.pustules$max.abs.hum,na.rm=T))/sd(delta.n.pustules$max.abs.hum)
+delta.n.pustules.standardized$min.abs.hum<-(delta.n.pustules$min.abs.hum-mean(delta.n.pustules$min.abs.hum,na.rm=T))/sd(delta.n.pustules$min.abs.hum)
+delta.n.pustules.standardized$mean.vpd<-(delta.n.pustules$mean.vpd-mean(delta.n.pustules$mean.vpd,na.rm=T))/sd(delta.n.pustules$mean.vpd)
+delta.n.pustules.standardized$max.vpd<-(delta.n.pustules$max.vpd-mean(delta.n.pustules$max.vpd,na.rm=T))/sd(delta.n.pustules$max.vpd)
+delta.n.pustules.standardized$min.vpd<-(delta.n.pustules$min.vpd-mean(delta.n.pustules$min.vpd,na.rm=T))/sd(delta.n.pustules$min.vpd)
+delta.n.pustules.standardized$mean.wetness<-(delta.n.pustules$mean.wetness-mean(delta.n.pustules$mean.wetness,na.rm=T))/sd(delta.n.pustules$mean.wetness)
+delta.n.pustules.standardized$tot.rain<-(delta.n.pustules$tot.rain-mean(delta.n.pustules$tot.rain,na.rm=T))/sd(delta.n.pustules$tot.rain)
+delta.n.pustules.standardized$mean.solar<-(delta.n.pustules$mean.solar-mean(delta.n.pustules$mean.solar,na.rm=T))/sd(delta.n.pustules$mean.solar)
+
+
 
 # visualize data
 
@@ -88,16 +105,17 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/n.pustules.model.set.creation.R")
   
   ### create all sets of models
-  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("n.pustules.next ~ ",predictors[x],'(1|site)'),collapse=" + ")))
+  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("n.pustules.next ~ s(time,k=10) + s(n.pustules",predictors[x],'site,k=15,bs="re")'),collapse=",k=15) + s(")))
+
   names(model.set)<-seq(1,length(model.set),1)
   
   ## run to search for best  model
   all.fit.models<-c()
-  AIC.benchmark<- AIC(lmer(n.pustules.next~n.pustules+(1|site),data=delta.n.pustules,REML = F)) #cutoff to limit memory usage
+  AIC.benchmark<- AIC(gam(n.pustules.next~s(n.pustules,k=15)+s(time,k=15)+s(site,bs='re',k=15),data=delta.n.pustules)) #cutoff to limit memory usage
   pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
   for (i in 1:length(model.set))
   {
-    suppressMessages(new.mod<-lmer(model.set[[i]],data=delta.n.pustules,REML = F))
+    suppressMessages(new.mod<-gam(model.set[[i]],data=delta.n.pustules))
     AIC.new.mod<-AIC(new.mod)
     if(AIC.new.mod<=(AIC.benchmark)) {all.fit.models<-append(all.fit.models,list(new.mod))}
     pb$tick()
@@ -114,6 +132,15 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 ## load best model
 
 n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS")
+
+## model checking
+plot(n.pustules.model,scale=0,pages=1) #plot smooths
+gam.check(n.pustules.model) #indicates more knots needed
+#gam.check(more.knots.mod) #indicates that increasing number of knots doesn't solve the issue of unevenly distributed residuals. This indicates that the data is the root cause and original model is OK
+
+## visualize model with standardized effects
+standardized.var.model<-gam(best.model$formula,data=delta.n.pustules.standardized,)
+plot(standardized.var.model,scale=0,pages=1) #plot standardized smooths
 
 # predict climate change effect
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
