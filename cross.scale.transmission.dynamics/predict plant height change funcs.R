@@ -54,8 +54,8 @@ predict.plant.growth<-function(height.last,site,date0,date1,exclude.site=T)
 
 predict.plant.growth.boot<-function(height.last,site,date0,date1)
 {
-  if(class(date0)=="Date") {date0<-as.POSIXct(date0)}
-  if(class(date1)=="Date") {date1<-as.POSIXct(date1)}
+  if(class(date0)=="Date") {date0<-as.POSIXct(paste0(date0," 12:00:00"),tz="UTC")}
+  if(class(date1)=="Date") {date1<-as.POSIXct(paste0(date1," 12:00:00"),tz="UTC")}
   
   # load weather data
   ## subst temp rh data to relevant window
@@ -109,8 +109,8 @@ predict.plant.growth.boot<-function(height.last,site,date0,date1)
 #function for predicting plant height change
 predict.plant.growth.last<-function(height.next,site,date0,date1,exclude.site=T)
 {
-  if(class(date0)=="Date") {date0<-as.POSIXct(date0)}
-  if(class(date1)=="Date") {date1<-as.POSIXct(date1)}
+  if(class(date0)=="Date") {date0<-as.POSIXct(paste0(date0," 12:00:00"),tz="UTC")}
+  if(class(date1)=="Date") {date1<-as.POSIXct(paste0(date1," 12:00:00"),tz="UTC")}
   
   # load weather data
   ## subst temp rh data to relevant window
