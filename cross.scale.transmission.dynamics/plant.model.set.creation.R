@@ -2,29 +2,30 @@
 ################################################################################################################################
 
 ### construct all combinations of predictors
-predictors<-c("time",
-              "temp.days","temp.days.16.22","temp.days.7.30",
-              "dew.point.days",
-              "temp.dew.point.days","temp.16.22.dew.point.days","temp.7.30.dew.point.days",
-              "wetness.days",
-              "temp.wetness.days","temp.16.22.wetness.days","temp.7.30.wetness.days",
-              "tot.rain","pred.pustule.diam.growth","pred.pustule.num.increase"
+predictors<-c("mean.temp","max.temp","min.temp",
+              "mean.abs.hum","max.abs.hum","min.abs.hum",
+              "mean.temp","mean.abs.hum",
+              "mean.vpd","max.vpd","min.vpd",
+              "mean.wetness",
+              "tot.rain",
+              "mean.solar","pred.pustule.diam.growth","pred.pustule.num.increase"
 )
 
-pred.mat<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F))
+pred.mat<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F))
 names(pred.mat)<-predictors
 
 ### define sets of variables that explain the same thing
 switch.vars<-list( 
-  list("temp.days",c("temp.days.16.22","temp.days.7.30")),
-  list("temp.days.16.22",c("temp.days","temp.days.7.30")),
-  list("temp.days.7.30",c("temp.days","temp.days.16.22")),
-  list("temp.dew.point.days",c("temp.16.22.dew.point.days","temp.7.30.dew.point.days")),
-  list("temp.16.22.dew.point.days",c("temp.dew.point.days","temp.7.30.dew.point.days")),
-  list("temp.7.30.dew.point.days",c("temp.dew.point.days","temp.16.22.dew.point.days")),
-  list("temp.wetness.days",c("temp.16.22.wetness.days","temp.7.30.wetness.days")),
-  list("temp.16.22.wetness.days",c("temp.wetness.days","temp.7.30.wetness.days")),
-  list("temp.7.30.wetness.days",c("temp.wetness.days","temp.16.22.wetness.days"))
+  list("mean.vpd",c("mean.temp","max.temp","min.temp","mean.abs.hum","max.abs.hum","min.abs.hum","mean.temp,mean.abs.hum")),
+  list("max.vpd",c("mean.temp","max.temp","min.temp","mean.abs.hum","max.abs.hum","min.abs.hum","mean.temp,mean.abs.hum")),
+  list("min.vpd",c("mean.temp","max.temp","min.temp","mean.abs.hum","max.abs.hum","min.abs.hum","mean.temp,mean.abs.hum")),
+  list("mean.temp",c("mean.vpd","max.vpd","min.vpd","mean.temp,mean.abs.hum")),
+  list("max.temp",c("mean.vpd","max.vpd","min.vpd","mean.temp,mean.abs.hum")),
+  list("min.temp",c("mean.vpd","max.vpd","min.vpd","mean.temp,mean.abs.hum")),
+  list("mean.abs.hum",c("mean.vpd","max.vpd","min.vpd","mean.temp,mean.abs.hum")),
+  list("max.abs.hum",c("mean.vpd","max.vpd","min.vpd","mean.temp,mean.abs.hum")),
+  list("min.abs.hum",c("mean.vpd","max.vpd","min.vpd","mean.temp,mean.abs.hum")),
+  list("mean.temp,mean.abs.hum",c(c("mean.temp","max.temp","min.temp","mean.abs.hum","max.abs.hum","min.abs.hum","mean.vpd","max.vpd","min.vpd")))
 )
 
 ### turn variables off
