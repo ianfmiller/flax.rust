@@ -98,6 +98,7 @@ mtext(text="N = 650",cex=2)
 # analyze data
 
 ## fit models--only if not already fit
+### using k=15 after gam checks indicated that k=10 resulted in unevenly distributed residuals
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS"))
 {
@@ -135,8 +136,7 @@ n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission
 
 ## model checking
 plot(n.pustules.model,scale=0,pages=1) #plot smooths
-gam.check(n.pustules.model) #indicates more knots needed
-#gam.check(more.knots.mod) #indicates that increasing number of knots doesn't solve the issue of unevenly distributed residuals. This indicates that the data is the root cause and original model is OK
+gam.check(n.pustules.model) #indicates that k=15 is sufficient
 
 ## visualize model with standardized effects
 standardized.var.model<-gam(n.pustules.model$formula,data=delta.n.pustules.standardized,)
