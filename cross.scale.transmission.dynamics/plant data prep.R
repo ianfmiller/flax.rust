@@ -205,14 +205,14 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         #predict pustule growth from pustule growth model and enviro conditions
         #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
         pustule.model.new.area<-.01 #predict change for small pustule, arbitrarily pick .01
-        pustule.model.pred.data<-data.frame("time"=delta.days,"area"=pustule.model.new.area,"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"max.abs.hum"=new.min.abs.hum,"mean.solar"=new.mean.solar,"site"=NA)
+        pustule.model.pred.data<-data.frame("time"=delta.days,"area"=pustule.model.new.area,"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"max.abs.hum"=new.min.abs.hum,"mean.solar"=new.mean.solar)
         pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,re.form=~0)
         
         #predict change in number of pustules from enviro conditions
         #n.pustule.model.vars<-names(fixef(n.pustule.model))[2:length(names(fixef(n.pustule.model)))]
         n.pustules.model.new.n.pustules<-0 #included only for offset, picked 0 for ease of interpretability
         obs.time<-delta.days
-        n.pustules.model.pred.data<-data.frame("time"=delta.days,"n.pustules"=n.pustules.model.new.n.pustules,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"tot.rain"=new.tot.rain,"pred.pustule.diam.growth"=pred.pustule.diam.growth,"site"=NA)
+        n.pustules.model.pred.data<-data.frame("time"=delta.days,"n.pustules"=n.pustules.model.new.n.pustules,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"tot.rain"=new.tot.rain,"pred.pustule.diam.growth"=pred.pustule.diam.growth)
         pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,re.form=~0)
         
         #store values
