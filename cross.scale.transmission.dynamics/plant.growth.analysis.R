@@ -72,5 +72,5 @@ plot(plant.growth.model,scale=0,pages=1) #plot smooths
 #gam.check(pustule.model) #indicates no more knots needed
 
 ## visualize model with standardized effects
-standardized.var.model<-gam(best.model$formula,data=delta.height.standardized,)
+standardized.var.model<-gam(plant.growth.model$formula,data=delta.height.standardized,)
 plot(standardized.var.model,scale=0,pages=1) #plot standardized smooths
