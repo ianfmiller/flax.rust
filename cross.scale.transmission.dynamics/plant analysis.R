@@ -7,6 +7,27 @@ library(progress)
 
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant data prep.R")
 delta.plants<-subset(delta.plants,time<=10)
+delta.plants.standardized<-delta.plants
+delta.plants.standardized$time<-(delta.plants$time-mean(delta.plants$time,na.rm=T))/sd(delta.plants$time)
+delta.plants.standardized$plant.inf.intens<-(delta.plants$plant.inf.intens-mean(delta.plants$plant.inf.intens,na.rm=T))/sd(delta.plants$plant.inf.intens)
+delta.plants.standardized$mean.temp<-(delta.plants$mean.temp-mean(delta.plants$mean.temp,na.rm=T))/sd(delta.plants$mean.temp)
+delta.plants.standardized$max.temp<-(delta.plants$max.temp-mean(delta.plants$max.temp,na.rm=T))/sd(delta.plants$max.temp)
+delta.plants.standardized$min.temp<-(delta.plants$min.temp-mean(delta.plants$min.temp,na.rm=T))/sd(delta.plants$min.temp)
+delta.plants.standardized$mean.abs.hum<-(delta.plants$mean.abs.hum-mean(delta.plants$mean.abs.hum,na.rm=T))/sd(delta.plants$mean.abs.hum)
+delta.plants.standardized$max.abs.hum<-(delta.plants$max.abs.hum-mean(delta.plants$max.abs.hum,na.rm=T))/sd(delta.plants$max.abs.hum)
+delta.plants.standardized$min.abs.hum<-(delta.plants$min.abs.hum-mean(delta.plants$min.abs.hum,na.rm=T))/sd(delta.plants$min.abs.hum)
+delta.plants.standardized$mean.vpd<-(delta.plants$mean.vpd-mean(delta.plants$mean.vpd,na.rm=T))/sd(delta.plants$mean.vpd)
+delta.plants.standardized$max.vpd<-(delta.plants$max.vpd-mean(delta.plants$max.vpd,na.rm=T))/sd(delta.plants$max.vpd)
+delta.plants.standardized$min.vpd<-(delta.plants$min.vpd-mean(delta.plants$min.vpd,na.rm=T))/sd(delta.plants$min.vpd)
+delta.plants.standardized$mean.wetness<-(delta.plants$mean.wetness-mean(delta.plants$mean.wetness,na.rm=T))/sd(delta.plants$mean.wetness)
+delta.plants.standardized$tot.rain<-(delta.plants$tot.rain-mean(delta.plants$tot.rain,na.rm=T))/sd(delta.plants$tot.rain)
+delta.plants.standardized$mean.solar<-(delta.plants$mean.solar-mean(delta.plants$mean.solar,na.rm=T))/sd(delta.plants$mean.solar)
+delta.plants.standardized$pred.pustule.diam.growth<-(delta.plants$pred.pustule.diam.growth-mean(delta.plants$pred.pustule.diam.growth,na.rm=T))/sd(delta.plants$pred.pustule.diam.growth)
+delta.plants.standardized$pred.pustule.num.increase<-(delta.plants$pred.pustule.num.increase-mean(delta.plants$pred.pustule.num.increase,na.rm=T))/sd(delta.plants$pred.pustule.num.increase)
+
+
+
+
 
 # visualize data
 
@@ -59,17 +80,17 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant.model.set.creation.R")
   
   ### create all sets of models
-  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("log10(plant.inf.intens.next) ~ s(log10(plant.inf.intens))",predictors[x],'s(site,bs="re")'),collapse=" + ")))
+  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("log10(plant.inf.intens.next) ~ s(time,k=10) + s(log10(plant.inf.intens)",predictors[x],'site,k=10,bs="re")'),collapse=",k=10) + s(")))
   names(model.set)<-seq(1,length(model.set),1)
   
   ## run to search for best  model
   all.fit.models<-c()
-  AIC.benchmark<- AIC(gam(log10(plant.inf.intens.next)~s(log10(plant.inf.intens))+s(site,bs="re"),data = delta.plants)) #cutoff to limit memory usage
+  AIC.benchmark<- AIC(gam(log10(plant.inf.intens.next)~s(time,k=10) + s(log10(plant.inf.intens),k=10)+s(site,bs="re",k=10),data = delta.plants)) #cutoff to limit memory usage
   #AIC.benchmark<- 8025
   pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
   for (i in 1:length(model.set))
   {
-    suppressMessages(new.mod<-gam(model.set[[i]],data=delta.plants,REML = F))
+    suppressMessages(new.mod<-gam(model.set[[i]],data=delta.plants))
     AIC.new.mod<-AIC(new.mod)
     if(AIC.new.mod<=(AIC.benchmark)) {all.fit.models<-append(all.fit.models,list(new.mod))}
     pb$tick()
@@ -86,6 +107,14 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 ## load best model
 
 plants.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS")
+
+## model checking
+plot(plants.model,scale=0,pages=1) #plot smooths
+#gam.check(plants.model) #indicates no more knots needed
+
+## visualize model with standardized effects
+standardized.var.model<-gam(plants.model$formula,data=delta.plants.standardized)
+plot(standardized.var.model,scale=0,pages=1) #plot standardized smooths
 
 # predict climate change effect
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
