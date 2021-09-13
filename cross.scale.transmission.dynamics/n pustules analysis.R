@@ -139,7 +139,7 @@ gam.check(n.pustules.model) #indicates more knots needed
 #gam.check(more.knots.mod) #indicates that increasing number of knots doesn't solve the issue of unevenly distributed residuals. This indicates that the data is the root cause and original model is OK
 
 ## visualize model with standardized effects
-standardized.var.model<-gam(best.model$formula,data=delta.n.pustules.standardized,)
+standardized.var.model<-gam(n.pustules.model$formula,data=delta.n.pustules.standardized,)
 plot(standardized.var.model,scale=0,pages=1) #plot standardized smooths
 
 # predict climate change effect
