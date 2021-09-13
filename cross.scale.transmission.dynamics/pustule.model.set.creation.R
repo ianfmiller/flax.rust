@@ -2,8 +2,7 @@
 ################################################################################################################################
 
 ### construct all combinations of predictors
-predictors<-c("time",
-               "mean.temp","max.temp","min.temp",
+predictors<-c( "mean.temp","max.temp","min.temp",
                "mean.abs.hum","max.abs.hum","min.abs.hum",
                "mean.temp,mean.abs.hum",
                "mean.vpd","max.vpd","min.vpd",
@@ -13,7 +12,7 @@ predictors<-c("time",
                
 )
 
-pred.mat<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F))
+pred.mat<-expand.grid(c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F),c(T,F))
 names(pred.mat)<-predictors
 
 ### define sets of variables that explain the same thing

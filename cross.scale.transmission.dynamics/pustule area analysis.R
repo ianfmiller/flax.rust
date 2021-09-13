@@ -75,12 +75,12 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/pustule.model.set.creation.R")
   
   ### create all sets of models
-  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ s(area",predictors[x],'site,k=10,bs="re")'),collapse=",k=10) + s(")))
+  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ s(time,k=10) + s(area",predictors[x],'site,k=10,bs="re")'),collapse=",k=10) + s(")))
   names(model.set)<-seq(1,length(model.set),1)
   
   ## run to search for best  model
   all.fit.models<-c()
-  AIC.benchmark<- AIC(gam(area.next~s(area)+s(site,bs="re"),data=delta.pustules)) #cutoff to limit memory usage
+  AIC.benchmark<- AIC(gam(area.next~s(area,k=10)+s(time,k=10)+s(site,bs="re",k=10),data=delta.pustules)) #cutoff to limit memory usage
   pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
   for (i in 1:length(model.set))
   {
