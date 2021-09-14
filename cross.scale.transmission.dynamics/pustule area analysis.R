@@ -117,7 +117,7 @@ plot(standardized.var.model,scale=0,pages=1) #plot standardized smooths
 # predict climate change effect
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
 par(mfrow=c(1,2),mar=c(6,6,6,6))
-plot(0,0,xlim=c(0,.1),ylim=c(-.02,.02),type="n",xlab="area (cm)",ylab="pred. change in area (cm)",cex.axis=2,cex.lab=2)
+plot(0,0,xlim=c(0,.1),ylim=c(-.05,.05),type="n",xlab="area (cm)",ylab="pred. change in area (cm)",cex.axis=2,cex.lab=2)
 day.indicies<-c(75,113,135)
 colors<-c("orange","red","purple")
 for(day in day.indicies)
@@ -128,7 +128,19 @@ for(day in day.indicies)
   for(i in seq(0,.1,.01))
   {
     pred.data<-get.pred.data.temp.mean.quantile.pustule.model(day,i)
-    y<-bootMer(pustule.model, FUN=function(x)predict(x,newdata=pred.data, re.form=NA),nsim=100)$t
+    
+    Xp <- predict(pustule.model, newdata = pred.data, exlude='s(site)',type="lpmatrix")
+    beta <- coef(pustule.model) ## posterior mean of coefs
+    Vb   <- vcov(pustule.model) ## posterior  cov of coefs
+    n <- 100
+    mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
+    preds <- rep(NA, n)
+    ilink <- family(plant.model)$linkinv
+    for (j in seq_len(n)) { 
+      preds[j]   <- ilink(Xp %*% mrand[j, ])
+    }
+    y<-preds
+
     lower=rbind(lower,data.frame(x=i,y=quantile(y,.05)-i))
     upper=rbind(upper,data.frame(x=i,y=quantile(y,.95)-i))
     points(i,mean(y)-i,col=colors[index],pch=16,cex=2)
@@ -149,7 +161,17 @@ for(temp.addition in temp.additions)
   for(i in seq(0,.1,.01))
   {
     pred.data<-get.pred.data.temp.mean.quantile.pustule.model(75,i,temp.addition = temp.addition)
-    y<-bootMer(pustule.model, FUN=function(x)predict(x,newdata=pred.data, re.form=NA),nsim=100)$t
+    Xp <- predict(pustule.model, newdata = pred.data, exlude='s(site)',type="lpmatrix")
+    beta <- coef(pustule.model) ## posterior mean of coefs
+    Vb   <- vcov(pustule.model) ## posterior  cov of coefs
+    n <- 100
+    mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
+    preds <- rep(NA, n)
+    ilink <- family(plant.model)$linkinv
+    for (j in seq_len(n)) { 
+      preds[j]   <- ilink(Xp %*% mrand[j, ])
+    }
+    y<-preds
     lower=rbind(lower,data.frame(x=i,y=quantile(y,.05)-i))
     upper=rbind(upper,data.frame(x=i,y=quantile(y,.95)-i))
     points(i,mean(y)-i,col=colors[index],pch=16,cex=2)
