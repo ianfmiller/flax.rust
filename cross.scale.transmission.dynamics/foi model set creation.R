@@ -6,10 +6,10 @@ predictors<-c(
               "height.cm",
               "mean.temp","max.temp","min.temp",
               "mean.abs.hum","max.abs.hum","min.abs.hum",
-              "mean.temp,mean.abs.hum",
+              "mean.temp*mean.abs.hum",
               "mean.vpd","max.vpd","min.vpd",
               "mean.wetness",
-              "tot.rain",
+              "mean.tot.rain",
               "mean.solar",
               "pred.pustule.diam.growth","pred.pustule.num.increase","pred.plant.inf.intens.increase"
 )
@@ -19,16 +19,16 @@ names(pred.mat)<-predictors
 
 ### define sets of variables that explain the same thing
 switch.vars<-list( 
-  list("mean.vpd",c("mean.temp","max.temp","min.temp","mean.abs.hum","max.abs.hum","min.abs.hum","mean.temp,mean.abs.hum")),
-  list("max.vpd",c("mean.temp","max.temp","min.temp","mean.abs.hum","max.abs.hum","min.abs.hum","mean.temp,mean.abs.hum")),
-  list("min.vpd",c("mean.temp","max.temp","min.temp","mean.abs.hum","max.abs.hum","min.abs.hum","mean.temp,mean.abs.hum")),
-  list("mean.temp",c("mean.vpd","max.vpd","min.vpd","mean.temp,mean.abs.hum")),
-  list("max.temp",c("mean.vpd","max.vpd","min.vpd","mean.temp,mean.abs.hum")),
-  list("min.temp",c("mean.vpd","max.vpd","min.vpd","mean.temp,mean.abs.hum")),
-  list("mean.abs.hum",c("mean.vpd","max.vpd","min.vpd","mean.temp,mean.abs.hum")),
-  list("max.abs.hum",c("mean.vpd","max.vpd","min.vpd","mean.temp,mean.abs.hum")),
-  list("min.abs.hum",c("mean.vpd","max.vpd","min.vpd","mean.temp,mean.abs.hum")),
-  list("mean.temp,mean.abs.hum",c(c("mean.temp","max.temp","min.temp","mean.abs.hum","max.abs.hum","min.abs.hum","mean.vpd","max.vpd","min.vpd")))
+  list("mean.vpd",c("mean.temp","max.temp","min.temp","mean.abs.hum","max.abs.hum","min.abs.hum","mean.temp*mean.abs.hum")),
+  list("max.vpd",c("mean.temp","max.temp","min.temp","mean.abs.hum","max.abs.hum","min.abs.hum","mean.temp*mean.abs.hum")),
+  list("min.vpd",c("mean.temp","max.temp","min.temp","mean.abs.hum","max.abs.hum","min.abs.hum","mean.temp*mean.abs.hum")),
+  list("mean.temp",c("mean.vpd","max.vpd","min.vpd","mean.temp*mean.abs.hum")),
+  list("max.temp",c("mean.vpd","max.vpd","min.vpd","mean.temp*mean.abs.hum")),
+  list("min.temp",c("mean.vpd","max.vpd","min.vpd","mean.temp*mean.abs.hum")),
+  list("mean.abs.hum",c("mean.vpd","max.vpd","min.vpd","mean.temp*mean.abs.hum")),
+  list("max.abs.hum",c("mean.vpd","max.vpd","min.vpd","mean.temp*mean.abs.hum")),
+  list("min.abs.hum",c("mean.vpd","max.vpd","min.vpd","mean.temp*mean.abs.hum")),
+  list("mean.temp*mean.abs.hum",c(c("mean.temp","max.temp","min.temp","mean.abs.hum","max.abs.hum","min.abs.hum","mean.vpd","max.vpd","min.vpd")))
 )
 
 ### turn variables off
