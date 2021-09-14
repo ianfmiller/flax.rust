@@ -20,6 +20,12 @@ predict.plant.growth<-function(height.last,site,date0,date1,exclude.site=T)
   temp.rh.sub<-subset(temp.rh.sub,!is.na(temp.c)) #### throw out NAs
   temp.rh.sub<-cbind(temp.rh.sub,interval.length=c(diff(as.numeric(temp.rh.sub$date.time))/(60*60*24),NA)) #add interval length in days
   
+  #### subset weather data to relevant window
+  weath.sub<-all.weath[which(all.weath$site==site),] #pull out weath data for site
+  weath.sub<-subset(weath.sub,date<=date1) #### pull out relevant data
+  weath.sub<-subset(weath.sub,date>=date0) #### pull out relevant data
+  weath.sub<-cbind(weath.sub,interval.length=c(diff(as.numeric(weath.sub$date))/(60*60*24),NA))
+  
   #calculate environmental variable metrics
   new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
   new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
@@ -64,6 +70,12 @@ predict.plant.growth.boot<-function(height.last,site,date0,date1)
   temp.rh.sub<-subset(temp.rh.sub,date.time>=date0) #### pull out relevant data
   temp.rh.sub<-subset(temp.rh.sub,!is.na(temp.c)) #### throw out NAs
   temp.rh.sub<-cbind(temp.rh.sub,interval.length=c(diff(as.numeric(temp.rh.sub$date.time))/(60*60*24),NA)) #add interval length in days
+  
+  #### subset weather data to relevant window
+  weath.sub<-all.weath[which(all.weath$site==site),] #pull out weath data for site
+  weath.sub<-subset(weath.sub,date<=date1) #### pull out relevant data
+  weath.sub<-subset(weath.sub,date>=date0) #### pull out relevant data
+  weath.sub<-cbind(weath.sub,interval.length=c(diff(as.numeric(weath.sub$date))/(60*60*24),NA))
   
   #calculate environmental variable metrics
   new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
@@ -119,6 +131,12 @@ predict.plant.growth.last<-function(height.next,site,date0,date1,exclude.site=T)
   temp.rh.sub<-subset(temp.rh.sub,date.time>=date0) #### pull out relevant data
   temp.rh.sub<-subset(temp.rh.sub,!is.na(temp.c)) #### throw out NAs
   temp.rh.sub<-cbind(temp.rh.sub,interval.length=c(diff(as.numeric(temp.rh.sub$date.time))/(60*60*24),NA)) #add interval length in days
+  
+  #### subset weather data to relevant window
+  weath.sub<-all.weath[which(all.weath$site==site),] #pull out weath data for site
+  weath.sub<-subset(weath.sub,date<=date1) #### pull out relevant data
+  weath.sub<-subset(weath.sub,date>=date0) #### pull out relevant data
+  weath.sub<-cbind(weath.sub,interval.length=c(diff(as.numeric(weath.sub$date))/(60*60*24),NA))
   
   # calculate environmental variable metrics
   new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
