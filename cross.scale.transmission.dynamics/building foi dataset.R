@@ -171,45 +171,46 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       weath.sub<-cbind(weath.sub,interval.length=c(diff(as.numeric(weath.sub$date))/(60*60*24),NA))
       
       #### calculate environmental variable metrics
-      new.temp.days<-sum(temp.rh.sub$temp.c*temp.rh.sub$interval.length,na.rm = T) #temperature days
-      new.temp.days.16.22<-sum(1*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T) #time (in days) during which temp between 16 and 22 celsius
-      new.temp.days.7.30<-sum(1*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T) #time (in days) during which temp between 7 and 30 celsius
-      new.dew.point.days<-sum(temp.rh.sub$dew.pt.c*temp.rh.sub$interval.length,na.rm = T) #Dew point days
+      new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
+      new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
+      new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
       
-      #calculate weather metrics
-      new.wetness.days<-sum(weath.sub$wetness*weath.sub$interval.length,na.rm = T)
+      abs.hum<-6.112*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh*2.1674/(273.15+T)
+      new.mean.abs.hum<-mean(abs.hum,na.rm=T) #absolute humidity, see https://www.medrxiv.org/content/10.1101/2020.02.12.20022467v1.full.pdf
+      new.max.abs.hum<-max(abs.hum,na.rm=T)
+      new.min.abs.hum<-min(abs.hum,na.rm=T)
+      
+      svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
+      avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
+      vpds<-avps-svps
+      
+      new.mean.vpd<-mean(vpds,na.rm=T)
+      new.max.vpd<-max(vpds,na.rm=T)
+      new.min.vpd<-min(vpds,na.rm=T)
+      
+      new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
       new.tot.rain<-sum(weath.sub$rain,na.rm=T)
-      new.solar.days<-sum(weath.sub$solar.radiation*weath.sub$interval.length,na.rm = T)
-      new.wind.speed.days<-sum(weath.sub$wind.speed*weath.sub$interval.length,na.rm = T)
-      new.gust.speed.days<-sum(weath.sub$wind.direction*weath.sub$interval.length,na.rm = T)
-      
-      #calculate joint environmental variable metrics--accounts for temporal co-occurence of environmental variables
-      new.temp.dew.point.days<-sum(temp.rh.sub$temp.c*temp.rh.sub$dew.pt.c*temp.rh.sub$interval.length,na.rm = T)
-      new.temp.16.22.dew.point.days<-sum(1*temp.rh.sub.func(temp.rh.sub,16,22)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T)
-      new.temp.7.30.dew.point.days<-sum(1*temp.rh.sub.func(temp.rh.sub,7,30)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T)
-      new.temp.wetness.days<-sum(weath.sub$temp*weath.sub$wetness*weath.sub$interval.length,na.rm = T)
-      new.temp.16.22.wetness.days<-sum(weath.sub$temp.16.22*weath.sub$wetness*weath.sub$interval.length,na.rm = T)
-      new.temp.7.30.wetness.days<-sum(weath.sub$temp.7.30*weath.sub$wetness*weath.sub$interval.length,na.rm = T)
+      new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
       
       #predict pustule growth from pustule growth model and enviro conditions
       #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
       pustule.model.new.area<-.01 #predict change for small pustule, arbitrarily pick .01
       obs.time<-delta.days
-      pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,"temp.days.16.22"=new.temp.days.16.22/delta.days,"dew.point.days"=new.dew.point.days/delta.days,"temp.16.22.dew.point.days"=new.temp.16.22.dew.point.days/delta.days,"temp.wetness.days"=new.temp.wetness.days/delta.days,"tot.rain"=new.tot.rain/delta.days)
-      pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,re.form=~0)
+      pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,"time"=delta.days,"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"max.abs.hum"=new.max.abs.hum,"mean.solar"=new.mean.solar,"site"=site)
+      pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,exclude = 's(site)')
       
       #predict change in number of pustules from enviro conditions
       #n.pustule.model.vars<-names(fixef(n.pustule.model))[2:length(names(fixef(n.pustule.model)))]
       n.pustules.model.new.n.pustules<-0 #included only for offset, picked 0 for ease of interpretability
       obs.time<-delta.days
-      n.pustules.model.pred.data<-data.frame("n.pustules"=n.pustules.model.new.n.pustules,"temp.days.16.22"=new.temp.days.16.22/delta.days,"temp.16.22.wetness.days"=new.temp.16.22.wetness.days/delta.days)
-      pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,re.form=~0)
+      n.pustules.model.pred.data<-data.frame("n.pustules"=n.pustules.model.new.n.pustules,"time"=delta.days,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"tot.rain"=new.tot.rain,"pred.pustule.diam.growth"=pred.pustule.diam.growth,"site"=site)
+      pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,exclude = 's(site)')
       
       #predict change in plant.inf.intensity from enviro conditions
       #plant.model.vars<-names(fixef(plant.model))[2:length(names(fixef(plant.model)))]
       plant.model.new.plant.inf.intens<-.1
       obs.time<-delta.days
-      plant.model.pred.data<-data.frame("plant.inf.intens"=plant.model.new.plant.inf.intens,"dew.point.days"=new.dew.point.days/delta.days,"temp.7.30.dew.point.days"=new.temp.7.30.dew.point.days/delta.days,"pred.pustule.diam.growth"=pred.pustule.diam.growth,"site"=site)
+      plant.model.pred.data<-data.frame("plant.inf.intens"=plant.model.new.plant.inf.intens,"time"=delta.days,"min.vpd"=new.max.vpd,"site"=site)
       pred.plant.inf.intens.increase<-10^predict(plant.model,newdata=plant.model.pred.data,exclude = 's(site)')
       
       sub.2.epi.data<-sub.1.epi.data[which(sub.1.epi.data$Date.First.Observed.Diseased<=date0),] ### epi data up until date0
@@ -261,8 +262,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
           new.status<-ifelse(ID.string %in% epi.ID.strings.next,1,0) #### count plant as becoming infected by next obs if its ID string shows up in the set of plants that have been infected by date1
           foi<-foi.func(site=site,date0=date0,date1=date1,epi.data=corrected.epi,xcord=sub.loc.data[index,"X"]+sub.loc.data[index,"x"],ycord=sub.loc.data[index,"Y"]+sub.loc.data[index,"y"]) #### calculate foi experienced
           foi.data<-rbind(foi.data,data.frame("site"=site,"date"=date0,"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"height.cm"=target.height,"foi"=foi,
-                                              "temp.days"=new.temp.days,"temp.days.16.22"=new.temp.days.16.22,"temp.days.7.30"=new.temp.days.7.30,"dew.point.days"=new.dew.point.days,"wetness.days"=new.wetness.days,"tot.rain"=new.tot.rain,"solar.days"=new.solar.days,"wind.speed.days"=new.wind.speed.days,
-                                              "gust.speed.days"=new.gust.speed.days,"temp.dew.point.days"=new.temp.dew.point.days,"temp.16.22.dew.point.days"=new.temp.16.22.dew.point.days,"temp.7.30.dew.point.days"=new.temp.7.30.dew.point.days,"temp.wetness.days"=new.temp.wetness.days,"temp.16.22.wetness.days"=new.temp.16.22.wetness.days,"temp.7.30.wetness.days"=new.temp.7.30.wetness.days,
+                                              "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.mean.abs.hum,"mean.vpd"=new.mean.vpd,"max.vpd"=new.max.vpd,"min.vpd"=new.min.vpd,
+                                              "mean.wetness"=new.mean.wetness,"tot.rain"=new.tot.rain,"mean.solar"=new.mean.solar,
                                               "pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase,"pred.plant.inf.intens.increase"=pred.plant.inf.intens.increase)) #### add new entry to data object
         }
         ### if that ID string is not unique
@@ -283,8 +284,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
           new.status<-ifelse(length(which(epi.ID.strings.next==ID.string))>=order,1,0) #### for plant that is the nth repeat, count as becoming infected by next obs if at least n matching ID strings show up in epi.ID.strings.next
           foi<-foi.func(site=site,date0=date0,date1=date1,epi.data=corrected.epi,xcord=sub.loc.data[index,"X"]+sub.loc.data[index,"x"],ycord=sub.loc.data[index,"Y"]+sub.loc.data[index,"y"]) #### calculate foi experienced
           foi.data<-rbind(foi.data,data.frame("site"=site,"date"=date0,"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"height.cm"=targt.height,"foi"=foi,
-                                              "temp.days"=new.temp.days,"temp.days.16.22"=new.temp.days.16.22,"temp.days.7.30"=new.temp.days.7.30,"dew.point.days"=new.dew.point.days,"wetness.days"=new.wetness.days,"tot.rain"=new.tot.rain,"solar.days"=new.solar.days,"wind.speed.days"=new.wind.speed.days,
-                                              "gust.speed.days"=new.gust.speed.days,"temp.dew.point.days"=new.temp.dew.point.days,"temp.16.22.dew.point.days"=new.temp.16.22.dew.point.days,"temp.7.30.dew.point.days"=new.temp.7.30.dew.point.days,"temp.wetness.days"=new.temp.wetness.days,"temp.16.22.wetness.days"=new.temp.16.22.wetness.days,"temp.7.30.wetness.days"=new.temp.7.30.wetness.days,
+                                              "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.mean.abs.hum,"mean.vpd"=new.mean.vpd,"max.vpd"=new.max.vpd,"min.vpd"=new.min.vpd,
+                                              "mean.wetness"=new.mean.wetness,"tot.rain"=new.tot.rain,"mean.solar"=new.mean.solar,
                                               "pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase,"pred.plant.inf.intens.increase"=pred.plant.inf.intens.increase)) #### add new entry to data object
         }
         print(paste0("site = ",site," date = ",date0," ",index,"/",dim(sub.loc.data)[1]," complete"))
@@ -305,8 +306,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
     foi.data[i,"delta.days"]<-delta.days
   }
   
-  foi.data[,c("temp.days","temp.days.16.22","temp.days.7.30","dew.point.days","wetness.days","tot.rain","solar.days","wind.speed.days","gust.speed.days","temp.dew.point.days","temp.16.22.dew.point.days","temp.7.30.dew.point.days","temp.wetness.days","temp.16.22.wetness.days","temp.7.30.wetness.days")]<-foi.data[,c("temp.days","temp.days.16.22","temp.days.7.30","dew.point.days","wetness.days","tot.rain","solar.days","wind.speed.days","gust.speed.days","temp.16.22.dew.point.days","temp.dew.point.days","temp.7.30.dew.point.days","temp.wetness.days","temp.16.22.wetness.days","temp.7.30.wetness.days")]/foi.data[,"delta.days"]
-  colnames(foi.data)[which(colnames(foi.data) %in% c("temp.days","temp.days.16.22","temp.days.7.30","dew.point.days","wetness.days","tot.rain","solar.days","wind.speed.days","gust.speed.days","temp.dew.point.days","temp.16.22.dew.point.days","temp.7.30.dew.point.days","temp.wetness.days","temp.16.22.wetness.days","temp.7.30.wetness.days"))]<-paste0("mean.",c("temp.days","temp.days.16.22","temp.days.7.30","dew.point.days","wetness.days","tot.rain","solar.days","wind.speed.days","gust.speed.days","temp.dew.point.days","temp.16.22.dew.point.days","temp.7.30.dew.point.days","temp.wetness.days","temp.16.22.wetness.days","temp.7.30.wetness.days"))
+  foi.data[,c("tot.rain")]<-foi.data[,c("tot.rain")]/foi.data[,"delta.days"]
+  colnames(foi.data)[which(colnames(foi.data) %in% c("tot.rain"))]<-paste0("mean.",c("tot.rain"))
   
   saveRDS(foi.data,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/foi.data.RDS")
 }
