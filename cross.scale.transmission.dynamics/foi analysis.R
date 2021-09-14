@@ -98,16 +98,16 @@ axis(1,cex.axis=1.5)
 fois<-seq(0,.15,.0001)
 new.data.1<-data.frame("foi"=fois,
                      "height.cm"=5,
-                     "pred.pustule.num.increase"=rep(mean(foi.data$pred.pustule.num.increase ),times=length(fois)))
+                     "pred.pustule.diam.growth"=rep(mean(foi.data$pred.pustule.diam.growth ),times=length(fois)))
 new.data.2<-data.frame("foi"=fois,
                        "height.cm"=10,
-                       "pred.pustule.num.increase"=rep(mean(foi.data$pred.pustule.num.increase ),times=length(fois)))
+                       "pred.pustule.diam.growth"=rep(mean(foi.data$pred.pustule.diam.growth ),times=length(fois)))
 new.data.3<-data.frame("foi"=fois,
                        "height.cm"=25,
-                       "pred.pustule.num.increase"=rep(mean(foi.data$pred.pustule.num.increase ),times=length(fois)))
+                       "pred.pustule.diam.growth"=rep(mean(foi.data$pred.pustule.diam.growth ),times=length(fois)))
 new.data.4<-data.frame("foi"=fois,
                        "height.cm"=50,
-                       "pred.pustule.num.increase"=rep(mean(foi.data$pred.pustule.num.increase ),times=length(fois)))
+                       "pred.pustule.diam.growth"=rep(mean(foi.data$pred.pustule.diam.growth ),times=length(fois)))
 
 points(new.data.1$foi,predict(best.model,newdata = new.data.1,type = "response",re.form=NA),type="l",col="red",lwd=2,lty=1)
 points(new.data.2$foi,predict(best.model,newdata = new.data.2,type = "response",re.form=NA),type="l",col="red",lwd=2,lty=2)
