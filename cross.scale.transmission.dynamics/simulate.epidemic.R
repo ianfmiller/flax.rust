@@ -85,53 +85,47 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
     weath.sub<-cbind(weath.sub,interval.length=c(diff(as.numeric(weath.sub$date))/(60*60*24),NA))
     
     #### calculate environmental variable metrics
-    mean.temp.days<-sum(temp.rh.sub$temp.c*temp.rh.sub$interval.length,na.rm = T)/delta.days #temperature days
-    mean.temp.days.16.22<-sum(1*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T)/delta.days  #time (in days) during which temp between 16 and 22 celsius
-    mean.temp.days.7.30<-sum(1*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T)/delta.days  #time (in days) during which temp between 7 and 30 celsius
-    mean.dew.point.days<-sum(temp.rh.sub$dew.pt.c*temp.rh.sub$interval.length,na.rm = T)/delta.days  #Dew point days
+    new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
+    new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
+    new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
     
-    #calculate weather metrics
-    mean.wetness.days<-sum(weath.sub$wetness*weath.sub$interval.length,na.rm = T)/delta.days 
-    mean.tot.rain<-sum(weath.sub$rain,na.rm=T)/delta.days 
-    mean.solar.days<-sum(weath.sub$solar.radiation*weath.sub$interval.length,na.rm = T)/delta.days 
-    mean.wind.speed.days<-sum(weath.sub$wind.speed*weath.sub$interval.length,na.rm = T)/delta.days 
-    mean.gust.speed.days<-sum(weath.sub$wind.direction*weath.sub$interval.length,na.rm = T)/delta.days 
+    abs.hum<-6.112*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh*2.1674/(273.15+T)
+    new.mean.abs.hum<-mean(abs.hum,na.rm=T) #absolute humidity, see https://www.medrxiv.org/content/10.1101/2020.02.12.20022467v1.full.pdf
+    new.max.abs.hum<-max(abs.hum,na.rm=T)
+    new.min.abs.hum<-min(abs.hum,na.rm=T)
     
-    #calculate joint environmental variable metrics--accounts for temporal co-occurence of environmental variables
-    mean.temp.dew.point.days<-sum(temp.rh.sub$temp.c*temp.rh.sub$dew.pt.c*temp.rh.sub$interval.length,na.rm = T)/delta.days 
-    mean.temp.16.22.dew.point.days<-sum(1*temp.rh.sub.func(temp.rh.sub,16,22)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T)/delta.days 
-    mean.temp.7.30.dew.point.days<-sum(1*temp.rh.sub.func(temp.rh.sub,7,30)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T)/delta.days 
-    mean.temp.wetness.days<-sum(weath.sub$temp*weath.sub$wetness*weath.sub$interval.length,na.rm = T)/delta.days 
-    mean.temp.16.22.wetness.days<-sum(weath.sub$temp.16.22*weath.sub$wetness*weath.sub$interval.length,na.rm = T)/delta.days 
-    mean.temp.7.30.wetness.days<-sum(weath.sub$temp.7.30*weath.sub$wetness*weath.sub$interval.length,na.rm = T)/delta.days 
+    svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
+    avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
+    vpds<-avps-svps
     
-    #calculate weather metrics
-    new.wetness.days<-sum(weath.sub$wetness*weath.sub$interval.length,na.rm = T)
+    new.mean.vpd<-mean(vpds,na.rm=T)
+    new.max.vpd<-max(vpds,na.rm=T)
+    new.min.vpd<-min(vpds,na.rm=T)
+    
+    new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
     new.tot.rain<-sum(weath.sub$rain,na.rm=T)
-    new.solar.days<-sum(weath.sub$solar.radiation*weath.sub$interval.length,na.rm = T)
-    new.wind.speed.days<-sum(weath.sub$wind.speed*weath.sub$interval.length,na.rm = T)
-    new.gust.speed.days<-sum(weath.sub$wind.direction*weath.sub$interval.length,na.rm = T)
+    new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
     
     
     #predict pustule growth from pustule growth model and enviro conditions
     #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
     pustule.model.new.area<-.01 #predict change for small pustule, arbitrarily pick .01
     obs.time<-delta.days
-    pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,"temp.days.16.22"=mean.temp.days.16.22,"dew.point.days"=mean.dew.point.days,"temp.16.22.dew.point.days"=mean.temp.16.22.dew.point.days,"temp.wetness.days"=mean.temp.wetness.days,"tot.rain"=new.tot.rain/delta.days)
-    pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,re.form=~0)
+    pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,"time"=delta.days,"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"max.abs.hum"=new.max.abs.hum,"mean.solar"=new.mean.solar,"site"=site)
+    pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,exclude = 's(site)')
     
     #predict change in number of pustules from enviro conditions
     #n.pustule.model.vars<-names(fixef(n.pustule.model))[2:length(names(fixef(n.pustule.model)))]
     n.pustules.model.new.n.pustules<-0 #included only for offset, picked 0 for ease of interpretability
     obs.time<-delta.days
-    n.pustules.model.pred.data<-data.frame("n.pustules"=n.pustules.model.new.n.pustules,"temp.days.16.22"=mean.temp.days.16.22,"temp.16.22.wetness.days"=mean.temp.16.22.wetness.days)
-    pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,re.form=~0)
+    n.pustules.model.pred.data<-data.frame("n.pustules"=n.pustules.model.new.n.pustules,"time"=delta.days,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"tot.rain"=new.tot.rain,"pred.pustule.diam.growth"=pred.pustule.diam.growth,"site"=site)
+    pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,exclude = 's(site)')
     
     #predict change in plant.inf.intensity from enviro conditions
     #plant.model.vars<-names(fixef(plant.model))[2:length(names(fixef(plant.model)))]
     plant.model.new.plant.inf.intens<-.1
     obs.time<-delta.days
-    plant.model.pred.data<-data.frame("plant.inf.intens"=plant.model.new.plant.inf.intens,"dew.point.days"=mean.dew.point.days,"temp.7.30.dew.point.days"=mean.temp.7.30.dew.point.days,"pred.pustule.diam.growth"=pred.pustule.diam.growth,"site"=site)
+    plant.model.pred.data<-data.frame("plant.inf.intens"=plant.model.new.plant.inf.intens,"time"=delta.days,"min.vpd"=new.max.vpd,"site"=site)
     pred.plant.inf.intens.increase<-10^predict(plant.model,newdata=plant.model.pred.data,exclude = 's(site)')
     
     ### compare weather data coverage to make sure foi is not being underestimated
@@ -163,7 +157,7 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
           foi<-foi+predict.kernel.tilted.plume(q=q,H=half.height,k=4.828517e-07,alphaz=1.687830e-06,Ws=9.299220e-01,xtarget=xcord-sourceX,ytarget=ycord-sourceY,wind.data=weath.sub)
         }
         foi<-foi*foi.mod ### correct for any gaps in weath data
-        pred.inf.odds<-predict(foi.model,newdata = data.frame("foi"=foi,"height.cm"=last.epi[i,"max.height"],"mean.temp.days.16.22"=mean.temp.days.16.22,"mean.temp.days.7.30"=mean.temp.days.7.30,"mean.dew.point.days"=mean.dew.point.days,"mean.temp.7.30.dew.point.days"=mean.temp.7.30.dew.point.days,"mean.wetness.days"=mean.wetness.days,"mean.temp.wetness.days"=mean.temp.wetness.days,"pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase),type="response") ### predict odds of becoming infected
+        pred.inf.odds<-predict(foi.model,newdata = data.frame("foi"=foi,"height.cm"=last.epi[i,"max.height"],"pred.pustule.diam.growth"=pred.pustule.diam.growth),type="response") ### predict odds of becoming infected
         #pred.inf.odds<-predict(foi.model,newdata = data.frame("foi"=foi,"height.cm"=last.epi[i,"max.height"],"mean.temp.days.16.22"=mean.temp.days.16.22,"mean.temp.7.30.dew.point.days"=mean.temp.7.30.dew.point.days),type="response",re.form=NA) ### predict odds of becoming infected
         #pred.inf.odds<-predict(foi.model,newdata=data.frame("foi"=foi),type="response")
         draw<-runif(1) ### draw random number between 0 and 1
