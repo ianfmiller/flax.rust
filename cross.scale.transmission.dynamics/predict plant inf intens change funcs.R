@@ -159,7 +159,7 @@ predict.plant.inf.intens.last<-function(plant.inf.intens.next,site,date0,date1)
   pred.func<-function(x)
   {
     plant.inf.intens.last.test<-x
-    pred.data<-data.frame("plant.inf.intens"=plant.inf.intens.last,"time"=delta.days,"min.vpd"=new.min.vpd,"site"=site)
+    pred.data<-data.frame("plant.inf.intens"=plant.inf.intens.last.test,"time"=delta.days,"min.vpd"=new.min.vpd,"site"=site)
     plant.inf.intens.next.pred<-10^predict(plant.model,newdata=pred.data,exclude = 's(site)')
     abs(plant.inf.intens.next.pred-plant.inf.intens.next)
   }
