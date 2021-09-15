@@ -7,23 +7,6 @@ library(progress)
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/pustule area data prep.R")
 
 delta.pustules<-subset(delta.pustules,time<=7)
-delta.pustules.standardized<-delta.pustules
-delta.pustules.standardized$time<-(delta.pustules$time-mean(delta.pustules$time,na.rm=T))/sd(delta.pustules$time)
-delta.pustules.standardized$area<-(delta.pustules$area-mean(delta.pustules$area,na.rm=T))/sd(delta.pustules$area)
-delta.pustules.standardized$mean.temp<-(delta.pustules$mean.temp-mean(delta.pustules$mean.temp,na.rm=T))/sd(delta.pustules$mean.temp)
-delta.pustules.standardized$max.temp<-(delta.pustules$max.temp-mean(delta.pustules$max.temp,na.rm=T))/sd(delta.pustules$max.temp)
-delta.pustules.standardized$min.temp<-(delta.pustules$min.temp-mean(delta.pustules$min.temp,na.rm=T))/sd(delta.pustules$min.temp)
-delta.pustules.standardized$mean.abs.hum<-(delta.pustules$mean.abs.hum-mean(delta.pustules$mean.abs.hum,na.rm=T))/sd(delta.pustules$mean.abs.hum)
-delta.pustules.standardized$max.abs.hum<-(delta.pustules$max.abs.hum-mean(delta.pustules$max.abs.hum,na.rm=T))/sd(delta.pustules$max.abs.hum)
-delta.pustules.standardized$min.abs.hum<-(delta.pustules$min.abs.hum-mean(delta.pustules$min.abs.hum,na.rm=T))/sd(delta.pustules$min.abs.hum)
-delta.pustules.standardized$mean.vpd<-(delta.pustules$mean.vpd-mean(delta.pustules$mean.vpd,na.rm=T))/sd(delta.pustules$mean.vpd)
-delta.pustules.standardized$max.vpd<-(delta.pustules$max.vpd-mean(delta.pustules$max.vpd,na.rm=T))/sd(delta.pustules$max.vpd)
-delta.pustules.standardized$min.vpd<-(delta.pustules$min.vpd-mean(delta.pustules$min.vpd,na.rm=T))/sd(delta.pustules$min.vpd)
-delta.pustules.standardized$mean.wetness<-(delta.pustules$mean.wetness-mean(delta.pustules$mean.wetness,na.rm=T))/sd(delta.pustules$mean.wetness)
-delta.pustules.standardized$tot.rain<-(delta.pustules$tot.rain-mean(delta.pustules$tot.rain,na.rm=T))/sd(delta.pustules$tot.rain)
-delta.pustules.standardized$mean.solar<-(delta.pustules$mean.solar-mean(delta.pustules$mean.solar,na.rm=T))/sd(delta.pustules$mean.solar)
-
-
 
 # visualize data
 
@@ -75,12 +58,12 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/pustule.model.set.creation.R")
   
   ### create all sets of models
-  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ s(time,k=4) + s(area",predictors[x],'site,k=4,bs="re")'),collapse=",k=4) + s(")))
+  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ s(time,bs='cs') + s(area",predictors[x],'site,k=4,bs="re")'),collapse=",bs='cs') + s(")))
   names(model.set)<-seq(1,length(model.set),1)
   
   ## run to search for best  model
   all.fit.models<-c()
-  AIC.benchmark<- AIC(gam(area.next~s(area,k=4)+s(time,k=4)+s(site,bs="re",k=4),data=delta.pustules)) #cutoff to limit memory usage
+  AIC.benchmark<- AIC(gam(area.next~s(area,bs="cs")+s(time,bs="cs")+s(site,bs="re"),data=delta.pustules)) #cutoff to limit memory usage
   pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
   for (i in 1:length(model.set))
   {
