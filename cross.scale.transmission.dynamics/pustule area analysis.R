@@ -75,12 +75,12 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/pustule.model.set.creation.R")
   
   ### create all sets of models
-  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ s(time,k=10) + s(area",predictors[x],'site,k=10,bs="re")'),collapse=",k=10) + s(")))
+  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ s(time,k=4) + s(area",predictors[x],'site,k=4,bs="re")'),collapse=",k=4) + s(")))
   names(model.set)<-seq(1,length(model.set),1)
   
   ## run to search for best  model
   all.fit.models<-c()
-  AIC.benchmark<- AIC(gam(area.next~s(area,k=10)+s(time,k=10)+s(site,bs="re",k=10),data=delta.pustules)) #cutoff to limit memory usage
+  AIC.benchmark<- AIC(gam(area.next~s(area,k=4)+s(time,k=4)+s(site,bs="re",k=4),data=delta.pustules)) #cutoff to limit memory usage
   pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
   for (i in 1:length(model.set))
   {
@@ -150,7 +150,7 @@ for(day in day.indicies)
 }
 legend("topright",legend = c("50% quantile hottest days","75% quantile hottest days","90% quantile hottest days"),col = c("orange","red","purple"),pch=16,cex=2,bty="n")
 
-plot(0,0,xlim=c(0,.1),ylim=c(-.02,.02),type="n",xlab="area (cm)",ylab="pred. change in area (cm)",cex.axis=2,cex.lab=2)
+plot(0,0,xlim=c(0,.1),ylim=c(-.04,.04),type="n",xlab="area (cm)",ylab="pred. change in area (cm)",cex.axis=2,cex.lab=2)
 temp.additions<-c(0,1.8,3.7)
 colors<-c("orange","red","purple")
 for(temp.addition in temp.additions)
