@@ -2,6 +2,7 @@ library(mgcv)
 library(lme4)
 library(lmerTest)
 library(progress)
+library(MASS)
 
 # load data
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/pustule area data prep.R")
@@ -54,32 +55,37 @@ abline(0,1)
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS"))
 {
-  ### construct all combinations of predictors
-  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/pustule.model.set.creation.R")
+
+  mod0<-gam(area.next~s(area,bs="cs",k=4)+
+              s(mean.temp,by=time,bs="cs",k=4)+
+              s(max.temp,by=time,bs="cs",k=4)+
+              s(min.temp,by=time,bs="cs",k=4)+
+              s(mean.abs.hum,by=time,bs="cs",k=4)+
+              s(max.abs.hum,by=time,bs="cs",k=4)+
+              s(min.abs.hum,by=time,bs="cs",k=4)+
+              s(mean.solar,by=time,bs="cs",k=4)+
+              s(mean.wetness,by=time,bs="cs",k=4)+
+              s(tot.rain,by=time,bs="cs",k=4)+
+              s(site,bs="re",k=4),
+            data=delta.pustules)
+
+  summary(mod0) #indicates that max.abs.hum, mean.solar, and tot.rain are not significant predictors
   
-  ### create all sets of models
-  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("area.next ~ s(time,bs='cs') + s(area",predictors[x],'site,k=4,bs="re")'),collapse=",bs='cs') + s(")))
-  names(model.set)<-seq(1,length(model.set),1)
+  mod1<-gam(area.next~s(area,bs="cs",k=4)+
+              s(mean.temp,by=time,bs="cs",k=4)+
+              s(max.temp,by=time,bs="cs",k=4)+
+              s(min.temp,by=time,bs="cs",k=4)+
+              s(mean.abs.hum,by=time,bs="cs",k=4)+
+              #s(max.abs.hum,by=time,bs="cs",k=4)+
+              s(min.abs.hum,by=time,bs="cs",k=4)+
+              #s(mean.solar,by=time,bs="cs",k=4)+
+              s(mean.wetness,by=time,bs="cs",k=4)+
+              #s(tot.rain,by=time,bs="cs",k=4)+
+              s(site,bs="re",k=4),
+            data=delta.pustules)
+  summary(mod1) # All now significant. Stepwise removal yields the same result.
   
-  ## run to search for best  model
-  all.fit.models<-c()
-  AIC.benchmark<- AIC(gam(area.next~s(area,bs="cs")+s(time,bs="cs")+s(site,bs="re"),data=delta.pustules)) #cutoff to limit memory usage
-  pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
-  for (i in 1:length(model.set))
-  {
-    suppressMessages(new.mod<-gam(model.set[[i]],data=delta.pustules))
-    AIC.new.mod<-AIC(new.mod)
-    if(AIC.new.mod<=(AIC.benchmark)) {all.fit.models<-append(all.fit.models,list(new.mod))}
-    pb$tick()
-  }
-  
-  
-  ## compare between models
-  AICs<-unlist(lapply(all.fit.models,AIC))
-  delta.AICs<-AICs-min(AICs)
-  index<-1
-  best.model<-all.fit.models[[order(AICs)[index]]]
-  saveRDS(best.model,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
+  saveRDS(mod1,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
 }
 
 ## load best model
@@ -89,18 +95,34 @@ pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dy
 ## model checking
 plot(pustule.model,scale=0,pages=1) #plot smooths
 #gam.check(pustule.model) #indicates more knots needed
-#more.knots.mod<-gam(area.next ~ s(area, k = 20) + s(mean.temp, k = 20) + s(max.temp, k = 20) + s(min.abs.hum, k = 20) + s(mean.wetness, k = 20) + s(mean.solar, k = 20) + s(site, k = 20, bs = "re"),data=delta.pustules)
+#more.knots.mod<-gam(area.next ~ s(area, bs = "cs", k = 20) + s(mean.temp, by = time, bs = "cs", k = 20) + s(max.temp, by = time, bs = "cs", k = 20) + s(min.temp, by = time, bs = "cs", k = 20) + s(mean.abs.hum, by = time, bs = "cs", k = 20) + s(min.abs.hum, by = time, bs = "cs", k = 20) + s(mean.wetness, by = time, bs = "cs", k = 20) + s(site, bs = "re", k = 20),data=delta.pustules)
 #gam.check(more.knots.mod) #indicates that increasing number of knots doesn't solve the issue of unevenly distributed residuals. This indicates that the data is the root cause and original model is OK
 
-## visualize model with standardized effects
-standardized.var.model<-gam(pustule.model$formula,data=delta.pustules.standardized,)
-plot(standardized.var.model,scale=0,pages=1) #plot standardized smooths
+## better visualize model
+par(mfrow=c(2,4))
+plot(pustule.model,scale=0,select=1)
+vis.gam(pustule.model,view = c("mean.temp","time"),n.grid=30,plot.type = "contour",zlim=c(-.02,.15),color="topo",contour.col = "black")
+vis.gam(pustule.model,view = c("max.temp","time"),n.grid=30,plot.type = "contour",zlim=c(-.02,.15),color="topo",contour.col = "black")
+vis.gam(pustule.model,view = c("min.temp","time"),n.grid=30,plot.type = "contour",zlim=c(-.02,.15),color="topo",contour.col = "black")
+vis.gam(pustule.model,view = c("mean.abs.hum","time"),n.grid=30,plot.type = "contour",zlim=c(-.02,.15),color="topo",contour.col = "black")
+vis.gam(pustule.model,view = c("min.abs.hum","time"),n.grid=30,plot.type = "contour",zlim=c(-.02,.15),color="topo",contour.col = "black")
+vis.gam(pustule.model,view = c("mean.wetness","time"),n.grid=30,plot.type = "contour",zlim=c(-.02,.15),color="topo",contour.col = "black")
+plot(pustule.model,scale=0,select=8)
 
+par(mfrow=c(2,4))
+plot(pustule.model,scale=0,select=1)
+vis.gam(pustule.model,view = c("mean.temp","time"),n.grid=30,plot.type = "persp",zlim=c(-.02,.15),se=1,theta=45,phi=15,ticktype="detailed")
+vis.gam(pustule.model,view = c("max.temp","time"),n.grid=30,plot.type = "persp",zlim=c(-.02,.15),se=1,theta=45,phi=15,ticktype="detailed")
+vis.gam(pustule.model,view = c("min.temp","time"),n.grid=30,plot.type = "persp",zlim=c(-.02,.15),se=1,theta=45,phi=15,ticktype="detailed")
+vis.gam(pustule.model,view = c("mean.abs.hum","time"),n.grid=30,plot.type = "persp",zlim=c(-.02,.15),se=1,theta=45,phi=15,ticktype="detailed")
+vis.gam(pustule.model,view = c("min.abs.hum","time"),n.grid=30,plot.type = "persp",zlim=c(-.02,.15),se=1,theta=45,phi=15,ticktype="detailed")
+vis.gam(pustule.model,view = c("mean.wetness","time"),n.grid=30,plot.type = "persp",zlim=c(-.02,.15),se=1,theta=45,phi=15,ticktype="detailed")
+plot(pustule.model,scale=0,select=8)
 
 # predict climate change effect
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
 par(mfrow=c(1,2),mar=c(6,6,6,6))
-plot(0,0,xlim=c(0,.1),ylim=c(-.05,.05),type="n",xlab="area (cm)",ylab="pred. change in area (cm)",cex.axis=2,cex.lab=2)
+plot(0,0,xlim=c(0,.1),ylim=c(-.02,.02),type="n",xlab="area (cm)",ylab="pred. change in area (cm)",cex.axis=2,cex.lab=2)
 day.indicies<-c(75,113,135)
 colors<-c("orange","red","purple")
 for(day in day.indicies)
@@ -131,9 +153,9 @@ for(day in day.indicies)
   polygon<-rbind(lower,upper[dim(upper)[1]:1,])
   polygon(polygon$x,polygon$y,col=colors[index],density=0)
 }
-legend("topright",legend = c("50% quantile hottest days","75% quantile hottest days","90% quantile hottest days"),col = c("orange","red","purple"),pch=16,cex=2,bty="n")
+legend("topright",legend = c("50% quantile hottest days","75% quantile hottest days","90% quantile hottest days"),col = c("orange","red","purple"),pch=16,cex=1,bty="n")
 
-plot(0,0,xlim=c(0,.1),ylim=c(-.04,.04),type="n",xlab="area (cm)",ylab="pred. change in area (cm)",cex.axis=2,cex.lab=2)
+plot(0,0,xlim=c(0,.1),ylim=c(-.02,.02),type="n",xlab="area (cm)",ylab="pred. change in area (cm)",cex.axis=2,cex.lab=2)
 temp.additions<-c(0,1.8,3.7)
 colors<-c("orange","red","purple")
 for(temp.addition in temp.additions)
@@ -162,4 +184,4 @@ for(temp.addition in temp.additions)
   polygon<-rbind(lower,upper[dim(upper)[1]:1,])
   polygon(polygon$x,polygon$y,col=colors[index],density=0)
 }
-legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),pch=16,cex=2,bty="n")
+legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),pch=16,cex=1,bty="n")

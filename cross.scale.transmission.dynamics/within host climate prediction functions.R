@@ -78,7 +78,7 @@ get.pred.data.temp.mean.quantile.pustule.model<-function(day.set,dummy.data,temp
   #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
   pustule.model.new.area<-.01 #predict change for small pustule, arbitrarily pick .01
   obs.time<-delta.days
-  pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,"time"=delta.days,"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"max.abs.hum"=new.max.abs.hum,"mean.solar"=new.mean.solar,"site"=site)
+  pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,"time"=delta.days,"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,"mean.wetness"=new.mean.wetness,"mean.solar"=new.mean.solar,"site"=site)
   pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,exclude = 's(site)')
   
   #predict change in number of pustules from enviro conditions
