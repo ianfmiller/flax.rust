@@ -8,23 +8,6 @@ library(progress)
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/n pustules data prep.R")
 
 delta.n.pustules<-subset(delta.n.pustules,time<=7)
-delta.n.pustules.standardized<-delta.n.pustules
-delta.n.pustules.standardized$time<-(delta.n.pustules$time-mean(delta.n.pustules$time,na.rm=T))/sd(delta.n.pustules$time)
-delta.n.pustules.standardized$n.pustules<-(delta.n.pustules$n.pustules-mean(delta.n.pustules$n.pustules,na.rm=T))/sd(delta.n.pustules$n.pustules)
-delta.n.pustules.standardized$mean.temp<-(delta.n.pustules$mean.temp-mean(delta.n.pustules$mean.temp,na.rm=T))/sd(delta.n.pustules$mean.temp)
-delta.n.pustules.standardized$max.temp<-(delta.n.pustules$max.temp-mean(delta.n.pustules$max.temp,na.rm=T))/sd(delta.n.pustules$max.temp)
-delta.n.pustules.standardized$min.temp<-(delta.n.pustules$min.temp-mean(delta.n.pustules$min.temp,na.rm=T))/sd(delta.n.pustules$min.temp)
-delta.n.pustules.standardized$mean.abs.hum<-(delta.n.pustules$mean.abs.hum-mean(delta.n.pustules$mean.abs.hum,na.rm=T))/sd(delta.n.pustules$mean.abs.hum)
-delta.n.pustules.standardized$max.abs.hum<-(delta.n.pustules$max.abs.hum-mean(delta.n.pustules$max.abs.hum,na.rm=T))/sd(delta.n.pustules$max.abs.hum)
-delta.n.pustules.standardized$min.abs.hum<-(delta.n.pustules$min.abs.hum-mean(delta.n.pustules$min.abs.hum,na.rm=T))/sd(delta.n.pustules$min.abs.hum)
-delta.n.pustules.standardized$mean.vpd<-(delta.n.pustules$mean.vpd-mean(delta.n.pustules$mean.vpd,na.rm=T))/sd(delta.n.pustules$mean.vpd)
-delta.n.pustules.standardized$max.vpd<-(delta.n.pustules$max.vpd-mean(delta.n.pustules$max.vpd,na.rm=T))/sd(delta.n.pustules$max.vpd)
-delta.n.pustules.standardized$min.vpd<-(delta.n.pustules$min.vpd-mean(delta.n.pustules$min.vpd,na.rm=T))/sd(delta.n.pustules$min.vpd)
-delta.n.pustules.standardized$mean.wetness<-(delta.n.pustules$mean.wetness-mean(delta.n.pustules$mean.wetness,na.rm=T))/sd(delta.n.pustules$mean.wetness)
-delta.n.pustules.standardized$tot.rain<-(delta.n.pustules$tot.rain-mean(delta.n.pustules$tot.rain,na.rm=T))/sd(delta.n.pustules$tot.rain)
-delta.n.pustules.standardized$mean.solar<-(delta.n.pustules$mean.solar-mean(delta.n.pustules$mean.solar,na.rm=T))/sd(delta.n.pustules$mean.solar)
-
-
 
 # visualize data
 
@@ -102,32 +85,36 @@ mtext(text="N = 650",cex=2)
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS"))
 {
-  ### construct all combinations of predictors
-  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/n.pustules.model.set.creation.R")
+  mod0<-gam(n.pustules.next~s(n.pustules,bs="cs",k=4)+
+              s(mean.temp,by=time,bs="cs",k=4)+
+              s(max.temp,by=time,bs="cs",k=4)+
+              s(min.temp,by=time,bs="cs",k=4)+
+              s(mean.abs.hum,by=time,bs="cs",k=4)+
+              s(max.abs.hum,by=time,bs="cs",k=4)+
+              s(min.abs.hum,by=time,bs="cs",k=4)+
+              s(mean.solar,by=time,bs="cs",k=4)+
+              s(mean.wetness,by=time,bs="cs",k=4)+
+              s(tot.rain,by=time,bs="cs",k=4)+
+              s(site,bs="re",k=4),
+            data=delta.n.pustules)
   
-  ### create all sets of models
-  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("n.pustules.next ~ s(time,k=10) + s(n.pustules",predictors[x],'site,k=15,bs="re")'),collapse=",k=15) + s(")))
-
-  names(model.set)<-seq(1,length(model.set),1)
+  summary(mod0) #indicates that max.abs.hum, mean.solar, and tot.rain are not significant predictors
   
-  ## run to search for best  model
-  all.fit.models<-c()
-  AIC.benchmark<- AIC(gam(n.pustules.next~s(n.pustules,k=15)+s(time,k=15)+s(site,bs='re',k=15),data=delta.n.pustules)) #cutoff to limit memory usage
-  pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
-  for (i in 1:length(model.set))
-  {
-    suppressMessages(new.mod<-gam(model.set[[i]],data=delta.n.pustules))
-    AIC.new.mod<-AIC(new.mod)
-    if(AIC.new.mod<=(AIC.benchmark)) {all.fit.models<-append(all.fit.models,list(new.mod))}
-    pb$tick()
-  }
+  mod1<-gam(n.pustules.next~s(n.pustules,bs="cs",k=4)+
+              #s(mean.temp,by=time,bs="cs",k=4)+
+              s(max.temp,by=time,bs="cs",k=4)+
+              #s(min.temp,by=time,bs="cs",k=4)+
+              #s(mean.abs.hum,by=time,bs="cs",k=4)+
+              #s(max.abs.hum,by=time,bs="cs",k=4)+
+              #s(min.abs.hum,by=time,bs="cs",k=4)+
+              #s(mean.solar,by=time,bs="cs",k=4)+
+              s(mean.wetness,by=time,bs="cs",k=4)+
+              #s(tot.rain,by=time,bs="cs",k=4)+
+              s(site,bs="re",k=4),
+            data=delta.n.pustules)
+  summary(mod1) # All now significant. Stepwise removal yields the same result. There were two marginally significant (p<.1) terms. A model including these terms was ~+2 AIC points, indicating that the simpler model is likely the best.
 
-  ## compare between models
-  AICs<-unlist(lapply(all.fit.models,AIC))
-  delta.AICs<-AICs-min(AICs)
-  index<-1
-  best.model<-all.fit.models[[order(AICs)[index]]]
-  saveRDS(best.model,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS")
+  saveRDS(mod1,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS")
 }
 
 ## load best model
@@ -136,16 +123,32 @@ n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission
 
 ## model checking
 plot(n.pustules.model,scale=0,pages=1) #plot smooths
-gam.check(n.pustules.model) #indicates that k=15 is sufficient
+gam.check(n.pustules.model) #indicates that the number of knots is sufficient
 
-## visualize model with standardized effects
-standardized.var.model<-gam(n.pustules.model$formula,data=delta.n.pustules.standardized,)
-plot(standardized.var.model,scale=0,pages=1) #plot standardized smooths
+## better visualize model
+
+par(mfrow=c(2,2))
+plot(n.pustules.model,scale=0,select=1)
+abline(0,1,col="red",lty=2)
+vis.gam(n.pustules.model,view = c("max.temp","time"),n.grid=30,plot.type = "contour",zlim=c(0,11),color="topo",contour.col = "black")
+vis.gam(n.pustules.model,view = c("mean.wetness","time"),n.grid=30,plot.type = "contour",zlim=c(0,11),color="topo",contour.col = "black")
+plot(n.pustules.model,scale=0,select=4)
+
+par(mfrow=c(2,2))
+plot(n.pustules.model,scale=0,select=1)
+vis.gam(n.pustules.model,view = c("max.temp","time"),n.grid=30,plot.type = "persp",zlim=c(0,11),se=1,theta=45,phi=15,ticktype="detailed")
+vis.gam(n.pustules.model,view = c("mean.wetness","time"),n.grid=30,plot.type = "persp",zlim=c(0,11),se=1,theta=45,phi=15,ticktype="detailed")
+plot(n.pustules.model,scale=0,select=4)
 
 # predict climate change effect
+
+## predict change in n.pustules by climate for different pustule sizes
+
+### climate modeled as day matching ~ 50th/75th/90th quantile of mean temp
+
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
 par(mfrow=c(1,2),mar=c(6,6,6,6))
-plot(0,0,xlim=c(0,26),ylim=c(-2,3),type="n",xlab="N pustules",ylab="pred. change in N pustules",cex.axis=2,cex.lab=2)
+plot(0,0,xlim=c(0,26),ylim=c(-4,2),type="n",xlab="N pustules",ylab="pred. change in N pustules",cex.axis=2,cex.lab=2)
 day.indicies<-c(75,113,135)
 colors<-c("orange","red","purple")
 for(day in day.indicies)
@@ -156,7 +159,18 @@ for(day in day.indicies)
   for(i in seq(1,26,5))
   {
     pred.data<-get.pred.data.temp.mean.quantile.n.pustules.model(day,i)
-    y<-bootMer(n.pustules.model, FUN=function(x)predict(x,newdata=pred.data, re.form=NA),nsim=100)$t
+    
+    Xp <- predict(n.pustules.model, newdata = pred.data, exlude='s(site)',type="lpmatrix")
+    beta <- coef(n.pustules.model) ## posterior mean of coefs
+    Vb   <- vcov(n.pustules.model) ## posterior  cov of coefs
+    n <- 100
+    mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
+    preds <- rep(NA, n)
+    ilink <- family(n.pustules.model)$linkinv
+    for (j in seq_len(n)) { 
+      preds[j]   <- ilink(Xp %*% mrand[j, ])
+    }
+    y<-preds
     lower=rbind(lower,data.frame(x=i,y=quantile(y,.05)-i))
     upper=rbind(upper,data.frame(x=i,y=quantile(y,.95)-i))
     points(i,mean(y)-i,col=colors[index],pch=16,cex=2)
@@ -164,9 +178,9 @@ for(day in day.indicies)
   polygon<-rbind(lower,upper[dim(upper)[1]:1,])
   polygon(polygon$x,polygon$y,col=colors[index],density=25)
 }
-legend("topright",legend = c("50% quantile hottest days","75% quantile hottest days","90% quantile hottest days"),col = c("orange","red","purple"),pch=16,cex=2,bty="n")
+legend("topright",legend = c("50% quantile hottest days","75% quantile hottest days","90% quantile hottest days"),col = c("orange","red","purple"),pch=16,cex=1,bty="n")
 
-plot(0,0,xlim=c(0,26),ylim=c(-2,3),type="n",xlab="N pustules",ylab="pred. change in N pustules",cex.axis=2,cex.lab=2)
+plot(0,0,xlim=c(0,26),ylim=c(-4,2),type="n",xlab="N pustules",ylab="pred. change in N pustules",cex.axis=2,cex.lab=2)
 temp.additions<-c(0,1.8,3.7)
 colors<-c("orange","red","purple")
 for(temp.addition in temp.additions)
@@ -177,7 +191,19 @@ for(temp.addition in temp.additions)
   for(i in seq(1,26,5))
   {
     pred.data<-get.pred.data.temp.mean.quantile.n.pustules.model(75,i,temp.addition = temp.addition)
-    y<-bootMer(n.pustules.model, FUN=function(x)predict(x,newdata=pred.data, re.form=NA),nsim=100)$t
+    
+    Xp <- predict(n.pustules.model, newdata = pred.data, exlude='s(site)',type="lpmatrix")
+    beta <- coef(n.pustules.model) ## posterior mean of coefs
+    Vb   <- vcov(n.pustules.model) ## posterior  cov of coefs
+    n <- 100
+    mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
+    preds <- rep(NA, n)
+    ilink <- family(n.pustules.model)$linkinv
+    for (j in seq_len(n)) { 
+      preds[j]   <- ilink(Xp %*% mrand[j, ])
+    }
+    y<-preds
+    
     lower=rbind(lower,data.frame(x=i,y=quantile(y,.05)-i))
     upper=rbind(upper,data.frame(x=i,y=quantile(y,.95)-i))
     points(i,mean(y)-i,col=colors[index],pch=16,cex=2)
@@ -185,4 +211,4 @@ for(temp.addition in temp.additions)
   polygon<-rbind(lower,upper[dim(upper)[1]:1,])
   polygon(polygon$x,polygon$y,col=colors[index],density=25)
 }
-legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),pch=16,cex=2,bty="n")
+legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),pch=16,cex=1,bty="n")
