@@ -387,18 +387,20 @@ get.pred.data<-function(site,date0,date1,dummy.data,temp.addition=0)
   
   #predict change in plant.inf.intensity from enviro conditions
   #plant.model.vars<-names(fixef(plant.model))[2:length(names(fixef(plant.model)))]
-  plant.model.new.plant.inf.intens<-.1
-  obs.time<-delta.days
-  plant.model.pred.data<-data.frame("plant.inf.intens"=plant.model.new.plant.inf.intens,
-                                    "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                                    "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                    "mean.wetness"=new.mean.wetness,
-                                    "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
-                                    "pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase)
-  pred.plant.inf.intens.increase<-10^predict(plant.model,newdata=plant.model.pred.data,exclude = 's(site)')
+  #plant.model.new.plant.inf.intens<-.1
+  #obs.time<-delta.days
+  #plant.model.pred.data<-data.frame("plant.inf.intens"=plant.model.new.plant.inf.intens,
+  #                                  "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
+  #                                 "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
+  #                                  "mean.wetness"=new.mean.wetness,
+  #                                  "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
+  #                                  "pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase)
+  #pred.plant.inf.intens.increase<-10^predict(plant.model,newdata=plant.model.pred.data,exclude = 's(site)')
   
+  pred.plant.inf.intens.increase<-0
   
-  out.data<-data.frame(plant.inf.intens=dummy.data,time=rep(delta.days,times=dim),site=rep(site,times=dim),
+  #area, n.pustules, and plant.inf.intens are all set to dummy data so that this function can be used interchangably for predictions at different scales without specifying the scale.
+  out.data<-data.frame(area=dummy.data,n.pustules=dummy.data,plant.inf.intens=dummy.data,time=rep(delta.days,times=dim),site=rep(site,times=dim),
                        mean.temp=rep(new.mean.temp,times=dim),max.temp=rep(new.max.temp,times=dim),min.temp=rep(new.min.temp,times=dim),
                        mean.abs.hum=rep(new.mean.abs.hum,times=dim),max.abs.hum=rep(new.max.abs.hum,times=dim),min.abs.hum=rep(new.min.abs.hum,times=dim),mean.vpd=rep(new.mean.vpd,times=dim),
                        max.vpd=rep(new.max.vpd,times=dim),min.vpd=rep(new.min.vpd,times=dim),mean.wetness=rep(new.mean.wetness,times=dim),tot.rain=rep(new.tot.rain,times=dim),mean.solar=rep(new.mean.solar,times=dim),
