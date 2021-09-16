@@ -217,7 +217,6 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         #n.pustule.model.vars<-names(fixef(n.pustule.model))[2:length(names(fixef(n.pustule.model)))]
         n.pustules.model.new.n.pustules<-1  #predict change for small N  pustules, arbitrarily pick 1
         obs.time<-delta.days
-        #test
         n.pustules.model.pred.data<-data.frame("n.pustules"=n.pustules.model.new.n.pustules,
                                                "time"=delta.days,"site"=site,
                                                "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
