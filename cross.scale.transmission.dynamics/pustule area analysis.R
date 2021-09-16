@@ -56,36 +56,52 @@ abline(0,1)
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS"))
 {
 
-  mod0<-gam(area.next~s(area,bs="cs",k=4)+
-              s(mean.temp,by=time,bs="cs",k=4)+
-              s(max.temp,by=time,bs="cs",k=4)+
-              s(min.temp,by=time,bs="cs",k=4)+
-              s(mean.abs.hum,by=time,bs="cs",k=4)+
-              s(max.abs.hum,by=time,bs="cs",k=4)+
-              s(min.abs.hum,by=time,bs="cs",k=4)+
-              s(mean.solar,by=time,bs="cs",k=4)+
-              s(mean.wetness,by=time,bs="cs",k=4)+
-              s(tot.rain,by=time,bs="cs",k=4)+
-              s(site,bs="re",k=4),
+  mod0<-gam(area.next~area+
+              te(mean.temp,area,by=time,bs="cs",k=4)+
+              te(max.temp,area,by=time,bs="cs",k=4)+
+              te(min.temp,area,by=time,bs="cs",k=4)+
+              te(mean.abs.hum,area,by=time,bs="cs",k=4)+
+              te(max.abs.hum,area,by=time,bs="cs",k=4)+
+              te(min.abs.hum,area,by=time,bs="cs",k=4)+
+              te(mean.solar,area,by=time,bs="cs",k=4)+
+              te(mean.wetness,area,by=time,bs="cs",k=4)+
+              te(tot.rain,area,by=time,bs="cs",k=4)+
+              te(site,bs="re",k=4),
             data=delta.pustules)
 
   summary(mod0) #indicates that max.abs.hum, mean.solar, and tot.rain are not significant predictors
   
-  mod1<-gam(area.next~s(area,bs="cs",k=4)+
-              s(mean.temp,by=time,bs="cs",k=4)+
-              s(max.temp,by=time,bs="cs",k=4)+
-              s(min.temp,by=time,bs="cs",k=4)+
-              s(mean.abs.hum,by=time,bs="cs",k=4)+
-              #s(max.abs.hum,by=time,bs="cs",k=4)+
-              s(min.abs.hum,by=time,bs="cs",k=4)+
-              #s(mean.solar,by=time,bs="cs",k=4)+
-              s(mean.wetness,by=time,bs="cs",k=4)+
-              #s(tot.rain,by=time,bs="cs",k=4)+
-              s(site,bs="re",k=4),
+  mod1<-gam(area.next~area+
+              te(mean.temp,area,by=time,bs="cs",k=4)+
+              te(max.temp,area,by=time,bs="cs",k=4)+
+              te(min.temp,area,by=time,bs="cs",k=4)+
+              te(mean.abs.hum,area,by=time,bs="cs",k=4)+
+              #te(max.abs.hum,area,by=time,bs="cs",k=4)+
+              te(min.abs.hum,area,by=time,bs="cs",k=4)+
+              te(mean.solar,area,by=time,bs="cs",k=4)+
+              te(mean.wetness,area,by=time,bs="cs",k=4)+
+              te(tot.rain,area,by=time,bs="cs",k=4)+
+              te(site,bs="re",k=4),
             data=delta.pustules)
-  summary(mod1) # All now significant. Stepwise removal yields the same result.
   
-  saveRDS(mod1,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
+  summary(mod1) #indicates that max.abs.hum, mean.solar, and tot.rain are not significant predictors
+  
+  mod2<-gam(area.next~area+
+              te(mean.temp,area,by=time,bs="cs",k=4)+
+              #te(max.temp,area,by=time,bs="cs",k=4)+
+              te(min.temp,area,by=time,bs="cs",k=4)+
+              te(mean.abs.hum,area,by=time,bs="cs",k=4)+
+              #te(max.abs.hum,area,by=time,bs="cs",k=4)+
+              te(min.abs.hum,area,by=time,bs="cs",k=4)+
+              te(mean.solar,area,by=time,bs="cs",k=4)+
+              te(mean.wetness,area,by=time,bs="cs",k=4)+
+              te(tot.rain,area,by=time,bs="cs",k=4)+
+              te(site,bs="re",k=4),
+            data=delta.pustules)
+  
+  summary(mod2) #indicates that max.abs.hum, mean.solar, and tot.rain are not significant predictors
+  
+  saveRDS(mod2,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
 }
 
 ## load best model
@@ -93,7 +109,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
 
 ## model checking
-plot(pustule.model,scale=0,pages=1) #plot smooths
+draw(pustule.model,dist=.5) #plot smooths
 #gam.check(pustule.model) #indicates more knots needed
 #more.knots.mod<-gam(area.next ~ s(area, bs = "cs", k = 20) + s(mean.temp, by = time, bs = "cs", k = 20) + s(max.temp, by = time, bs = "cs", k = 20) + s(min.temp, by = time, bs = "cs", k = 20) + s(mean.abs.hum, by = time, bs = "cs", k = 20) + s(min.abs.hum, by = time, bs = "cs", k = 20) + s(mean.wetness, by = time, bs = "cs", k = 20) + s(site, bs = "re", k = 20),data=delta.pustules)
 #gam.check(more.knots.mod) #indicates that increasing number of knots doesn't solve the issue of unevenly distributed residuals. This indicates that the data is the root cause and original model is OK
