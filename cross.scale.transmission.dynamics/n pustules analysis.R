@@ -232,8 +232,8 @@ predict.n.pustules.trajectory<-function(site,temp.addition,color,pred.window=1,p
     i<-start.n.pustules
     xcords.new<-c(1)
     ycords.new<-c(i)
-    beta <- coef(pustule.model) ## posterior mean of coefs
-    Vb   <- vcov(pustule.model) ## posterior  cov of coefs
+    beta <- coef(n.pustules.model) ## posterior mean of coefs
+    Vb   <- vcov(n.pustules.model) ## posterior  cov of coefs
     mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
     for(k in 1:(length(dates)-1)) #date index
     {
@@ -290,39 +290,39 @@ par(mar=c(6,6,2,2),mfrow=c(3,1))
 
 ### one day ahead projection
 plot(0,0,type="n",xlim=c(1,36),ylim=c(0,3),ylab='N.pustules',xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
-dat<-predict.pustule.trajectory("GM",0,pred.window=1,plot.orange,T,T) 
+dat<-predict.n.pustules.trajectory("GM",0,pred.window=1,plot.orange,T,T) 
 points(1:36,colMeans(dat),type="l",col="orange",lwd=4,lty=2)
 
-dat<-predict.pustule.trajectory("GM",1.8,pred.window=1,plot.red,T,T) 
+dat<-predict.n.pustules.trajectory("GM",1.8,pred.window=1,plot.red,T,T) 
 points(1:36,colMeans(dat),type="l",col="red",lwd=4,lty=2)
 
-dat<-predict.pustule.trajectory("GM",3.7,pred.window=1,plot.purple,T,T) 
+dat<-predict.n.pustules.trajectory("GM",3.7,pred.window=1,plot.purple,T,T) 
 points(1:36,colMeans(dat),type="l",col="purple",lwd=4,lty=2)
 
 legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
 
 ### two days ahead projection
 plot(0,0,type="n",xlim=c(1,36),ylim=c(0,3),ylab='N. pustules',xlab="day",cex.lab=1.5,cex.axis=1.5,main="2 days ahead")
-dat<-predict.pustule.trajectory("GM",0,pred.window=2,plot.orange,T,T) 
+dat<-predict.n.pustules.trajectory("GM",0,pred.window=2,plot.orange,T,T) 
 points(seq(1,35,2),colMeans(dat),type="l",col="orange",lwd=4,lty=2)
 
-dat<-predict.pustule.trajectory("GM",1.8,pred.window=2,plot.red,T,T) 
+dat<-predict.n.pustules.trajectory("GM",1.8,pred.window=2,plot.red,T,T) 
 points(seq(1,35,2),colMeans(dat),type="l",col="red",lwd=4,lty=2)
 
-dat<-predict.pustule.trajectory("GM",3.7,pred.window=2,plot.purple,T,T) 
+dat<-predict.n.pustules.trajectory("GM",3.7,pred.window=2,plot.purple,T,T) 
 points(seq(1,35,2),colMeans(dat),type="l",col="purple",lwd=4,lty=2)
 
 legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
 
 ### seven days ahead projection
-plot(0,0,type="n",xlim=c(1,36),ylim=c(0,3),ylab='N pustules',xlab="week",cex.lab=1.5,cex.axis=1.5,main="1 week ahead")
-dat<-predict.pustule.trajectory("GM",0,pred.window=7,plot.orange,T,T) 
+plot(0,0,type="n",xlim=c(1,36),ylim=c(0,8),ylab='N pustules',xlab="week",cex.lab=1.5,cex.axis=1.5,main="1 week ahead")
+dat<-predict.n.pustules.trajectory("GM",0,pred.window=7,plot.orange,T,T) 
 points(seq(1,36,7),colMeans(dat),type="l",col="orange",lwd=4,lty=2)
 
-dat<-predict.pustule.trajectory("GM",1.8,pred.window=7,plot.red,T,T) 
+dat<-predict.n.pustules.trajectory("GM",1.8,pred.window=7,plot.red,T,T) 
 points(seq(1,36,7),colMeans(dat),type="l",col="red",lwd=4,lty=2)
 
-dat<-predict.pustule.trajectory("GM",3.7,pred.window=7,plot.purple,T,T) 
+dat<-predict.n.pustules.trajectory("GM",3.7,pred.window=7,plot.purple,T,T) 
 points(seq(1,36,7),colMeans(dat),type="l",col="purple",lwd=4,lty=2)
 
 legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
