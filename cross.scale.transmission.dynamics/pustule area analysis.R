@@ -202,14 +202,14 @@ predict.pustule.trajectory<-function(site,temp.addition,color,pred.window=1,plot
   min.date<-max(min(unique(as.Date(weath.dat$date))),min(unique(as.Date(temp.rh.dat$date.time))))
   max.date<-min(max(unique(as.Date(weath.dat$date))),max(unique(as.Date(temp.rh.dat$date.time))))
   dates<-seq(min.date,max.date,pred.window)
-  start.area<-.1
+  start.area<-.01
   xcords<-rep(NA,length(dates))
   ycords<-rep(NA,length(dates))
   
   for(j in 1:100) #simulation iteration
   {
     reps<-1
-    i<-start.inf.intens
+    i<-start.area
     xcords.new<-c(1)
     ycords.new<-c(i)
     beta <- coef(pustule.model) ## posterior mean of coefs
