@@ -84,7 +84,7 @@ get.pred.data.temp.mean.quantile.pustule.model<-function(day.set,dummy.data,temp
                                       "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
                                       "mean.wetness"=new.mean.wetness,
                                       "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain)
-  pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,exclude = 's(site)')
+  pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,exclude = 's(site)')
   
   #predict change in number of pustules from enviro conditions
   #n.pustule.model.vars<-names(fixef(n.pustule.model))[2:length(names(fixef(n.pustule.model)))]
@@ -101,16 +101,17 @@ get.pred.data.temp.mean.quantile.pustule.model<-function(day.set,dummy.data,temp
   
   #predict change in plant.inf.intensity from enviro conditions
   #plant.model.vars<-names(fixef(plant.model))[2:length(names(fixef(plant.model)))]
-  plant.model.new.plant.inf.intens<-.1
-  obs.time<-delta.days
-  plant.model.pred.data<-data.frame("plant.inf.intens"=plant.model.new.plant.inf.intens,
-                                    "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                                    "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                    "mean.wetness"=new.mean.wetness,
-                                    "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
-                                    "pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase)
-  pred.plant.inf.intens.increase<-10^predict(plant.model,newdata=plant.model.pred.data,exclude = 's(site)')
+  #plant.model.new.plant.inf.intens<-.1
+  #obs.time<-delta.days
+  #plant.model.pred.data<-data.frame("plant.inf.intens"=plant.model.new.plant.inf.intens,
+  #                                  "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
+  #                                  "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
+  #                                  "mean.wetness"=new.mean.wetness,
+  #                                  "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
+  #                                  "pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase)
+  #pred.plant.inf.intens.increase<-10^predict(plant.model,newdata=plant.model.pred.data,exclude = 's(site)')
   
+  pred.plant.inf.intens.increase<-0
 
   out.data<-data.frame(area=dummy.data,time=rep(delta.days,times=dim),site=rep(site,times=dim),
                              mean.temp=rep(new.mean.temp,times=dim),max.temp=rep(new.max.temp,times=dim),min.temp=rep(new.min.temp,times=dim),
