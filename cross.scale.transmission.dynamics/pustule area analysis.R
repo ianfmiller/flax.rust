@@ -146,7 +146,7 @@ for(day in day.indicies)
     n <- 100
     mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
     preds <- rep(NA, n)
-    ilink <- family(plant.model)$linkinv
+    ilink <- family(n.pustules.model)$linkinv
     for (j in seq_len(n)) { 
       preds[j]   <- ilink(Xp %*% mrand[j, ])
     }
