@@ -120,6 +120,11 @@ vis.gam(pustule.model,view = c("mean.wetness","time"),n.grid=30,plot.type = "per
 plot(pustule.model,scale=0,select=8)
 
 # predict climate change effect
+
+## predict change in pustule area by climate for different pustule sizes
+
+### climate modeled as day matching ~ 50th/75th/90th quantile of mean temp
+
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
 par(mfrow=c(1,2),mar=c(6,6,6,6))
 plot(0,0,xlim=c(0,.1),ylim=c(-.02,.02),type="n",xlab="area (cm)",ylab="pred. change in area (cm)",cex.axis=2,cex.lab=2)
@@ -155,6 +160,8 @@ for(day in day.indicies)
 }
 legend("topright",legend = c("50% quantile hottest days","75% quantile hottest days","90% quantile hottest days"),col = c("orange","red","purple"),pch=16,cex=1,bty="n")
 
+### climate modeled as ~50th quantile hotest day + temperature addition
+
 plot(0,0,xlim=c(0,.1),ylim=c(-.02,.02),type="n",xlab="area (cm)",ylab="pred. change in area (cm)",cex.axis=2,cex.lab=2)
 temp.additions<-c(0,1.8,3.7)
 colors<-c("orange","red","purple")
@@ -185,3 +192,122 @@ for(temp.addition in temp.additions)
   polygon(polygon$x,polygon$y,col=colors[index],density=0)
 }
 legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),pch=16,cex=1,bty="n")
+
+## predict size trajectory of pustule across observation window
+predict.pustule.trajectory<-function(site,temp.addition,color,pred.window=1,plot=T,output=F)
+{  
+  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
+  weath.dat<-all.weath[which(all.weath$site==site),]
+  temp.rh.dat<-all.temp.rh[which(all.temp.rh$site==site),]
+  min.date<-max(min(unique(as.Date(weath.dat$date))),min(unique(as.Date(temp.rh.dat$date.time))))
+  max.date<-min(max(unique(as.Date(weath.dat$date))),max(unique(as.Date(temp.rh.dat$date.time))))
+  dates<-seq(min.date,max.date,pred.window)
+  start.area<-.1
+  xcords<-rep(NA,length(dates))
+  ycords<-rep(NA,length(dates))
+  
+  for(j in 1:100) #simulation iteration
+  {
+    reps<-1
+    i<-start.inf.intens
+    xcords.new<-c(1)
+    ycords.new<-c(i)
+    beta <- coef(pustule.model) ## posterior mean of coefs
+    Vb   <- vcov(pustule.model) ## posterior  cov of coefs
+    mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
+    for(k in 1:(length(dates)-1)) #date index
+    {
+      date0<-as.POSIXct(dates[k])
+      date1<-as.POSIXct(dates[k+1])
+      pred.data<-get.pred.data(site,date0,date1,i,temp.addition = temp.addition)
+      Xp <- predict(pustule.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
+      n <-2
+      ilink <- family(pustule.model)$linkinv
+      preds <- rep(NA,n)
+      for (l in seq_len(n)) { 
+        preds[l]   <- ilink(Xp %*% mrand[l, ])[1]
+      }
+      y<-preds[1]
+      if(y<0) {y<-0}
+      reps<-reps+pred.window
+      xcords.new<-c(xcords.new,reps)
+      ycords.new<-c(ycords.new,y)
+    }
+    xcords<-rbind(xcords,xcords.new)
+    ycords<-rbind(ycords,ycords.new)
+    print(j)
+  }
+  xcords<-xcords[-1,]
+  ycords<-ycords[-1,]
+  
+  if(plot)
+  {
+    for(k in 1:dim(xcords)[1])
+    {
+      points(xcords[k,],ycords[k,],type="l",col=color) 
+    } 
+  }
+  if(output)
+  {
+    ycords
+  }
+}
+
+t_col <- function(color, percent = 50, name = NULL) {
+  rgb.val <- col2rgb(color)
+  t.col <- rgb(rgb.val[1], rgb.val[2], rgb.val[3],
+               max = 255,
+               alpha = (100 - percent) * 255 / 100,
+               names = name)
+  invisible(t.col)
+}
+
+plot.purple<-t_col("purple",80)
+plot.red<-t_col("red",80)
+plot.orange<-t_col("orange",80)
+
+par(mar=c(6,6,2,2),mfrow=c(3,1))
+
+### one day ahead projection
+plot(0,0,type="n",xlim=c(1,36),ylim=c(0,.13),ylab='pustule area (cm)',xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
+dat<-predict.pustule.trajectory("GM",0,pred.window=1,plot.orange,T,T) 
+points(1:36,colMeans(dat),type="l",col="orange",lwd=4,lty=2)
+
+dat<-predict.pustule.trajectory("GM",1.8,pred.window=1,plot.red,T,T) 
+points(1:36,colMeans(dat),type="l",col="red",lwd=4,lty=2)
+
+dat<-predict.pustule.trajectory("GM",3.7,pred.window=1,plot.purple,T,T) 
+points(1:36,colMeans(dat),type="l",col="purple",lwd=4,lty=2)
+
+legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
+
+### two days ahead projection
+plot(0,0,type="n",xlim=c(1,36),ylim=c(0,.13),ylab='pustule area (cm)',xlab="day",cex.lab=1.5,cex.axis=1.5,main="2 days ahead")
+dat<-predict.pustule.trajectory("GM",0,pred.window=2,plot.orange,T,T) 
+points(seq(1,35,2),colMeans(dat),type="l",col="orange",lwd=4,lty=2)
+
+dat<-predict.pustule.trajectory("GM",1.8,pred.window=2,plot.red,T,T) 
+points(seq(1,35,2),colMeans(dat),type="l",col="red",lwd=4,lty=2)
+
+dat<-predict.pustule.trajectory("GM",3.7,pred.window=2,plot.purple,T,T) 
+points(seq(1,35,2),colMeans(dat),type="l",col="purple",lwd=4,lty=2)
+
+legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
+
+### seven days ahead projection
+plot(0,0,type="n",xlim=c(1,36),ylim=c(0,.13),ylab='pustule area (cm)',xlab="week",cex.lab=1.5,cex.axis=1.5,main="1 week ahead")
+dat<-predict.pustule.trajectory("GM",0,pred.window=7,plot.orange,T,T) 
+points(seq(1,36,7),colMeans(dat),type="l",col="orange",lwd=4,lty=2)
+
+dat<-predict.pustule.trajectory("GM",1.8,pred.window=7,plot.red,T,T) 
+points(seq(1,36,7),colMeans(dat),type="l",col="red",lwd=4,lty=2)
+
+dat<-predict.pustule.trajectory("GM",3.7,pred.window=7,plot.purple,T,T) 
+points(seq(1,36,7),colMeans(dat),type="l",col="purple",lwd=4,lty=2)
+
+legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
+
+
+
+
+
