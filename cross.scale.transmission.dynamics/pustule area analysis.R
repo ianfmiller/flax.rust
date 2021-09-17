@@ -64,7 +64,6 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
               s(max.abs.hum,by=time,bs="cs",k=4)+
               s(min.abs.hum,by=time,bs="cs",k=4)+
               s(mean.solar,by=time,bs="cs",k=4)+
-              #s(mean.wetness,by=time,bs="cs",k=4)+
               s(tot.rain,bs="cs",k=4)+
               s(site,bs="re",k=4),
             data=delta.pustules)
@@ -79,7 +78,6 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
               s(max.abs.hum,by=time,bs="cs",k=4)+
               s(min.abs.hum,by=time,bs="cs",k=4)+
               s(mean.solar,by=time,bs="cs",k=4)+
-              #s(mean.wetness,by=time,bs="cs",k=4)+
               s(tot.rain,bs="cs",k=4)+
               s(site,bs="re",k=4),
             data=delta.pustules)
