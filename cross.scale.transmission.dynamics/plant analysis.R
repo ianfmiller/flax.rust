@@ -2,6 +2,7 @@ library(mgcv)
 library(lme4)
 library(lmerTest)
 library(progress)
+library(gratia)
 
 # load data
 
@@ -46,7 +47,9 @@ plot(log10(delta.plants$plant.inf.intens),log10(delta.plants$plant.inf.intens.ne
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS"))
 {
-  mod0<-gam(log10(plant.inf.intens.next)~s(log10(plant.inf.intens),bs="cs",k=4)+
+  mod0<-gam(log10(plant.inf.intens.next)~s(log10(plant.inf.intens),by=time,bs="cs",k=4)+
+              s(pred.pustule.diam.growth,by=time,bs="cs",k=4)+
+              s(pred.pustule.num.increase,by=time,bs="cs",k=4)+
               s(mean.temp,by=time,bs="cs",k=4)+
               s(max.temp,by=time,bs="cs",k=4)+
               s(min.temp,by=time,bs="cs",k=4)+
@@ -54,42 +57,28 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
               s(max.abs.hum,by=time,bs="cs",k=4)+
               s(min.abs.hum,by=time,bs="cs",k=4)+
               s(mean.solar,by=time,bs="cs",k=4)+
-              s(mean.wetness,by=time,bs="cs",k=4)+
-              s(tot.rain,by=time,bs="cs",k=4)+
+              s(tot.rain,bs="cs",k=4)+
               s(site,bs="re",k=4),
             data=delta.plants)
   
-  summary(mod0) #indicates that max.abs.hum, mean.solar, and tot.rain are not significant predictors
+  summary(mod0) #indicates that all predictors besides pred.pustule.num.increase, min.temp, and mean solara are not significant predictors
   
-  mod1<-gam(log10(plant.inf.intens.next)~s(log10(plant.inf.intens),bs="cs",k=4)+
-              s(mean.temp,by=time,bs="cs",k=4)+
+  mod1<-gam(log10(plant.inf.intens.next)~s(log10(plant.inf.intens),by=time,bs="cs",k=4)+
+             # s(pred.pustule.diam.growth,by=time,bs="cs",k=4)+
+              s(pred.pustule.num.increase,by=time,bs="cs",k=4)+
+              #s(mean.temp,by=time,bs="cs",k=4)+
               #s(max.temp,by=time,bs="cs",k=4)+
               s(min.temp,by=time,bs="cs",k=4)+
               #s(mean.abs.hum,by=time,bs="cs",k=4)+
-              s(max.abs.hum,by=time,bs="cs",k=4)+
+              #s(max.abs.hum,by=time,bs="cs",k=4)+
               #s(min.abs.hum,by=time,bs="cs",k=4)+
               s(mean.solar,by=time,bs="cs",k=4)+
-              #s(mean.wetness,by=time,bs="cs",k=4)+
-              s(tot.rain,by=time,bs="cs",k=4)+
+              #s(tot.rain,bs="cs",k=4)+
               s(site,bs="re",k=4),
             data=delta.plants)
   summary(mod1) #indicates that mean.temp and min.temp are not significant predictors
   
-  mod2<-gam(log10(plant.inf.intens.next)~s(log10(plant.inf.intens),bs="cs",k=4)+
-              #s(mean.temp,by=time,bs="cs",k=4)+
-              #s(max.temp,by=time,bs="cs",k=4)+
-              #s(min.temp,by=time,bs="cs",k=4)+
-              #s(mean.abs.hum,by=time,bs="cs",k=4)+
-              s(max.abs.hum,by=time,bs="cs",k=4)+
-              #s(min.abs.hum,by=time,bs="cs",k=4)+
-              s(mean.solar,by=time,bs="cs",k=4)+
-              #s(mean.wetness,by=time,bs="cs",k=4)+
-              s(tot.rain,by=time,bs="cs",k=4)+
-              s(site,bs="re",k=4),
-            data=delta.plants)
-  summary(mod2)  # All now significant. Stepwise removal yields the same result. There were two marginally significant (p<.1) terms. A model including these terms was ~+2 AIC points, indicating that the simpler model is likely the best.
-  
-  saveRDS(mod2,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS")
+  saveRDS(mod1,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS")
 }
 
 ## load best model
@@ -97,14 +86,14 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 plants.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS")
 
 ## model checking
-plot(plants.model,scale=0,pages=1) #plot smooths
-#gam.check(plants.model) #indicates no more knots needed
+#plot(plants.model,scale=0,pages=1) #plot smooths
+#gam.check(plants.model) #indicates k=4 leads to unevenly distributed residuals, but increasing k doesn't solve issue and leads to overfitting
 
 # predict climate change effect
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
 library("MASS")
 par(mfrow=c(1,2),mar=c(6,6,6,6))
-plot(0,0,xlim=c(-1,5),ylim=c(-1,2),type="n",xlab="plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
+plot(0,0,xlim=c(-1,5),ylim=c(-4,3),type="n",xlab="plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
 day.indicies<-c(75,113,135)
 colors<-c("orange","red","purple")
 for(day in day.indicies)
@@ -133,9 +122,9 @@ for(day in day.indicies)
   polygon<-rbind(lower,upper[dim(upper)[1]:1,])
   polygon(polygon$x,polygon$y,col=colors[index],density=25)
 }
-legend("topright",legend = c("50% quantile hottest days","75% quantile hottest days","90% quantile hottest days"),col = c("orange","red","purple"),pch=16,cex=2,bty="n")
+legend("topright",legend = c("50% quantile hottest days","75% quantile hottest days","90% quantile hottest days"),col = c("orange","red","purple"),pch=16,cex=1,bty="n")
 
-plot(0,0,xlim=c(-1,5),ylim=c(-1,2),type="n",xlab="plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
+plot(0,0,xlim=c(-1,5),ylim=c(-4,3),type="n",xlab="plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
 temp.additions<-c(0,1.8,3.7)
 colors<-c("orange","red","purple")
 for(temp.addition in temp.additions)
@@ -164,7 +153,7 @@ for(temp.addition in temp.additions)
   polygon<-rbind(lower,upper[dim(upper)[1]:1,])
   polygon(polygon$x,polygon$y,col=colors[index],density=25)
 }
-legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),pch=16,cex=2,bty="n")
+legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),pch=16,cex=1,bty="n")
 
 
 predict.plant.inf.trajectory<-function(site,temp.addition,color,pred.window=2,plot=T,output=F)
