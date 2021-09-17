@@ -47,7 +47,7 @@ plot(log10(delta.plants$plant.inf.intens),log10(delta.plants$plant.inf.intens.ne
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS"))
 {
-  mod0<-gam(log10(plant.inf.intens.next)~s(log10(plant.inf.intens),by=time,bs="cs",k=4)+
+  mod0<-gam(plant.inf.intens.next~s(plant.inf.intens,by=time,bs="cs",k=4)+
               s(pred.pustule.diam.growth,by=time,bs="cs",k=4)+
               s(pred.pustule.num.increase,by=time,bs="cs",k=4)+
               s(mean.temp,by=time,bs="cs",k=4)+
@@ -60,19 +60,18 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
               s(tot.rain,bs="cs",k=4)+
               s(site,bs="re",k=4),
             data=delta.plants)
+  summary(mod0)
   
-  summary(mod0) #indicates that all predictors besides pred.pustule.num.increase, min.temp, and mean solara are not significant predictors
-  
-  mod1<-gam(log10(plant.inf.intens.next)~s(log10(plant.inf.intens),by=time,bs="cs",k=4)+
-             # s(pred.pustule.diam.growth,by=time,bs="cs",k=4)+
-              s(pred.pustule.num.increase,by=time,bs="cs",k=4)+
+  mod1<-gam(plant.inf.intens.next~s(plant.inf.intens,by=time,bs="cs",k=4)+
+              #s(pred.pustule.diam.growth,by=time,bs="cs",k=4)+
+              #s(pred.pustule.num.increase,by=time,bs="cs",k=4)+
               #s(mean.temp,by=time,bs="cs",k=4)+
               #s(max.temp,by=time,bs="cs",k=4)+
               s(min.temp,by=time,bs="cs",k=4)+
               #s(mean.abs.hum,by=time,bs="cs",k=4)+
               #s(max.abs.hum,by=time,bs="cs",k=4)+
               #s(min.abs.hum,by=time,bs="cs",k=4)+
-              s(mean.solar,by=time,bs="cs",k=4)+
+              #s(mean.solar,by=time,bs="cs",k=4)+
               #s(tot.rain,bs="cs",k=4)+
               s(site,bs="re",k=4),
             data=delta.plants)
@@ -155,7 +154,6 @@ for(temp.addition in temp.additions)
 }
 legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),pch=16,cex=1,bty="n")
 
-
 predict.plant.inf.trajectory<-function(site,temp.addition,color,pred.window=2,plot=T,output=F)
 {  
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
@@ -164,7 +162,7 @@ predict.plant.inf.trajectory<-function(site,temp.addition,color,pred.window=2,pl
   min.date<-max(min(unique(as.Date(weath.dat$date))),min(unique(as.Date(temp.rh.dat$date.time))))
   max.date<-min(max(unique(as.Date(weath.dat$date))),max(unique(as.Date(temp.rh.dat$date.time))))
   dates<-seq(min.date,max.date,pred.window)
-  start.inf.intens<-.1
+  start.inf.intens<-10
   xcords<-rep(NA,length(dates))
   ycords<-rep(NA,length(dates))
   
@@ -173,9 +171,10 @@ predict.plant.inf.trajectory<-function(site,temp.addition,color,pred.window=2,pl
     reps<-1
     i<-start.inf.intens
     xcords.new<-c(1)
-    ycords.new<-c(log10(i))
+    ycords.new<-c(i)
     beta <- coef(plants.model) ## posterior mean of coefs
     Vb   <- vcov(plants.model) ## posterior  cov of coefs
+    n <-2
     mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
     for(k in 1:(length(dates)-1)) #date index
     {
@@ -183,17 +182,17 @@ predict.plant.inf.trajectory<-function(site,temp.addition,color,pred.window=2,pl
       date1<-as.POSIXct(dates[k+1])
       pred.data<-get.pred.data(site,date0,date1,i,temp.addition = temp.addition)
       Xp <- predict(plants.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
-      n <-2
       ilink <- family(plants.model)$linkinv
       preds <- rep(NA,n)
       for (l in seq_len(n)) { 
         preds[l]   <- ilink(Xp %*% mrand[l, ])[1]
       }
       y<-preds[1]
-      i<-10^y
+      if(y<.1) {y<-.1}
+      i<-y
       reps<-reps+pred.window
       xcords.new<-c(xcords.new,reps)
-      ycords.new<-c(ycords.new,log10(i))
+      ycords.new<-c(ycords.new,i)
     }
     xcords<-rbind(xcords,xcords.new)
     ycords<-rbind(ycords,ycords.new)
@@ -231,7 +230,7 @@ plot.orange<-t_col("orange",80)
 par(mar=c(6,6,2,2),mfrow=c(3,1))
 
 ### one day ahead projection
-plot(0,0,type="n",xlim=c(1,36),ylim=c(-1,2),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
+plot(0,0,type="n",xlim=c(1,36),ylim=c(0,5000),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
 dat<-predict.plant.inf.trajectory("GM",0,pred.window=1,plot.orange,T,T) 
 points(1:36,colMeans(dat),type="l",col="orange",lwd=4,lty=2)
 
@@ -244,7 +243,7 @@ points(1:36,colMeans(dat),type="l",col="purple",lwd=4,lty=2)
 legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
 
 ### two days ahead projection
-plot(0,0,type="n",xlim=c(1,36),ylim=c(-1,1),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="2 days ahead")
+plot(0,0,type="n",xlim=c(1,36),ylim=c(0,5000),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="2 days ahead")
 dat<-predict.plant.inf.trajectory("GM",0,pred.window=2,plot.orange,T,T) 
 points(seq(1,35,2),colMeans(dat),type="l",col="orange",lwd=4,lty=2)
 
@@ -257,7 +256,7 @@ points(seq(1,35,2),colMeans(dat),type="l",col="purple",lwd=4,lty=2)
 legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
 
 ### seven days ahead projection
-plot(0,0,type="n",xlim=c(1,36),ylim=c(-1,1),ylab='plant inf. intens.',xlab="week",cex.lab=1.5,cex.axis=1.5,main="1 week ahead")
+plot(0,0,type="n",xlim=c(1,36),ylim=c(0,5000),ylab='plant inf. intens.',xlab="week",cex.lab=1.5,cex.axis=1.5,main="1 week ahead")
 dat<-predict.plant.inf.trajectory("GM",0,pred.window=7,plot.orange,T,T) 
 points(seq(1,36,7),colMeans(dat),type="l",col="orange",lwd=4,lty=2)
 
