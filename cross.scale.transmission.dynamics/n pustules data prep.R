@@ -39,7 +39,6 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   #mean.vpd<-c() #vapor pressure deficit
   #max.vpd<-c() 
   #min.vpd<-c() 
-  mean.wetness<-c()
   tot.rain<-c()
   mean.solar<-c()
   pred.pustule.diam.growths<-c()
@@ -107,7 +106,6 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
             #new.max.vpd<-max(vpds,na.rm=T)
             #new.min.vpd<-min(vpds,na.rm=T)
             
-            new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
             new.tot.rain<-sum(weath.sub$rain,na.rm=T)
             new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
             
@@ -124,7 +122,6 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
                                                 "time"=delta.days,"site"=site,
                                                 "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                                                 "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                                "mean.wetness"=new.mean.wetness,
                                                 "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain)
             pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,re.form=~0)
             
@@ -147,7 +144,6 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
             #mean.vpd<-c(mean.vpd,new.mean.vpd)
             #max.vpd<-c(max.vpd,new.max.vpd)
             #min.vpd<-c(min.vpd,new.min.vpd)
-            mean.wetness<-c(mean.wetness,new.mean.wetness)
             tot.rain<-c(tot.rain,new.tot.rain)
             mean.solar<-c(mean.solar,new.mean.solar)
             
@@ -162,7 +158,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
                              mean.temp=mean.temp,max.temp=max.temp,min.temp=min.temp,
                              mean.abs.hum=mean.abs.hum,max.abs.hum=max.abs.hum,min.abs.hum=min.abs.hum,
                              #mean.vpd=mean.vpd,max.vpd=max.vpd,min.vpd=min.vpd,
-                             mean.wetness=mean.wetness,tot.rain=tot.rain,mean.solar=mean.solar,pred.pustule.diam.growth=pred.pustule.diam.growths)
+                             tot.rain=tot.rain,mean.solar=mean.solar,pred.pustule.diam.growth=pred.pustule.diam.growths)
   
   saveRDS(n.pustules,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/n.pustules.RDS")
   saveRDS(delta.n.pustules,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.n.pustules.RDS")
