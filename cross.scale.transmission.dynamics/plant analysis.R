@@ -7,27 +7,6 @@ library(progress)
 
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant data prep.R")
 delta.plants<-subset(delta.plants,time<=10)
-delta.plants.standardized<-delta.plants
-delta.plants.standardized$time<-(delta.plants$time-mean(delta.plants$time,na.rm=T))/sd(delta.plants$time)
-delta.plants.standardized$plant.inf.intens<-(delta.plants$plant.inf.intens-mean(delta.plants$plant.inf.intens,na.rm=T))/sd(delta.plants$plant.inf.intens)
-delta.plants.standardized$mean.temp<-(delta.plants$mean.temp-mean(delta.plants$mean.temp,na.rm=T))/sd(delta.plants$mean.temp)
-delta.plants.standardized$max.temp<-(delta.plants$max.temp-mean(delta.plants$max.temp,na.rm=T))/sd(delta.plants$max.temp)
-delta.plants.standardized$min.temp<-(delta.plants$min.temp-mean(delta.plants$min.temp,na.rm=T))/sd(delta.plants$min.temp)
-delta.plants.standardized$mean.abs.hum<-(delta.plants$mean.abs.hum-mean(delta.plants$mean.abs.hum,na.rm=T))/sd(delta.plants$mean.abs.hum)
-delta.plants.standardized$max.abs.hum<-(delta.plants$max.abs.hum-mean(delta.plants$max.abs.hum,na.rm=T))/sd(delta.plants$max.abs.hum)
-delta.plants.standardized$min.abs.hum<-(delta.plants$min.abs.hum-mean(delta.plants$min.abs.hum,na.rm=T))/sd(delta.plants$min.abs.hum)
-delta.plants.standardized$mean.vpd<-(delta.plants$mean.vpd-mean(delta.plants$mean.vpd,na.rm=T))/sd(delta.plants$mean.vpd)
-delta.plants.standardized$max.vpd<-(delta.plants$max.vpd-mean(delta.plants$max.vpd,na.rm=T))/sd(delta.plants$max.vpd)
-delta.plants.standardized$min.vpd<-(delta.plants$min.vpd-mean(delta.plants$min.vpd,na.rm=T))/sd(delta.plants$min.vpd)
-delta.plants.standardized$mean.wetness<-(delta.plants$mean.wetness-mean(delta.plants$mean.wetness,na.rm=T))/sd(delta.plants$mean.wetness)
-delta.plants.standardized$tot.rain<-(delta.plants$tot.rain-mean(delta.plants$tot.rain,na.rm=T))/sd(delta.plants$tot.rain)
-delta.plants.standardized$mean.solar<-(delta.plants$mean.solar-mean(delta.plants$mean.solar,na.rm=T))/sd(delta.plants$mean.solar)
-delta.plants.standardized$pred.pustule.diam.growth<-(delta.plants$pred.pustule.diam.growth-mean(delta.plants$pred.pustule.diam.growth,na.rm=T))/sd(delta.plants$pred.pustule.diam.growth)
-delta.plants.standardized$pred.pustule.num.increase<-(delta.plants$pred.pustule.num.increase-mean(delta.plants$pred.pustule.num.increase,na.rm=T))/sd(delta.plants$pred.pustule.num.increase)
-
-
-
-
 
 # visualize data
 
@@ -49,7 +28,6 @@ for (tag in unique(plants$Tag))
   i<-i+1
 }
 
-
 ## plot change
 par(mfrow=c(2,1))
 plot(delta.plants$plant.inf.intens,delta.plants$plant.inf.intens.next,col="grey",xlab = "plant infection intensity",ylab="next obs. plant infection intensity",xlim=c(0,1000),ylim=c(0,200))
@@ -61,14 +39,6 @@ abline(h=0)
 ### relationship doesn't appear obviously linear near 0--take polynomial fitting approach
 par(mfrow=c(1,1))
 plot(log10(delta.plants$plant.inf.intens),log10(delta.plants$plant.inf.intens.next),col="black",xlab = "plant infection intensity",ylab="next obs. plant infection intensity",cex.lab=2,cex.axis=2,cex.main=2,main="N = 327")
-abline(0,1,lty=2)
-
-## test gam fit
-par(mfrow=c(1,1))
-plot(log10(delta.plants$plant.inf.intens),log10(delta.plants$plant.inf.intens.next),col="grey",xlab = "plant infection intensity",ylab="next obs. plant infection intensity")
-test.mod<-gam(log10(plant.inf.intens.next)~s(log10(plant.inf.intens))+s(site,bs="re"),data = delta.plants)
-points(log10(delta.plants$plant.inf.intens),predict(test.mod,exclude = 's(site)'),col="red")
-
 
 # analyze data
 
@@ -76,32 +46,50 @@ points(log10(delta.plants$plant.inf.intens),predict(test.mod,exclude = 's(site)'
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS"))
 {
-  ### construct all combinations of predictors
-  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant.model.set.creation.R")
+  mod0<-gam(log10(plant.inf.intens.next)~s(log10(plant.inf.intens),bs="cs",k=4)+
+              s(mean.temp,by=time,bs="cs",k=4)+
+              s(max.temp,by=time,bs="cs",k=4)+
+              s(min.temp,by=time,bs="cs",k=4)+
+              s(mean.abs.hum,by=time,bs="cs",k=4)+
+              s(max.abs.hum,by=time,bs="cs",k=4)+
+              s(min.abs.hum,by=time,bs="cs",k=4)+
+              s(mean.solar,by=time,bs="cs",k=4)+
+              s(mean.wetness,by=time,bs="cs",k=4)+
+              s(tot.rain,by=time,bs="cs",k=4)+
+              s(site,bs="re",k=4),
+            data=delta.plants)
   
-  ### create all sets of models
-  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("log10(plant.inf.intens.next) ~ s(time,k=10) + s(log10(plant.inf.intens)",predictors[x],'site,k=10,bs="re")'),collapse=",k=10) + s(")))
-  names(model.set)<-seq(1,length(model.set),1)
+  summary(mod0) #indicates that max.abs.hum, mean.solar, and tot.rain are not significant predictors
   
-  ## run to search for best  model
-  all.fit.models<-c()
-  AIC.benchmark<- AIC(gam(log10(plant.inf.intens.next)~s(time,k=10) + s(log10(plant.inf.intens),k=10)+s(site,bs="re",k=10),data = delta.plants)) #cutoff to limit memory usage
-  #AIC.benchmark<- 8025
-  pb <- progress_bar$new(total = length(model.set),format = " fitting models [:bar] :percent eta: :eta")
-  for (i in 1:length(model.set))
-  {
-    suppressMessages(new.mod<-gam(model.set[[i]],data=delta.plants))
-    AIC.new.mod<-AIC(new.mod)
-    if(AIC.new.mod<=(AIC.benchmark)) {all.fit.models<-append(all.fit.models,list(new.mod))}
-    pb$tick()
-  }
+  mod1<-gam(log10(plant.inf.intens.next)~s(log10(plant.inf.intens),bs="cs",k=4)+
+              s(mean.temp,by=time,bs="cs",k=4)+
+              #s(max.temp,by=time,bs="cs",k=4)+
+              s(min.temp,by=time,bs="cs",k=4)+
+              #s(mean.abs.hum,by=time,bs="cs",k=4)+
+              s(max.abs.hum,by=time,bs="cs",k=4)+
+              #s(min.abs.hum,by=time,bs="cs",k=4)+
+              s(mean.solar,by=time,bs="cs",k=4)+
+              #s(mean.wetness,by=time,bs="cs",k=4)+
+              s(tot.rain,by=time,bs="cs",k=4)+
+              s(site,bs="re",k=4),
+            data=delta.plants)
+  summary(mod1) #indicates that mean.temp and min.temp are not significant predictors
   
-  ## compare between models
-  AICs<-unlist(lapply(all.fit.models,AIC))
-  delta.AICs<-AICs-min(AICs)
-  index<-1
-  best.model<-all.fit.models[[order(AICs)[index]]]
-  saveRDS(best.model,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS")
+  mod2<-gam(log10(plant.inf.intens.next)~s(log10(plant.inf.intens),bs="cs",k=4)+
+              #s(mean.temp,by=time,bs="cs",k=4)+
+              #s(max.temp,by=time,bs="cs",k=4)+
+              #s(min.temp,by=time,bs="cs",k=4)+
+              #s(mean.abs.hum,by=time,bs="cs",k=4)+
+              s(max.abs.hum,by=time,bs="cs",k=4)+
+              #s(min.abs.hum,by=time,bs="cs",k=4)+
+              s(mean.solar,by=time,bs="cs",k=4)+
+              #s(mean.wetness,by=time,bs="cs",k=4)+
+              s(tot.rain,by=time,bs="cs",k=4)+
+              s(site,bs="re",k=4),
+            data=delta.plants)
+  summary(mod2)  # All now significant. Stepwise removal yields the same result. There were two marginally significant (p<.1) terms. A model including these terms was ~+2 AIC points, indicating that the simpler model is likely the best.
+  
+  saveRDS(mod2,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS")
 }
 
 ## load best model
@@ -111,10 +99,6 @@ plants.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dyn
 ## model checking
 plot(plants.model,scale=0,pages=1) #plot smooths
 #gam.check(plants.model) #indicates no more knots needed
-
-## visualize model with standardized effects
-standardized.var.model<-gam(plants.model$formula,data=delta.plants.standardized)
-plot(standardized.var.model,scale=0,pages=1) #plot standardized smooths
 
 # predict climate change effect
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
