@@ -167,14 +167,14 @@ for(temp.addition in temp.additions)
 legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),pch=16,cex=2,bty="n")
 
 
-predict.plant.inf.trajectory<-function(site,temp.addition,color,plot=T,output=F)
+predict.plant.inf.trajectory<-function(site,temp.addition,color,pred.window=2,plot=T,output=F)
 {  
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
   weath.dat<-all.weath[which(all.weath$site==site),]
   temp.rh.dat<-all.temp.rh[which(all.temp.rh$site==site),]
   min.date<-max(min(unique(as.Date(weath.dat$date))),min(unique(as.Date(temp.rh.dat$date.time))))
   max.date<-min(max(unique(as.Date(weath.dat$date))),max(unique(as.Date(temp.rh.dat$date.time))))
-  dates<-seq(min.date,max.date,7)
+  dates<-seq(min.date,max.date,pred.window)
   start.inf.intens<-.1
   xcords<-rep(NA,length(dates))
   ycords<-rep(NA,length(dates))
@@ -202,7 +202,7 @@ predict.plant.inf.trajectory<-function(site,temp.addition,color,plot=T,output=F)
       }
       y<-preds[1]
       i<-10^y
-      reps<-reps+1
+      reps<-reps+pred.window
       xcords.new<-c(xcords.new,reps)
       ycords.new<-c(ycords.new,log10(i))
     }
@@ -239,17 +239,46 @@ plot.purple<-t_col("purple",80)
 plot.red<-t_col("red",80)
 plot.orange<-t_col("orange",80)
 
-par(mar=c(6,6,5,5))
-plot(0,0,type="n",xlim=c(1,6),ylim=c(-1,2),ylab=expression(log[10]*' plant infection intensity'),xlab="week",cex.lab=1.5,cex.axis=1.5)
-dat<-predict.plant.inf.trajectory("GM",0,plot.orange,T,T) 
-points(1:6,colMeans(dat),type="l",col="orange",lwd=4,lty=2)
+par(mar=c(6,6,2,2),mfrow=c(3,1))
 
-dat<-predict.plant.inf.trajectory("GM",1.8,plot.red,T,T) 
-points(1:6,colMeans(dat),type="l",col="red",lwd=4,lty=2)
+### one day ahead projection
+plot(0,0,type="n",xlim=c(1,36),ylim=c(-1,2),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
+dat<-predict.plant.inf.trajectory("GM",0,pred.window=1,plot.orange,T,T) 
+points(1:36,colMeans(dat),type="l",col="orange",lwd=4,lty=2)
 
-dat<-predict.plant.inf.trajectory("GM",3.7,plot.purple,T,T) 
-points(1:6,colMeans(dat),type="l",col="purple",lwd=4,lty=2)
+dat<-predict.plant.inf.trajectory("GM",1.8,pred.window=1,plot.red,T,T) 
+points(1:36,colMeans(dat),type="l",col="red",lwd=4,lty=2)
+
+dat<-predict.plant.inf.trajectory("GM",3.7,pred.window=1,plot.purple,T,T) 
+points(1:36,colMeans(dat),type="l",col="purple",lwd=4,lty=2)
 
 legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
+
+### two days ahead projection
+plot(0,0,type="n",xlim=c(1,36),ylim=c(-1,1),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="2 days ahead")
+dat<-predict.plant.inf.trajectory("GM",0,pred.window=2,plot.orange,T,T) 
+points(seq(1,35,2),colMeans(dat),type="l",col="orange",lwd=4,lty=2)
+
+dat<-predict.plant.inf.trajectory("GM",1.8,pred.window=2,plot.red,T,T) 
+points(seq(1,35,2),colMeans(dat),type="l",col="red",lwd=4,lty=2)
+
+dat<-predict.plant.inf.trajectory("GM",3.7,pred.window=2,plot.purple,T,T) 
+points(seq(1,35,2),colMeans(dat),type="l",col="purple",lwd=4,lty=2)
+
+legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
+
+### seven days ahead projection
+plot(0,0,type="n",xlim=c(1,36),ylim=c(-1,1),ylab='plant inf. intens.',xlab="week",cex.lab=1.5,cex.axis=1.5,main="1 week ahead")
+dat<-predict.plant.inf.trajectory("GM",0,pred.window=7,plot.orange,T,T) 
+points(seq(1,36,7),colMeans(dat),type="l",col="orange",lwd=4,lty=2)
+
+dat<-predict.plant.inf.trajectory("GM",1.8,pred.window=7,plot.red,T,T) 
+points(seq(1,36,7),colMeans(dat),type="l",col="red",lwd=4,lty=2)
+
+dat<-predict.plant.inf.trajectory("GM",3.7,pred.window=7,plot.purple,T,T) 
+points(seq(1,36,7),colMeans(dat),type="l",col="purple",lwd=4,lty=2)
+
+legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
+
 
 
