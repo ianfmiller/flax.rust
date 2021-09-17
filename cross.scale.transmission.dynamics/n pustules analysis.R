@@ -86,6 +86,7 @@ mtext(text="N = 650",cex=2)
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS"))
 {
   mod0<-gam(n.pustules.next~s(n.pustules,bs="cs",k=4)+
+              s(pred.pustule.diam.growth,by=time,bs="cs",k=4)+
               s(mean.temp,by=time,bs="cs",k=4)+
               s(max.temp,by=time,bs="cs",k=4)+
               s(min.temp,by=time,bs="cs",k=4)+
@@ -101,13 +102,14 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   summary(mod0) #indicates that max.abs.hum, mean.solar, and tot.rain are not significant predictors
   
   mod1<-gam(n.pustules.next~s(n.pustules,bs="cs",k=4)+
-              #s(mean.temp,by=time,bs="cs",k=4)+
-              s(max.temp,by=time,bs="cs",k=4)+
+              s(pred.pustule.diam.growth,by=time,bs="cs",k=4)+
+              s(mean.temp,by=time,bs="cs",k=4)+
+              #s(max.temp,by=time,bs="cs",k=4)+
               #s(min.temp,by=time,bs="cs",k=4)+
               #s(mean.abs.hum,by=time,bs="cs",k=4)+
               #s(max.abs.hum,by=time,bs="cs",k=4)+
-              #s(min.abs.hum,by=time,bs="cs",k=4)+
-              #s(mean.solar,by=time,bs="cs",k=4)+
+              s(min.abs.hum,by=time,bs="cs",k=4)+
+              s(mean.solar,by=time,bs="cs",k=4)+
               s(mean.wetness,by=time,bs="cs",k=4)+
               #s(tot.rain,by=time,bs="cs",k=4)+
               s(site,bs="re",k=4),
@@ -123,22 +125,28 @@ n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission
 
 ## model checking
 plot(n.pustules.model,scale=0,pages=1) #plot smooths
-gam.check(n.pustules.model) #indicates that the number of knots is sufficient
+#gam.check(n.pustules.model) #indicates that the number of knots is sufficient
 
 ## better visualize model
 
-par(mfrow=c(2,2))
+par(mfrow=c(2,4))
 plot(n.pustules.model,scale=0,select=1)
 abline(0,1,col="red",lty=2)
-vis.gam(n.pustules.model,view = c("max.temp","time"),n.grid=30,plot.type = "contour",zlim=c(0,11),color="topo",contour.col = "black")
-vis.gam(n.pustules.model,view = c("mean.wetness","time"),n.grid=30,plot.type = "contour",zlim=c(0,11),color="topo",contour.col = "black")
-plot(n.pustules.model,scale=0,select=4)
+vis.gam(n.pustules.model,view = c("pred.pustule.diam.growth","time"),n.grid=30,plot.type = "contour",zlim=c(0,15),color="topo",contour.col = "black")
+vis.gam(n.pustules.model,view = c("mean.temp","time"),n.grid=30,plot.type = "contour",zlim=c(0,15),color="topo",contour.col = "black")
+vis.gam(n.pustules.model,view = c("min.abs.hum","time"),n.grid=30,plot.type = "contour",zlim=c(0,15),color="topo",contour.col = "black")
+vis.gam(n.pustules.model,view = c("mean.solar","time"),n.grid=30,plot.type = "contour",zlim=c(0,15),color="topo",contour.col = "black")
+vis.gam(n.pustules.model,view = c("mean.wetness","time"),n.grid=30,plot.type = "contour",zlim=c(0,15),color="topo",contour.col = "black")
+plot(n.pustules.model,scale=0,select=7)
 
-par(mfrow=c(2,2))
+par(mfrow=c(2,4))
 plot(n.pustules.model,scale=0,select=1)
-vis.gam(n.pustules.model,view = c("max.temp","time"),n.grid=30,plot.type = "persp",zlim=c(0,11),se=1,theta=45,phi=15,ticktype="detailed")
-vis.gam(n.pustules.model,view = c("mean.wetness","time"),n.grid=30,plot.type = "persp",zlim=c(0,11),se=1,theta=45,phi=15,ticktype="detailed")
-plot(n.pustules.model,scale=0,select=4)
+vis.gam(n.pustules.model,view = c("pred.pustule.diam.growth","time"),n.grid=30,plot.type = "persp",zlim=c(0,20),se=1,theta=45,phi=15,ticktype="detailed")
+vis.gam(n.pustules.model,view = c("mean.temp","time"),n.grid=30,plot.type = "persp",zlim=c(0,20),se=1,theta=45,phi=15,ticktype="detailed")
+vis.gam(n.pustules.model,view = c("min.abs.hum","time"),n.grid=30,plot.type = "persp",zlim=c(0,20),se=1,theta=45,phi=15,ticktype="detailed")
+vis.gam(n.pustules.model,view = c("mean.solar","time"),n.grid=30,plot.type = "persp",zlim=c(0,20),se=1,theta=45,phi=15,ticktype="detailed")
+vis.gam(n.pustules.model,view = c("mean.wetness","time"),n.grid=30,plot.type = "persp",zlim=c(0,20),se=1,theta=45,phi=15,ticktype="detailed")
+plot(n.pustules.model,scale=0,select=7)
 
 # predict climate change effect
 
