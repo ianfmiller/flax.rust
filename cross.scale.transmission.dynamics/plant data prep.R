@@ -222,7 +222,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
                                                "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                                                "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
                                                "mean.wetness"=new.mean.wetness,
-                                               "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain)
+                                               "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
+                                               "pred.pustule.diam.growth"=pred.pustule.diam.growth)
         pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,re.form=~0)
         
         #store values
