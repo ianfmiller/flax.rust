@@ -56,7 +56,7 @@ abline(0,1)
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS"))
 {
 
-  mod0<-gam(area.next~s(area,bs="cs",k=4)+
+  mod0<-gam(area.next~s(area,by=time,bs="cs",k=4)+
               s(mean.temp,by=time,bs="cs",k=4)+
               s(max.temp,by=time,bs="cs",k=4)+
               s(min.temp,by=time,bs="cs",k=4)+
@@ -70,13 +70,13 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 
   summary(mod0) #indicates that max.abs.hum, mean.solar, and tot.rain are not significant predictors
   
-  mod1<-gam(area.next~s(area,bs="cs",k=4)+
-              #s(mean.temp,by=time,bs="cs",k=4)+
+  mod1<-gam(area.next~s(area,by=time,bs="cs",k=4)+
+              s(mean.temp,by=time,bs="cs",k=4)+
               #s(max.temp,by=time,bs="cs",k=4)+
-              s(min.temp,by=time,bs="cs",k=4)+
+              #s(min.temp,by=time,bs="cs",k=4)+
               #s(mean.abs.hum,by=time,bs="cs",k=4)+
               s(max.abs.hum,by=time,bs="cs",k=4)+
-              s(min.abs.hum,by=time,bs="cs",k=4)+
+              #s(min.abs.hum,by=time,bs="cs",k=4)+
               s(mean.solar,by=time,bs="cs",k=4)+
               s(tot.rain,bs="cs",k=4)+
               s(site,bs="re",k=4),
@@ -93,28 +93,25 @@ pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dy
 ## model checking
 #plot(pustule.model,scale=0,pages=1) #plot smooths
 #gam.check(pustule.model) #indicates more knots needed
-#more.knots.mod<-gam(area.next ~ s(area, bs = "cs", k = 20) + s(min.temp, by = time, bs = "cs", k = 20) + s(max.abs.hum, by = time, bs = "cs", k = 20) + s(min.abs.hum, by = time, bs = "cs", k = 20) + s(mean.solar, by = time, bs = "cs", k = 20) + s(tot.rain, bs = "cs", k = 20) +s(site, bs = "re", k = 20),data=delta.pustules)
+#more.knots.mod<-gam(area.next ~ s(area, by = time, bs = "cs", k = 20) + s(mean.temp,by = time, bs = "cs", k = 20) + s(max.abs.hum, by = time, bs = "cs", k = 20) + s(mean.solar, by = time, bs = "cs", k = 20) + s(tot.rain, bs = "cs", k = 20) + s(site, bs = "re", k = 20),data=delta.pustules)
 #gam.check(more.knots.mod) #indicates that increasing number of knots doesn't solve the issue of unevenly distributed residuals. This indicates that the data is the root cause and original model is OK
 
 ## better visualize model
-par(mfrow=c(2,4))
-plot(pustule.model,scale=0,select=1)
-abline(0,1,col="red",lty=2)
-vis.gam(pustule.model,view = c("min.temp","time"),n.grid=30,plot.type = "contour",zlim=c(-.02,.15),color="topo",contour.col = "black")
+par(mfrow=c(2,3))
+vis.gam(pustule.model,view = c("area","time"),n.grid=30,plot.type = "contour",zlim=c(-.02,1),color="topo",contour.col = "black")
+vis.gam(pustule.model,view = c("mean.temp","time"),n.grid=30,plot.type = "contour",zlim=c(-.02,.15),color="topo",contour.col = "black")
 vis.gam(pustule.model,view = c("max.abs.hum","time"),n.grid=30,plot.type = "contour",zlim=c(-.02,.15),color="topo",contour.col = "black")
-vis.gam(pustule.model,view = c("min.abs.hum","time"),n.grid=30,plot.type = "contour",zlim=c(-.02,.15),color="topo",contour.col = "black")
 vis.gam(pustule.model,view = c("mean.solar","time"),n.grid=30,plot.type = "contour",zlim=c(-.02,.15),color="topo",contour.col = "black")
+plot(pustule.model,scale=0,select=5)
 plot(pustule.model,scale=0,select=6)
-plot(pustule.model,scale=0,select=7)
 
-par(mfrow=c(2,4))
-plot(pustule.model,scale=0,select=1)
-vis.gam(pustule.model,view = c("min.temp","time"),n.grid=30,plot.type = "persp",zlim=c(-.02,.15),se=1,theta=45,phi=15,ticktype="detailed")
+par(mfrow=c(2,3))
+vis.gam(pustule.model,view = c("area","time"),n.grid=30,plot.type = "persp",zlim=c(-.02,1),se=1,theta=45,phi=15,ticktype="detailed")
+vis.gam(pustule.model,view = c("mean.temp","time"),n.grid=30,plot.type = "persp",zlim=c(-.02,.15),se=1,theta=45,phi=15,ticktype="detailed")
 vis.gam(pustule.model,view = c("max.abs.hum","time"),n.grid=30,plot.type = "persp",zlim=c(-.02,.15),se=1,theta=45,phi=15,ticktype="detailed")
-vis.gam(pustule.model,view = c("min.abs.hum","time"),n.grid=30,plot.type = "persp",zlim=c(-.02,.15),se=1,theta=45,phi=15,ticktype="detailed")
 vis.gam(pustule.model,view = c("mean.solar","time"),n.grid=30,plot.type = "persp",zlim=c(-.02,.15),se=1,theta=45,phi=15,ticktype="detailed")
+plot(pustule.model,scale=0,select=5)
 plot(pustule.model,scale=0,select=6)
-plot(pustule.model,scale=0,select=7)
 
 # predict climate change effect
 
@@ -124,7 +121,7 @@ plot(pustule.model,scale=0,select=7)
 
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
 par(mfrow=c(1,2),mar=c(6,6,6,6))
-plot(0,0,xlim=c(0,.1),ylim=c(-.02,.02),type="n",xlab="area (cm)",ylab="pred. change in area (cm)",cex.axis=2,cex.lab=2)
+plot(0,0,xlim=c(0,.1),ylim=c(-.05,.05),type="n",xlab="area (cm)",ylab="pred. change in area (cm)",cex.axis=2,cex.lab=2)
 day.indicies<-c(75,113,135)
 colors<-c("orange","red","purple")
 for(day in day.indicies)
@@ -159,7 +156,7 @@ legend("topright",legend = c("50% quantile hottest days","75% quantile hottest d
 
 ### climate modeled as ~50th quantile hotest day + temperature addition
 
-plot(0,0,xlim=c(0,.1),ylim=c(-.02,.02),type="n",xlab="area (cm)",ylab="pred. change in area (cm)",cex.axis=2,cex.lab=2)
+plot(0,0,xlim=c(0,.1),ylim=c(-.05,.05),type="n",xlab="area (cm)",ylab="pred. change in area (cm)",cex.axis=2,cex.lab=2)
 temp.additions<-c(0,1.8,3.7)
 colors<-c("orange","red","purple")
 for(temp.addition in temp.additions)
