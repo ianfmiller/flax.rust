@@ -64,23 +64,23 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
               s(max.abs.hum,by=time,bs="cs",k=4)+
               s(min.abs.hum,by=time,bs="cs",k=4)+
               s(mean.solar,by=time,bs="cs",k=4)+
-              s(mean.wetness,by=time,bs="cs",k=4)+
-              s(tot.rain,by=time,bs="cs",k=4)+
+              #s(mean.wetness,by=time,bs="cs",k=4)+
+              s(tot.rain,bs="cs",k=4)+
               s(site,bs="re",k=4),
             data=delta.pustules)
 
   summary(mod0) #indicates that max.abs.hum, mean.solar, and tot.rain are not significant predictors
   
   mod1<-gam(area.next~s(area,bs="cs",k=4)+
-              s(mean.temp,by=time,bs="cs",k=4)+
-              s(max.temp,by=time,bs="cs",k=4)+
+              #s(mean.temp,by=time,bs="cs",k=4)+
+              #s(max.temp,by=time,bs="cs",k=4)+
               s(min.temp,by=time,bs="cs",k=4)+
-              s(mean.abs.hum,by=time,bs="cs",k=4)+
-              #s(max.abs.hum,by=time,bs="cs",k=4)+
+              #s(mean.abs.hum,by=time,bs="cs",k=4)+
+              s(max.abs.hum,by=time,bs="cs",k=4)+
               s(min.abs.hum,by=time,bs="cs",k=4)+
-              #s(mean.solar,by=time,bs="cs",k=4)+
-              s(mean.wetness,by=time,bs="cs",k=4)+
-              #s(tot.rain,by=time,bs="cs",k=4)+
+              s(mean.solar,by=time,bs="cs",k=4)+
+              #s(mean.wetness,by=time,bs="cs",k=4)+
+              s(tot.rain,bs="cs",k=4)+
               s(site,bs="re",k=4),
             data=delta.pustules)
   summary(mod1) # All now significant. Stepwise removal yields the same result.
@@ -93,32 +93,30 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
 
 ## model checking
-plot(pustule.model,scale=0,pages=1) #plot smooths
+#plot(pustule.model,scale=0,pages=1) #plot smooths
 #gam.check(pustule.model) #indicates more knots needed
-#more.knots.mod<-gam(area.next ~ s(area, bs = "cs", k = 20) + s(mean.temp, by = time, bs = "cs", k = 20) + s(max.temp, by = time, bs = "cs", k = 20) + s(min.temp, by = time, bs = "cs", k = 20) + s(mean.abs.hum, by = time, bs = "cs", k = 20) + s(min.abs.hum, by = time, bs = "cs", k = 20) + s(mean.wetness, by = time, bs = "cs", k = 20) + s(site, bs = "re", k = 20),data=delta.pustules)
+#more.knots.mod<-gam(area.next ~ s(area, bs = "cs", k = 20) + s(min.temp, by = time, bs = "cs", k = 20) + s(max.abs.hum, by = time, bs = "cs", k = 20) + s(min.abs.hum, by = time, bs = "cs", k = 20) + s(mean.solar, by = time, bs = "cs", k = 20) + s(tot.rain, bs = "cs", k = 20) +s(site, bs = "re", k = 20),data=delta.pustules)
 #gam.check(more.knots.mod) #indicates that increasing number of knots doesn't solve the issue of unevenly distributed residuals. This indicates that the data is the root cause and original model is OK
 
 ## better visualize model
 par(mfrow=c(2,4))
 plot(pustule.model,scale=0,select=1)
 abline(0,1,col="red",lty=2)
-vis.gam(pustule.model,view = c("mean.temp","time"),n.grid=30,plot.type = "contour",zlim=c(-.02,.15),color="topo",contour.col = "black")
-vis.gam(pustule.model,view = c("max.temp","time"),n.grid=30,plot.type = "contour",zlim=c(-.02,.15),color="topo",contour.col = "black")
 vis.gam(pustule.model,view = c("min.temp","time"),n.grid=30,plot.type = "contour",zlim=c(-.02,.15),color="topo",contour.col = "black")
-vis.gam(pustule.model,view = c("mean.abs.hum","time"),n.grid=30,plot.type = "contour",zlim=c(-.02,.15),color="topo",contour.col = "black")
+vis.gam(pustule.model,view = c("max.abs.hum","time"),n.grid=30,plot.type = "contour",zlim=c(-.02,.15),color="topo",contour.col = "black")
 vis.gam(pustule.model,view = c("min.abs.hum","time"),n.grid=30,plot.type = "contour",zlim=c(-.02,.15),color="topo",contour.col = "black")
-vis.gam(pustule.model,view = c("mean.wetness","time"),n.grid=30,plot.type = "contour",zlim=c(-.02,.15),color="topo",contour.col = "black")
-plot(pustule.model,scale=0,select=8)
+vis.gam(pustule.model,view = c("mean.solar","time"),n.grid=30,plot.type = "contour",zlim=c(-.02,.15),color="topo",contour.col = "black")
+plot(pustule.model,scale=0,select=6)
+plot(pustule.model,scale=0,select=7)
 
 par(mfrow=c(2,4))
 plot(pustule.model,scale=0,select=1)
-vis.gam(pustule.model,view = c("mean.temp","time"),n.grid=30,plot.type = "persp",zlim=c(-.02,.15),se=1,theta=45,phi=15,ticktype="detailed")
-vis.gam(pustule.model,view = c("max.temp","time"),n.grid=30,plot.type = "persp",zlim=c(-.02,.15),se=1,theta=45,phi=15,ticktype="detailed")
 vis.gam(pustule.model,view = c("min.temp","time"),n.grid=30,plot.type = "persp",zlim=c(-.02,.15),se=1,theta=45,phi=15,ticktype="detailed")
-vis.gam(pustule.model,view = c("mean.abs.hum","time"),n.grid=30,plot.type = "persp",zlim=c(-.02,.15),se=1,theta=45,phi=15,ticktype="detailed")
+vis.gam(pustule.model,view = c("max.abs.hum","time"),n.grid=30,plot.type = "persp",zlim=c(-.02,.15),se=1,theta=45,phi=15,ticktype="detailed")
 vis.gam(pustule.model,view = c("min.abs.hum","time"),n.grid=30,plot.type = "persp",zlim=c(-.02,.15),se=1,theta=45,phi=15,ticktype="detailed")
-vis.gam(pustule.model,view = c("mean.wetness","time"),n.grid=30,plot.type = "persp",zlim=c(-.02,.15),se=1,theta=45,phi=15,ticktype="detailed")
-plot(pustule.model,scale=0,select=8)
+vis.gam(pustule.model,view = c("mean.solar","time"),n.grid=30,plot.type = "persp",zlim=c(-.02,.15),se=1,theta=45,phi=15,ticktype="detailed")
+plot(pustule.model,scale=0,select=6)
+plot(pustule.model,scale=0,select=7)
 
 # predict climate change effect
 
@@ -193,121 +191,6 @@ for(temp.addition in temp.additions)
   polygon(polygon$x,polygon$y,col=colors[index],density=0)
 }
 legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),pch=16,cex=1,bty="n")
-
-## predict size trajectory of pustule across observation window
-predict.pustule.trajectory<-function(site,temp.addition,color,pred.window=1,plot=T,output=F)
-{  
-  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
-  weath.dat<-all.weath[which(all.weath$site==site),]
-  temp.rh.dat<-all.temp.rh[which(all.temp.rh$site==site),]
-  min.date<-max(min(unique(as.Date(weath.dat$date))),min(unique(as.Date(temp.rh.dat$date.time))))
-  max.date<-min(max(unique(as.Date(weath.dat$date))),max(unique(as.Date(temp.rh.dat$date.time))))
-  dates<-seq(min.date,max.date,pred.window)
-  start.area<-.01
-  xcords<-rep(NA,length(dates))
-  ycords<-rep(NA,length(dates))
-  
-  for(j in 1:100) #simulation iteration
-  {
-    reps<-1
-    i<-start.area
-    xcords.new<-c(1)
-    ycords.new<-c(i)
-    beta <- coef(pustule.model) ## posterior mean of coefs
-    Vb   <- vcov(pustule.model) ## posterior  cov of coefs
-    mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
-    for(k in 1:(length(dates)-1)) #date index
-    {
-      date0<-as.POSIXct(dates[k])
-      date1<-as.POSIXct(dates[k+1])
-      pred.data<-get.pred.data(site,date0,date1,i,temp.addition = temp.addition)
-      Xp <- predict(pustule.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
-      n <-2
-      ilink <- family(pustule.model)$linkinv
-      preds <- rep(NA,n)
-      for (l in seq_len(n)) { 
-        preds[l]   <- ilink(Xp %*% mrand[l, ])[1]
-      }
-      y<-preds[1]
-      if(y<0) {y<-0}
-      reps<-reps+pred.window
-      xcords.new<-c(xcords.new,reps)
-      ycords.new<-c(ycords.new,y)
-    }
-    xcords<-rbind(xcords,xcords.new)
-    ycords<-rbind(ycords,ycords.new)
-    print(j)
-  }
-  xcords<-xcords[-1,]
-  ycords<-ycords[-1,]
-  
-  if(plot)
-  {
-    for(k in 1:dim(xcords)[1])
-    {
-      points(xcords[k,],ycords[k,],type="l",col=color) 
-    } 
-  }
-  if(output)
-  {
-    ycords
-  }
-}
-
-t_col <- function(color, percent = 50, name = NULL) {
-  rgb.val <- col2rgb(color)
-  t.col <- rgb(rgb.val[1], rgb.val[2], rgb.val[3],
-               max = 255,
-               alpha = (100 - percent) * 255 / 100,
-               names = name)
-  invisible(t.col)
-}
-
-plot.purple<-t_col("purple",80)
-plot.red<-t_col("red",80)
-plot.orange<-t_col("orange",80)
-
-par(mar=c(6,6,2,2),mfrow=c(3,1))
-
-### one day ahead projection
-plot(0,0,type="n",xlim=c(1,36),ylim=c(0,.13),ylab='pustule area (cm)',xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
-dat<-predict.pustule.trajectory("GM",0,pred.window=1,plot.orange,T,T) 
-points(1:36,colMeans(dat),type="l",col="orange",lwd=4,lty=2)
-
-dat<-predict.pustule.trajectory("GM",1.8,pred.window=1,plot.red,T,T) 
-points(1:36,colMeans(dat),type="l",col="red",lwd=4,lty=2)
-
-dat<-predict.pustule.trajectory("GM",3.7,pred.window=1,plot.purple,T,T) 
-points(1:36,colMeans(dat),type="l",col="purple",lwd=4,lty=2)
-
-legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
-
-### two days ahead projection
-plot(0,0,type="n",xlim=c(1,36),ylim=c(0,.13),ylab='pustule area (cm)',xlab="day",cex.lab=1.5,cex.axis=1.5,main="2 days ahead")
-dat<-predict.pustule.trajectory("GM",0,pred.window=2,plot.orange,T,T) 
-points(seq(1,35,2),colMeans(dat),type="l",col="orange",lwd=4,lty=2)
-
-dat<-predict.pustule.trajectory("GM",1.8,pred.window=2,plot.red,T,T) 
-points(seq(1,35,2),colMeans(dat),type="l",col="red",lwd=4,lty=2)
-
-dat<-predict.pustule.trajectory("GM",3.7,pred.window=2,plot.purple,T,T) 
-points(seq(1,35,2),colMeans(dat),type="l",col="purple",lwd=4,lty=2)
-
-legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
-
-### seven days ahead projection
-plot(0,0,type="n",xlim=c(1,36),ylim=c(0,.13),ylab='pustule area (cm)',xlab="week",cex.lab=1.5,cex.axis=1.5,main="1 week ahead")
-dat<-predict.pustule.trajectory("GM",0,pred.window=7,plot.orange,T,T) 
-points(seq(1,36,7),colMeans(dat),type="l",col="orange",lwd=4,lty=2)
-
-dat<-predict.pustule.trajectory("GM",1.8,pred.window=7,plot.red,T,T) 
-points(seq(1,36,7),colMeans(dat),type="l",col="red",lwd=4,lty=2)
-
-dat<-predict.pustule.trajectory("GM",3.7,pred.window=7,plot.purple,T,T) 
-points(seq(1,36,7),colMeans(dat),type="l",col="purple",lwd=4,lty=2)
-
-legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
-
 
 ## predict size trajectory of pustule across observation window
 predict.pustule.trajectory<-function(site,temp.addition,color,pred.window=1,plot=T,output=F)
