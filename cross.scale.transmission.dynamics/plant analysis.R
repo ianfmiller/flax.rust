@@ -53,7 +53,7 @@ abline(h=0)
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS"))
 {
-  mod0<-gam(plant.inf.intens.next-plant.inf.intens~s(plant.inf.intens,by=time,bs="cs",k=10)+
+  mod0<-gam(plant.inf.intens.next-plant.inf.intens~s(plant.inf.intens,by=time,bs="cs",k=20)+
               s(pred.pustule.diam.growth,by=time,bs="cs",k=4)+
               s(pred.pustule.num.increase,by=time,bs="cs",k=4)+
               s(mean.temp,by=time,bs="cs",k=4)+
@@ -66,9 +66,24 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
               s(tot.rain,bs="cs",k=4)+
               s(site,bs="re",k=4),
             data=delta.plants)
-  summary(mod0)
+  summary(mod0) #indicates that and min.temp are pred.pustule.diam.growth are significant predictors
   
-  mod1<-gam(plant.inf.intens.next-plant.inf.intens~s(plant.inf.intens,by=time,bs="cs",k=10)+
+  mod1<-gam(plant.inf.intens.next-plant.inf.intens~s(plant.inf.intens,by=time,bs="cs",k=20)+
+              s(pred.pustule.diam.growth,by=time,bs="cs",k=4)+
+              #s(pred.pustule.num.increase,by=time,bs="cs",k=4)+
+              #s(mean.temp,by=time,bs="cs",k=4)+
+              #s(max.temp,by=time,bs="cs",k=4)+
+              s(min.temp,by=time,bs="cs",k=4)+
+              #s(mean.abs.hum,by=time,bs="cs",k=4)+
+              #s(max.abs.hum,by=time,bs="cs",k=4)+
+              #s(min.abs.hum,by=time,bs="cs",k=4)+
+              #s(mean.solar,by=time,bs="cs",k=4)+
+              #s(tot.rain,bs="cs",k=4)+
+              s(site,bs="re",k=4),
+            data=delta.plants)
+  summary(mod1) #indicates that pred.pustule.diam.growth is not a significant predictor
+  
+  mod2<-gam(plant.inf.intens.next-plant.inf.intens~s(plant.inf.intens,by=time,bs="cs",k=20)+
               #s(pred.pustule.diam.growth,by=time,bs="cs",k=4)+
               #s(pred.pustule.num.increase,by=time,bs="cs",k=4)+
               #s(mean.temp,by=time,bs="cs",k=4)+
@@ -81,9 +96,9 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
               #s(tot.rain,bs="cs",k=4)+
               s(site,bs="re",k=4),
             data=delta.plants)
-  summary(mod1) #indicates that mean.temp and min.temp are not significant predictors
+  summary(mod2) #all predictors are now significant
   
-  saveRDS(mod1,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS")
+  saveRDS(mod2,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS")
 }
 
 ## load best model
@@ -120,9 +135,9 @@ for(day in day.indicies)
       preds[j]   <- ilink(Xp %*% mrand[j, ])
     }
     y<-preds
-    lower=rbind(lower,data.frame(x=log10(i),y=quantile(y,.05)-log10(i)))
-    upper=rbind(upper,data.frame(x=log10(i),y=quantile(y,.95)-log10(i)))
-    points(log10(i),mean(y)-i,col=colors[index],pch=16,cex=2)
+    lower=rbind(lower,data.frame(x=log10(i),y=quantile(y,.05)))
+    upper=rbind(upper,data.frame(x=log10(i),y=quantile(y,.95)))
+    points(log10(i),mean(y),col=colors[index],pch=16,cex=2)
   }
   polygon<-rbind(lower,upper[dim(upper)[1]:1,])
   polygon(polygon$x,polygon$y,col=colors[index],density=25)
@@ -153,7 +168,7 @@ for(temp.addition in temp.additions)
     y<-preds
     lower=rbind(lower,data.frame(x=log10(i),y=quantile(y,.05)-log10(i)))
     upper=rbind(upper,data.frame(x=log10(i),y=quantile(y,.95)-log10(i)))
-    points(log10(i),mean(y)-i,col=colors[index],pch=16,cex=2)
+    points(log10(i),mean(y),col=colors[index],pch=16,cex=2)
   }
   polygon<-rbind(lower,upper[dim(upper)[1]:1,])
   polygon(polygon$x,polygon$y,col=colors[index],density=25)
