@@ -146,7 +146,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
                            mean.wetness=mean.wetness,tot.rain=tot.rain,mean.solar=mean.solar)
   
   saveRDS(plant.heights,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plant.heights.RDS")
-  saveRDS(delta.height,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.height.RDS")
+  saveRDS(delta.height,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.heights.RDS")
 }
 plant.heights<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plant.heights.RDS")
-delta.height<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.height.RDS")
+delta.height<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.heights.RDS")
