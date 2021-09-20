@@ -173,7 +173,7 @@ predict.plant.inf.intens.boot<-function(plant.inf.intens.last,site,date0,date1)
   for (j in seq_len(n)) { 
     preds[j]   <- ilink(Xp %*% mrand[j, ])
   }
-  plant.inf.intens.next<-10^preds[1]
+  plant.inf.intens.next<-preds[1]
   if(plant.inf.intens.next<.01) {plant.inf.intens.next<-.01}
   plant.inf.intens.next
 }
@@ -257,7 +257,7 @@ predict.plant.inf.intens.last<-function(plant.inf.intens.next,site,date0,date1)
   pred.func<-function(x)
   {
     plant.inf.intens.last.test<-x
-    plant.inf.intens.next.pred<-10^predict(plant.model,newdata=pred.data,exclude = 's(site)')
+    plant.inf.intens.next.pred<-predict(plant.model,newdata=pred.data,exclude = 's(site)')
     abs(plant.inf.intens.next.pred-plant.inf.intens.next)
   }
   plant.inf.intens.last<-optim(c(plant.inf.intens.next),pred.func,method = "Brent",lower=0,upper=10e6)$par
