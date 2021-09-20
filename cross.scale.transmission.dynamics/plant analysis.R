@@ -17,7 +17,7 @@ hist(plants$plant.inf.intens,main="plant infection intensity",breaks=100,xlab="p
 hist(delta.plants$plant.inf.intens.next-delta.plants$plant.inf.intens,main="change in plant infection intensity",breaks=100,xlab="change in plant infection intensity")
 
 ## plot trajectories
-par(mfrow=c(1,1))
+par(mfrow=c(2,1))
 plot(c(min(as.Date(plants$Date,tryFormats = "%m/%d/%Y")),max(as.Date(plants$Date,tryFormats = "%m/%d/%Y"))),c(-1,max(log10(plants$plant.inf.intens))),type="n",xlab="date",ylab="log 10 plant infection intensity",main="plant infection intensity",cex.lab=2,cex.axis=2,cex.main=2)
 i<-0
 plot.cols<-sample(rainbow(101))
@@ -29,6 +29,17 @@ for (tag in unique(plants$Tag))
   i<-i+1
 }
 
+plot(c(min(as.Date(plants$Date,tryFormats = "%m/%d/%Y")),max(as.Date(plants$Date,tryFormats = "%m/%d/%Y"))),c(0,max(plants$plant.inf.intens)),type="n",xlab="date",ylab="log 10 plant infection intensity",main="plant infection intensity",cex.lab=2,cex.axis=2,cex.main=2)
+i<-0
+plot.cols<-sample(rainbow(101))
+
+for (tag in unique(plants$Tag))
+{
+  sub.plants.1<-plants[which(plants$Tag==tag),]
+  points(sub.plants.1$Date,sub.plants.1$plant.inf.intens,col=plot.cols[i],type="l",lwd=2)
+  i<-i+1
+}
+
 ## plot change
 par(mfrow=c(2,1))
 plot(delta.plants$plant.inf.intens,delta.plants$plant.inf.intens.next,col="grey",xlab = "plant infection intensity",ylab="next obs. plant infection intensity",xlim=c(0,1000),ylim=c(0,200))
@@ -36,18 +47,13 @@ abline(0,1)
 plot(delta.plants$plant.inf.intens,delta.plants$plant.inf.intens.next-delta.plants$plant.inf.intens,col="grey",xlab = "plant infection intensity",ylab="change in plant infection intensity")
 abline(h=0)
 
-## plot log10 change
-### relationship doesn't appear obviously linear near 0--take polynomial fitting approach
-par(mfrow=c(1,1))
-plot(log10(delta.plants$plant.inf.intens),log10(delta.plants$plant.inf.intens.next),col="black",xlab = "plant infection intensity",ylab="next obs. plant infection intensity",cex.lab=2,cex.axis=2,cex.main=2,main="N = 327")
-
 # analyze data
 
 ## fit models--only if not already fit
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS"))
 {
-  mod0<-gam(plant.inf.intens.next~s(plant.inf.intens,by=time,bs="cs",k=4)+
+  mod0<-gam(plant.inf.intens.next-plant.inf.intens~s(plant.inf.intens,by=time,bs="cs",k=10)+
               s(pred.pustule.diam.growth,by=time,bs="cs",k=4)+
               s(pred.pustule.num.increase,by=time,bs="cs",k=4)+
               s(mean.temp,by=time,bs="cs",k=4)+
@@ -62,7 +68,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
             data=delta.plants)
   summary(mod0)
   
-  mod1<-gam(plant.inf.intens.next~s(plant.inf.intens,by=time,bs="cs",k=4)+
+  mod1<-gam(plant.inf.intens.next-plant.inf.intens~s(plant.inf.intens,by=time,bs="cs",k=10)+
               #s(pred.pustule.diam.growth,by=time,bs="cs",k=4)+
               #s(pred.pustule.num.increase,by=time,bs="cs",k=4)+
               #s(mean.temp,by=time,bs="cs",k=4)+
@@ -92,7 +98,7 @@ plants.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dyn
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
 library("MASS")
 par(mfrow=c(1,2),mar=c(6,6,6,6))
-plot(0,0,xlim=c(-1,5),ylim=c(-4,3),type="n",xlab="plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
+plot(0,0,xlim=c(-1,5),ylim=c(-1000,1000),type="n",xlab="log 10 plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
 day.indicies<-c(75,113,135)
 colors<-c("orange","red","purple")
 for(day in day.indicies)
@@ -116,14 +122,14 @@ for(day in day.indicies)
     y<-preds
     lower=rbind(lower,data.frame(x=log10(i),y=quantile(y,.05)-log10(i)))
     upper=rbind(upper,data.frame(x=log10(i),y=quantile(y,.95)-log10(i)))
-    points(log10(i),mean(y)-log10(i),col=colors[index],pch=16,cex=2)
+    points(log10(i),mean(y)-i,col=colors[index],pch=16,cex=2)
   }
   polygon<-rbind(lower,upper[dim(upper)[1]:1,])
   polygon(polygon$x,polygon$y,col=colors[index],density=25)
 }
 legend("topright",legend = c("50% quantile hottest days","75% quantile hottest days","90% quantile hottest days"),col = c("orange","red","purple"),pch=16,cex=1,bty="n")
 
-plot(0,0,xlim=c(-1,5),ylim=c(-4,3),type="n",xlab="plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
+plot(0,0,xlim=c(0,5),ylim=c(-1000,1000),type="n",xlab="plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
 temp.additions<-c(0,1.8,3.7)
 colors<-c("orange","red","purple")
 for(temp.addition in temp.additions)
@@ -147,7 +153,7 @@ for(temp.addition in temp.additions)
     y<-preds
     lower=rbind(lower,data.frame(x=log10(i),y=quantile(y,.05)-log10(i)))
     upper=rbind(upper,data.frame(x=log10(i),y=quantile(y,.95)-log10(i)))
-    points(log10(i),mean(y)-log10(i),col=colors[index],pch=16,cex=2)
+    points(log10(i),mean(y)-i,col=colors[index],pch=16,cex=2)
   }
   polygon<-rbind(lower,upper[dim(upper)[1]:1,])
   polygon(polygon$x,polygon$y,col=colors[index],density=25)
@@ -162,7 +168,7 @@ predict.plant.inf.trajectory<-function(site,temp.addition,color,pred.window=2,pl
   min.date<-max(min(unique(as.Date(weath.dat$date))),min(unique(as.Date(temp.rh.dat$date.time))))
   max.date<-min(max(unique(as.Date(weath.dat$date))),max(unique(as.Date(temp.rh.dat$date.time))))
   dates<-seq(min.date,max.date,pred.window)
-  start.inf.intens<-10
+  start.inf.intens<-.1
   xcords<-rep(NA,length(dates))
   ycords<-rep(NA,length(dates))
   
@@ -172,15 +178,15 @@ predict.plant.inf.trajectory<-function(site,temp.addition,color,pred.window=2,pl
     i<-start.inf.intens
     xcords.new<-c(1)
     ycords.new<-c(i)
-    beta <- coef(plants.model) ## posterior mean of coefs
-    Vb   <- vcov(plants.model) ## posterior  cov of coefs
-    n <-2
-    mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
     for(k in 1:(length(dates)-1)) #date index
     {
       date0<-as.POSIXct(dates[k])
       date1<-as.POSIXct(dates[k+1])
       pred.data<-get.pred.data(site,date0,date1,i,temp.addition = temp.addition)
+      beta <- coef(plants.model) ## posterior mean of coefs
+      Vb   <- vcov(plants.model) ## posterior  cov of coefs
+      n <-2
+      mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
       Xp <- predict(plants.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
       ilink <- family(plants.model)$linkinv
       preds <- rep(NA,n)
@@ -188,8 +194,8 @@ predict.plant.inf.trajectory<-function(site,temp.addition,color,pred.window=2,pl
         preds[l]   <- ilink(Xp %*% mrand[l, ])[1]
       }
       y<-preds[1]
-      if(y<.1) {y<-.1}
-      i<-y
+      i<-i+y
+      if(i<.1) {i<-.1}
       reps<-reps+pred.window
       xcords.new<-c(xcords.new,reps)
       ycords.new<-c(ycords.new,i)
@@ -230,7 +236,7 @@ plot.orange<-t_col("orange",80)
 par(mar=c(6,6,2,2),mfrow=c(3,1))
 
 ### one day ahead projection
-plot(0,0,type="n",xlim=c(1,36),ylim=c(0,5000),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
+plot(0,0,type="n",xlim=c(1,36),ylim=c(0,10000),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
 dat<-predict.plant.inf.trajectory("GM",0,pred.window=1,plot.orange,T,T) 
 points(1:36,colMeans(dat),type="l",col="orange",lwd=4,lty=2)
 
@@ -256,7 +262,7 @@ points(seq(1,35,2),colMeans(dat),type="l",col="purple",lwd=4,lty=2)
 legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
 
 ### seven days ahead projection
-plot(0,0,type="n",xlim=c(1,36),ylim=c(0,5000),ylab='plant inf. intens.',xlab="week",cex.lab=1.5,cex.axis=1.5,main="1 week ahead")
+plot(0,0,type="n",xlim=c(1,36),ylim=c(0,10000),ylab='plant inf. intens.',xlab="week",cex.lab=1.5,cex.axis=1.5,main="1 week ahead")
 dat<-predict.plant.inf.trajectory("GM",0,pred.window=7,plot.orange,T,T) 
 points(seq(1,36,7),colMeans(dat),type="l",col="orange",lwd=4,lty=2)
 
