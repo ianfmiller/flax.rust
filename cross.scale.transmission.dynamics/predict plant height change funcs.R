@@ -36,13 +36,13 @@ predict.plant.growth<-function(height.last,site,date0,date1,exclude.site=T)
   new.max.abs.hum<-max(abs.hum,na.rm=T)
   new.min.abs.hum<-min(abs.hum,na.rm=T)
   
-  svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
-  avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
-  vpds<-avps-svps
+  #svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
+  #avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
+  #vpds<-avps-svps
   
-  new.mean.vpd<-mean(vpds,na.rm=T)
-  new.max.vpd<-max(vpds,na.rm=T)
-  new.min.vpd<-min(vpds,na.rm=T)
+  #new.mean.vpd<-mean(vpds,na.rm=T)
+  #new.max.vpd<-max(vpds,na.rm=T)
+  #new.min.vpd<-min(vpds,na.rm=T)
   
   new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.tot.rain<-sum(weath.sub$rain,na.rm=T)
@@ -51,7 +51,11 @@ predict.plant.growth<-function(height.last,site,date0,date1,exclude.site=T)
   delta.days<-as.numeric(date1-date0)
   
   # make forward prediction
-  pred.data<-data.frame("time"=delta.days,"height"=height.last,"min.temp"=new.min.temp,"min.abs.hum"=new.min.abs.hum,"mean.solar"=new.mean.solar,"site"=site)
+  pred.data<-data.frame("time"=delta.days,"height"=height.last,
+                        "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
+                        "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
+                        "mean.solar"=new.mean.solar,"mean.wetness"=new.mean.wetness,"tot.rain"=new.tot.rain,
+                        "site"=site)
   
   if(exclude.site) {height.next<-predict(plant.growth.model,newdata=pred.data,exclude = 's(site)')} else {height.next<-predict(plant.growth.model,newdata=pred.data)}
   if(height.next<1) {height.next<-1}
@@ -87,13 +91,13 @@ predict.plant.growth.boot<-function(height.last,site,date0,date1)
   new.max.abs.hum<-max(abs.hum,na.rm=T)
   new.min.abs.hum<-min(abs.hum,na.rm=T)
   
-  svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
-  avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
-  vpds<-avps-svps
+  #svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
+  #avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
+  #vpds<-avps-svps
   
-  new.mean.vpd<-mean(vpds,na.rm=T)
-  new.max.vpd<-max(vpds,na.rm=T)
-  new.min.vpd<-min(vpds,na.rm=T)
+  #new.mean.vpd<-mean(vpds,na.rm=T)
+  #new.max.vpd<-max(vpds,na.rm=T)
+  #new.min.vpd<-min(vpds,na.rm=T)
   
   new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.tot.rain<-sum(weath.sub$rain,na.rm=T)
@@ -102,7 +106,11 @@ predict.plant.growth.boot<-function(height.last,site,date0,date1)
   delta.days<-as.numeric(date1-date0)
   
   # make forward prediction
-  pred.data<-data.frame("time"=delta.days,"height"=height.last,"min.temp"=new.min.temp,"min.abs.hum"=new.min.abs.hum,"mean.solar"=new.mean.solar,"site"=site)
+  pred.data<-data.frame("time"=delta.days,"height"=height.last,
+                        "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
+                        "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
+                        "mean.solar"=new.mean.solar,"mean.wetness"=new.mean.wetness,"tot.rain"=new.tot.rain,
+                        "site"=site)
   Xp <- predict(plant.growth.model, newdata = pred.data, exlude='s(site)',type="lpmatrix")
   beta <- coef(plant.growth.model) ## posterior mean of coefs
   Vb   <- vcov(plant.growth.model) ## posterior  cov of coefs
@@ -148,13 +156,13 @@ predict.plant.growth.last<-function(height.next,site,date0,date1,exclude.site=T)
   new.max.abs.hum<-max(abs.hum,na.rm=T)
   new.min.abs.hum<-min(abs.hum,na.rm=T)
   
-  svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
-  avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
-  vpds<-avps-svps
+  #svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
+  #avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
+  #vpds<-avps-svps
   
-  new.mean.vpd<-mean(vpds,na.rm=T)
-  new.max.vpd<-max(vpds,na.rm=T)
-  new.min.vpd<-min(vpds,na.rm=T)
+  #new.mean.vpd<-mean(vpds,na.rm=T)
+  #new.max.vpd<-max(vpds,na.rm=T)
+  #new.min.vpd<-min(vpds,na.rm=T)
   
   new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.tot.rain<-sum(weath.sub$rain,na.rm=T)
@@ -166,7 +174,11 @@ predict.plant.growth.last<-function(height.next,site,date0,date1,exclude.site=T)
   pred.func<-function(x)
   {
     plant.height.last.test<-x
-    pred.data<-data.frame("time"=delta.days,"height"=height.last,"min.temp"=new.min.temp,"min.abs.hum"=new.min.abs.hum,"mean.solar"=new.mean.solar,"site"=site)
+    pred.data<-data.frame("time"=delta.days,"height"=plant.height.last.test,
+                           "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
+                           "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
+                           "mean.solar"=new.mean.solar,"mean.wetness"=new.mean.wetness,"tot.rain"=new.tot.rain,
+                           "site"=site)
     if(exclude.site) {plant.height.next.pred<-predict(plant.growth.model,newdata=pred.data,exclude = 's(site)')} else {plant.height.next.pred<-predict(plant.growth.model,newdata=pred.data)}
     abs(plant.height.next.pred-height.next)
   }
