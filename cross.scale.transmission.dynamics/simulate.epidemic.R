@@ -94,13 +94,13 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
     new.max.abs.hum<-max(abs.hum,na.rm=T)
     new.min.abs.hum<-min(abs.hum,na.rm=T)
     
-    svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
-    avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
-    vpds<-avps-svps
+    #svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
+    #avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
+    #vpds<-avps-svps
     
-    new.mean.vpd<-mean(vpds,na.rm=T)
-    new.max.vpd<-max(vpds,na.rm=T)
-    new.min.vpd<-min(vpds,na.rm=T)
+    #new.mean.vpd<-mean(vpds,na.rm=T)
+    #new.max.vpd<-max(vpds,na.rm=T)
+    #new.min.vpd<-min(vpds,na.rm=T)
     
     new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
     new.tot.rain<-sum(weath.sub$rain,na.rm=T)
@@ -111,22 +111,39 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
     #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
     pustule.model.new.area<-.01 #predict change for small pustule, arbitrarily pick .01
     obs.time<-delta.days
-    pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,"time"=delta.days,"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"max.abs.hum"=new.max.abs.hum,"mean.solar"=new.mean.solar,"site"=site)
+    pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,
+                                        "time"=delta.days,"site"=site,
+                                        "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
+                                        "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
+                                        "mean.wetness"=new.mean.wetness,
+                                        "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain)
     pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,exclude = 's(site)')
     
     #predict change in number of pustules from enviro conditions
     #n.pustule.model.vars<-names(fixef(n.pustule.model))[2:length(names(fixef(n.pustule.model)))]
     n.pustules.model.new.n.pustules<-0 #included only for offset, picked 0 for ease of interpretability
     obs.time<-delta.days
-    n.pustules.model.pred.data<-data.frame("n.pustules"=n.pustules.model.new.n.pustules,"time"=delta.days,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"tot.rain"=new.tot.rain,"pred.pustule.diam.growth"=pred.pustule.diam.growth,"site"=site)
+    n.pustules.model.pred.data<-data.frame("n.pustules"=n.pustules.model.new.n.pustules,
+                                           "time"=delta.days,"site"=site,
+                                           "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
+                                           "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
+                                           "mean.wetness"=new.mean.wetness,
+                                           "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
+                                           "pred.pustule.diam.growth"=pred.pustule.diam.growth)
     pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,exclude = 's(site)')
     
     #predict change in plant.inf.intensity from enviro conditions
     #plant.model.vars<-names(fixef(plant.model))[2:length(names(fixef(plant.model)))]
     plant.model.new.plant.inf.intens<-.1
     obs.time<-delta.days
-    plant.model.pred.data<-data.frame("plant.inf.intens"=plant.model.new.plant.inf.intens,"time"=delta.days,"min.vpd"=new.max.vpd,"site"=site)
-    pred.plant.inf.intens.increase<-10^predict(plant.model,newdata=plant.model.pred.data,exclude = 's(site)')
+    plant.model.pred.data<-data.frame("plant.inf.intens"=plant.model.new.plant.inf.intens,
+                                      "time"=delta.days,"site"=site,
+                                      "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
+                                      "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
+                                      "mean.wetness"=new.mean.wetness,
+                                      "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
+                                      "pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase)
+    pred.plant.inf.intens.increase<-predict(plant.model,newdata=plant.model.pred.data,exclude = 's(site)')
     
     ### compare weather data coverage to make sure foi is not being underestimated
     time.diff.weather.data<-weath.sub$date[nrow(weath.sub)]-weath.sub$date[1]
