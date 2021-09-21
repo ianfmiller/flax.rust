@@ -44,7 +44,6 @@ predict.plant.growth<-function(height.last,site,date0,date1,exclude.site=T)
   #new.max.vpd<-max(vpds,na.rm=T)
   #new.min.vpd<-min(vpds,na.rm=T)
   
-  new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.tot.rain<-sum(weath.sub$rain,na.rm=T)
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
 
@@ -54,7 +53,7 @@ predict.plant.growth<-function(height.last,site,date0,date1,exclude.site=T)
   pred.data<-data.frame("time"=delta.days,"height"=height.last,
                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                         "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                        "mean.solar"=new.mean.solar,"mean.wetness"=new.mean.wetness,"tot.rain"=new.tot.rain,
+                        "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
                         "site"=site)
   
   if(exclude.site) {height.next<-predict(plant.growth.model,newdata=pred.data,exclude = 's(site)')} else {height.next<-predict(plant.growth.model,newdata=pred.data)}
@@ -99,7 +98,6 @@ predict.plant.growth.boot<-function(height.last,site,date0,date1)
   #new.max.vpd<-max(vpds,na.rm=T)
   #new.min.vpd<-min(vpds,na.rm=T)
   
-  new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.tot.rain<-sum(weath.sub$rain,na.rm=T)
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
   
@@ -109,7 +107,7 @@ predict.plant.growth.boot<-function(height.last,site,date0,date1)
   pred.data<-data.frame("time"=delta.days,"height"=height.last,
                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                         "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                        "mean.solar"=new.mean.solar,"mean.wetness"=new.mean.wetness,"tot.rain"=new.tot.rain,
+                        "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
                         "site"=site)
   Xp <- predict(plant.growth.model, newdata = pred.data, exlude='s(site)',type="lpmatrix")
   beta <- coef(plant.growth.model) ## posterior mean of coefs
@@ -164,7 +162,6 @@ predict.plant.growth.last<-function(height.next,site,date0,date1,exclude.site=T)
   #new.max.vpd<-max(vpds,na.rm=T)
   #new.min.vpd<-min(vpds,na.rm=T)
   
-  new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.tot.rain<-sum(weath.sub$rain,na.rm=T)
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
   
@@ -177,7 +174,7 @@ predict.plant.growth.last<-function(height.next,site,date0,date1,exclude.site=T)
     pred.data<-data.frame("time"=delta.days,"height"=plant.height.last.test,
                            "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                            "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                           "mean.solar"=new.mean.solar,"mean.wetness"=new.mean.wetness,"tot.rain"=new.tot.rain,
+                           "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
                            "site"=site)
     if(exclude.site) {plant.height.next.pred<-predict(plant.growth.model,newdata=pred.data,exclude = 's(site)')} else {plant.height.next.pred<-predict(plant.growth.model,newdata=pred.data)}
     abs(plant.height.next.pred-height.next)
