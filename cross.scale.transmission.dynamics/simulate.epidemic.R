@@ -267,7 +267,7 @@ for(k in 1:length(pred.epi.all.0))
   xvals<-c()
   yvals<-c()
   pred.epi<-pred.epi.all.0[[k]]
-  for(i in 1:9)
+  for(i in 1:36)
   {
     date<-unique(pred.epi$date)[i]
     xvals<-c(xvals,date)
