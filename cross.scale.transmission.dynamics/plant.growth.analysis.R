@@ -28,7 +28,6 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
               s(mean.abs.hum,by=time,bs="cs",k=4)+
               s(max.abs.hum,by=time,bs="cs",k=4)+
               s(min.abs.hum,by=time,bs="cs",k=4)+
-              s(mean.wetness,by=time,bs="cs",k=4)+
               s(tot.rain,by=time,bs="cs",k=4)+
               s(mean.solar,by=time,bs="cs",k=4)
             ,data=delta.height)
@@ -41,13 +40,26 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
                       s(min.temp,by=time,bs="cs",k=4)+
                       #s(mean.abs.hum,by=time,bs="cs",k=4)+
                       #s(max.abs.hum,by=time,bs="cs",k=4)+
-                      #s(min.abs.hum,by=time,bs="cs",k=4)+
-                      s(mean.wetness,by=time,bs="cs",k=4)+
-                      s(tot.rain,by=time,bs="cs",k=4)+
+                      s(min.abs.hum,by=time,bs="cs",k=4)+
+                      #s(tot.rain,by=time,bs="cs",k=4)+
                       s(mean.solar,by=time,bs="cs",k=4)
                     ,data=delta.height)
-  summary(mod1)
-  saveRDS(mod1,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS")
+  summary(mod1) #indicates that min.temp is not significant
+  
+  mod2<-gam(height.next~s(height,by=time,bs="cs",k=4)+
+              #s(inf.intens,by=time,bs="cs",k=4)+
+              s(mean.temp,by=time,bs="cs",k=4)+
+              #s(max.temp,by=time,bs="cs",k=4)+
+              #s(min.temp,by=time,bs="cs",k=4)+
+              #s(mean.abs.hum,by=time,bs="cs",k=4)+
+              #s(max.abs.hum,by=time,bs="cs",k=4)+
+              s(min.abs.hum,by=time,bs="cs",k=4)+
+              #s(tot.rain,by=time,bs="cs",k=4)+
+              s(mean.solar,by=time,bs="cs",k=4)
+            ,data=delta.height)
+  summary(mod2) #mean temp is marginally significant, comparison w/ model resulting from cutting marginally significant predictors (mean temp and then min.min.abs.hum) explains less deviance and has slightly lower AIC
+  
+  saveRDS(mod2,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS")
 }
 
 ## load best model
