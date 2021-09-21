@@ -8,7 +8,7 @@ source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/starting 
 foi.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
 heights<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plant.heights.RDS")
 plant.inf.intens<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plants.RDS")
-
+rm(site)
 
 
 # simulate epi function
@@ -33,8 +33,14 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
     date0<-max(start.epi$Date.First.Observed.Diseased) ### first observed date
     tag<-sub.locs[i,"tag"] ### tag
     if (as.Date(sub.locs[i,"Date"],tryFormats = "%m/%d/%y")==date0) ### simulate height on date0
-    {new.max.height<-sub.locs[i,"height.cm"]} else 
-        {new.max.height<-predict.plant.growth(height.last=sub.locs[i,"height.cm"],site=site,date0=as.Date(sub.locs[i,"Date"],tryFormats = "%m/%d/%y"),date1=date0,exclude.site = F)}
+    {
+      new.max.height<-max(sub.locs[i,"height.cm"],5,na.rm = T)} else 
+        {
+          if((as.Date(sub.locs[i,"Date"],tryFormats = "%m/%d/%y") >= as.Date(date0) ) & is.na(sub.locs[i,"height.cm"])) {new.max.height<-5} else 
+            {
+              new.max.height<-predict.plant.growth(height.last=max(sub.locs[i,"height.cm"],5,na.rm = T),site=site,date0=as.Date(sub.locs[i,"Date"],tryFormats = "%m/%d/%y"),date1=as.Date(date0),exclude.site = F) #set max height to 5 for seedlings w/o max height recorded  
+            }
+          }
     
     if(sub.locs[i,"tag"] %in% start.epi$Tag) ### if plant is starting diseased
     {
@@ -60,7 +66,7 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
       status<-0 ### set status to healthy
       new.plant.inf.intens<-NA  ### set plant.inf.intens to NA
     }
-    new.row<-data.frame("site"=site,"tag"=sub.locs[i,"tag"],"X"=sub.locs[i,"X"],"Y"=sub.locs[i,"Y"],"x"=sub.locs[i,"x"],"y"=sub.locs[i,"y"],"date"= date0,"status"=status,"max.height"=new.max.height,"plant.inf.intens"=new.plant.inf.intens) ### new data row; set max height to 5 for seedlings w/o max height recorded         
+    new.row<-data.frame("site"=site,"tag"=sub.locs[i,"tag"],"X"=sub.locs[i,"X"],"Y"=sub.locs[i,"Y"],"x"=sub.locs[i,"x"],"y"=sub.locs[i,"y"],"date"= date0,"status"=status,"max.height"=new.max.height,"plant.inf.intens"=new.plant.inf.intens) ### new data row       
     pred.epi<-rbind(pred.epi,new.row) ### join data
   }
   
@@ -171,7 +177,7 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
           foi<-foi+predict.kernel.tilted.plume(q=q,H=half.height,k=4.828517e-07,alphaz=1.687830e-06,Ws=9.299220e-01,xtarget=xcord-sourceX,ytarget=ycord-sourceY,wind.data=weath.sub)
         }
         foi<-foi*foi.mod ### correct for any gaps in weath data
-        pred.inf.odds<-predict(foi.model,newdata = data.frame("foi"=foi,"height.cm"=last.epi[i,"max.height"],"pred.pustule.diam.growth"=pred.pustule.diam.growth),type="response") ### predict odds of becoming infected
+        pred.inf.odds<-predict(foi.model,newdata = data.frame("site"=site,"foi"=foi,"height.cm"=last.epi[i,"max.height"],"pred.pustule.diam.growth"=pred.pustule.diam.growth),type="response",re.form=NA) ### predict odds of becoming infected
         #pred.inf.odds<-predict(foi.model,newdata = data.frame("foi"=foi,"height.cm"=last.epi[i,"max.height"],"mean.temp.days.16.22"=mean.temp.days.16.22,"mean.temp.7.30.dew.point.days"=mean.temp.7.30.dew.point.days),type="response",re.form=NA) ### predict odds of becoming infected
         #pred.inf.odds<-predict(foi.model,newdata=data.frame("foi"=foi),type="response")
         draw<-runif(1) ### draw random number between 0 and 1
