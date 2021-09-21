@@ -155,7 +155,7 @@ get.pred.data.temp.mean.quantile.n.pustules.model<-function(day.set,dummy.data,t
   out.data
 }
 
-get.pred.data.temp.mean.quantile.plants.model<-function(day.set,dummy.data,temp.addition=0)
+get.pred.data.temp.mean.quantile.plants.model<-function(day.set,dummy.data.inf.intens,dummy.data.height,temp.addition=0)
 {
   dim<-length(dummy.data)
   daily.means<-pull.temp.mean.quantile.data()
@@ -232,7 +232,7 @@ get.pred.data.temp.mean.quantile.plants.model<-function(day.set,dummy.data,temp.
                                          "pred.pustule.diam.growth"=pred.pustule.diam.growth)
   pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,exclude = 's(site)')
   
-  out.data<-data.frame(plant.inf.intens=dummy.data,time=rep(delta.days,times=dim),site=rep(site,times=dim),
+  out.data<-data.frame(plant.inf.intens=dummy.data.inf.intens,max.height=dummy.data.height,time=rep(delta.days,times=dim),site=rep(site,times=dim),
                        mean.temp=rep(new.mean.temp,times=dim),max.temp=rep(new.max.temp,times=dim),min.temp=rep(new.min.temp,times=dim),
                        mean.abs.hum=rep(new.mean.abs.hum,times=dim),max.abs.hum=rep(new.max.abs.hum,times=dim),min.abs.hum=rep(new.min.abs.hum,times=dim),
                        #mean.vpd=rep(new.mean.vpd,times=dim),max.vpd=rep(new.max.vpd,times=dim),min.vpd=rep(new.min.vpd,times=dim),
@@ -241,7 +241,7 @@ get.pred.data.temp.mean.quantile.plants.model<-function(day.set,dummy.data,temp.
   out.data
 }
 
-get.pred.data<-function(site,date0,date1,dummy.data,temp.addition=0)
+get.pred.data<-function(site,date0,date1,dummy.data,dummy.data.max.height=15,temp.addition=0)
 {
   dim<-length(dummy.data)
   temp.rh.sub.func<-function(x,lower.bound,upper.bound) {out<-subset(x,temp.c>=lower.bound); out<-subset(out,temp.c<=upper.bound); out}
@@ -274,13 +274,13 @@ get.pred.data<-function(site,date0,date1,dummy.data,temp.addition=0)
   new.max.abs.hum<-max(abs.hum,na.rm=T)
   new.min.abs.hum<-min(abs.hum,na.rm=T)
   
-  svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
-  avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
-  vpds<-avps-svps
+  #svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
+  #avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
+  #vpds<-avps-svps
   
-  new.mean.vpd<-mean(vpds,na.rm=T)
-  new.max.vpd<-max(vpds,na.rm=T)
-  new.min.vpd<-min(vpds,na.rm=T)
+  #new.mean.vpd<-mean(vpds,na.rm=T)
+  #new.max.vpd<-max(vpds,na.rm=T)
+  #new.min.vpd<-min(vpds,na.rm=T)
   
   new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.tot.rain<-sum(weath.sub$rain,na.rm=T)
@@ -315,6 +315,7 @@ get.pred.data<-function(site,date0,date1,dummy.data,temp.addition=0)
   plant.model.new.plant.inf.intens<-1
   obs.time<-delta.days
   plant.model.pred.data<-data.frame("plant.inf.intens"=plant.model.new.plant.inf.intens,
+                                    "max.height"=dummy.data.max.height,
                                     "time"=delta.days,"site"=site,
                                     "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                                    "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
@@ -325,10 +326,11 @@ get.pred.data<-function(site,date0,date1,dummy.data,temp.addition=0)
   
 
   #area, n.pustules, and plant.inf.intens are all set to dummy data so that this function can be used interchangably for predictions at different scales without specifying the scale.
-  out.data<-data.frame(area=dummy.data,n.pustules=dummy.data,plant.inf.intens=dummy.data,time=rep(delta.days,times=dim),site=rep(site,times=dim),
+  out.data<-data.frame(area=dummy.data,n.pustules=dummy.data,plant.inf.intens=dummy.data,time=rep(delta.days,times=dim),max.height=dummy.data.max.height,site=rep(site,times=dim),
                        mean.temp=rep(new.mean.temp,times=dim),max.temp=rep(new.max.temp,times=dim),min.temp=rep(new.min.temp,times=dim),
-                       mean.abs.hum=rep(new.mean.abs.hum,times=dim),max.abs.hum=rep(new.max.abs.hum,times=dim),min.abs.hum=rep(new.min.abs.hum,times=dim),mean.vpd=rep(new.mean.vpd,times=dim),
-                       max.vpd=rep(new.max.vpd,times=dim),min.vpd=rep(new.min.vpd,times=dim),mean.wetness=rep(new.mean.wetness,times=dim),tot.rain=rep(new.tot.rain,times=dim),mean.solar=rep(new.mean.solar,times=dim),
+                       mean.abs.hum=rep(new.mean.abs.hum,times=dim),max.abs.hum=rep(new.max.abs.hum,times=dim),min.abs.hum=rep(new.min.abs.hum,times=dim),
+                       #mean.vpd=rep(new.mean.vpd,times=dim),max.vpd=rep(new.max.vpd,times=dim),min.vpd=rep(new.min.vpd,times=dim),
+                       mean.wetness=rep(new.mean.wetness,times=dim),tot.rain=rep(new.tot.rain,times=dim),mean.solar=rep(new.mean.solar,times=dim),
                        pred.pustule.diam.growth=rep(pred.pustule.diam.growth,times=dim),pred.pustule.num.increase=rep(pred.pustule.num.increase,times=dim),pred.plant.inf.intens.increase=rep(pred.plant.inf.intens.increase,times=dim))
   out.data
   
