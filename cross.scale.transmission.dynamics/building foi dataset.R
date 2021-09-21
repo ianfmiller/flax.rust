@@ -204,7 +204,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       
       #predict change in number of pustules from enviro conditions
       #n.pustule.model.vars<-names(fixef(n.pustule.model))[2:length(names(fixef(n.pustule.model)))]
-      n.pustules.model.new.n.pustules<-0 #included only for offset, picked 0 for ease of interpretability
+      n.pustules.model.new.n.pustules<-1 #included only for offset, picked 0 for ease of interpretability
       obs.time<-delta.days
       n.pustules.model.pred.data<-data.frame("site"=site,"date"=date0,"n.pustules"=n.pustules.model.new.n.pustules,"time"=delta.days,
                                              "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
