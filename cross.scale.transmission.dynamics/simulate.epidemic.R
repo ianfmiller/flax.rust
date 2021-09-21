@@ -70,13 +70,16 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
     pred.epi<-rbind(pred.epi,new.row) ### join data
   }
   
-  ## loopt to simulate epi process
+  ## loop to simulate epi process
+  start.date<-min(pred.epi$date)
+  end.date<-max(unique(sub.epi$Date.First.Observed.Diseased))
+  sim.dates<-seq(start.date,end.date,1)
   
-  for(date.index in 1:(length(unique(sub.epi$Date.First.Observed.Diseased))-2)) 
+  for(date.index in 1:(length(sim.dates)-1)) 
   {
-    date0<-unique(sub.epi$Date.First.Observed.Diseased)[date.index+1] ### last date
+    date0<-sim.dates[date.index] ### last date
     date0<-as.POSIXct(paste0(date0," 12:00:00")) ### convert format
-    date1<-unique(sub.epi$Date.First.Observed.Diseased)[date.index+2] ### next date
+    date1<-sim.dates[date.index+1] ### next date
     date1<-as.POSIXct(paste0(date1," 12:00:00")) ### convert format
     delta.days<-as.numeric(as.Date(date1)-as.Date(date0))
     
@@ -225,6 +228,7 @@ n.cores<-4
 registerDoParallel(n.cores)
 site<-"GM"
 pred.epi.all.0<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,0,print.progress = T)
+beep()
 pred.epi.all.1.8<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,1.8,print.progress = F)
 pred.epi.all.3.7<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,3.7,print.progress = F)
 
@@ -246,7 +250,7 @@ sub.locs<-corrected.locs[which(corrected.locs$Site==site),]
 
 par(mfrow=c(1,1))
 par(mar=c(6,6,6,6))
-plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,.4),xlab="date",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
+plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,1),xlab="date",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
 xvals<-c()
 yvals<-c()
 for(i in 1:9)
