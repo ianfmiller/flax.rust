@@ -97,12 +97,13 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   plants<-plants[-intersect(which(plants$Site=="HM"),which(as.Date(plants$Date,tryFormats = "%m/%d/%y")>as.Date("2020-07-10"))),]
   
   
-  ## make new data object for change in pustule size
+  ## make new data object for change
   
   temp.rh.sub.func<-function(x,lower.bound,upper.bound) {out<-subset(x,temp.c>=lower.bound); out<-subset(out,temp.c<=upper.bound); out}
   
   tags<-c()
   sites<-c()
+  max.heights<-c()
   n.stems<-c()
   n.d.stems<-c()
   max.heights<-c()
@@ -198,7 +199,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         
         new.n.stems<-sub.plants.1[i,"N.Stems"]
         new.n.d.stems<-sub.plants.1[i,"N.D.Stems"]
-        new.max.heights<-sub.plants.1[i,"max.height"]
+        new.max.height<-sub.plants.1[i,"max.height"]
         
         #predict pustule growth from pustule growth model and enviro conditions
         #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
@@ -225,11 +226,12 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         #store values
         tags<-c(tags,tag)
         sites<-c(sites,site)
+        
         start.plant.inf.intens<-c(start.plant.inf.intens,new.start.plant.inf.intens)
         end.plant.inf.intens<-c(end.plant.inf.intens,new.end.plant.inf.intens)
         n.stems<-c(n.stems,new.n.stems)
         n.d.stems<-c(n.d.stems,new.n.d.stems)
-        max.heights<-c(max.heights,new.max.heights)
+        max.heights<-c(max.heights,new.max.height)
         days<-c(days,delta.days)
         
         mean.temp<-c(mean.temp,new.mean.temp)
@@ -250,7 +252,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
     }
   }
   
-  delta.plants<-data.frame(tag=factor(tags),site=factor(sites),time=days,N.stems=n.stems,N.D.Stems=n.d.stems,max.height=max.heights,plant.inf.intens=start.plant.inf.intens,plant.inf.intens.next=end.plant.inf.intens,
+  delta.plants<-data.frame(tag=factor(tags),site=factor(sites),max.height=max.heights,time=days,N.stems=n.stems,N.D.Stems=n.d.stems,max.height=max.heights,plant.inf.intens=start.plant.inf.intens,plant.inf.intens.next=end.plant.inf.intens,
                            mean.temp=mean.temp,max.temp=max.temp,min.temp=min.temp,
                            mean.abs.hum=mean.abs.hum,max.abs.hum=max.abs.hum,min.abs.hum=min.abs.hum,
                            #mean.vpd=mean.vpd,max.vpd=max.vpd,min.vpd=min.vpd,
