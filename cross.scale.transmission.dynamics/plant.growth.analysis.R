@@ -21,6 +21,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 {
 
   mod0<-gam(height.next~s(height,by=time,bs="cs",k=4)+
+              s(inf.intens,by=time,bs="cs",k=4)+
               s(mean.temp,by=time,bs="cs",k=4)+
               s(max.temp,by=time,bs="cs",k=4)+
               s(min.temp,by=time,bs="cs",k=4)+
@@ -34,6 +35,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   summary(mod0) #indicates that max.temp, mean.abs.hum, max.abs.hum, min.abs.hum not significant
   
   mod1<-gam(height.next~s(height,by=time,bs="cs",k=4)+
+                      #s(inf.intens,by=time,bs="cs",k=4)+
                       s(mean.temp,by=time,bs="cs",k=4)+
                       #s(max.temp,by=time,bs="cs",k=4)+
                       s(min.temp,by=time,bs="cs",k=4)+
