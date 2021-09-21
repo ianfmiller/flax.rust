@@ -7,6 +7,7 @@ library(gratia)
 # load data
 
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant data prep.R")
+plant.growth.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS")
 delta.plants<-subset(delta.plants,time<=10)
 
 # visualize data
@@ -187,20 +188,26 @@ predict.plant.inf.trajectory<-function(site,temp.addition,plant.height,color,pre
   max.date<-min(max(unique(as.Date(weath.dat$date))),max(unique(as.Date(temp.rh.dat$date.time))))
   dates<-seq(min.date,max.date,pred.window)
   start.inf.intens<-.1
-  xcords<-rep(NA,length(dates))
-  ycords<-rep(NA,length(dates))
+  xcords<-rep(NA,length(dates)) #time values
+  ycords<-rep(NA,length(dates)) #inf intensity values
+  hcords<-rep(NA,length(dates)) #height values
   
   for(j in 1:100) #simulation iteration
   {
     reps<-1
     i<-start.inf.intens
+    h<-plant.height
     xcords.new<-c(1)
     ycords.new<-c(i)
+    hcords.new<-c(h)
     for(k in 1:(length(dates)-1)) #date index
     {
       date0<-as.POSIXct(dates[k])
       date1<-as.POSIXct(dates[k+1])
-      pred.data<-get.pred.data(site,date0,date1,i,dummy.data.max.height=plant.height,temp.addition = temp.addition)
+      pred.data<-get.pred.data(site,date0,date1,i,dummy.data.max.height=h,temp.addition = temp.addition)
+      pred.data.h<-pred.data
+      colnames(pred.data.h)[which(colnames(pred.data.h)=="max.height")]<-"height"
+      
       beta <- coef(plants.model) ## posterior mean of coefs
       Vb   <- vcov(plants.model) ## posterior  cov of coefs
       n <-2
@@ -214,16 +221,33 @@ predict.plant.inf.trajectory<-function(site,temp.addition,plant.height,color,pre
       y<-preds[1]
       i<-i+y
       if(i<.1) {i<-.1}
+      
+      beta.h <- coef(plant.growth.model) ## posterior mean of coefs
+      Vb.h   <- vcov(plant.growth.model) ## posterior  cov of coefs
+      n.h <-1000
+      mrand.h <- mvrnorm(n.h, beta.h, Vb.h) ## simulate n rep coef vectors from posterior
+      Xp.h <- predict(plant.growth.model, newdata = pred.data.h, exlude="s(site)",type="lpmatrix")
+      ilink <- family(plant.growth.model)$linkinv
+      preds.h <- rep(NA,n.h)
+      for (l in seq_len(n.h)) { 
+        preds.h[l]   <- ilink(Xp.h %*% mrand.h[l, ])[1]
+      }
+      h<-preds.h[1]
+      
+      
       reps<-reps+pred.window
       xcords.new<-c(xcords.new,reps)
       ycords.new<-c(ycords.new,i)
+      hcords.new<-c(hcords.new,h)
     }
     xcords<-rbind(xcords,xcords.new)
     ycords<-rbind(ycords,ycords.new)
+    hcords<-rbind(hcords,hcords.new)
     print(j)
   }
   xcords<-xcords[-1,]
   ycords<-ycords[-1,]
+  hcords<-hcords[-1,]
   
   if(plot)
   {
@@ -234,7 +258,7 @@ predict.plant.inf.trajectory<-function(site,temp.addition,plant.height,color,pre
   }
   if(output)
   {
-    ycords
+    list(ycords,hcords)
   }
 }
 
@@ -253,44 +277,44 @@ plot.orange<-t_col("orange",80)
 
 par(mar=c(6,6,2,2),mfrow=c(3,1))
 
-plant.height<-55
+plant.height<-5
 
 ### one day ahead projection
 plot(0,0,type="n",xlim=c(1,36),ylim=c(0,1000),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
 dat<-predict.plant.inf.trajectory("GM",0,plant.height=plant.height,pred.window=1,plot.orange,T,T) 
-points(1:36,colMeans(dat),type="l",col="orange",lwd=4,lty=2)
+points(1:36,colMeans(dat[[1]]),type="l",col="orange",lwd=4,lty=2)
 
 dat<-predict.plant.inf.trajectory("GM",1.8,plant.height=plant.height,pred.window=1,plot.red,T,T) 
-points(1:36,colMeans(dat),type="l",col="red",lwd=4,lty=2)
+points(1:36,colMeans(dat[[1]]),type="l",col="red",lwd=4,lty=2)
 
 dat<-predict.plant.inf.trajectory("GM",3.7,plant.height=plant.height,pred.window=1,plot.purple,T,T) 
-points(1:36,colMeans(dat),type="l",col="purple",lwd=4,lty=2)
+points(1:36,colMeans(dat[[1]]),type="l",col="purple",lwd=4,lty=2)
 
 legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
 
 ### two days ahead projection
-plot(0,0,type="n",xlim=c(1,36),ylim=c(0,5000),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="2 days ahead")
+plot(0,0,type="n",xlim=c(1,36),ylim=c(0,10000),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="2 days ahead")
 dat<-predict.plant.inf.trajectory("GM",0,plant.height=plant.height,plant.height=40,pred.window=2,plot.orange,T,T) 
-points(seq(1,35,2),colMeans(dat),type="l",col="orange",lwd=4,lty=2)
+points(seq(1,35,2),colMeans(dat[[1]]),type="l",col="orange",lwd=4,lty=2)
 
 dat<-predict.plant.inf.trajectory("GM",1.8,plant.height=plant.height,pred.window=2,plot.red,T,T) 
-points(seq(1,35,2),colMeans(dat),type="l",col="red",lwd=4,lty=2)
+points(seq(1,35,2),colMeans(dat[[1]]),type="l",col="red",lwd=4,lty=2)
 
 dat<-predict.plant.inf.trajectory("GM",3.7,plant.height=plant.height,pred.window=2,plot.purple,T,T) 
-points(seq(1,35,2),colMeans(dat),type="l",col="purple",lwd=4,lty=2)
+points(seq(1,35,2),colMeans(dat[[1]]),type="l",col="purple",lwd=4,lty=2)
 
 legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
 
 ### seven days ahead projection
-plot(0,0,type="n",xlim=c(1,36),ylim=c(0,4000),ylab='plant inf. intens.',xlab="week",cex.lab=1.5,cex.axis=1.5,main="1 week ahead")
+plot(0,0,type="n",xlim=c(1,36),ylim=c(0,10000),ylab='plant inf. intens.',xlab="week",cex.lab=1.5,cex.axis=1.5,main="1 week ahead")
 dat<-predict.plant.inf.trajectory("GM",0,plant.height=plant.height,pred.window=7,plot.orange,T,T) 
-points(seq(1,36,7),colMeans(dat),type="l",col="orange",lwd=4,lty=2)
+points(seq(1,36,7),colMeans(dat[[1]]),type="l",col="orange",lwd=4,lty=2)
 
 dat<-predict.plant.inf.trajectory("GM",1.8,plant.height=plant.height,pred.window=7,plot.red,T,T) 
-points(seq(1,36,7),colMeans(dat),type="l",col="red",lwd=4,lty=2)
+points(seq(1,36,7),colMeans(dat[[1]]),type="l",col="red",lwd=4,lty=2)
 
 dat<-predict.plant.inf.trajectory("GM",3.7,plant.height=plant.height,pred.window=7,plot.purple,T,T) 
-points(seq(1,36,7),colMeans(dat),type="l",col="purple",lwd=4,lty=2)
+points(seq(1,36,7),colMeans(dat[[1]]),type="l",col="purple",lwd=4,lty=2)
 
 legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
 
