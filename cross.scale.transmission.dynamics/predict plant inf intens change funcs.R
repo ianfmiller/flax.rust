@@ -36,13 +36,13 @@ predict.plant.inf.intens<-function(plant.inf.intens.last,max.height.last,site,da
   new.max.abs.hum<-max(abs.hum,na.rm=T)
   new.min.abs.hum<-min(abs.hum,na.rm=T)
   
-  svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
-  avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
-  vpds<-avps-svps
+  #svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
+  #avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
+  #vpds<-avps-svps
   
-  new.mean.vpd<-mean(vpds,na.rm=T)
-  new.max.vpd<-max(vpds,na.rm=T)
-  new.min.vpd<-min(vpds,na.rm=T)
+  #new.mean.vpd<-mean(vpds,na.rm=T)
+  #new.max.vpd<-max(vpds,na.rm=T)
+  #new.min.vpd<-min(vpds,na.rm=T)
   
   new.tot.rain<-sum(weath.sub$rain,na.rm=T)
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
@@ -201,9 +201,9 @@ predict.plant.inf.intens.last<-function(plant.inf.intens.next,max.height.last,si
   #avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
   #vpds<-avps-svps
   
-  new.mean.vpd<-mean(vpds,na.rm=T)
-  new.max.vpd<-max(vpds,na.rm=T)
-  new.min.vpd<-min(vpds,na.rm=T)
+  #new.mean.vpd<-mean(vpds,na.rm=T)
+  #new.max.vpd<-max(vpds,na.rm=T)
+  #new.min.vpd<-min(vpds,na.rm=T)
   
   new.tot.rain<-sum(weath.sub$rain,na.rm=T)
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
