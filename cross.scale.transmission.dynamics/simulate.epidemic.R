@@ -1,11 +1,12 @@
 # load + prep data
-library(lme4)
+library(mgcv)
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant loc dataset building.R")
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/predict plant inf intens change funcs.R")
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/spore deposition functions tilt.R")
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/predict plant height change funcs.R")
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/starting plant inf intens model.R")
 foi.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
+heights<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plant.heights.RDS")
 plant.inf.intens<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plants.RDS")
 
 
@@ -31,6 +32,10 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
   {
     date0<-max(start.epi$Date.First.Observed.Diseased) ### first observed date
     tag<-sub.locs[i,"tag"] ### tag
+    if (as.Date(sub.locs[i,"Date"],tryFormats = "%m/%d/%y")==date0) ### simulate height on date0
+    {new.max.height<-sub.locs[i,"height.cm"]} else 
+        {new.max.height<-predict.plant.growth(height.last=sub.locs[i,"height.cm"],site=site,date0=as.Date(sub.locs[i,"Date"],tryFormats = "%m/%d/%y"),date1=date0,exclude.site = F)}
+    
     if(sub.locs[i,"tag"] %in% start.epi$Tag) ### if plant is starting diseased
     {
       status<-1 ### set status to diseased
@@ -47,7 +52,7 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
           target.date.set<-target.date.set[which(target.date.set>date0)] #### look at those after date0
           target.date<-min(target.date.set) #### get closest date w/ observation after date0
           target.date.plant.inf.intens<-plant.inf.intens[intersect(which(plant.inf.intens$Date==target.date),which(plant.inf.intens$Tag==tag)),"plant.inf.intens"] #### get observed plant.inf.intens on target date
-          new.plant.inf.intens<-predict.plant.inf.intens.last(target.date.plant.inf.intens,site,as.POSIXct(paste0(date0," 12:00:00")),as.POSIXct(paste0(target.date," 12:00:00"))) #### hindcast plant.inf.intens for date0 
+          new.plant.inf.intens<-predict.plant.inf.intens.last(plant.inf.intens.next = target.date.plant.inf.intens, max.height.last = new.max.height, site,as.POSIXct(paste0(date0," 12:00:00")),as.POSIXct(paste0(target.date," 12:00:00"))) #### hindcast plant.inf.intens for date0 
         }
       }
     } else ### if plant is starting healthy
@@ -55,7 +60,7 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
       status<-0 ### set status to healthy
       new.plant.inf.intens<-NA  ### set plant.inf.intens to NA
     }
-    new.row<-data.frame("site"=site,"tag"=sub.locs[i,"tag"],"X"=sub.locs[i,"X"],"Y"=sub.locs[i,"Y"],"x"=sub.locs[i,"x"],"y"=sub.locs[i,"y"],"date"= date0,"status"=status,"max.height"=max(sub.locs[i,"height.cm"],5,na.rm = T),"plant.inf.intens"=new.plant.inf.intens) ### new data row; set max height to 5 for seedlings w/o max height recorded         
+    new.row<-data.frame("site"=site,"tag"=sub.locs[i,"tag"],"X"=sub.locs[i,"X"],"Y"=sub.locs[i,"Y"],"x"=sub.locs[i,"x"],"y"=sub.locs[i,"y"],"date"= date0,"status"=status,"max.height"=new.max.height,"plant.inf.intens"=new.plant.inf.intens) ### new data row; set max height to 5 for seedlings w/o max height recorded         
     pred.epi<-rbind(pred.epi,new.row) ### join data
   }
   
@@ -136,14 +141,6 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
     #plant.model.vars<-names(fixef(plant.model))[2:length(names(fixef(plant.model)))]
     plant.model.new.plant.inf.intens<-.1
     obs.time<-delta.days
-    plant.model.pred.data<-data.frame("plant.inf.intens"=plant.model.new.plant.inf.intens,
-                                      "time"=delta.days,"site"=site,
-                                      "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                                      "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                      "mean.wetness"=new.mean.wetness,
-                                      "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
-                                      "pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase)
-    pred.plant.inf.intens.increase<-predict(plant.model,newdata=plant.model.pred.data,exclude = 's(site)')
     
     ### compare weather data coverage to make sure foi is not being underestimated
     time.diff.weather.data<-weath.sub$date[nrow(weath.sub)]-weath.sub$date[1]
@@ -194,7 +191,7 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
       {
         new.status<-1
         
-        new.plant.inf.intens<-predict.plant.inf.intens.boot(plant.inf.intens.last = last.epi[i,"plant.inf.intens"],site = site,date0 = date0,date1 = date1)
+        new.plant.inf.intens<-predict.plant.inf.intens.boot(plant.inf.intens.last = last.epi[i,"plant.inf.intens"], max.height.last = last.epi[i,"max.height"], site = site,date0 = date0,date1 = date1)
       }
       
       ### plant growth
