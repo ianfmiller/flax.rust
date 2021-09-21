@@ -10,7 +10,7 @@ pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dy
 temp.rh.sub.func<-function(x,lower.bound,upper.bound) {out<-subset(x,temp.c>=lower.bound); out<-subset(out,temp.c<=upper.bound); out}
 
 #function for predicting plant inf intens change
-predict.plant.inf.intens<-function(plant.inf.intens.last,site,date0,date1)
+predict.plant.inf.intens<-function(plant.inf.intens.last,max.height.last,site,date0,date1)
 {
   # load weather data
   ## subst temp rh data to relevant window
@@ -44,7 +44,6 @@ predict.plant.inf.intens<-function(plant.inf.intens.last,site,date0,date1)
   new.max.vpd<-max(vpds,na.rm=T)
   new.min.vpd<-min(vpds,na.rm=T)
   
-  new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.tot.rain<-sum(weath.sub$rain,na.rm=T)
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
   
@@ -58,7 +57,6 @@ predict.plant.inf.intens<-function(plant.inf.intens.last,site,date0,date1)
                                       "time"=delta.days,"site"=site,
                                       "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                                       "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                      "mean.wetness"=new.mean.wetness,
                                       "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain)
   pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,exclude = 's(site)')
   
@@ -70,25 +68,23 @@ predict.plant.inf.intens<-function(plant.inf.intens.last,site,date0,date1)
                                          "time"=delta.days,"site"=site,
                                          "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                                          "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                         "mean.wetness"=new.mean.wetness,
                                          "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
                                          "pred.pustule.diam.growth"=pred.pustule.diam.growth)
   pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,exclude = 's(site)')
   
   # make forward prediction
-  pred.data<-data.frame("plant.inf.intens"=plant.inf.intens.last,
+  pred.data<-data.frame("plant.inf.intens"=plant.inf.intens.last,"max.height"=max.height.last,
                         "time"=delta.days,"site"=site,
                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                         "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                        "mean.wetness"=new.mean.wetness,
                         "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
                         "pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase)
-  plant.inf.intens.next<-predict(plant.model,newdata=pred.data,exclude = 's(site)')
+  plant.inf.intens.next<-plant.inf.intens.last+predict(plant.model,newdata=pred.data,exclude = 's(site)')
   if(plant.inf.intens.next<.01) {plant.inf.intens.next<-.01}
   plant.inf.intens.next
 }
 
-predict.plant.inf.intens.boot<-function(plant.inf.intens.last,site,date0,date1)
+predict.plant.inf.intens.boot<-function(plant.inf.intens.last,max.height.last,site,date0,date1)
 {
   # load weather data
   ## subst temp rh data to relevant window
@@ -114,15 +110,14 @@ predict.plant.inf.intens.boot<-function(plant.inf.intens.last,site,date0,date1)
   new.max.abs.hum<-max(abs.hum,na.rm=T)
   new.min.abs.hum<-min(abs.hum,na.rm=T)
   
-  svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
-  avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
-  vpds<-avps-svps
+  #svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
+  #avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
+  #vpds<-avps-svps
   
   #new.mean.vpd<-mean(vpds,na.rm=T)
   #new.max.vpd<-max(vpds,na.rm=T)
   #new.min.vpd<-min(vpds,na.rm=T)
   
-  new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.tot.rain<-sum(weath.sub$rain,na.rm=T)
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
   
@@ -137,7 +132,6 @@ predict.plant.inf.intens.boot<-function(plant.inf.intens.last,site,date0,date1)
                                       "time"=delta.days,"site"=site,
                                       "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                                       "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                      "mean.wetness"=new.mean.wetness,
                                       "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain)
   pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,exclude = 's(site)')
   
@@ -149,17 +143,15 @@ predict.plant.inf.intens.boot<-function(plant.inf.intens.last,site,date0,date1)
                                          "time"=delta.days,"site"=site,
                                          "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                                          "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                         "mean.wetness"=new.mean.wetness,
                                          "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
                                          "pred.pustule.diam.growth"=pred.pustule.diam.growth)
   pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,exclude = 's(site)')
   
   # make forward prediction
-  pred.data<-data.frame("plant.inf.intens"=plant.inf.intens.last,
+  pred.data<-data.frame("plant.inf.intens"=plant.inf.intens.last,"max.height"=max.height.last,
                         "time"=delta.days,"site"=site,
                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                         "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                        "mean.wetness"=new.mean.wetness,
                         "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
                         "pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase)
   
@@ -173,13 +165,13 @@ predict.plant.inf.intens.boot<-function(plant.inf.intens.last,site,date0,date1)
   for (j in seq_len(n)) { 
     preds[j]   <- ilink(Xp %*% mrand[j, ])
   }
-  plant.inf.intens.next<-preds[1]
+  plant.inf.intens.next<-preds[1]+plant.inf.intens.last
   if(plant.inf.intens.next<.01) {plant.inf.intens.next<-.01}
   plant.inf.intens.next
 }
 
 #function for predicting plant inf intens change
-predict.plant.inf.intens.last<-function(plant.inf.intens.next,site,date0,date1)
+predict.plant.inf.intens.last<-function(plant.inf.intens.next,max.height.last,site,date0,date1)
 {
   # load weather data
   ## subst temp rh data to relevant window
@@ -205,15 +197,14 @@ predict.plant.inf.intens.last<-function(plant.inf.intens.next,site,date0,date1)
   new.max.abs.hum<-max(abs.hum,na.rm=T)
   new.min.abs.hum<-min(abs.hum,na.rm=T)
   
-  svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
-  avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
-  vpds<-avps-svps
+  #svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
+  #avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
+  #vpds<-avps-svps
   
   new.mean.vpd<-mean(vpds,na.rm=T)
   new.max.vpd<-max(vpds,na.rm=T)
   new.min.vpd<-min(vpds,na.rm=T)
   
-  new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.tot.rain<-sum(weath.sub$rain,na.rm=T)
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
   
@@ -227,7 +218,6 @@ predict.plant.inf.intens.last<-function(plant.inf.intens.next,site,date0,date1)
                                       "time"=delta.days,"site"=site,
                                       "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                                       "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                      "mean.wetness"=new.mean.wetness,
                                       "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain)
   pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,exclude = 's(site)')
   
@@ -239,25 +229,21 @@ predict.plant.inf.intens.last<-function(plant.inf.intens.next,site,date0,date1)
                                          "time"=delta.days,"site"=site,
                                          "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                                          "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                         "mean.wetness"=new.mean.wetness,
                                          "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
                                          "pred.pustule.diam.growth"=pred.pustule.diam.growth)
   pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,exclude = 's(site)')
-  
-  # make forward prediction
-  pred.data<-data.frame("plant.inf.intens"=plant.inf.intens.last,
-                        "time"=delta.days,"site"=site,
-                        "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                        "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                        "mean.wetness"=new.mean.wetness,
-                        "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
-                        "pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase)
   
   # make backwards prediction
   pred.func<-function(x)
   {
     plant.inf.intens.last.test<-x
-    plant.inf.intens.next.pred<-predict(plant.model,newdata=pred.data,exclude = 's(site)')
+    pred.data<-data.frame("plant.inf.intens"=plant.inf.intens.last.test,"max.height"=max.height.last,
+                          "time"=delta.days,"site"=site,
+                          "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
+                          "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
+                          "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
+                          "pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase)
+    plant.inf.intens.next.pred<-plant.inf.intens.last.test+predict(plant.model,newdata=pred.data,exclude = 's(site)')
     abs(plant.inf.intens.next.pred-plant.inf.intens.next)
   }
   plant.inf.intens.last<-optim(c(plant.inf.intens.next),pred.func,method = "Brent",lower=0,upper=10e6)$par
