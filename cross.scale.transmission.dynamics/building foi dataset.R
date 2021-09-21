@@ -93,12 +93,12 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
               plant.inf.intens.index<-intersect(which(plant.inf.intens$Date==closest.date),which(plant.inf.intens$Tag==source.data[i,"Tag"]))
               if(closest.date>date0) ###### hindcast
               {
-                q<-predict.plant.inf.intens.last(plant.inf.intens.next=plant.inf.intens[plant.inf.intens.index,"plant.inf.intens"],site=site,date0=as.POSIXct(paste0(date0," 12:00:00")),date1=as.POSIXct(paste0(closest.date," 12:00:00")))
+                q<-predict.plant.inf.intens.last(plant.inf.intens.next=plant.inf.intens[plant.inf.intens.index,"plant.inf.intens"],max.height.last=source.data[i,"corrected.height"],site=site,date0=as.POSIXct(paste0(date0," 12:00:00")),date1=as.POSIXct(paste0(closest.date," 12:00:00")))
                 half.height<-plant.inf.intens[plant.inf.intens.index,"max.height"]*.5
               }
               if(closest.date<date0) ###### forecast
               {
-                q<-predict.plant.inf.intens(plant.inf.intens.last=plant.inf.intens[plant.inf.intens.index,"plant.inf.intens"],site=site,date0=as.POSIXct(paste0(closest.date," 12:00:00")),date1=as.POSIXct(paste0(date0," 12:00:00")))
+                q<-predict.plant.inf.intens(plant.inf.intens.last=plant.inf.intens[plant.inf.intens.index,"plant.inf.intens"],max.height.last=source.data[i,"corrected.height"],site=site,date0=as.POSIXct(paste0(closest.date," 12:00:00")),date1=as.POSIXct(paste0(date0," 12:00:00")))
                 half.height<-plant.inf.intens[plant.inf.intens.index,"max.height"]*.5
               }
             }
@@ -180,15 +180,14 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       new.max.abs.hum<-max(abs.hum,na.rm=T)
       new.min.abs.hum<-min(abs.hum,na.rm=T)
       
-      svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
-      avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
-      vpds<-avps-svps
+      #svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
+      #avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
+      #vpds<-avps-svps
       
-      new.mean.vpd<-mean(vpds,na.rm=T)
-      new.max.vpd<-max(vpds,na.rm=T)
-      new.min.vpd<-min(vpds,na.rm=T)
+      #new.mean.vpd<-mean(vpds,na.rm=T)
+      #new.max.vpd<-max(vpds,na.rm=T)
+      #new.min.vpd<-min(vpds,na.rm=T)
       
-      new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
       new.tot.rain<-sum(weath.sub$rain,na.rm=T)
       new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
       
@@ -196,22 +195,33 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
       pustule.model.new.area<-.01 #predict change for small pustule, arbitrarily pick .01
       obs.time<-delta.days
-      pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,"time"=delta.days,"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"max.abs.hum"=new.max.abs.hum,"mean.solar"=new.mean.solar,"site"=site)
+      pustule.model.pred.data<-data.frame("site"=site,"date"=date0,"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"height.cm"=targt.height,"foi"=foi,
+                                          "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.mean.abs.hum,
+                                          #"mean.vpd"=new.mean.vpd,"max.vpd"=new.max.vpd,"min.vpd"=new.min.vpd,
+                                          "tot.rain"=new.tot.rain,"mean.solar"=new.mean.solar)
       pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,exclude = 's(site)')
       
       #predict change in number of pustules from enviro conditions
       #n.pustule.model.vars<-names(fixef(n.pustule.model))[2:length(names(fixef(n.pustule.model)))]
       n.pustules.model.new.n.pustules<-0 #included only for offset, picked 0 for ease of interpretability
       obs.time<-delta.days
-      n.pustules.model.pred.data<-data.frame("n.pustules"=n.pustules.model.new.n.pustules,"time"=delta.days,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"tot.rain"=new.tot.rain,"pred.pustule.diam.growth"=pred.pustule.diam.growth,"site"=site)
+      n.pustules.model.pred.data<-data.frame("site"=site,"date"=date0,"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"height.cm"=targt.height,"foi"=foi,
+                                             "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.mean.abs.hum,
+                                             #"mean.vpd"=new.mean.vpd,"max.vpd"=new.max.vpd,"min.vpd"=new.min.vpd,
+                                             "tot.rain"=new.tot.rain,"mean.solar"=new.mean.solar,
+                                             "pred.pustule.diam.growth"=pred.pustule.diam.growth)
       pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,exclude = 's(site)')
       
       #predict change in plant.inf.intensity from enviro conditions
       #plant.model.vars<-names(fixef(plant.model))[2:length(names(fixef(plant.model)))]
       plant.model.new.plant.inf.intens<-.1
       obs.time<-delta.days
-      plant.model.pred.data<-data.frame("plant.inf.intens"=plant.model.new.plant.inf.intens,"time"=delta.days,"min.vpd"=new.max.vpd,"site"=site)
-      pred.plant.inf.intens.increase<-10^predict(plant.model,newdata=plant.model.pred.data,exclude = 's(site)')
+      plant.model.pred.data<-data.frame("site"=site,"date"=date0,"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"height.cm"=targt.height,"foi"=foi,
+                                        "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.mean.abs.hum,
+                                        #"mean.vpd"=new.mean.vpd,"max.vpd"=new.max.vpd,"min.vpd"=new.min.vpd,
+                                        "tot.rain"=new.tot.rain,"mean.solar"=new.mean.solar,
+                                        "pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase)
+      pred.plant.inf.intens.increase<-predict(plant.model,newdata=plant.model.pred.data,exclude = 's(site)')
       
       sub.2.epi.data<-sub.1.epi.data[which(sub.1.epi.data$Date.First.Observed.Diseased<=date0),] ### epi data up until date0
       sub.3.epi.data<-sub.1.epi.data[which(sub.1.epi.data$Date.First.Observed.Diseased<=date1),] ### epi date up until date1
@@ -262,8 +272,9 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
           new.status<-ifelse(ID.string %in% epi.ID.strings.next,1,0) #### count plant as becoming infected by next obs if its ID string shows up in the set of plants that have been infected by date1
           foi<-foi.func(site=site,date0=date0,date1=date1,epi.data=corrected.epi,xcord=sub.loc.data[index,"X"]+sub.loc.data[index,"x"],ycord=sub.loc.data[index,"Y"]+sub.loc.data[index,"y"]) #### calculate foi experienced
           foi.data<-rbind(foi.data,data.frame("site"=site,"date"=date0,"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"height.cm"=target.height,"foi"=foi,
-                                              "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.mean.abs.hum,"mean.vpd"=new.mean.vpd,"max.vpd"=new.max.vpd,"min.vpd"=new.min.vpd,
-                                              "mean.wetness"=new.mean.wetness,"tot.rain"=new.tot.rain,"mean.solar"=new.mean.solar,
+                                              "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.mean.abs.hum,
+                                              #"mean.vpd"=new.mean.vpd,"max.vpd"=new.max.vpd,"min.vpd"=new.min.vpd,
+                                              "tot.rain"=new.tot.rain,"mean.solar"=new.mean.solar,
                                               "pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase,"pred.plant.inf.intens.increase"=pred.plant.inf.intens.increase)) #### add new entry to data object
         }
         ### if that ID string is not unique
@@ -284,8 +295,9 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
           new.status<-ifelse(length(which(epi.ID.strings.next==ID.string))>=order,1,0) #### for plant that is the nth repeat, count as becoming infected by next obs if at least n matching ID strings show up in epi.ID.strings.next
           foi<-foi.func(site=site,date0=date0,date1=date1,epi.data=corrected.epi,xcord=sub.loc.data[index,"X"]+sub.loc.data[index,"x"],ycord=sub.loc.data[index,"Y"]+sub.loc.data[index,"y"]) #### calculate foi experienced
           foi.data<-rbind(foi.data,data.frame("site"=site,"date"=date0,"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"height.cm"=targt.height,"foi"=foi,
-                                              "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.mean.abs.hum,"mean.vpd"=new.mean.vpd,"max.vpd"=new.max.vpd,"min.vpd"=new.min.vpd,
-                                              "mean.wetness"=new.mean.wetness,"tot.rain"=new.tot.rain,"mean.solar"=new.mean.solar,
+                                              "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.mean.abs.hum,
+                                              #"mean.vpd"=new.mean.vpd,"max.vpd"=new.max.vpd,"min.vpd"=new.min.vpd,
+                                              "tot.rain"=new.tot.rain,"mean.solar"=new.mean.solar,
                                               "pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase,"pred.plant.inf.intens.increase"=pred.plant.inf.intens.increase)) #### add new entry to data object
         }
         print(paste0("site = ",site," date = ",date0," ",index,"/",dim(sub.loc.data)[1]," complete"))
