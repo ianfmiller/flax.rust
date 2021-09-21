@@ -10,8 +10,8 @@ temp.rh.sub.func<-function(x,lower.bound,upper.bound) {out<-subset(x,temp.c>=low
 #function for predicting plant height change
 predict.plant.growth<-function(height.last,site,date0,date1,exclude.site=T)
 {
-  if(class(date0)=="Date") {date0<-as.POSIXct(paste0(date0," 12:00:00"),tz="UTC")}
-  if(class(date1)=="Date") {date1<-as.POSIXct(paste0(date1," 12:00:00"),tz="UTC")}
+  suppressWarnings(if(class(date0)=="Date") {date0<-as.POSIXct(paste0(date0," 12:00:00"),tz="UTC")})
+  suppressWarnings(if(class(date1)=="Date") {date1<-as.POSIXct(paste0(date1," 12:00:00"),tz="UTC")})
   # load weather data
   ## subst temp rh data to relevant window
   temp.rh.sub<-all.temp.rh[which(all.temp.rh$site==site),] #pull out temp data for site
