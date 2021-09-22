@@ -122,7 +122,7 @@ points(new.data.1$foi,predict(best.model,newdata = new.data.1,type = "response",
 points(new.data.2$foi,predict(best.model,newdata = new.data.2,type = "response",re.form=NA)/base.pred,type="l",col="red",lwd=2,lty=2)
 points(new.data.3$foi,predict(best.model,newdata = new.data.3,type = "response",re.form=NA)/base.pred,type="l",col="red",lwd=2,lty=3)
 points(new.data.4$foi,predict(best.model,newdata = new.data.4,type = "response",re.form=NA)/base.pred,type="l",col="red",lwd=2,lty=4)
-legend("right",legend=c("50cm","25cm","10cm","5cm"),col="red",lty=c(4,3,2,1),bty="n",cex=1.5,lwd=2)
+legend("topleft",legend=c("50cm","25cm","10cm","5cm"),col="red",lty=c(4,3,2,1),bty="n",cex=1.5,lwd=2)
 
 
          
