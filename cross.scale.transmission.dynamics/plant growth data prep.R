@@ -4,7 +4,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
 {
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
   
-  # clean healthy plant data
+  # clean data from healthy focal plants
   healthyraw <- read.csv("~/Documents/GitHub/flax.rust/data/healthyplants.csv")
   healthy <- healthyraw[!is.na(healthyraw$max.height),]
   tags <- unique(healthy$Tag)
@@ -25,11 +25,11 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   healthyindiv$Date <- mdy(healthyindiv$Date)
   healthyindiv$plant.inf.intens <- 0
   
-  ## load diseased plant data
+  ## load data from diseased healthy plants
   plantsraw <- readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plants.RDS")
   plants <- plantsraw[!is.na(plantsraw$max.height),]
   
-  ## merge data
+  ## merge height data from healthy and diseased focal plants
   subs <- c("Year", "Site", "Tag", "Date", "max.height", "plant.inf.intens")
   plant.heights <- rbind(healthyindiv[subs], plants[subs])
   colnames(plant.heights) <- c("year", "site", "tag", "date", "max.height", "plant.inf.intens")
