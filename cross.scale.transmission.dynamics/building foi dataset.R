@@ -22,6 +22,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   ### Tag #15 in "CC" which was assumed to have 0 inf intensity as indicated by an observation on 6/22
   
   # function for calculating foi
+  
   foi.func<-function(site,date0,date1,epi.data=corrected.epi,xcord,ycord)
   {
     ## get wind data from site and dates
