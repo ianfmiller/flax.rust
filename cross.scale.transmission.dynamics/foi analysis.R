@@ -1,5 +1,4 @@
 library(mgcv)
-library(lme4)
 library(lmerTest)
 library(progress)
 
@@ -57,6 +56,25 @@ axis(1,cex.axis=1.5)
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS"))
 {
+  
+  mod0<-gam(cbind(status.next,1-status.next)~te(foi,height.cm,bs="cs",k=4),
+              #s(pred.pustule.diam.growth,by=delta.days,bs="cs",k=4)+
+              #s(pred.pustule.num.increase,by=delta.days,bs="cs",k=4)+
+              #s(pred.plant.inf.intens.increase,by=delta.days,bs="cs",k=4)+
+              #s(mean.temp,by=delta.days,bs="cs",k=4)+
+              #s(max.temp,by=delta.days,bs="cs",k=4)+
+              #s(min.temp,by=delta.days,bs="cs",k=4)+
+              #s(mean.abs.hum,by=delta.days,bs="cs",k=4)+
+              #s(max.abs.hum,by=delta.days,bs="cs",k=4)+
+              #s(min.abs.hum,by=delta.days,bs="cs",k=4)+
+              #s(mean.solar,by=delta.days,bs="cs",k=4)+
+              #s(tot.rain,bs="cs",k=4)+
+              #s(site,bs="re",k=4),
+            family = binomial("logit"),
+            data=foi.data)
+  
+  
+  
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/foi model set creation.R") ### load models
   model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("status.next ~ foi + (1|site)",predictors[x]),collapse=" + ")))
   names(model.set)<-seq(1,length(model.set),1)
