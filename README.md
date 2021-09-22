@@ -8,12 +8,21 @@ The below text provides a summary of the analysis pipeline. To recreate results 
 <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/plant growth data prep.R">plant growth data prep.R</a> <br />
 
 ### Data collection
+### Statistical methods
+Unless otherwise noted, we used the following modeling approach to investigate the relationship between a response variable (e.g. observed plant height at time t+1) and predictor variables. These predictor variables include the previous observed state (e.g. plant height at time t) and weather metrics (e.g. mean temperature).
+<br />
+<br />
+We used generalized additive models (implemented via the mgcv package) to model the response variable as the sum of smooth functions of predictors: y ~ s(x1) + s(x2) + ... s(xn). These smooths are capable of capturing non-linear relationships between the predictors and the response variable. We limited the number of knots in each smooth to four in order to prevent overfitting. We included interactions with time for all predictor variables (except total rainfall) to account for the variation in the time between observations. To select the most parsimonious model we began by fitting a model with all possible predictors using penalized cubic regression splines with an additional shrinkage penalty. This approach functionally removes insignificant predictors from the model, facilitating predictor selection (see <a href="https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/gam.selection.html">mgcv documentation</a>). Next, we iteratively removed insignificant terms from the model until none remained.
 ### Weather data prep
 Weather data collected from sensors at each of four sites is compiled and cleaned in <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/prep.enviro.data.R">prep enviro data.R</a>. 
 ### Within host scale
 The analysis begins at the within host scale. 
 #### Plant growth
-First, we investigate the relationship between plant growth and weather conditions. In <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/plant growth data prep.R">plant growth data prep.R</a> longitudinal height data of healthy and diseased focal plants is joined. This raw data is stored as <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/summarized data/plant.heights.RDS">plant.heights.RDS</a>. To make this data usable for analyses, we join data on change in plant height with mean weather metrics in a new data object <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/summarized data/delta.heights.RDS">delta.heights.RDS</a>. 
+First, we investigate the relationship between plant growth and weather conditions.
+<br />
+In <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/plant growth data prep.R">plant growth data prep.R</a> longitudinal height data of healthy and diseased focal plants is joined. This raw data is stored as <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/summarized data/plant.heights.RDS">plant.heights.RDS</a>. To make this data usable for analyses, we join data on change in plant height with mean weather metrics in a new data object <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/summarized data/delta.heights.RDS">delta.heights.RDS</a>. 
+<br />
+In <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/plant growth analysis.R">plant growth analysis.R</a> we .
 #### Pustlule growth
 -pustule area data prep.R <br />
 -pustule area analysis.R <br />
