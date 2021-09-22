@@ -51,23 +51,6 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   hm.weath<-hm.weath[-which(hm.weath$wetness==-888.88),]
   hm.weath<-cbind("site"="HM",hm.weath)
   
-  ## join with temperature data for calculating variables capturing co-occurence of weather vars and temp
-  temps<-c()
-  temps.16.22<-c()
-  temps.7.30<-c()
-  for(i in 1:(dim(hm.weath)[1]))
-  {
-    date0<-as.POSIXct(hm.weath[i,"date"])
-    date1<-as.POSIXct(hm.weath[i+1,"date"])
-    interval.temps<-hm[intersect(which(hm$date.time>=date0),which(hm$date.time<=date1)),"temp.c"]
-    ifelse(all(all(interval.temps>=16),all(interval.temps<=22)),interval.16.22<-1,interval.16.22<-0)
-    ifelse(all(all(interval.temps>=7),all(interval.temps<=30)),interval.7.30<-1,interval.7.30<-0)
-    temps<-c(temps,mean(interval.temps))
-    temps.16.22<-c(temps.16.22,interval.16.22)
-    temps.7.30<-c(temps.7.30,interval.7.30)
-  }
-  hm.weath<-cbind(hm.weath,temp=temps,temp.16.22=temps.16.22,temp.7.30=temps.7.30)
-  
   # gm weather data
   ## load data, clean
   gm.weath<-read.csv("~/Documents/Github/flax.rust/data/enviro/Gothic_Mountain.csv",skip=2)[,-1]
@@ -75,23 +58,6 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   gm.weath[,1]<-parse_date_time(gm.weath[,1],'%m/%d/%y %I:%M:%S %p')
   gm.weath<-gm.weath[-which(gm.weath$wetness==-888.88),]
   gm.weath<-cbind("site"="GM",gm.weath)
-  
-  ## join with temperature data for calculating variables capturing co-occurence of weather vars and temp
-  temps<-c()
-  temps.16.22<-c()
-  temps.7.30<-c()
-  for(i in 1:(dim(gm.weath)[1]))
-  {
-    date0<-as.POSIXct(gm.weath[i,"date"])
-    date1<-as.POSIXct(gm.weath[i+1,"date"])
-    interval.temps<-gm[intersect(which(gm$date.time>=date0),which(gm$date.time<=date1)),"temp.c"]
-    ifelse(all(all(interval.temps>=16),all(interval.temps<=22)),interval.16.22<-1,interval.16.22<-0)
-    ifelse(all(all(interval.temps>=7),all(interval.temps<=30)),interval.7.30<-1,interval.7.30<-0)
-    temps<-c(temps,mean(interval.temps))
-    temps.16.22<-c(temps.16.22,interval.16.22)
-    temps.7.30<-c(temps.7.30,interval.7.30)
-  }
-  gm.weath<-cbind(gm.weath,temp=temps,temp.16.22=temps.16.22,temp.7.30=temps.7.30)
   
   # bt weather data
   ## load data, clean
@@ -101,24 +67,6 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   bt.weath<-bt.weath[-which(bt.weath$wetness==-888.88),]
   bt.weath<-cbind("site"="BT",bt.weath)
   
-  ## join with temperature data for calculating variables capturing co-occurence of weather vars and temp
-  temps<-c()
-  temps.16.22<-c()
-  temps.7.30<-c()
-  for(i in 1:(dim(bt.weath)[1]))
-  {
-    date0<-as.POSIXct(bt.weath[i,"date"])
-    date1<-as.POSIXct(bt.weath[i+1,"date"])
-    interval.temps<-bt[intersect(which(bt$date.time>=date0),which(bt$date.time<=date1)),"temp.c"]
-    ifelse(all(all(interval.temps>=16),all(interval.temps<=22)),interval.16.22<-1,interval.16.22<-0)
-    ifelse(all(all(interval.temps>=7),all(interval.temps<=30)),interval.7.30<-1,interval.7.30<-0)
-    temps<-c(temps,mean(interval.temps))
-    temps.16.22<-c(temps.16.22,interval.16.22)
-    temps.7.30<-c(temps.7.30,interval.7.30)
-  }
-  bt.weath<-cbind(bt.weath,temp=temps,temp.16.22=temps.16.22,temp.7.30=temps.7.30)
-  
-  
   # cc weather data
   ## load data, clean
   cc.weath<-read.csv("~/Documents/Github/flax.rust/data/enviro/Cement_Creek.csv",skip=2)[,-1]
@@ -126,24 +74,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   cc.weath[,1]<-parse_date_time(cc.weath[,1],'%m/%d/%y %I:%M:%S %p')
   cc.weath<-cc.weath[-which(cc.weath$wetness==-888.88),]
   cc.weath<-cbind("site"="CC",cc.weath)
-  
-  ## join with temperature data for calculating variables capturing co-occurence of weather vars and temp
-  temps<-c()
-  temps.16.22<-c()
-  temps.7.30<-c()
-  for(i in 1:(dim(cc.weath)[1]))
-  {
-    date0<-as.POSIXct(cc.weath[i,"date"])
-    date1<-as.POSIXct(cc.weath[i+1,"date"])
-    interval.temps<-cc[intersect(which(cc$date.time>=date0),which(cc$date.time<=date1)),"temp.c"]
-    ifelse(all(all(interval.temps>=16),all(interval.temps<=22)),interval.16.22<-1,interval.16.22<-0)
-    ifelse(all(all(interval.temps>=7),all(interval.temps<=30)),interval.7.30<-1,interval.7.30<-0)
-    temps<-c(temps,mean(interval.temps))
-    temps.16.22<-c(temps.16.22,interval.16.22)
-    temps.7.30<-c(temps.7.30,interval.7.30)
-  }
-  cc.weath<-cbind(cc.weath,temp=temps,temp.16.22=temps.16.22,temp.7.30=temps.7.30)
-  
+
   #join all weather data
   all.weath<-rbind(hm.weath,gm.weath,bt.weath,cc.weath)
   
