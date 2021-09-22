@@ -2,13 +2,18 @@
 tools and analyses related to the flax-rust project
 
 ## cross.scale.transmission.dynamics
+This file contains analyses for a paper (in preparation) about the effects of climate change on the cross-scale transmission dynamics of flax rust disease. <br /> <br />
+The below text provides a summary of the analysis pipeline. To recreate results source the following files in order: <br />
+<a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/prep.enviro.data.R">prep enviro data.R</a> <br />
+<a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/plant growth data prep.R">plant growth data prep.R</a> <br />
 
+### Data collection
 ### Weather data prep
--prep.enviro.data.R
+Weather data collected from sensors at each of four sites is compiled and cleaned in <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/prep.enviro.data.R">prep enviro data.R</a>. 
 ### Within host scale
+The analysis begins at the within host scale. 
 #### Plant growth
--plant growth data prep.R <br />
--plant.growth.analysis.R
+First, we investigate the relationship between plant growth and weather conditions. In <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/plant growth data prep.R">plant growth data prep.R</a> longitudinal height data of healthy and diseased focal plants is joined. This raw data is stored as <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/summarized data/plant.heights.RDS">plant.heights.RDS</a>. To make this data usable for analyses, we join data on change in plant height with mean weather metrics in a new data object <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/summarized data/delta.heights.RDS">delta.heights.RDS</a>. 
 #### Pustlule growth
 -pustule area data prep.R <br />
 -pustule area analysis.R <br />
