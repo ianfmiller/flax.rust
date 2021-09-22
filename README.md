@@ -7,11 +7,11 @@ tools and analyses related to the flax-rust project
 -prep.enviro.data.R
 ### Within host scale
 #### Plant growth
--plant growth data prep.R
+-plant growth data prep.R\n
 -plant.growth.analysis.R
 #### Pustlule growth
--pustule area data prep.R
--pustule area analysis.R
+-pustule area data prep.R\n
+-pustule area analysis.R\n
 -within host climate prediction functions.R (vis)
 #### Pustule establishment
 -n pustules data prep.R
