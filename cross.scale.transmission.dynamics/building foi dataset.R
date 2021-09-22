@@ -323,8 +323,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   }
   
   foi.data[,c("tot.rain")]<-foi.data[,c("tot.rain")]/foi.data[,"delta.days"]
-  colnames(foi.data)[which(colnames(foi.data) %in% c("tot.rain"))]<-paste0("mean.",c("tot.rain"))
-  
+
   saveRDS(foi.data,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/foi.data.RDS")
 }
 
