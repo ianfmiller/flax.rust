@@ -11,6 +11,13 @@ sites<-c("CC","BT","GM","HM")
 ### load data
 corrected.epi<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/corrected.epi.RDS")
 corrected.locs<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/corrected.locs.RDS")
+
+corrected.locs$Date[which(corrected.locs$Date=="6/15/20")]<-"6/15/2020"
+corrected.locs$Date[which(corrected.locs$Date=="6/16/20")]<-"6/16/2020"
+corrected.locs$Date[which(corrected.locs$Date=="6/17/20")]<-"6/17/2020"
+corrected.locs$Date[which(corrected.locs$Date=="6/18/20")]<-"6/18/2020"
+corrected.locs$Date[which(corrected.locs$Date=="6/22/20")]<-"6/22/2020"
+
 within.host<-read.csv("~/Documents/GitHub/flax.rust/data/Withinhost.csv")
 #### subset to relevant records
 within.host<-within.host[which(within.host$Year==2020),]
@@ -257,6 +264,7 @@ for (site in sites)
         }
       }
     }
+    if(any(corrected.plant.heights$height.cm>100,na.rm = T)) {print(paste0("ERROR; index == ",i))}
   }
 }
 
