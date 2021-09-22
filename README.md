@@ -1,6 +1,45 @@
 # flax.rust
 tools and analyses related to the flax-rust project
 
+## cross.scale.transmission.dynamics
+
+### Weather data prep
+-prep.enviro.data.R
+### Within host scale
+#### Plant growth
+-plant growth data prep.R
+-plant.growth.analysis.R
+#### Pustlule growth
+-pustule area data prep.R
+-pustule area analysis.R
+-within host climate prediction functions.R (vis)
+#### Pustule establishment
+-n pustules data prep.R
+-n pustules analysis.R
+-within host climate prediction functions.R (vis)
+#### Plant infection intensity change
+-plant data prep.R
+-plant analysis.R
+-predict plant inf intens change funcs.R
+-within host climate prediction functions.R (vis)
+### Between host scale
+#### Data prep
+##### Plant heights
+-plant height dataset building.R
+##### Plant locations and incidence data
+-plant loc dataset building.R
+#### Spore deposition
+-spore deposition functions tilt.R
+-spore deposition model fitting tilt.R
+-visualize.spore.kernel.R (vis)
+#### Spore deposition and infection
+-building foi dataset.R
+-foi analysis.R
+#### Epidemic simulation
+-epi data vis.R
+-starting plant inf intens model.R
+-simulate epidemic.R
+
 ## quant.vir.evolution
 
 ### infeciton intensity survival analysis--demog data only.R
