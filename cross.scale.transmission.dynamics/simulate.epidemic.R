@@ -73,7 +73,7 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
   ## loop to simulate epi process
   start.date<-min(pred.epi$date)
   end.date<-max(unique(sub.epi$Date.First.Observed.Diseased))
-  sim.dates<-seq(start.date,end.date,1)
+  sim.dates<-seq(start.date,end.date,7)
   
   for(date.index in 1:(length(sim.dates)-1)) 
   {
@@ -229,8 +229,8 @@ if(any((!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dyna
   pred.epi.all.3.7<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,3.7,print.progress = F)
   
   saveRDS(pred.epi.all.0,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.RDS")
-  saveRDS(pred.epi.all.1.8,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8")
-  saveRDS(pred.epi.all.3.7,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7")
+  saveRDS(pred.epi.all.1.8,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.RDS")
+  saveRDS(pred.epi.all.3.7,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.RDS")
 } else 
 {
   site<-"GM"
