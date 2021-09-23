@@ -54,7 +54,8 @@ abline(h=0)
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS"))
 {
-  mod0<-gam(plant.inf.intens.next-plant.inf.intens~te(plant.inf.intens,max.height,by=time,bs="cs",k=10)+
+  mod0<-gam(plant.inf.intens.next-plant.inf.intens~s(plant.inf.intens,by=time,bs="cs",k=10)+
+              s(max.height,by=time,bs="cs",k=10)+
               s(pred.pustule.diam.growth,by=time,bs="cs",k=4)+
               s(pred.pustule.num.increase,by=time,bs="cs",k=4)+
               s(mean.temp,by=time,bs="cs",k=4)+
@@ -69,33 +70,35 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
             data=delta.plants)
   summary(mod0) #indicates that all but pred.pustule.num.increase and min.abs.hum are insignificant
   
-  mod1<-gam(plant.inf.intens.next-plant.inf.intens~te(plant.inf.intens,max.height,by=time,bs="cs",k=10)+
+  mod1<-gam(plant.inf.intens.next-plant.inf.intens~s(plant.inf.intens,by=time,bs="cs",k=10)+
+              #s(max.height,by=time,bs="cs",k=10)+
               #s(pred.pustule.diam.growth,by=time,bs="cs",k=4)+
-              s(pred.pustule.num.increase,by=time,bs="cs",k=4)+
+              #s(pred.pustule.num.increase,by=time,bs="cs",k=4)+
               #s(mean.temp,by=time,bs="cs",k=4)+
               #s(max.temp,by=time,bs="cs",k=4)+
-              #s(min.temp,by=time,bs="cs",k=4)+
-              #s(mean.abs.hum,by=time,bs="cs",k=4)+
+              s(min.temp,by=time,bs="cs",k=4)+
+              s(mean.abs.hum,by=time,bs="cs",k=4)+
               #s(max.abs.hum,by=time,bs="cs",k=4)+
-              s(min.abs.hum,by=time,bs="cs",k=4),
+              #s(min.abs.hum,by=time,bs="cs",k=4)+
               #s(mean.solar,by=time,bs="cs",k=4)+
               #s(tot.rain,bs="cs",k=4)+
-              #s(site,bs="re",k=4),
+              s(site,bs="re",k=4),
             data=delta.plants)
   summary(mod1) #indicates that min.abs.hum is insignificant
   
-  mod2<-gam(plant.inf.intens.next-plant.inf.intens~te(plant.inf.intens,max.height,by=time,bs="cs",k=10)+
-            #s(pred.pustule.diam.growth,by=time,bs="cs",k=4)+
-            s(pred.pustule.num.increase,by=time,bs="cs",k=4),
-            #s(mean.temp,by=time,bs="cs",k=4)+
-            #s(max.temp,by=time,bs="cs",k=4)+
-            #s(min.temp,by=time,bs="cs",k=4)+
-            #s(mean.abs.hum,by=time,bs="cs",k=4)+
-            #s(max.abs.hum,by=time,bs="cs",k=4)+
-            #s(min.abs.hum,by=time,bs="cs",k=4),
-            #s(mean.solar,by=time,bs="cs",k=4)+
-            #s(tot.rain,bs="cs",k=4)+
-            #s(site,bs="re",k=4),
+  mod2<-gam(plant.inf.intens.next-plant.inf.intens~s(plant.inf.intens,by=time,bs="cs",k=10)+
+              #s(max.height,by=time,bs="cs",k=10)+
+              #s(pred.pustule.diam.growth,by=time,bs="cs",k=4)+
+              #s(pred.pustule.num.increase,by=time,bs="cs",k=4)+
+              #s(mean.temp,by=time,bs="cs",k=4)+
+              #s(max.temp,by=time,bs="cs",k=4)+
+              s(min.temp,by=time,bs="cs",k=4)+
+              #s(mean.abs.hum,by=time,bs="cs",k=4)+
+              #s(max.abs.hum,by=time,bs="cs",k=4)+
+              #s(min.abs.hum,by=time,bs="cs",k=4)+
+              #s(mean.solar,by=time,bs="cs",k=4)+
+              #s(tot.rain,bs="cs",k=4)+
+              s(site,bs="re",k=4),
             data=delta.plants)
   summary(mod2) #all predictors are now significant
   
@@ -111,13 +114,13 @@ plants.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dyn
 #gam.check(plants.model) #indicates k=4 leads to unevenly distributed residuals, but increasing k doesn't solve issue and leads to overfitting
 
 ## visualize model
-draw(plants.model,dist=.5)
+draw(plants.model)
 
 # predict climate change effect
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
 library("MASS")
 par(mfrow=c(1,2),mar=c(6,6,6,6))
-plot(0,0,xlim=c(-1,3),ylim=c(-1000,1000),type="n",xlab="log 10 plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
+plot(0,0,xlim=c(-1,5),ylim=c(-1000,1000),type="n",xlab="log 10 plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
 day.indicies<-c(75,113,135)
 colors<-c("orange","red","purple")
 for(day in day.indicies)
@@ -125,7 +128,7 @@ for(day in day.indicies)
   index<-which(day.indicies==day)
   lower<-data.frame(x=numeric(),y=numeric())
   upper<-data.frame(x=numeric(),y=numeric())
-  for(i in 10^seq(-1,3,.25))
+  for(i in 10^seq(-1,5,.25))
   {
     pred.data<-get.pred.data.temp.mean.quantile.plants.model(day,dummy.data.inf.intens=i,dummy.data.height=15)
     Xp <- predict(plants.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
@@ -148,7 +151,7 @@ for(day in day.indicies)
 }
 legend("topright",legend = c("50% quantile hottest days","75% quantile hottest days","90% quantile hottest days"),col = c("orange","red","purple"),pch=16,cex=1,bty="n")
 
-plot(0,0,xlim=c(-1,3),ylim=c(-1000,1000),type="n",xlab="plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
+plot(0,0,xlim=c(-1,5),ylim=c(-1000,1000),type="n",xlab="plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
 temp.additions<-c(0,1.8,3.7)
 colors<-c("orange","red","purple")
 for(temp.addition in temp.additions)
@@ -156,7 +159,7 @@ for(temp.addition in temp.additions)
   index<-which(temp.additions==temp.addition)
   lower<-data.frame(x=numeric(),y=numeric())
   upper<-data.frame(x=numeric(),y=numeric())
-  for(i in 10^seq(-1,3,.25))
+  for(i in 10^seq(-1,5,.25))
   {
     pred.data<-get.pred.data.temp.mean.quantile.plants.model(75,dummy.data.inf.intens=i,dummy.data.height=15,temp.addition = temp.addition)
     Xp <- predict(plants.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
