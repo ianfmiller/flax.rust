@@ -41,8 +41,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   #min.vpd<-c() 
   tot.rain<-c()
   mean.solar<-c()
-  pred.pustule.diam.growths<-c()
-  
+
   
   for (tag in unique(n.pustules$tag))
   {
@@ -115,16 +114,6 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
             delta.days<-as.numeric(date1-date0)
             measurer.id<-sub.n.pustules3[i,"who.entered"] #same person did all measurements for each pustule
             
-            #predict pustule growth from pustule growth model and enviro conditions
-            #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
-            pustule.model.new.area<-.01 #predict change for small pustule, arbitrarily pick .01
-            pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,
-                                                "time"=delta.days,"site"=site,
-                                                "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                                                "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                                "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain)
-            pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,re.form=~0)
-            
             #store values
             tags<-c(tags,tag)
             sites<-c(sites,site)
@@ -147,7 +136,6 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
             tot.rain<-c(tot.rain,new.tot.rain)
             mean.solar<-c(mean.solar,new.mean.solar)
             
-            pred.pustule.diam.growths<-c(pred.pustule.diam.growths,pred.pustule.diam.growth)
           } 
         }
       }
@@ -158,7 +146,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
                              mean.temp=mean.temp,max.temp=max.temp,min.temp=min.temp,
                              mean.abs.hum=mean.abs.hum,max.abs.hum=max.abs.hum,min.abs.hum=min.abs.hum,
                              #mean.vpd=mean.vpd,max.vpd=max.vpd,min.vpd=min.vpd,
-                             tot.rain=tot.rain,mean.solar=mean.solar,pred.pustule.diam.growth=pred.pustule.diam.growths)
+                             tot.rain=tot.rain,mean.solar=mean.solar)
   
   saveRDS(n.pustules,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/n.pustules.RDS")
   saveRDS(delta.n.pustules,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.n.pustules.RDS")
