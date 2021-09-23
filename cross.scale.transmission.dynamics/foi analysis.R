@@ -1,4 +1,5 @@
 library(mgcv)
+library(lme4)
 library(progress)
 
 # load data
@@ -56,7 +57,7 @@ axis(1,cex.axis=1.5)
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS"))
 {
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/foi model set creation.R") ### load models
-  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("status.next ~ foi + height.cm + (1|site)",predictors[x]),collapse=" + ")))
+  model.set <-apply(pred.mat, 1, function(x) as.formula( paste(c("status.next ~ foi + (1|site)",predictors[x]),collapse=" + ")))
   names(model.set)<-seq(1,length(model.set),1)
   ## run to search for best  model
   all.fit.models<-c()
