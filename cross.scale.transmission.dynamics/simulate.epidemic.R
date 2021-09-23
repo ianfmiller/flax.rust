@@ -214,23 +214,30 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
   pred.epi
 }
 
-simulate.epi("GM",0,print.progress = T)->pred.epi
-
-par(mfrow=c(3,3))
-for(date in unique(pred.epi$date))
+if(any((!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.RDS")),
+        (!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.RDS")),
+         (!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.RDS"))
+)) {
+  library(parallel)
+  library(doParallel)
+  n.cores<-10
+  registerDoParallel(n.cores)
+  site<-"GM"
+  
+  pred.epi.all.0<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,0,print.progress = T)
+  pred.epi.all.1.8<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,1.8,print.progress = F)
+  pred.epi.all.3.7<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,3.7,print.progress = F)
+  
+  saveRDS(pred.epi.all.0,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.RDS")
+  saveRDS(pred.epi.all.1.8,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8")
+  saveRDS(pred.epi.all.3.7,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7")
+} else 
 {
-  hist(pred.epi[which(pred.epi$date==date),"plant.inf.intens"],breaks=20)
+  site<-"GM"
+  pred.epi.all.0<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.RDS")
+  pred.epi.all.1.8<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.RDS")
+  pred.epi.all.3.7<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.RDS")
 }
-
-library(parallel)
-library(doParallel)
-n.cores<-4
-registerDoParallel(n.cores)
-site<-"GM"
-pred.epi.all.0<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,0,print.progress = T)
-beep()
-pred.epi.all.1.8<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,1.8,print.progress = F)
-pred.epi.all.3.7<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,3.7,print.progress = F)
 
 t_col <- function(color, percent = 50, name = NULL) {
   rgb.val <- col2rgb(color)
@@ -249,7 +256,7 @@ sub.epi<-corrected.epi[which(corrected.epi$Site==site),]
 sub.locs<-corrected.locs[which(corrected.locs$Site==site),]
 
 par(mfrow=c(1,1))
-par(mar=c(6,6,6,6))
+par(mar=c(5,5,1,1))
 plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,1),xlab="date",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
 xvals<-c()
 yvals<-c()
@@ -267,7 +274,7 @@ for(k in 1:length(pred.epi.all.0))
   xvals<-c()
   yvals<-c()
   pred.epi<-pred.epi.all.0[[k]]
-  for(i in 1:36)
+  for(i in 1:length(unique(pred.epi.all.0[[1]]$date)))
   {
     date<-unique(pred.epi$date)[i]
     xvals<-c(xvals,date)
@@ -299,7 +306,7 @@ for(k in 1:length(pred.epi.all.1.8))
   xvals<-c()
   yvals<-c()
   pred.epi<-pred.epi.all.1.8[[k]]
-  for(i in 1:9)
+  for(i in 1:length(unique(pred.epi.all.0)[[k]]$date))
   {
     date<-unique(pred.epi$date)[i]
     xvals<-c(xvals,date)
@@ -314,7 +321,7 @@ for(k in 1:length(unique(pred.epi.all.1.8[[1]]$date)))
 {
   sub.prevs<-c()
   date<-unique(pred.epi.all.1.8[[1]]$date)[k]
-  for(j in 1:length(pred.epi.all.0))
+  for(j in 1:length(pred.epi.all.1.8))
   {
     sub.dat<-pred.epi.all.1.8[[j]]
     sub.dat<-sub.dat[which(sub.dat$date==date),]
@@ -331,7 +338,7 @@ for(k in 1:length(pred.epi.all.3.7))
   xvals<-c()
   yvals<-c()
   pred.epi<-pred.epi.all.3.7[[k]]
-  for(i in 1:9)
+  for(i in 1:length(unique(pred.epi.all.3.7[[1]]$date)))
   {
     date<-unique(pred.epi$date)[i]
     xvals<-c(xvals,date)
@@ -357,9 +364,6 @@ for(k in 1:length(unique(pred.epi.all.3.7[[1]]$date)))
 }
 points(xvals,yvals,type="l",col="purple",lwd=4)
 legend("top",legend=c("data","+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col=c("black","orange","red","purple"),lwd=4,cex=2,bty="n")
-
-
-
 
 par(mfrow=c(2,4))
 
