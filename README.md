@@ -2,9 +2,10 @@
 This file contains analyses for a paper (in preparation) about the effects of climate change on the cross-scale transmission dynamics of flax rust disease. <br /> <br />
 The below text provides a summary of the analysis pipeline. To recreate results, source the following files in order: <br />
 <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/prep.enviro.data.R">prep enviro data.R</a> <br />
-<a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/plant loc data set building.R">plant loc data set buildings.R</a> <br />
+<a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/plant loc data set building.R">plant loc data set building.R</a> <br />
 <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/plant growth data prep.R">plant growth data prep.R</a> <br />
 <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/plant growth analysis.R">plant growth analysis.R</a> <br />
+<a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/plant height dataset building.R">plant height data set building.R</a>  <br />
 <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/pustule area data prep.R">pustule area data prep.R</a> <br />
 <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/pustule area analysis.R">pustule area analysis.R</a> <br />
 <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/n pustules data prep.R">n pusutles data prep.R</a> <br />
@@ -21,7 +22,21 @@ We use generalized additive models (implemented via the mgcv package) to model t
 ### Weather data
 Weather data collected from sensors at each of four sites is compiled and cleaned in <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/prep.enviro.data.R">prep enviro data.R</a>. 
 ### Plant locations and epidemiological data
-We recorded the locations of each plant in each transect at the begininning of the field season. When we observed a newly diseased plant, we re-recorded its location. In order to understand spatial epidemiological patterns, we need to match newly diseased plants to the healthy plants surveyed at the beginning of the season. This is accomplished in <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/plant loc data set building.R">plant loc data set buildings.R</a>. This script generates two data sets. The first, <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/summarized data/corrected.locs.RDS">corrected.locs.RDS</a>, gives the identity location of all (healthy and diseased) plants in each transect. The second, <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/summarized data/corrected.locs.RDS">corrected.locs.RDS</a>, gives the identity, location, and date first observed diseased for all infected plants. When the newly diseased plant was previously tagged, we updated its coordinates in the epidemiological data set to match its coordinates in the plant location data set. When the newly diseased plant was not previously tagged (and therefore able to be definitively matched to a record in the initial transect survey) we matched its identity and changed its coordinates to that of the closest untagged and unmatched healthy plant in the plant location daataset. Note that this procedure was also performed for plants that were tagged after being observed diseased. When no untagged and unmatched plant was withing 0.5m of the newly diseased plant we assumed that it was either unemerged or missed during the initial survey, and added a new record into the plant location dataset to reflect its presence.
+We recorded the locations of each plant in each transect at the begininning of the field season. When we observed a newly diseased plant, we re-recorded its location. In order to understand spatial epidemiological patterns, we need to match newly diseased plants to the healthy plants surveyed at the beginning of the season. This is accomplished in <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/plant loc data set building.R">plant loc data set building
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  .R</a>. This script generates two data sets. The first, <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/summarized data/corrected.locs.RDS">corrected.locs.RDS</a>, gives the identity location of all (healthy and diseased) plants in each transect. The second, <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/summarized data/corrected.locs.RDS">corrected.locs.RDS</a>, gives the identity, location, and date first observed diseased for all infected plants. When the newly diseased plant was previously tagged, we updated its coordinates in the epidemiological data set to match its coordinates in the plant location data set. When the newly diseased plant was not previously tagged (and therefore able to be definitively matched to a record in the initial transect survey) we matched its identity and changed its coordinates to that of the closest untagged and unmatched healthy plant in the plant location daataset. Note that this procedure was also performed for plants that were tagged after being observed diseased. When no untagged and unmatched plant was withing 0.5m of the newly diseased plant we assumed that it was either unemerged or missed during the initial survey, and added a new record into the plant location dataset to reflect its presence.
 -plant loc dataset building.R
 ## Within host scale
 The analysis begins at the with in host scale. 
@@ -32,8 +47,7 @@ In <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transm
 #### Model fitting
 In <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/plant growth analysis.R">plant growth analysis.R</a> we fit and visualize a model of plant height<sub>t+1</sub> as a sum of smoothed functions of plant height<sub>t</sub> and weather metrics (interactions with time are included for all predictors), and proceeded with our standard model selection approach. This model is saved as <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/models/plant.growth.model.RDS">plant.growth.model.RDS</a>.
 #### Plant height dataset building
--plant height dataset building.R
-
+In a subsequent analysis of the effects of spore deposition on the odds of infection, we wish to use plant height as a predictor variable. However, for the majority of plants within the transect, heights were not recorded after the initial population survey. We use the <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/models/plant.growth.model.RDS">plant.growth.model.RDS</a> to simulate missing height data from weather conditions and the closest recorded height measurment for each plant in <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/plant height dataset building.R">plant height data set building.R</a>. This script uses convenience functions in <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/predict plant height change funcs.R">predict plant height change funcs.R</a>. The resutling dataset of observed and fore/hindcasted plant heights is stored as <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/models/corrected.plant.heights.RDS">corrected.plant.heights.RDS</a>.
 ### Pustlule growth
 Next, we begin our analysis of the effects of climate change on the within host spread of disease beginning that the scale of a single pustule. 
 #### Data preperation
