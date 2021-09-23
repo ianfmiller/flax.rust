@@ -157,7 +157,7 @@ get.pred.data.temp.mean.quantile.n.pustules.model<-function(day.set,dummy.data,t
 
 get.pred.data.temp.mean.quantile.plants.model<-function(day.set,dummy.data.inf.intens,dummy.data.height,temp.addition=0)
 {
-  dim<-length(dummy.data)
+  dim<-length(dummy.data.inf.intens)
   daily.means<-pull.temp.mean.quantile.data()
   temp.rh.sub.func<-function(x,lower.bound,upper.bound) {out<-subset(x,temp.c>=lower.bound); out<-subset(out,temp.c<=upper.bound); out}
   
