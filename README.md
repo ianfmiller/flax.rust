@@ -1,9 +1,11 @@
 # cross.scale.transmission.dynamics
 This file contains analyses for a paper (in preparation) about the effects of climate change on the cross-scale transmission dynamics of flax rust disease. <br /> <br />
-The below text provides a summary of the analysis pipeline. To recreate results source the following files in order: <br />
+The below text provides a summary of the analysis pipeline. To recreate results, source the following files in order: <br />
 <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/prep.enviro.data.R">prep enviro data.R</a> <br />
 <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/plant growth data prep.R">plant growth data prep.R</a> <br />
 <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/plant growth analysis.R">plant growth analysis.R</a> <br />
+<a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/pustule area data prep.R"> <br />
+<a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/pustule area analysis.R"> <br />
 ## Data collection
 ## Statistical methods
 Unless otherwise noted, we use the following modeling approach to investigate the relationship between a response variable (e.g. observed plant height at time t+1) and predictor variables. These predictor variables include the previous observed state (e.g. plant height at time t) and weather metrics (e.g. mean temperature).
@@ -40,10 +42,10 @@ In <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transm
 <br />
 <br />
 #### Model interpretation and visualization
-In order to translate the fitted model into predictions about climate effects on pustule growth, we need to be able to make predictions from the model. This required constructing a dummy data set for a given set of starting conditions and a given set of weather data to use to generate predictions. These dummy data sets are constructed using convenience functions in  <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/within host climate prediction functions">within host climate prediction functions</a>. Using these dummy datasets, we make predictions via bootstrap simulations of the fitted model. 
+In order to translate the fitted model into predictions about climate effects on pustule growth, we need to be able to make predictions from the model. This requires constructing a dummy data set for the starting pustule area and weather conditions that we wish to investigate. These dummy data sets are constructed using convenience functions in  <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/within host climate prediction functions">within host climate prediction functions</a>. Using these dummy datasets, we make predictions via bootstrap simulations of the fitted model. 
 <br />
 <br />
-We visualize the effect of climate change on the growth of pustules of various size by simulating their growth under various climate conditions. We take two approaches. In the first, we simulate pustule growth using the fitted model and real weather data from days corresponding to the 50th, 75th, and 90th quantiles of hottest days observed during the data collection period. In the second, we simulate pustule growth using the fitted model and weather data from a day corresponding to 50th quantile of hottest days observed during the data collection period with either 0, 1.8, or 3.7 degrees added to individual temperature observation. In each approach we simulate area change across a one day window. 
+We take two approaches to visualize the effect of climate change on the growth of pustules of various sizeIn the first, we simulate pustule growth using the fitted model and real weather data from days corresponding to the 50th, 75th, and 90th quantiles of hottest days observed during the data collection period. In the second, we simulate pustule growth using the fitted model and weather data from a day corresponding to 50th quantile of hottest days observed during the data collection period with either 0, 1.8, or 3.7 degrees added to individual temperature observations. In each approach we simulate area change across a one day window. 
 <br />
 <br />
 To predict how climate change will affect the growth trajectory of pustules, we use the fitted model and longitudinal weather data to simulate the growth of a pustule over time. We added either 0, 1.8 or 3.7 degrees to observed temperature readings to investigate the effects of climate change. We assumed a starting pustule area of .01cm<sup>2</sup>, and simulated trajectories for 100 pustules at each of the temperature scenarios. We replicated this procedure for forward simulation windows of one, two, and seven days. 
