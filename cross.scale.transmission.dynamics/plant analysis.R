@@ -1,5 +1,4 @@
 library(mgcv)
-library(lme4)
 library(lmerTest)
 library(progress)
 library(gratia)
@@ -56,8 +55,6 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 {
   mod0<-gam(plant.inf.intens.next-plant.inf.intens~s(plant.inf.intens,by=time,bs="cs",k=10)+
               s(max.height,by=time,bs="cs",k=10)+
-              s(pred.pustule.diam.growth,by=time,bs="cs",k=4)+
-              s(pred.pustule.num.increase,by=time,bs="cs",k=4)+
               s(mean.temp,by=time,bs="cs",k=4)+
               s(max.temp,by=time,bs="cs",k=4)+
               s(min.temp,by=time,bs="cs",k=4)+
@@ -72,13 +69,11 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   
   mod1<-gam(plant.inf.intens.next-plant.inf.intens~s(plant.inf.intens,by=time,bs="cs",k=10)+
               #s(max.height,by=time,bs="cs",k=10)+
-              #s(pred.pustule.diam.growth,by=time,bs="cs",k=4)+
-              #s(pred.pustule.num.increase,by=time,bs="cs",k=4)+
               #s(mean.temp,by=time,bs="cs",k=4)+
               #s(max.temp,by=time,bs="cs",k=4)+
               s(min.temp,by=time,bs="cs",k=4)+
               s(mean.abs.hum,by=time,bs="cs",k=4)+
-              #s(max.abs.hum,by=time,bs="cs",k=4)+
+              s(max.abs.hum,by=time,bs="cs",k=4)+
               #s(min.abs.hum,by=time,bs="cs",k=4)+
               #s(mean.solar,by=time,bs="cs",k=4)+
               #s(tot.rain,bs="cs",k=4)+
