@@ -4,8 +4,10 @@ The below text provides a summary of the analysis pipeline. To recreate results,
 <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/prep.enviro.data.R">prep enviro data.R</a> <br />
 <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/plant growth data prep.R">plant growth data prep.R</a> <br />
 <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/plant growth analysis.R">plant growth analysis.R</a> <br />
-<a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/pustule area data prep.R"> <br />
-<a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/pustule area analysis.R"> <br />
+<a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/pustule area data prep.R">pustule area data prep.R</a> <br />
+<a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/pustule area analysis.R">pustule area analysis.R</a> <br />
+<a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/n pustules data prep.R">n pusutles data prep.R</a> <br />
+<a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/n pustules analysis.R">n pustules analysis.R</a> <br />
 ## Data collection
 ## Statistical methods
 Unless otherwise noted, we use the following modeling approach to investigate the relationship between a response variable (e.g. observed plant height at time t+1) and predictor variables. These predictor variables include the previous observed state (e.g. plant height at time t) and weather metrics (e.g. mean temperature).
@@ -18,29 +20,17 @@ Weather data collected from sensors at each of four sites is compiled and cleane
 The analysis begins at the within host scale. 
 ### Plant growth
 First, we investigate the relationship between plant growth and weather conditions.
-<br />
-<br />
 #### Data preperation
 In <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/plant growth data prep.R">plant growth data prep.R</a> longitudinal height data of healthy and diseased focal plants is joined. This raw data is stored as <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/summarized data/plant.heights.RDS">plant.heights.RDS</a>. To make this data usable for analyses, we join data on change in plant height with mean weather metrics in a new data object <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/summarized data/delta.heights.RDS">delta.heights.RDS</a>. 
-<br />
-<br />
 #### Model fitting
 In <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/plant growth analysis.R">plant growth analysis.R</a> we fit and visualize a model of plant height<sub>t+1</sub> as a sum of smoothed functions of plant height<sub>t</sub> and weather metrics (interactions with time are included for all predictors). This model is saved as <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/models/plant.growth.model.RDS">plant.growth.model.RDS</a>.
-<br />
-<br />
 #### Model interpretation and visualization
 ### Pustlule growth
 Next, we begin our analysis of the effects of climate change on the within host spread of disease beginning that the scale of a single pustule. 
-<br />
-<br />
 #### Data preperation
 In <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/pustule area data prep.R">pustule area data prep.R</a> we calculate pustule areas from the minimum and maximum diameters measured from pictures taken in the field. This data, along with other metadata including the date and time at which the pictures were taken are saved as <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/summarized data/pustules.RDS">pustules.RDS</a>. To facilitate analyses, we reformat this data, joining data on change in pustule diameter with mean weather metrics. This new data object is saved as <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/summarized data/delta.pustules.RDS">delta.pustules.RDS</a>. 
-<br />
-<br />
 #### Model fitting
 In <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/pustule area analysis.R">pustule area analysis.R</a> we fit a model of pustule area<sub>t+1</sub> as a sum of smoothed functions of pustule areat<sub>t</sub> and weather metrics (interactions with time are included for all predictors). This model is saved as <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/models/pustule.model.RDS">pustules.model.RDS</a>. 
-<br />
-<br />
 #### Model interpretation and visualization
 In order to translate the fitted model into predictions about climate effects on pustule growth, we need to be able to make predictions from the model. This requires constructing a dummy data set for the starting pustule area and weather conditions that we wish to investigate. These dummy data sets are constructed using convenience functions in  <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/within host climate prediction functions">within host climate prediction functions</a>. Using these dummy datasets, we make predictions via bootstrap simulations of the fitted model. 
 <br />
@@ -50,6 +40,12 @@ We take two approaches to visualize the effect of climate change on the growth o
 <br />
 To predict how climate change will affect the growth trajectory of pustules, we use the fitted model and longitudinal weather data to simulate the growth of a pustule over time. We added either 0, 1.8 or 3.7 degrees to observed temperature readings to investigate the effects of climate change. We assumed a starting pustule area of .01cm<sup>2</sup>, and simulated trajectories for 100 pustules at each of the temperature scenarios. We replicated this procedure for forward simulation windows of one, two, and seven days. 
 ### Pustule establishment
+We next consider the process of pustule establishment. The main metric we use to investigate this process is the change in the number of pustules present on a leaf.
+#### Data preperation
+In <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/n pustules data prep.R">n pusutles data prep.R</a> we clean raw pustule count data, and save it as <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/summarized data/n.pustules.RDS">n.pustules.RDS</a>. To facilitate analyses, we reformat this data, joining data on change in pustule number with mean weather metrics and a predictor variable capturing how the observed weather conditions are expected to affect pustule growth. To generate this additional variable, we predicted pustule area<sub>t+1</sub> using the <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/models/pustule.model.RDS">pustules.model.RDS</a> model and weather metrics spanning t to t+1, while assuming pustule area<sub>t</sub>=0.01 cm<sup>2</sup>.  The new data object is saved as <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/summarized data/delta.n.pustules.RDS">delta.n.pustules.RDS</a>. 
+#### Model fitting
+#### Model interpretation and visualization
+
 -n pustules data prep.R <br />
 -n pustules analysis.R <br />
 -within host climate prediction functions.R (vis)
