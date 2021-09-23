@@ -44,7 +44,7 @@ axis(2,at=c(0,1),labels = c("healthy","infected"))
 plot(jitter(log10(foi.data[which(foi.data$site=="HM"),"foi"]+1e-10)),jitter(foi.data[which(foi.data$site=="HM"),"status.next"]),xlab="log10 foi",ylab="outcome",axes=F,col="purple",xlim=c(min(log10(foi.data$foi+1e-10)),max(log10(foi.data$foi+1e-10))),main="HM")
 axis(2,at=c(0,1),labels = c("healthy","infected"))
 
-par(mfrow=c(2,1),mar=c(6,6,6,6))
+par(mfrow=c(2,1),mar=c(5,5,2,2))
 plot(jitter(foi.data$foi),jitter(foi.data$status.next),xlab="predicted spore deposition",ylab="",axes=F,cex.lab=1.5)
 axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=1.5)
 axis(1,cex.axis=1.5)
@@ -94,20 +94,43 @@ axis(2,at=c(0,.25,.5,.75,1),cex.axis=1.5,col="red",col.axis="red")
 mtext("odds of infection",side=2,line=2.5,cex=1.5,col="red")
 axis(1,cex.axis=1.5)
 
-fois<-seq(0,.15,.0001)
+fois<-seq(0,1.5,.01)
 new.data.1<-data.frame("foi"=fois,
                      "height.cm"=5,
-                     "pred.pustule.diam.growth"=rep(mean(foi.data$pred.pustule.diam.growth ),times=length(fois)))
+                     "mean.temp"=mean(foi.data$mean.temp),
+                     "max.temp"=mean(foi.data$max.temp),
+                     "min.temp"=mean(foi.data$min.temp),
+                     "pred.pustule.diam.growth"=rep(mean(foi.data$pred.pustule.diam.growth ),times=length(fois)),
+                     "pred.pustule.num.increase"=rep(mean(foi.data$pred.pustule.num.increase ),times=length(fois)),
+                     "pred.plant.inf.intens.increase"=rep(mean(foi.data$pred.plant.inf.intens.increase ),times=length(fois))
+                     )
 new.data.2<-data.frame("foi"=fois,
                        "height.cm"=10,
-                       "pred.pustule.diam.growth"=rep(mean(foi.data$pred.pustule.diam.growth ),times=length(fois)))
+                       "mean.temp"=mean(foi.data$mean.temp),
+                       "max.temp"=mean(foi.data$max.temp),
+                       "min.temp"=mean(foi.data$min.temp),
+                       "pred.pustule.diam.growth"=rep(mean(foi.data$pred.pustule.diam.growth ),times=length(fois)),
+                       "pred.pustule.num.increase"=rep(mean(foi.data$pred.pustule.num.increase ),times=length(fois)),
+                       "pred.plant.inf.intens.increase"=rep(mean(foi.data$pred.plant.inf.intens.increase ),times=length(fois))
+                      )
 new.data.3<-data.frame("foi"=fois,
                        "height.cm"=25,
-                       "pred.pustule.diam.growth"=rep(mean(foi.data$pred.pustule.diam.growth ),times=length(fois)))
+                       "mean.temp"=mean(foi.data$mean.temp),
+                       "max.temp"=mean(foi.data$max.temp),
+                       "min.temp"=mean(foi.data$min.temp),
+                       "pred.pustule.diam.growth"=rep(mean(foi.data$pred.pustule.diam.growth ),times=length(fois)),
+                       "pred.pustule.num.increase"=rep(mean(foi.data$pred.pustule.num.increase ),times=length(fois)),
+                       "pred.plant.inf.intens.increase"=rep(mean(foi.data$pred.plant.inf.intens.increase ),times=length(fois))
+                      )
 new.data.4<-data.frame("foi"=fois,
                        "height.cm"=50,
-                       "pred.pustule.diam.growth"=rep(mean(foi.data$pred.pustule.diam.growth ),times=length(fois)))
-
+                       "mean.temp"=mean(foi.data$mean.temp),
+                       "max.temp"=mean(foi.data$max.temp),
+                       "min.temp"=mean(foi.data$min.temp),
+                       "pred.pustule.diam.growth"=rep(mean(foi.data$pred.pustule.diam.growth ),times=length(fois)),
+                       "pred.pustule.num.increase"=rep(mean(foi.data$pred.pustule.num.increase ),times=length(fois)),
+                       "pred.plant.inf.intens.increase"=rep(mean(foi.data$pred.plant.inf.intens.increase ),times=length(fois))
+                      )
 points(new.data.1$foi,predict(best.model,newdata = new.data.1,type = "response",re.form=NA),type="l",col="red",lwd=2,lty=1)
 points(new.data.2$foi,predict(best.model,newdata = new.data.2,type = "response",re.form=NA),type="l",col="red",lwd=2,lty=2)
 points(new.data.3$foi,predict(best.model,newdata = new.data.3,type = "response",re.form=NA),type="l",col="red",lwd=2,lty=3)
