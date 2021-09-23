@@ -73,7 +73,7 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
   ## loop to simulate epi process
   start.date<-min(pred.epi$date)
   end.date<-max(unique(sub.epi$Date.First.Observed.Diseased))
-  sim.dates<-seq(start.date,end.date,7)
+  sim.dates<-seq(start.date,end.date,1)
   
   for(date.index in 1:(length(sim.dates)-1)) 
   {
@@ -147,9 +147,17 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
     pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,exclude = 's(site)')
     
     #predict change in plant.inf.intensity from enviro conditions
-    #plant.model.vars<-names(fixef(plant.model))[2:length(names(fixef(plant.model)))]
-    plant.model.new.plant.inf.intens<-.1
+    plant.model.new.plant.inf.intens<-1
     obs.time<-delta.days
+    plant.model.pred.data<-data.frame("plant.inf.intens"=plant.model.new.plant.inf.intens,
+                                      "time"=delta.days,"site"=site,
+                                      "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
+                                      "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
+                                      "mean.wetness"=new.mean.wetness,
+                                      "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
+                                      "pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase)
+    pred.plant.inf.intens.increase<-predict(plant.model,newdata=plant.model.pred.data,exclude = 's(site)')
+    
     
     ### compare weather data coverage to make sure foi is not being underestimated
     time.diff.weather.data<-weath.sub$date[nrow(weath.sub)]-weath.sub$date[1]
@@ -180,7 +188,7 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
           foi<-foi+predict.kernel.tilted.plume(q=q,H=half.height,k=4.828517e-07,alphaz=1.687830e-06,Ws=9.299220e-01,xtarget=xcord-sourceX,ytarget=ycord-sourceY,wind.data=weath.sub)
         }
         foi<-foi*foi.mod ### correct for any gaps in weath data
-        pred.inf.odds<-predict(foi.model,newdata = data.frame("site"=site,"foi"=foi,"height.cm"=last.epi[i,"max.height"],"pred.pustule.diam.growth"=pred.pustule.diam.growth),type="response",re.form=NA) ### predict odds of becoming infected
+        pred.inf.odds<-predict(foi.model,newdata = data.frame("site"=site,"foi"=foi,"height.cm"=last.epi[i,"max.height"],"pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase,"pred.plant.inf.intens.increase"=pred.plant.inf.intens.increase,"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp),type="response",re.form=NA) ### predict odds of becoming infected
         #pred.inf.odds<-predict(foi.model,newdata = data.frame("foi"=foi,"height.cm"=last.epi[i,"max.height"],"mean.temp.days.16.22"=mean.temp.days.16.22,"mean.temp.7.30.dew.point.days"=mean.temp.7.30.dew.point.days),type="response",re.form=NA) ### predict odds of becoming infected
         #pred.inf.odds<-predict(foi.model,newdata=data.frame("foi"=foi),type="response")
         draw<-runif(1) ### draw random number between 0 and 1
@@ -215,8 +223,8 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
 }
 
 if(any((!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.RDS")),
-        (!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.RDS")),
-         (!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.RDS"))
+        (!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.RDS")),
+         (!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.RDS"))
 )) {
   library(parallel)
   library(doParallel)
@@ -257,7 +265,7 @@ sub.locs<-corrected.locs[which(corrected.locs$Site==site),]
 
 par(mfrow=c(1,1))
 par(mar=c(5,5,1,1))
-plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,1),xlab="date",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
+plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,.4),xlab="date",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
 xvals<-c()
 yvals<-c()
 for(i in 1:9)
