@@ -273,48 +273,58 @@ plot.purple<-t_col("purple",80)
 plot.red<-t_col("red",80)
 plot.orange<-t_col("orange",80)
 
-par(mar=c(6,6,2,2),mfrow=c(3,1))
+par(mar=c(6,6,2,2),mfrow=c(3,2))
 
 plant.height<-5
 
 ### one day ahead projection
+plot(0,0,type="n",xlim=c(1,36),ylim=c(0,10000),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
+dat1<-predict.plant.inf.trajectory("GM",0,plant.height=plant.height,pred.window=1,plot.orange,T,T) 
+points(1:36,colMeans(dat1[[1]]),type="l",col="orange",lwd=4,lty=2)
+
+dat2<-predict.plant.inf.trajectory("GM",1.8,plant.height=plant.height,pred.window=1,plot.red,T,T) 
+points(1:36,colMeans(dat2[[1]]),type="l",col="red",lwd=4,lty=2)
+
+dat3<-predict.plant.inf.trajectory("GM",3.7,plant.height=plant.height,pred.window=1,plot.purple,T,T) 
+points(1:36,colMeans(dat3[[1]]),type="l",col="purple",lwd=4,lty=2)
+
 plot(0,0,type="n",xlim=c(1,36),ylim=c(0,1000),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
-dat<-predict.plant.inf.trajectory("GM",0,plant.height=plant.height,pred.window=1,plot.orange,T,T) 
-points(1:36,colMeans(dat[[1]]),type="l",col="orange",lwd=4,lty=2)
+points(1:36,colMeans(dat1[[1]]),type="l",col="orange",lwd=4,lty=2)
+points(1:36,colMeans(dat2[[1]]),type="l",col="red",lwd=4,lty=2)
+points(1:36,colMeans(dat3[[1]]),type="l",col="purple",lwd=4,lty=2)
 
-dat<-predict.plant.inf.trajectory("GM",1.8,plant.height=plant.height,pred.window=1,plot.red,T,T) 
-points(1:36,colMeans(dat[[1]]),type="l",col="red",lwd=4,lty=2)
-
-dat<-predict.plant.inf.trajectory("GM",3.7,plant.height=plant.height,pred.window=1,plot.purple,T,T) 
-points(1:36,colMeans(dat[[1]]),type="l",col="purple",lwd=4,lty=2)
-
-legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
 
 ### two days ahead projection
 plot(0,0,type="n",xlim=c(1,36),ylim=c(0,10000),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="2 days ahead")
-dat<-predict.plant.inf.trajectory("GM",0,plant.height=plant.height,plant.height=40,pred.window=2,plot.orange,T,T) 
-points(seq(1,35,2),colMeans(dat[[1]]),type="l",col="orange",lwd=4,lty=2)
+dat1<-predict.plant.inf.trajectory("GM",0,plant.height=plant.height,plant.height=40,pred.window=2,plot.orange,T,T) 
+points(seq(1,35,2),colMeans(dat1[[1]]),type="l",col="orange",lwd=4,lty=2)
 
-dat<-predict.plant.inf.trajectory("GM",1.8,plant.height=plant.height,pred.window=2,plot.red,T,T) 
-points(seq(1,35,2),colMeans(dat[[1]]),type="l",col="red",lwd=4,lty=2)
+dat2<-predict.plant.inf.trajectory("GM",1.8,plant.height=plant.height,pred.window=2,plot.red,T,T) 
+points(seq(1,35,2),colMeans(dat2[[1]]),type="l",col="red",lwd=4,lty=2)
 
-dat<-predict.plant.inf.trajectory("GM",3.7,plant.height=plant.height,pred.window=2,plot.purple,T,T) 
-points(seq(1,35,2),colMeans(dat[[1]]),type="l",col="purple",lwd=4,lty=2)
+dat3<-predict.plant.inf.trajectory("GM",3.7,plant.height=plant.height,pred.window=2,plot.purple,T,T) 
+points(seq(1,35,2),colMeans(dat3[[1]]),type="l",col="purple",lwd=4,lty=2)
 
-legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
+
+plot(0,0,type="n",xlim=c(1,36),ylim=c(0,1000),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="2 days ahead")
+points(seq(1,35,2),colMeans(dat1[[1]]),type="l",col="orange",lwd=4,lty=2)
+points(seq(1,35,2),colMeans(dat2[[1]]),type="l",col="red",lwd=4,lty=2)
+points(seq(1,35,2),colMeans(dat3[[1]]),type="l",col="purple",lwd=4,lty=2)
 
 ### seven days ahead projection
 plot(0,0,type="n",xlim=c(1,36),ylim=c(0,10000),ylab='plant inf. intens.',xlab="week",cex.lab=1.5,cex.axis=1.5,main="1 week ahead")
-dat<-predict.plant.inf.trajectory("GM",0,plant.height=plant.height,pred.window=7,plot.orange,T,T) 
-points(seq(1,36,7),colMeans(dat[[1]]),type="l",col="orange",lwd=4,lty=2)
+dat1<-predict.plant.inf.trajectory("GM",0,plant.height=plant.height,pred.window=7,plot.orange,T,T) 
+points(seq(1,36,7),colMeans(dat1[[1]]),type="l",col="orange",lwd=4,lty=2)
 
-dat<-predict.plant.inf.trajectory("GM",1.8,plant.height=plant.height,pred.window=7,plot.red,T,T) 
-points(seq(1,36,7),colMeans(dat[[1]]),type="l",col="red",lwd=4,lty=2)
+dat2<-predict.plant.inf.trajectory("GM",1.8,plant.height=plant.height,pred.window=7,plot.red,T,T) 
+points(seq(1,36,7),colMeans(dat2[[1]]),type="l",col="red",lwd=4,lty=2)
 
-dat<-predict.plant.inf.trajectory("GM",3.7,plant.height=plant.height,pred.window=7,plot.purple,T,T) 
-points(seq(1,36,7),colMeans(dat[[1]]),type="l",col="purple",lwd=4,lty=2)
+dat3<-predict.plant.inf.trajectory("GM",3.7,plant.height=plant.height,pred.window=7,plot.purple,T,T) 
+points(seq(1,36,7),colMeans(dat3[[1]]),type="l",col="purple",lwd=4,lty=2)
 
-legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
-
+plot(0,0,type="n",xlim=c(1,36),ylim=c(0,1000),ylab='plant inf. intens.',xlab="week",cex.lab=1.5,cex.axis=1.5,main="1 week ahead")
+points(seq(1,36,7),colMeans(dat1[[1]]),type="l",col="orange",lwd=4,lty=2)
+points(seq(1,36,7),colMeans(dat2[[1]]),type="l",col="red",lwd=4,lty=2)
+points(seq(1,36,7),colMeans(dat3[[1]]),type="l",col="purple",lwd=4,lty=2)
 
 
