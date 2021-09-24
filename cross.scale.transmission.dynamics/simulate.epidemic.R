@@ -74,6 +74,7 @@ simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
   start.date<-min(pred.epi$date)
   end.date<-max(unique(sub.epi$Date.First.Observed.Diseased))
   sim.dates<-seq(start.date,end.date,step.size)
+  if(site=="HM") {sim.dates<-sim.dates[which(sim.dates<as.Date("2020-07-10"))]}
   
   for(date.index in 1:(length(sim.dates)-1)) 
   {
@@ -223,18 +224,19 @@ simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
 }
 
 # run simulations
-step.size<-1
+step.size<-7
+site<-"HM"
 
-if(any((!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.step.size.",step.size,".RDS"))),
-        (!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.step.size.",step.size,".RDS"))),
-         (!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.step.size.",step.size,".RDS")))
+
+if(any((!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.site.",site,".step.size.",step.size,".RDS"))),
+        (!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.site.",site,".step.size.",step.size,".RDS"))),
+         (!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.site.",site,".step.size.",step.size,".RDS")))
 )) {
   library(parallel)
   library(doParallel)
   n.cores<-10
   registerDoParallel(n.cores)
-  site<-"GM"
-  pred.epi.all.0<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,0,step.size=step.size,print.progress = T)
+  pred.epi.all.0<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,0,step.size=step.size,print.progress = F)
   pred.epi.all.1.8<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,1.8,step.size=step.size,print.progress = F)
   pred.epi.all.3.7<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,3.7,step.size=step.size,print.progress = F)
   
@@ -243,7 +245,6 @@ if(any((!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmissi
   saveRDS(pred.epi.all.3.7,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.site.",site,".step.size.",step.size,".RDS"))
 } else 
 {
-  site<-"GM"
   pred.epi.all.0<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.site.",site,".step.size.",step.size,".RDS"))
   pred.epi.all.1.8<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.site.",site,".step.size.",step.size,".RDS"))
   pred.epi.all.3.7<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.site.",site,".step.size.",step.size,".RDS"))
@@ -318,7 +319,7 @@ for(k in 1:length(pred.epi.all.1.8))
   xvals<-c()
   yvals<-c()
   pred.epi<-pred.epi.all.1.8[[k]]
-  for(i in 1:length(unique(pred.epi.all.1.8)[[k]]$date))
+  for(i in 1:length(unique(pred.epi.all.1.8[[1]]$date)))
   {
     date<-unique(pred.epi$date)[i]
     xvals<-c(xvals,date)
@@ -375,7 +376,7 @@ for(k in 1:length(unique(pred.epi.all.3.7[[1]]$date)))
   xvals<-c(xvals,date)
 }
 points(xvals,yvals,type="l",col="purple",lwd=4)
-legend("top",legend=c("data","+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col=c("black","orange","red","purple"),lwd=4,cex=2,bty="n")
+legend("topleft",legend=c("data","+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col=c("black","orange","red","purple"),lwd=4,cex=1,bty="n")
 
 par(mfrow=c(2,4))
 
