@@ -13,7 +13,7 @@ rm(site)
 
 # simulate epi function
 
-simulate.epi<-function(site,temp.addition,print.progress=T)
+simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
 {
   ## setup
   
@@ -73,7 +73,7 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
   ## loop to simulate epi process
   start.date<-min(pred.epi$date)
   end.date<-max(unique(sub.epi$Date.First.Observed.Diseased))
-  sim.dates<-seq(start.date,end.date,1)
+  sim.dates<-seq(start.date,end.date,step.size)
   
   for(date.index in 1:(length(sim.dates)-1)) 
   {
@@ -222,30 +222,34 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
   pred.epi
 }
 
-if(any((!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.RDS")),
-        (!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.RDS")),
-         (!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.RDS"))
+# run simulations
+step.size<-1
+
+if(any((!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.step.size.",step.size,".RDS"))),
+        (!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.step.size.",step.size,".RDS"))),
+         (!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.step.size.",step.size,".RDS")))
 )) {
   library(parallel)
   library(doParallel)
   n.cores<-10
   registerDoParallel(n.cores)
   site<-"GM"
+  pred.epi.all.0<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,0,step.size=step.size,print.progress = T)
+  pred.epi.all.1.8<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,1.8,step.size=step.size,print.progress = F)
+  pred.epi.all.3.7<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,3.7,step.size=step.size,print.progress = F)
   
-  pred.epi.all.0<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,0,print.progress = T)
-  pred.epi.all.1.8<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,1.8,print.progress = F)
-  pred.epi.all.3.7<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,3.7,print.progress = F)
-  
-  saveRDS(pred.epi.all.0,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.RDS")
-  saveRDS(pred.epi.all.1.8,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.RDS")
-  saveRDS(pred.epi.all.3.7,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.RDS")
+  saveRDS(pred.epi.all.0,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.step.size.",step.size,".RDS"))
+  saveRDS(pred.epi.all.1.8,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.step.size.",step.size,".RDS"))
+  saveRDS(pred.epi.all.3.7,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.step.size.",step.size,".RDS"))
 } else 
 {
   site<-"GM"
-  pred.epi.all.0<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.RDS")
-  pred.epi.all.1.8<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.RDS")
-  pred.epi.all.3.7<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.RDS")
+  pred.epi.all.0<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.step.size.",step.size,".RDS"))
+  pred.epi.all.1.8<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.step.size.",step.size,".RDS"))
+  pred.epi.all.3.7<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.step.size.",step.size,".RDS"))
 }
+
+# plot simulations
 
 t_col <- function(color, percent = 50, name = NULL) {
   rgb.val <- col2rgb(color)
