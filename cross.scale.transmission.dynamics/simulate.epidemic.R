@@ -238,15 +238,15 @@ if(any((!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmissi
   pred.epi.all.1.8<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,1.8,step.size=step.size,print.progress = F)
   pred.epi.all.3.7<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,3.7,step.size=step.size,print.progress = F)
   
-  saveRDS(pred.epi.all.0,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.step.size.",step.size,".RDS"))
-  saveRDS(pred.epi.all.1.8,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.step.size.",step.size,".RDS"))
-  saveRDS(pred.epi.all.3.7,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.step.size.",step.size,".RDS"))
+  saveRDS(pred.epi.all.0,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.site.",site,".step.size.",step.size,".RDS"))
+  saveRDS(pred.epi.all.1.8,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.site.",site,".step.size.",step.size,".RDS"))
+  saveRDS(pred.epi.all.3.7,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.site.",site,".step.size.",step.size,".RDS"))
 } else 
 {
   site<-"GM"
-  pred.epi.all.0<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.step.size.",step.size,".RDS"))
-  pred.epi.all.1.8<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.step.size.",step.size,".RDS"))
-  pred.epi.all.3.7<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.step.size.",step.size,".RDS"))
+  pred.epi.all.0<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.site.",site,".step.size.",step.size,".RDS"))
+  pred.epi.all.1.8<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.site.",site,".step.size.",step.size,".RDS"))
+  pred.epi.all.3.7<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.site.",site,".step.size.",step.size,".RDS"))
 }
 
 # plot simulations
