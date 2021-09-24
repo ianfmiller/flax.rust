@@ -1,5 +1,4 @@
 library(mgcv)
-library(lmerTest)
 library(progress)
 library(gratia)
 
@@ -275,7 +274,7 @@ plot.orange<-t_col("orange",80)
 
 par(mar=c(6,6,2,2),mfrow=c(3,2))
 
-plant.height<-5
+plant.height<-60
 
 ### one day ahead projection
 plot(0,0,type="n",xlim=c(1,36),ylim=c(0,10000),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
