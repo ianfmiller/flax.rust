@@ -20,9 +20,8 @@ simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
   ### subset data
   sub.locs<-corrected.locs[which(corrected.locs$Site==site),]
   sub.epi<-corrected.epi[which(corrected.epi$Site==site),]
-  #start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased==min(sub.epi$Date.First.Observed.Diseased)),]
-  start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased<=unique(sub.epi$Date.First.Observed.Diseased)[2]),] ## option for shorter sim
-  
+  start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased==min(sub.epi$Date.First.Observed.Diseased)),]
+
   ### data frame to fill
   pred.epi<-data.frame("site"=factor(),"tag"=factor(),"X"=numeric(),"Y"=numeric(),"x"=numeric(),"y"=numeric(),"date"=character(),"tot.stems"=numeric(),"status"=numeric(),"max.height"=numeric(),"plant.inf.intens"=numeric())
   
@@ -224,8 +223,8 @@ simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
 }
 
 # run simulations
-step.size<-7
-site<-"BT"
+step.size<-1
+site<-"GM"
 
 
 if(any((!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.site.",site,".step.size.",step.size,".RDS"))),
@@ -273,7 +272,7 @@ par(mar=c(5,5,1,1))
 plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,.4),xlab="date",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
 xvals<-c()
 yvals<-c()
-for(i in 1:9)
+for(i in 1:length(pred.epi.all.0))
 {
   date<-unique(sub.epi$Date.First.Observed.Diseased)[i]
   xvals<-c(xvals,date)
