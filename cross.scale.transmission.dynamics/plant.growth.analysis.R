@@ -69,3 +69,38 @@ plant.growth.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmissi
 ## model checking
 draw(plant.growth.model) #plot smooths
 #gam.check(plant.growth.model) #indicates no more knots needed
+
+# model vis
+source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
+library("MASS")
+par(mfrow=c(1,2),mar=c(6,6,6,6))
+plot(0,0,xlim=c(0,80),ylim=c(-50,50),type="n",xlab="log 10 plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
+day.indicies<-c(75,113,135)
+colors<-c("orange","red","purple")
+for(day in day.indicies)
+{
+  index<-which(day.indicies==day)
+  lower<-data.frame(x=numeric(),y=numeric())
+  upper<-data.frame(x=numeric(),y=numeric())
+  for(i in seq(10,80,10))
+  {
+    pred.data<-get.pred.data.temp.mean.quantile.plant.growth.model(day,dummy.data.height=i)
+    Xp <- predict(plant.growth.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
+    beta <- coef(plant.growth.model) ## posterior mean of coefs
+    Vb   <- vcov(plant.growth.model) ## posterior  cov of coefs
+    n <- 10000
+    mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
+    preds <- rep(NA, n)
+    ilink <- family(plant.growth.model)$linkinv
+    for (j in seq_len(n)) { 
+      preds[j]   <- ilink(Xp %*% mrand[j, ])
+    }
+    y<-preds
+    lower=rbind(lower,data.frame(x=i,y=quantile(y,.05)))
+    upper=rbind(upper,data.frame(x=i,y=quantile(y,.95)))
+    points(i,mean(y),col=colors[index],pch=16,cex=2)
+  }
+  polygon<-rbind(lower,upper[dim(upper)[1]:1,])
+  polygon(polygon$x,polygon$y,col=colors[index],density=25)
+}
+legend("topright",legend = c("50% quantile hottest days","75% quantile hottest days","90% quantile hottest days"),col = c("orange","red","purple"),pch=16,cex=1,bty="n")
