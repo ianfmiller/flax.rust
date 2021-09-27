@@ -277,7 +277,7 @@ par(mar=c(6,6,2,2),mfrow=c(3,2))
 plant.height<-60
 
 ### one day ahead projection
-plot(0,0,type="n",xlim=c(1,36),ylim=c(0,10000),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
+plot(0,0,type="n",xlim=c(1,36),ylim=c(0,5000),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
 dat1<-predict.plant.inf.trajectory("GM",0,plant.height=plant.height,pred.window=1,plot.orange,T,T) 
 points(1:36,colMeans(dat1[[1]]),type="l",col="orange",lwd=4,lty=2)
 
