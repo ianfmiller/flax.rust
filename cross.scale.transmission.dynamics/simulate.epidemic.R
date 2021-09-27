@@ -21,7 +21,8 @@ simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
   sub.locs<-corrected.locs[which(corrected.locs$Site==site),]
   sub.epi<-corrected.epi[which(corrected.epi$Site==site),]
   start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased==min(sub.epi$Date.First.Observed.Diseased)),]
-
+  if(site=="GM") {start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased<=as.Date("2020-06-23")),]}
+  
   ### data frame to fill
   pred.epi<-data.frame("site"=factor(),"tag"=factor(),"X"=numeric(),"Y"=numeric(),"x"=numeric(),"y"=numeric(),"date"=character(),"tot.stems"=numeric(),"status"=numeric(),"max.height"=numeric(),"plant.inf.intens"=numeric())
   
@@ -30,6 +31,7 @@ simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
   for(i in 1:dim(sub.locs)[1])
   {
     date0<-max(start.epi$Date.First.Observed.Diseased) ### first observed date
+    if(site=="GM") {date0<-as.Date("2020-06-23")}
     tag<-sub.locs[i,"tag"] ### tag
     if (as.Date(sub.locs[i,"Date"],tryFormats = "%m/%d/%y")==date0) ### simulate height on date0
     {
