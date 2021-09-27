@@ -225,7 +225,7 @@ simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
 
 # run simulations
 step.size<-7
-site<-"HM"
+site<-"BT"
 
 
 if(any((!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.site.",site,".step.size.",step.size,".RDS"))),
