@@ -20,7 +20,7 @@ plot(height.next-height~height, data = delta.height, col = colors,xlab="height",
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS"))
 {
 
-  mod0<-gam(height.next~s(height,by=time,bs="cs",k=4)+
+  mod0<-gam(height.next-height~0+s(height,by=time,bs="cs",k=4)+
               s(inf.intens,by=time,bs="cs",k=4)+
               s(mean.temp,by=time,bs="cs",k=4)+
               s(max.temp,by=time,bs="cs",k=4)+
@@ -29,37 +29,26 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
               s(max.abs.hum,by=time,bs="cs",k=4)+
               s(min.abs.hum,by=time,bs="cs",k=4)+
               s(tot.rain,by=time,bs="cs",k=4)+
-              s(mean.solar,by=time,bs="cs",k=4)
+              s(mean.solar,by=time,bs="cs",k=4)+
+              s(site,bs="re",k=4)
             ,data=delta.height)
   summary(mod0) #indicates that max.temp, mean.abs.hum, max.abs.hum, min.abs.hum not significant
   
-  mod1<-gam(height.next~s(height,by=time,bs="cs",k=4)+
-                      #s(inf.intens,by=time,bs="cs",k=4)+
-                      s(mean.temp,by=time,bs="cs",k=4)+
-                      #s(max.temp,by=time,bs="cs",k=4)+
-                      s(min.temp,by=time,bs="cs",k=4)+
-                      #s(mean.abs.hum,by=time,bs="cs",k=4)+
-                      #s(max.abs.hum,by=time,bs="cs",k=4)+
-                      s(min.abs.hum,by=time,bs="cs",k=4)+
-                      #s(tot.rain,by=time,bs="cs",k=4)+
-                      s(mean.solar,by=time,bs="cs",k=4)
-                    ,data=delta.height)
-  summary(mod1) #indicates that min.temp is not significant
-  
-  mod2<-gam(height.next~s(height,by=time,bs="cs",k=4)+
+  mod1<-gam(height.next-height~0+s(height,by=time,bs="cs",k=4)+
               #s(inf.intens,by=time,bs="cs",k=4)+
-              s(mean.temp,by=time,bs="cs",k=4)+
+              #s(mean.temp,by=time,bs="cs",k=4)+
               #s(max.temp,by=time,bs="cs",k=4)+
               #s(min.temp,by=time,bs="cs",k=4)+
               #s(mean.abs.hum,by=time,bs="cs",k=4)+
-              #s(max.abs.hum,by=time,bs="cs",k=4)+
-              s(min.abs.hum,by=time,bs="cs",k=4)+
+              s(max.abs.hum,by=time,bs="cs",k=4)+
+              #s(min.abs.hum,by=time,bs="cs",k=4)+
               #s(tot.rain,by=time,bs="cs",k=4)+
-              s(mean.solar,by=time,bs="cs",k=4)
+              #s(mean.solar,by=time,bs="cs",k=4)+
+              s(site,bs="re",k=4)
             ,data=delta.height)
-  summary(mod2) #mean temp is marginally significant, comparison w/ model resulting from cutting marginally significant predictors (mean temp and then min.min.abs.hum) explains less deviance and has slightly lower AIC
-  
-  saveRDS(mod2,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS")
+  summary(mod1) #indicates that min.temp is not significant
+
+  saveRDS(mod1,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS")
 }
 
 ## load best model
@@ -74,7 +63,7 @@ draw(plant.growth.model) #plot smooths
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
 library("MASS")
 par(mfrow=c(1,2),mar=c(6,6,6,6))
-plot(0,0,xlim=c(0,80),ylim=c(-50,50),type="n",xlab="log 10 plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
+plot(0,0,xlim=c(0,80),ylim=c(0,20),type="n",xlab="log 10 plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
 day.indicies<-c(75,113,135)
 colors<-c("orange","red","purple")
 for(day in day.indicies)
