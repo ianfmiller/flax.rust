@@ -1,7 +1,4 @@
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
-pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
-n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS")
-plant.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS")
 
 sites<-c("CC","BT","GM","HM")
 
@@ -134,24 +131,11 @@ get.pred.data.temp.mean.quantile.n.pustules.model<-function(day.set,dummy.data,t
   new.tot.rain<-sum(weath.sub$rain,na.rm=T)
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
   
-  #predict pustule growth from pustule growth model and enviro conditions
-  #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
-  pustule.model.new.area<-.01 #predict change for small pustule, arbitrarily pick .01
-  obs.time<-delta.days
-  pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,
-                                      "time"=delta.days,"site"=site,
-                                      "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                                      "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                      "mean.wetness"=new.mean.wetness,
-                                      "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain)
-  pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,exclude = 's(site)')
-  
   out.data<-data.frame(n.pustules=dummy.data,time=rep(delta.days,times=dim),site=rep(site,times=dim),
                        mean.temp=rep(new.mean.temp,times=dim),max.temp=rep(new.max.temp,times=dim),min.temp=rep(new.min.temp,times=dim),
                        mean.abs.hum=rep(new.mean.abs.hum,times=dim),max.abs.hum=rep(new.max.abs.hum,times=dim),min.abs.hum=rep(new.min.abs.hum,times=dim),
                        #mean.vpd=rep(new.mean.vpd,times=dim),max.vpd=rep(new.max.vpd,times=dim),min.vpd=rep(new.min.vpd,times=dim),
-                       mean.wetness=rep(new.mean.wetness,times=dim),tot.rain=rep(new.tot.rain,times=dim),mean.solar=rep(new.mean.solar,times=dim),
-                       pred.pustule.diam.growth=rep(pred.pustule.diam.growth,times=dim))
+                       mean.wetness=rep(new.mean.wetness,times=dim),tot.rain=rep(new.tot.rain,times=dim),mean.solar=rep(new.mean.solar,times=dim))
   out.data
 }
 
@@ -207,37 +191,12 @@ get.pred.data.temp.mean.quantile.plants.model<-function(day.set,dummy.data.inf.i
   new.tot.rain<-sum(weath.sub$rain,na.rm=T)
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
   
-  #predict pustule growth from pustule growth model and enviro conditions
-  #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
-  pustule.model.new.area<-.01 #predict change for small pustule, arbitrarily pick .01
-  obs.time<-delta.days
-  pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,
-                                      "time"=delta.days,"site"=site,
-                                      "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                                      "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                      "mean.wetness"=new.mean.wetness,
-                                      "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain)
-  pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,exclude = 's(site)')
-  
-  #predict change in number of pustules from enviro conditions
-  #n.pustule.model.vars<-names(fixef(n.pustule.model))[2:length(names(fixef(n.pustule.model)))]
-  n.pustules.model.new.n.pustules<-1 #included only for offset, picked 0 for ease of interpretability
-  obs.time<-delta.days
-  n.pustules.model.pred.data<-data.frame("n.pustules"=n.pustules.model.new.n.pustules,
-                                         "time"=delta.days,"site"=site,
-                                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                                         "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                         "mean.wetness"=new.mean.wetness,
-                                         "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
-                                         "pred.pustule.diam.growth"=pred.pustule.diam.growth)
-  pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,exclude = 's(site)')
   
   out.data<-data.frame(plant.inf.intens=dummy.data.inf.intens,max.height=dummy.data.height,time=rep(delta.days,times=dim),site=rep(site,times=dim),
                        mean.temp=rep(new.mean.temp,times=dim),max.temp=rep(new.max.temp,times=dim),min.temp=rep(new.min.temp,times=dim),
                        mean.abs.hum=rep(new.mean.abs.hum,times=dim),max.abs.hum=rep(new.max.abs.hum,times=dim),min.abs.hum=rep(new.min.abs.hum,times=dim),
                        #mean.vpd=rep(new.mean.vpd,times=dim),max.vpd=rep(new.max.vpd,times=dim),min.vpd=rep(new.min.vpd,times=dim),
-                       mean.wetness=rep(new.mean.wetness,times=dim),tot.rain=rep(new.tot.rain,times=dim),mean.solar=rep(new.mean.solar,times=dim),
-                       pred.pustule.diam.growth=rep(pred.pustule.diam.growth,times=dim),pred.pustule.num.increase=rep(pred.pustule.num.increase,times=dim))
+                       mean.wetness=rep(new.mean.wetness,times=dim),tot.rain=rep(new.tot.rain,times=dim),mean.solar=rep(new.mean.solar,times=dim))
   out.data
 }
 
@@ -292,12 +251,13 @@ get.pred.data.temp.mean.quantile.plant.growth.model<-function(day.set,dummy.data
   new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.tot.rain<-sum(weath.sub$rain,na.rm=T)
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
+  new.mean.soil.moisture<-mean(weath.sub$soil.moisture,na.rm=T)
   
   out.data<-data.frame(height=dummy.data.height,time=rep(delta.days,times=dim),site=rep(site,times=dim),
                        mean.temp=rep(new.mean.temp,times=dim),max.temp=rep(new.max.temp,times=dim),min.temp=rep(new.min.temp,times=dim),
                        mean.abs.hum=rep(new.mean.abs.hum,times=dim),max.abs.hum=rep(new.max.abs.hum,times=dim),min.abs.hum=rep(new.min.abs.hum,times=dim),
                        #mean.vpd=rep(new.mean.vpd,times=dim),max.vpd=rep(new.max.vpd,times=dim),min.vpd=rep(new.min.vpd,times=dim),
-                       mean.wetness=rep(new.mean.wetness,times=dim),tot.rain=rep(new.tot.rain,times=dim),mean.solar=rep(new.mean.solar,times=dim))
+                       mean.wetness=rep(new.mean.wetness,times=dim),tot.rain=rep(new.tot.rain,times=dim),mean.solar=rep(new.mean.solar,times=dim),mean.soil.moisture=new.mean.soil.moisture)
   out.data
 }
 
@@ -346,52 +306,13 @@ get.pred.data<-function(site,date0,date1,dummy.data,dummy.data.max.height=15,tem
   new.tot.rain<-sum(weath.sub$rain,na.rm=T)
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
   
-  #predict pustule growth from pustule growth model and enviro conditions
-  #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
-  pustule.model.new.area<-.01 #predict change for small pustule, arbitrarily pick .01
-  obs.time<-delta.days
-  pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,
-                                      "time"=delta.days,"site"=site,
-                                      "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                                      "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                      "mean.wetness"=new.mean.wetness,
-                                      "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain)
-  pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,exclude = 's(site)')
-  
-  #predict change in number of pustules from enviro conditions
-  #n.pustule.model.vars<-names(fixef(n.pustule.model))[2:length(names(fixef(n.pustule.model)))]
-  n.pustules.model.new.n.pustules<-0 #included only for offset, picked 0 for ease of interpretability
-  obs.time<-delta.days
-  n.pustules.model.pred.data<-data.frame("n.pustules"=n.pustules.model.new.n.pustules,
-                                         "time"=delta.days,"site"=site,
-                                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                                         "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                         "mean.wetness"=new.mean.wetness,
-                                         "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
-                                         "pred.pustule.diam.growth"=pred.pustule.diam.growth)
-  pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,exclude = 's(site)')
-  
-  #predict change in plant.inf.intensity from enviro conditions
-  plant.model.new.plant.inf.intens<-1
-  obs.time<-delta.days
-  plant.model.pred.data<-data.frame("plant.inf.intens"=plant.model.new.plant.inf.intens,
-                                    "max.height"=dummy.data.max.height,
-                                    "time"=delta.days,"site"=site,
-                                    "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                                   "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                    "mean.wetness"=new.mean.wetness,
-                                    "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
-                                    "pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase)
-  pred.plant.inf.intens.increase<-predict(plant.model,newdata=plant.model.pred.data,exclude = 's(site)')
-  
 
   #area, n.pustules, and plant.inf.intens are all set to dummy data so that this function can be used interchangably for predictions at different scales without specifying the scale.
   out.data<-data.frame(area=dummy.data,n.pustules=dummy.data,plant.inf.intens=dummy.data,time=rep(delta.days,times=dim),max.height=dummy.data.max.height,site=rep(site,times=dim),
                        mean.temp=rep(new.mean.temp,times=dim),max.temp=rep(new.max.temp,times=dim),min.temp=rep(new.min.temp,times=dim),
                        mean.abs.hum=rep(new.mean.abs.hum,times=dim),max.abs.hum=rep(new.max.abs.hum,times=dim),min.abs.hum=rep(new.min.abs.hum,times=dim),
                        #mean.vpd=rep(new.mean.vpd,times=dim),max.vpd=rep(new.max.vpd,times=dim),min.vpd=rep(new.min.vpd,times=dim),
-                       mean.wetness=rep(new.mean.wetness,times=dim),tot.rain=rep(new.tot.rain,times=dim),mean.solar=rep(new.mean.solar,times=dim),
-                       pred.pustule.diam.growth=rep(pred.pustule.diam.growth,times=dim),pred.pustule.num.increase=rep(pred.pustule.num.increase,times=dim),pred.plant.inf.intens.increase=rep(pred.plant.inf.intens.increase,times=dim))
+                       mean.wetness=rep(new.mean.wetness,times=dim),tot.rain=rep(new.tot.rain,times=dim),mean.solar=rep(new.mean.solar,times=dim))
   out.data
   
 }
