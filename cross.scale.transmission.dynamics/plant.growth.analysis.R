@@ -20,7 +20,7 @@ plot(height.next-height~height, data = delta.height, col = colors,xlab="height",
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS"))
 {
 
-  mod0<-gam(height.next-height~s(height,by=time,bs="cs",k=4)+
+  mod0<-gam(height.next-height~0+s(height,by=time,bs="cs",k=4)+
               s(inf.intens,by=time,bs="cs",k=4)+
               s(mean.temp,by=time,bs="cs",k=4)+
               s(max.temp,by=time,bs="cs",k=4)+
@@ -33,7 +33,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
               s(mean.soil.moisture,by=time,bs="cs",k=4)+
               s(site,bs="re",k=4)
             ,data=delta.height)
-  summary(mod0) #indicates that all but min.temp, max.abs.hum, and min.abs.hum are not significant. min.temp is marginally significant in mod0 but becomes fully significaant in mod1.
+  summary(mod0) #indicates that all but max.abs.hum and min.abs.hum are not significant. Min.abs.hum becomes insignificant once others are dropped.
   
   mod1<-gam(height.next-height~0+s(height,by=time,bs="cs",k=4)+
               #s(inf.intens,by=time,bs="cs",k=4)+
