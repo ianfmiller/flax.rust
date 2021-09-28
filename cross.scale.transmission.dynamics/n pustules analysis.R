@@ -1,5 +1,4 @@
 library(mgcv)
-library(lme4)
 library(lmerTest)
 library(progress)
 
@@ -43,7 +42,7 @@ for (tag in unique(n.pustules$tag))
   }
 }
 
-## one trajectory
+## just a few trajectories
 par(mfrow=c(1,1),mar=c(6,6,6,6))
 tags<-c(86,88,106,112,124)
 i<-0
@@ -83,7 +82,7 @@ mtext(text="N = 650",cex=2)
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS"))
 {
-  mod0<-gam(n.pustules.next~s(n.pustules,by=time,bs="cs",k=4)+
+  mod0<-gam(n.pustules.next-n.pustules~0+s(n.pustules,by=time,bs="cs",k=4)+
               s(mean.temp,by=time,bs="cs",k=4)+
               s(max.temp,by=time,bs="cs",k=4)+
               s(min.temp,by=time,bs="cs",k=4)+
@@ -97,16 +96,16 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   
   summary(mod0)
   
-  mod1<-gam(n.pustules.next~s(n.pustules,by=time,bs="cs",k=4)+
+  mod1<-gam(n.pustules.next-n.pustules~0+s(n.pustules,by=time,bs="cs",k=4),
               #s(mean.temp,by=time,bs="cs",k=4)+
-              s(max.temp,by=time,bs="cs",k=4)+
-              s(min.temp,by=time,bs="cs",k=4)+
+              #s(max.temp,by=time,bs="cs",k=4)+
+              #s(min.temp,by=time,bs="cs",k=4)+
               #s(mean.abs.hum,by=time,bs="cs",k=4)+
-              s(max.abs.hum,by=time,bs="cs",k=4)+
+              #s(max.abs.hum,by=time,bs="cs",k=4)+
               #s(min.abs.hum,by=time,bs="cs",k=4)+
               #s(mean.solar,by=time,bs="cs",k=4)+
               #s(tot.rain,bs="cs",k=4)+
-              s(site,bs="re",k=4),
+              #s(site,bs="re",k=4),
             data=delta.n.pustules)
   summary(mod1)    # All now significant. Mod1 fit via stepwise removal that resulted in 2 marginally signiificant terms. The AIC of this model is significantly less than that of the model without the marginally significant terms.
   saveRDS(mod1,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS")
@@ -119,22 +118,6 @@ n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission
 ## model checking
 #plot(n.pustules.model,scale=0,pages=1) #plot smooths
 #gam.check(n.pustules.model) #indicates that the number of knots is sufficient, except for mean temperature. Increasing knots doesn't resolve issue, which indicates the issue is with the data, and the model is OK.
-
-## better visualize model
-
-par(mfrow=c(2,3))
-vis.gam(n.pustules.model,view = c("n.pustules","time"),n.grid=30,plot.type = "contour",zlim=c(-100,300),color="topo",contour.col = "black")
-vis.gam(n.pustules.model,view = c("max.temp","time"),n.grid=30,plot.type = "contour",zlim=c(-20,15),color="topo",contour.col = "black")
-vis.gam(n.pustules.model,view = c("min.temp","time"),n.grid=30,plot.type = "contour",zlim=c(-20,15),color="topo",contour.col = "black")
-vis.gam(n.pustules.model,view = c("max.abs.hum","time"),n.grid=30,plot.type = "contour",zlim=c(-20,15),color="topo",contour.col = "black")
-plot(n.pustules.model,scale=0,select=5)
-
-par(mfrow=c(2,3))
-vis.gam(n.pustules.model,view = c("n.pustules","time"),n.grid=30,plot.type = "persp",zlim=c(-100,300),se=1,theta=45,phi=15,ticktype="detailed")
-vis.gam(n.pustules.model,view = c("max.temp","time"),n.grid=30,plot.type = "persp",zlim=c(-20,20),se=1,theta=45,phi=15,ticktype="detailed")
-vis.gam(n.pustules.model,view = c("min.temp","time"),n.grid=30,plot.type = "persp",zlim=c(-20,20),se=1,theta=45,phi=15,ticktype="detailed")
-vis.gam(n.pustules.model,view = c("max.abs.hum","time"),n.grid=30,plot.type = "persp",zlim=c(-20,20),se=1,theta=45,phi=15,ticktype="detailed")
-plot(n.pustules.model,scale=0,select=5)
 
 # predict climate change effect
 
