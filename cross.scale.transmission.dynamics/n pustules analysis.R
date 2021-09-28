@@ -127,7 +127,7 @@ n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission
 
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
 par(mfrow=c(1,2),mar=c(6,6,6,6))
-plot(0,0,xlim=c(0,26),ylim=c(-15,15),type="n",xlab="N pustules",ylab="pred. change in N pustules",cex.axis=2,cex.lab=2)
+plot(0,0,xlim=c(0,206),ylim=c(-5,5),type="n",xlab="N pustules",ylab="pred. change in N pustules",cex.axis=2,cex.lab=2)
 day.indicies<-c(75,113,135)
 colors<-c("orange","red","purple")
 for(day in day.indicies)
@@ -135,7 +135,7 @@ for(day in day.indicies)
   index<-which(day.indicies==day)
   lower<-data.frame(x=numeric(),y=numeric())
   upper<-data.frame(x=numeric(),y=numeric())
-  for(i in seq(1,26,5))
+  for(i in seq(1,206,5))
   {
     pred.data<-get.pred.data.temp.mean.quantile.n.pustules.model(day,i)
     
@@ -150,16 +150,16 @@ for(day in day.indicies)
       preds[j]   <- ilink(Xp %*% mrand[j, ])
     }
     y<-preds
-    lower=rbind(lower,data.frame(x=i,y=quantile(y,.05)-i))
-    upper=rbind(upper,data.frame(x=i,y=quantile(y,.95)-i))
-    points(i,mean(y)-i,col=colors[index],pch=16,cex=2)
+    lower=rbind(lower,data.frame(x=i,y=quantile(y,.05)))
+    upper=rbind(upper,data.frame(x=i,y=quantile(y,.95)))
+    points(i,mean(y),col=colors[index],pch=16,cex=2)
   }
   polygon<-rbind(lower,upper[dim(upper)[1]:1,])
   polygon(polygon$x,polygon$y,col=colors[index],density=25)
 }
 legend("topright",legend = c("50% quantile hottest days","75% quantile hottest days","90% quantile hottest days"),col = c("orange","red","purple"),pch=16,cex=1,bty="n")
 
-plot(0,0,xlim=c(0,26),ylim=c(-15,15),type="n",xlab="N pustules",ylab="pred. change in N pustules",cex.axis=2,cex.lab=2)
+plot(0,0,xlim=c(0,206),ylim=c(-15,15),type="n",xlab="N pustules",ylab="pred. change in N pustules",cex.axis=2,cex.lab=2)
 temp.additions<-c(0,1.8,3.7)
 colors<-c("orange","red","purple")
 for(temp.addition in temp.additions)
@@ -167,7 +167,7 @@ for(temp.addition in temp.additions)
   index<-which(temp.additions==temp.addition)
   lower<-data.frame(x=numeric(),y=numeric())
   upper<-data.frame(x=numeric(),y=numeric())
-  for(i in seq(1,26,5))
+  for(i in seq(1,206,5))
   {
     pred.data<-get.pred.data.temp.mean.quantile.n.pustules.model(75,i,temp.addition = temp.addition)
     
@@ -183,9 +183,9 @@ for(temp.addition in temp.additions)
     }
     y<-preds
     
-    lower=rbind(lower,data.frame(x=i,y=quantile(y,.05)-i))
-    upper=rbind(upper,data.frame(x=i,y=quantile(y,.95)-i))
-    points(i,mean(y)-i,col=colors[index],pch=16,cex=2)
+    lower=rbind(lower,data.frame(x=i,y=quantile(y,.05)))
+    upper=rbind(upper,data.frame(x=i,y=quantile(y,.95)))
+    points(i,mean(y),col=colors[index],pch=16,cex=2)
   }
   polygon<-rbind(lower,upper[dim(upper)[1]:1,])
   polygon(polygon$x,polygon$y,col=colors[index],density=25)
@@ -201,7 +201,7 @@ predict.n.pustules.trajectory<-function(site,temp.addition,color,pred.window=1,p
   min.date<-max(min(unique(as.Date(weath.dat$date))),min(unique(as.Date(temp.rh.dat$date.time))))
   max.date<-min(max(unique(as.Date(weath.dat$date))),max(unique(as.Date(temp.rh.dat$date.time))))
   dates<-seq(min.date,max.date,pred.window)
-  start.n.pustules<-1
+  start.n.pustules<-10
   xcords<-rep(NA,length(dates))
   ycords<-rep(NA,length(dates))
   
@@ -227,10 +227,11 @@ predict.n.pustules.trajectory<-function(site,temp.addition,color,pred.window=1,p
         preds[l]   <- ilink(Xp %*% mrand[l, ])[1]
       }
       y<-preds[1]
-      if(y<0) {y<-0}
+      i<-i+y
+      if(i<1) {i<-1}
       reps<-reps+pred.window
       xcords.new<-c(xcords.new,reps)
-      ycords.new<-c(ycords.new,y)
+      ycords.new<-c(ycords.new,i)
     }
     xcords<-rbind(xcords,xcords.new)
     ycords<-rbind(ycords,ycords.new)
@@ -277,32 +278,6 @@ points(1:36,colMeans(dat),type="l",col="red",lwd=4,lty=2)
 
 dat<-predict.n.pustules.trajectory("GM",3.7,pred.window=1,plot.purple,T,T) 
 points(1:36,colMeans(dat),type="l",col="purple",lwd=4,lty=2)
-
-legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
-
-### two days ahead projection
-plot(0,0,type="n",xlim=c(1,36),ylim=c(0,20),ylab='N. pustules',xlab="day",cex.lab=1.5,cex.axis=1.5,main="2 days ahead")
-dat<-predict.n.pustules.trajectory("GM",0,pred.window=2,plot.orange,T,T) 
-points(seq(1,35,2),colMeans(dat),type="l",col="orange",lwd=4,lty=2)
-
-dat<-predict.n.pustules.trajectory("GM",1.8,pred.window=2,plot.red,T,T) 
-points(seq(1,35,2),colMeans(dat),type="l",col="red",lwd=4,lty=2)
-
-dat<-predict.n.pustules.trajectory("GM",3.7,pred.window=2,plot.purple,T,T) 
-points(seq(1,35,2),colMeans(dat),type="l",col="purple",lwd=4,lty=2)
-
-legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
-
-### seven days ahead projection
-plot(0,0,type="n",xlim=c(1,36),ylim=c(0,20),ylab='N pustules',xlab="week",cex.lab=1.5,cex.axis=1.5,main="1 week ahead")
-dat<-predict.n.pustules.trajectory("GM",0,pred.window=7,plot.orange,T,T) 
-points(seq(1,36,7),colMeans(dat),type="l",col="orange",lwd=4,lty=2)
-
-dat<-predict.n.pustules.trajectory("GM",1.8,pred.window=7,plot.red,T,T) 
-points(seq(1,36,7),colMeans(dat),type="l",col="red",lwd=4,lty=2)
-
-dat<-predict.n.pustules.trajectory("GM",3.7,pred.window=7,plot.purple,T,T) 
-points(seq(1,36,7),colMeans(dat),type="l",col="purple",lwd=4,lty=2)
 
 legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
 
