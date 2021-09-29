@@ -49,37 +49,13 @@ predict.plant.inf.intens<-function(plant.inf.intens.last,max.height.last,site,da
   
   delta.days<-as.numeric(date1-date0)
   
-  #predict pustule growth from pustule growth model and enviro conditions
-  #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
-  pustule.model.new.area<-.01 #predict change for small pustule, arbitrarily pick .01
-  obs.time<-delta.days
-  pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,
-                                      "time"=delta.days,"site"=site,
-                                      "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                                      "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                      "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain)
-  pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,exclude = 's(site)')
-  
-  #predict change in number of pustules from enviro conditions
-  #n.pustule.model.vars<-names(fixef(n.pustule.model))[2:length(names(fixef(n.pustule.model)))]
-  n.pustules.model.new.n.pustules<-1 #included only for offset, picked 0 for ease of interpretability
-  obs.time<-delta.days
-  n.pustules.model.pred.data<-data.frame("n.pustules"=n.pustules.model.new.n.pustules,
-                                         "time"=delta.days,"site"=site,
-                                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                                         "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                         "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
-                                         "pred.pustule.diam.growth"=pred.pustule.diam.growth)
-  pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,exclude = 's(site)')
-  
   # make forward prediction
   pred.data<-data.frame("plant.inf.intens"=plant.inf.intens.last,"max.height"=max.height.last,
                         "time"=delta.days,"site"=site,
                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                         "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                        "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
-                        "pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase)
-  plant.inf.intens.next<-plant.inf.intens.last+predict(plant.model,newdata=pred.data,exclude = 's(site)')
+                        "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain)
+  plant.inf.intens.next<-10^predict(plant.model,newdata=pred.data,exclude = 's(site)')
   if(plant.inf.intens.next<.01) {plant.inf.intens.next<-.01}
   plant.inf.intens.next
 }
@@ -124,36 +100,11 @@ predict.plant.inf.intens.boot<-function(plant.inf.intens.last,max.height.last,si
   delta.days<-as.numeric(date1-date0)
   
   # make forward prediction
-  #predict pustule growth from pustule growth model and enviro conditions
-  #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
-  pustule.model.new.area<-.01 #predict change for small pustule, arbitrarily pick .01
-  obs.time<-delta.days
-  pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,
-                                      "time"=delta.days,"site"=site,
-                                      "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                                      "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                      "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain)
-  pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,exclude = 's(site)')
-  
-  #predict change in number of pustules from enviro conditions
-  #n.pustule.model.vars<-names(fixef(n.pustule.model))[2:length(names(fixef(n.pustule.model)))]
-  n.pustules.model.new.n.pustules<-1 #included only for offset, picked 0 for ease of interpretability
-  obs.time<-delta.days
-  n.pustules.model.pred.data<-data.frame("n.pustules"=n.pustules.model.new.n.pustules,
-                                         "time"=delta.days,"site"=site,
-                                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                                         "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                         "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
-                                         "pred.pustule.diam.growth"=pred.pustule.diam.growth)
-  pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,exclude = 's(site)')
-  
-  # make forward prediction
   pred.data<-data.frame("plant.inf.intens"=plant.inf.intens.last,"max.height"=max.height.last,
                         "time"=delta.days,"site"=site,
                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                         "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                        "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
-                        "pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase)
+                        "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain)
   
   Xp <- predict(plant.model, newdata = pred.data, exlude='s(site)',type="lpmatrix")
   beta <- coef(plant.model) ## posterior mean of coefs
@@ -165,7 +116,7 @@ predict.plant.inf.intens.boot<-function(plant.inf.intens.last,max.height.last,si
   for (j in seq_len(n)) { 
     preds[j]   <- ilink(Xp %*% mrand[j, ])
   }
-  plant.inf.intens.next<-preds[1]+plant.inf.intens.last
+  plant.inf.intens.next<-10^preds[1]
   if(plant.inf.intens.next<.01) {plant.inf.intens.next<-.01}
   plant.inf.intens.next
 }
@@ -210,28 +161,6 @@ predict.plant.inf.intens.last<-function(plant.inf.intens.next,max.height.last,si
   
   delta.days<-as.numeric(date1-date0)
   
-  #predict pustule growth from pustule growth model and enviro conditions
-  #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
-  pustule.model.new.area<-.01 #predict change for small pustule, arbitrarily pick .01
-  obs.time<-delta.days
-  pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,
-                                      "time"=delta.days,"site"=site,
-                                      "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                                      "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                      "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain)
-  pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,exclude = 's(site)')
-  
-  #predict change in number of pustules from enviro conditions
-  #n.pustule.model.vars<-names(fixef(n.pustule.model))[2:length(names(fixef(n.pustule.model)))]
-  n.pustules.model.new.n.pustules<-1 #included only for offset, picked 0 for ease of interpretability
-  obs.time<-delta.days
-  n.pustules.model.pred.data<-data.frame("n.pustules"=n.pustules.model.new.n.pustules,
-                                         "time"=delta.days,"site"=site,
-                                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                                         "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                         "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
-                                         "pred.pustule.diam.growth"=pred.pustule.diam.growth)
-  pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,exclude = 's(site)')
   
   # make backwards prediction
   pred.func<-function(x)
@@ -241,9 +170,8 @@ predict.plant.inf.intens.last<-function(plant.inf.intens.next,max.height.last,si
                           "time"=delta.days,"site"=site,
                           "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                           "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                          "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
-                          "pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase)
-    plant.inf.intens.next.pred<-plant.inf.intens.last.test+predict(plant.model,newdata=pred.data,exclude = 's(site)')
+                          "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain)
+    plant.inf.intens.next.pred<-10^predict(plant.model,newdata=pred.data,exclude = 's(site)')
     abs(plant.inf.intens.next.pred-plant.inf.intens.next)
   }
   plant.inf.intens.last<-optim(c(plant.inf.intens.next),pred.func,method = "Brent",lower=0,upper=10e6)$par
