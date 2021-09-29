@@ -15,8 +15,18 @@ par(mfrow=c(2,1))
 hist(plants$plant.inf.intens,main="plant infection intensity",breaks=100,xlab="plant infection intensity")
 hist(delta.plants$plant.inf.intens.next-delta.plants$plant.inf.intens,main="change in plant infection intensity",breaks=100,xlab="change in plant infection intensity")
 
+## plot change
+par(mfrow=c(1,1))
+plot(delta.plants$plant.inf.intens,delta.plants$plant.inf.intens.next-delta.plants$plant.inf.intens,xlab = "plant infection intensity",ylab="change in plant infection intensity")
+abline(0,-1,lty=2)
+par(fig=c(.6,.9,.5,.85),new=T,mar=c(0,0,0,0))
+plot(delta.plants$plant.inf.intens,delta.plants$plant.inf.intens.next-delta.plants$plant.inf.intens,xlim=c(0,1),ylim=c(-1,10))
+abline(0,-1,lty=2)
+par(new=F,mar=c(5,5,5,5))
+
+
 ## plot trajectories
-par(mfrow=c(2,1))
+par(mfrow=c(2,1),new=F,mar=c(5,5,5,5))
 plot(c(min(as.Date(plants$Date,tryFormats = "%m/%d/%Y")),max(as.Date(plants$Date,tryFormats = "%m/%d/%Y"))),c(-1,max(log10(plants$plant.inf.intens))),type="n",xlab="date",ylab="log 10 plant infection intensity",main="plant infection intensity",cex.lab=1.25,cex.axis=1.25,cex.main=1.25)
 i<-0
 plot.cols<-sample(rainbow(101))
@@ -39,20 +49,15 @@ for (tag in unique(plants$Tag))
   i<-i+1
 }
 
-## plot change
-par(mfrow=c(2,1))
-plot(delta.plants$plant.inf.intens,delta.plants$plant.inf.intens.next,col="grey",xlab = "plant infection intensity",ylab="next obs. plant infection intensity",xlim=c(0,1000),ylim=c(0,200))
-abline(0,1)
-plot(delta.plants$plant.inf.intens,delta.plants$plant.inf.intens.next-delta.plants$plant.inf.intens,col="grey",xlab = "plant infection intensity",ylab="change in plant infection intensity")
-abline(h=0)
-
 # analyze data
 
 ## fit models--only if not already fit
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS"))
 {
-  mod0<-gam(plant.inf.intens.next-plant.inf.intens~s(plant.inf.intens,by=time,bs="cs",k=10)+
+  mod0<-gam(log10(plant.inf.intens.next)~
+              s(log10(plant.inf.intens),bs="cs",k=4)+
+              s(log10(plant.inf.intens),by=time,bs="cs",k=4)+
               s(max.height,by=time,bs="cs",k=10)+
               s(mean.temp,by=time,bs="cs",k=4)+
               s(max.temp,by=time,bs="cs",k=4)+
@@ -64,39 +69,25 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
               s(tot.rain,bs="cs",k=4)+
               s(site,bs="re",k=4),
             data=delta.plants)
-  summary(mod0) #indicates that all but pred.pustule.num.increase and min.abs.hum are insignificant
+  summary(mod0) #indicates that mean.abs.hum is not significant
   
-  mod1<-gam(plant.inf.intens.next-plant.inf.intens~s(plant.inf.intens,by=time,bs="cs",k=10)+
+  mod1<-gam(log10(plant.inf.intens.next)~
+              s(log10(plant.inf.intens),bs="cs",k=4)+
+              #s(log10(plant.inf.intens),by=time,bs="cs",k=4)+
               #s(max.height,by=time,bs="cs",k=10)+
-              #s(mean.temp,by=time,bs="cs",k=4)+
-              #s(max.temp,by=time,bs="cs",k=4)+
-              s(min.temp,by=time,bs="cs",k=4)+
-              s(mean.abs.hum,by=time,bs="cs",k=4)+
-              s(max.abs.hum,by=time,bs="cs",k=4)+
-              #s(min.abs.hum,by=time,bs="cs",k=4)+
-              #s(mean.solar,by=time,bs="cs",k=4)+
-              #s(tot.rain,bs="cs",k=4)+
-              s(site,bs="re",k=4),
-            data=delta.plants)
-  summary(mod1) #indicates that min.abs.hum is insignificant
-  
-  mod2<-gam(plant.inf.intens.next-plant.inf.intens~s(plant.inf.intens,by=time,bs="cs",k=10)+
-              #s(max.height,by=time,bs="cs",k=10)+
-              #s(pred.pustule.diam.growth,by=time,bs="cs",k=4)+
-              #s(pred.pustule.num.increase,by=time,bs="cs",k=4)+
-              #s(mean.temp,by=time,bs="cs",k=4)+
+              s(mean.temp,by=time,bs="cs",k=4)+
               #s(max.temp,by=time,bs="cs",k=4)+
               s(min.temp,by=time,bs="cs",k=4)+
               #s(mean.abs.hum,by=time,bs="cs",k=4)+
               #s(max.abs.hum,by=time,bs="cs",k=4)+
-              #s(min.abs.hum,by=time,bs="cs",k=4)+
+              s(min.abs.hum,by=time,bs="cs",k=4)+
               #s(mean.solar,by=time,bs="cs",k=4)+
               #s(tot.rain,bs="cs",k=4)+
               s(site,bs="re",k=4),
             data=delta.plants)
-  summary(mod2) #all predictors are now significant
+  summary(mod1) #all predictors are now significant
   
-  saveRDS(mod2,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS")
+  saveRDS(mod1,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS")
 }
 
 ## load best model
@@ -114,7 +105,7 @@ draw(plants.model)
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
 library("MASS")
 par(mfrow=c(1,2),mar=c(6,6,6,6))
-plot(0,0,xlim=c(-1,5),ylim=c(-1000,1000),type="n",xlab="log 10 plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
+plot(0,0,xlim=c(-1,5),ylim=c(-1,5),type="n",xlab="log 10 plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
 day.indicies<-c(75,113,135)
 colors<-c("orange","red","purple")
 for(day in day.indicies)
@@ -124,11 +115,11 @@ for(day in day.indicies)
   upper<-data.frame(x=numeric(),y=numeric())
   for(i in 10^seq(-1,5,.25))
   {
-    pred.data<-get.pred.data.temp.mean.quantile.plants.model(day,dummy.data.inf.intens=i,dummy.data.height=15)
+    pred.data<-get.pred.data.temp.mean.quantile.plants.model(day,dummy.data.inf.intens=i,dummy.data.height=60)
     Xp <- predict(plants.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
     beta <- coef(plants.model) ## posterior mean of coefs
     Vb   <- vcov(plants.model) ## posterior  cov of coefs
-    n <- 10000
+    n <- 1000
     mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
     preds <- rep(NA, n)
     ilink <- family(plants.model)$linkinv
@@ -143,9 +134,10 @@ for(day in day.indicies)
   polygon<-rbind(lower,upper[dim(upper)[1]:1,])
   polygon(polygon$x,polygon$y,col=colors[index],density=25)
 }
+abline(0,1,lty=2)
 legend("topright",legend = c("50% quantile hottest days","75% quantile hottest days","90% quantile hottest days"),col = c("orange","red","purple"),pch=16,cex=1,bty="n")
 
-plot(0,0,xlim=c(-1,5),ylim=c(-1000,1000),type="n",xlab="plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
+plot(0,0,xlim=c(-1,5),ylim=c(-1,5),type="n",xlab="plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
 temp.additions<-c(0,1.8,3.7)
 colors<-c("orange","red","purple")
 for(temp.addition in temp.additions)
@@ -167,13 +159,14 @@ for(temp.addition in temp.additions)
       preds[j]   <- ilink(Xp %*% mrand[j, ])
     }
     y<-preds
-    lower=rbind(lower,data.frame(x=log10(i),y=quantile(y,.05)-log10(i)))
-    upper=rbind(upper,data.frame(x=log10(i),y=quantile(y,.95)-log10(i)))
+    lower=rbind(lower,data.frame(x=log10(i),y=quantile(y,.05)))
+    upper=rbind(upper,data.frame(x=log10(i),y=quantile(y,.95)))
     points(log10(i),mean(y),col=colors[index],pch=16,cex=2)
   }
   polygon<-rbind(lower,upper[dim(upper)[1]:1,])
   polygon(polygon$x,polygon$y,col=colors[index],density=25)
 }
+abline(0,1,lty=2)
 legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),pch=16,cex=1,bty="n")
 
 predict.plant.inf.trajectory<-function(site,temp.addition,plant.height,color,pred.window=2,plot=T,output=F)
@@ -184,7 +177,7 @@ predict.plant.inf.trajectory<-function(site,temp.addition,plant.height,color,pre
   min.date<-max(min(unique(as.Date(weath.dat$date))),min(unique(as.Date(temp.rh.dat$date.time))))
   max.date<-min(max(unique(as.Date(weath.dat$date))),max(unique(as.Date(temp.rh.dat$date.time))))
   dates<-seq(min.date,max.date,pred.window)
-  start.inf.intens<-.1
+  start.inf.intens<-1
   xcords<-rep(NA,length(dates)) #time values
   ycords<-rep(NA,length(dates)) #inf intensity values
   hcords<-rep(NA,length(dates)) #height values
@@ -195,7 +188,7 @@ predict.plant.inf.trajectory<-function(site,temp.addition,plant.height,color,pre
     i<-start.inf.intens
     h<-plant.height
     xcords.new<-c(1)
-    ycords.new<-c(i)
+    ycords.new<-c(log10(i))
     hcords.new<-c(h)
     for(k in 1:(length(dates)-1)) #date index
     {
@@ -216,12 +209,12 @@ predict.plant.inf.trajectory<-function(site,temp.addition,plant.height,color,pre
         preds[l]   <- ilink(Xp %*% mrand[l, ])[1]
       }
       y<-preds[1]
-      i<-i+y
-      if(i<.1) {i<-.1}
+      i<-10^y
+      #if(i<.1) {i<-.1}
       
       beta.h <- coef(plant.growth.model) ## posterior mean of coefs
       Vb.h   <- vcov(plant.growth.model) ## posterior  cov of coefs
-      n.h <-1000
+      n.h <-2
       mrand.h <- mvrnorm(n.h, beta.h, Vb.h) ## simulate n rep coef vectors from posterior
       Xp.h <- predict(plant.growth.model, newdata = pred.data.h, exlude="s(site)",type="lpmatrix")
       ilink <- family(plant.growth.model)$linkinv
@@ -234,7 +227,7 @@ predict.plant.inf.trajectory<-function(site,temp.addition,plant.height,color,pre
       
       reps<-reps+pred.window
       xcords.new<-c(xcords.new,reps)
-      ycords.new<-c(ycords.new,i)
+      ycords.new<-c(ycords.new,y)
       hcords.new<-c(hcords.new,h)
     }
     xcords<-rbind(xcords,xcords.new)
@@ -272,12 +265,11 @@ plot.purple<-t_col("purple",80)
 plot.red<-t_col("red",80)
 plot.orange<-t_col("orange",80)
 
-par(mar=c(6,6,2,2),mfrow=c(3,2))
-
-plant.height<-60
+plant.height<-15
 
 ### one day ahead projection
-plot(0,0,type="n",xlim=c(1,36),ylim=c(0,5000),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
+layout(matrix(c(1,1,2),1,3,byrow = T))
+plot(0,0,type="n",xlim=c(1,36),ylim=c(-1,5),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
 dat1<-predict.plant.inf.trajectory("GM",0,plant.height=plant.height,pred.window=1,plot.orange,T,T) 
 points(1:36,colMeans(dat1[[1]]),type="l",col="orange",lwd=4,lty=2)
 
@@ -287,43 +279,9 @@ points(1:36,colMeans(dat2[[1]]),type="l",col="red",lwd=4,lty=2)
 dat3<-predict.plant.inf.trajectory("GM",3.7,plant.height=plant.height,pred.window=1,plot.purple,T,T) 
 points(1:36,colMeans(dat3[[1]]),type="l",col="purple",lwd=4,lty=2)
 
-plot(0,0,type="n",xlim=c(1,36),ylim=c(0,1000),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
+plot(0,0,type="n",xlim=c(1,36),ylim=c(-1,5),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
 points(1:36,colMeans(dat1[[1]]),type="l",col="orange",lwd=4,lty=2)
 points(1:36,colMeans(dat2[[1]]),type="l",col="red",lwd=4,lty=2)
 points(1:36,colMeans(dat3[[1]]),type="l",col="purple",lwd=4,lty=2)
-
-
-### two days ahead projection
-plot(0,0,type="n",xlim=c(1,36),ylim=c(0,10000),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="2 days ahead")
-dat1<-predict.plant.inf.trajectory("GM",0,plant.height=plant.height,plant.height=40,pred.window=2,plot.orange,T,T) 
-points(seq(1,35,2),colMeans(dat1[[1]]),type="l",col="orange",lwd=4,lty=2)
-
-dat2<-predict.plant.inf.trajectory("GM",1.8,plant.height=plant.height,pred.window=2,plot.red,T,T) 
-points(seq(1,35,2),colMeans(dat2[[1]]),type="l",col="red",lwd=4,lty=2)
-
-dat3<-predict.plant.inf.trajectory("GM",3.7,plant.height=plant.height,pred.window=2,plot.purple,T,T) 
-points(seq(1,35,2),colMeans(dat3[[1]]),type="l",col="purple",lwd=4,lty=2)
-
-
-plot(0,0,type="n",xlim=c(1,36),ylim=c(0,1000),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="2 days ahead")
-points(seq(1,35,2),colMeans(dat1[[1]]),type="l",col="orange",lwd=4,lty=2)
-points(seq(1,35,2),colMeans(dat2[[1]]),type="l",col="red",lwd=4,lty=2)
-points(seq(1,35,2),colMeans(dat3[[1]]),type="l",col="purple",lwd=4,lty=2)
-
-### seven days ahead projection
-plot(0,0,type="n",xlim=c(1,36),ylim=c(0,10000),ylab='plant inf. intens.',xlab="week",cex.lab=1.5,cex.axis=1.5,main="1 week ahead")
-dat1<-predict.plant.inf.trajectory("GM",0,plant.height=plant.height,pred.window=7,plot.orange,T,T) 
-points(seq(1,36,7),colMeans(dat1[[1]]),type="l",col="orange",lwd=4,lty=2)
-
-dat2<-predict.plant.inf.trajectory("GM",1.8,plant.height=plant.height,pred.window=7,plot.red,T,T) 
-points(seq(1,36,7),colMeans(dat2[[1]]),type="l",col="red",lwd=4,lty=2)
-
-dat3<-predict.plant.inf.trajectory("GM",3.7,plant.height=plant.height,pred.window=7,plot.purple,T,T) 
-points(seq(1,36,7),colMeans(dat3[[1]]),type="l",col="purple",lwd=4,lty=2)
-
-plot(0,0,type="n",xlim=c(1,36),ylim=c(0,1000),ylab='plant inf. intens.',xlab="week",cex.lab=1.5,cex.axis=1.5,main="1 week ahead")
-points(seq(1,36,7),colMeans(dat1[[1]]),type="l",col="orange",lwd=4,lty=2)
-points(seq(1,36,7),colMeans(dat2[[1]]),type="l",col="red",lwd=4,lty=2)
-points(seq(1,36,7),colMeans(dat3[[1]]),type="l",col="purple",lwd=4,lty=2)
 
 
