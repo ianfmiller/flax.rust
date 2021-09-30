@@ -225,8 +225,8 @@ simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
 }
 
 # run simulations
-step.size<-1
-site<-"BT"
+step.size<-7
+site<-"GM"
 
 
 if(any((!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.site.",site,".step.size.",step.size,".RDS"))),
@@ -235,7 +235,7 @@ if(any((!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmissi
 )) {
   library(parallel)
   library(doParallel)
-  n.cores<-10
+  n.cores<-4
   registerDoParallel(n.cores)
   pred.epi.all.0<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,0,step.size=step.size,print.progress = F)
   pred.epi.all.1.8<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,1.8,step.size=step.size,print.progress = F)
