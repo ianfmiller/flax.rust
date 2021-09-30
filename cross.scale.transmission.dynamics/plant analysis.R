@@ -2,28 +2,14 @@ library(mgcv)
 library(progress)
 library(gratia)
 
-# load data
-
+# load and prep data
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant data prep.R")
 plant.growth.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS")
 delta.plants<-subset(delta.plants,time<=10)
-
+delta.plants.change<-cbind(delta.plants,"change"=ifelse(delta.plants$plant.inf.intens.next>=delta.plants$plant.inf.intens,1,0)) ## add binary variable indicating growth/stasis or shrinkage
+delta.plants.plus<-delta.plants[which(delta.plants.change$change==1),] #subset data to increase
+delta.plants.minus<-delta.plants[which(delta.plants.change$change==0),] #subset data to decrease
 # visualize data
-
-## histograms
-par(mfrow=c(2,1))
-hist(plants$plant.inf.intens,main="plant infection intensity",breaks=100,xlab="plant infection intensity")
-hist(delta.plants$plant.inf.intens.next-delta.plants$plant.inf.intens,main="change in plant infection intensity",breaks=100,xlab="change in plant infection intensity")
-
-## plot change
-par(mfrow=c(1,1))
-plot(delta.plants$plant.inf.intens,delta.plants$plant.inf.intens.next-delta.plants$plant.inf.intens,xlab = "plant infection intensity",ylab="change in plant infection intensity")
-abline(0,-1,lty=2)
-par(fig=c(.6,.9,.5,.85),new=T,mar=c(0,0,0,0))
-plot(delta.plants$plant.inf.intens,delta.plants$plant.inf.intens.next-delta.plants$plant.inf.intens,xlim=c(0,1),ylim=c(-1,10))
-abline(0,-1,lty=2)
-par(new=F,mar=c(5,5,5,5))
-
 
 ## plot trajectories
 par(mfrow=c(2,1),new=F,mar=c(5,5,5,5))
@@ -49,63 +35,210 @@ for (tag in unique(plants$Tag))
   i<-i+1
 }
 
+## histograms
+par(mfrow=c(2,1))
+hist(plants$plant.inf.intens,main="plant infection intensity",breaks=100,xlab="plant infection intensity")
+hist(delta.plants$plant.inf.intens.next-delta.plants$plant.inf.intens,main="change in plant infection intensity",breaks=100,xlab="change in plant infection intensity")
+
+## plot change
+### Indicates need to constrain outcomes, as the change in plant infection intensity is bounded by current infection intensiy.
+### To circumvent the constraint problem, we model log10(inf intens at t+1) rather than inf intens at t+1 - inf intens at t
+par(mfrow=c(1,1))
+plot(delta.plants$plant.inf.intens,delta.plants$plant.inf.intens.next-delta.plants$plant.inf.intens,xlab = "plant infection intensity",ylab="change in plant infection intensity")
+abline(0,-1,lty=2)
+par(fig=c(.6,.9,.5,.85),new=T,mar=c(0,0,0,0))
+plot(delta.plants$plant.inf.intens,delta.plants$plant.inf.intens.next-delta.plants$plant.inf.intens,xlim=c(0,1),ylim=c(-1,10))
+abline(0,-1,lty=2)
+par(new=F,mar=c(5,5,5,5))
+
+## plot transformed data to model
+par(mfrow=c(1,1))
+plot(log10(delta.plants$plant.inf.intens),log10(delta.plants$plant.inf.intens.next))
+abline(0,1)
+## Indicates that most changes are small increases or decreases, but there are many large increases for low infection intensity (around -1), and several large decreases for medium infection intensity (around 0 to 2.5)
+## Modeling the change in infection intensity as a single process resulted in a model that  1) often predicted log10(infection intensities) <  -1, 2) generally underpredicted infection intensity but 3) failed to capture large decreases
+## As such, we first model whether the change in infection intensity is positive/0 or negative, and then model the growth/stasis or shrinkage in infection intensity as seperate processes.
+
 # analyze data
 
 ## fit models--only if not already fit
 
-if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS"))
+if(any(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.change.model.RDS"),!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.growth.RDS"),!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.shrinkage.model.RDS")))
 {
-  mod0<-gam(log10(plant.inf.intens.next)~
-              s(log10(plant.inf.intens),bs="cs",k=4)+
-              s(log10(plant.inf.intens),by=time,bs="cs",k=4)+
-              s(max.height,by=time,bs="cs",k=10)+
-              s(mean.temp,by=time,bs="cs",k=4)+
-              s(max.temp,by=time,bs="cs",k=4)+
-              s(min.temp,by=time,bs="cs",k=4)+
-              s(mean.abs.hum,by=time,bs="cs",k=4)+
-              s(max.abs.hum,by=time,bs="cs",k=4)+
-              s(min.abs.hum,by=time,bs="cs",k=4)+
-              s(mean.solar,by=time,bs="cs",k=4)+
-              s(tot.rain,bs="cs",k=4)+
-              s(site,bs="re",k=4),
-            data=delta.plants)
-  summary(mod0) #indicates that mean.abs.hum is not significant
+  ### model change
+  change.mod0<-gam(change~
+                   s(log10(plant.inf.intens),bs="cs",k=4)+
+                   s(max.height,bs='cs',k=4)+
+                   s(mean.temp,bs="cs",k=4)+
+                   s(max.temp,bs="cs",k=4)+
+                   s(min.temp,bs="cs",k=4)+
+                   s(mean.abs.hum,bs="cs",k=4)+
+                   s(max.abs.hum,bs="cs",k=4)+
+                   s(min.abs.hum,bs="cs",k=4)+
+                   s(mean.solar,bs="cs",k=4)+
+                   s(tot.rain,bs="cs",k=4)+
+                   s(site,bs="re",k=4),
+                   data=delta.plants.change,
+                   family = binomial())
+  summary(change.mod0) #indicates that all but s(log10(plant.inf.intens)), s(max.temp), s(max.abs.hum) are insignificant, min.temp marginially significant
   
-  mod1<-gam(log10(plant.inf.intens.next)~
-              s(log10(plant.inf.intens),bs="cs",k=4)+
-              #s(log10(plant.inf.intens),by=time,bs="cs",k=4)+
-              #s(max.height,by=time,bs="cs",k=10)+
-              s(mean.temp,by=time,bs="cs",k=4)+
-              #s(max.temp,by=time,bs="cs",k=4)+
-              s(min.temp,by=time,bs="cs",k=4)+
-              #s(mean.abs.hum,by=time,bs="cs",k=4)+
-              #s(max.abs.hum,by=time,bs="cs",k=4)+
-              s(min.abs.hum,by=time,bs="cs",k=4)+
-              #s(mean.solar,by=time,bs="cs",k=4)+
-              #s(tot.rain,bs="cs",k=4)+
-              s(site,bs="re",k=4),
-            data=delta.plants)
-  summary(mod1) #all predictors are now significant
+  change.mod1<-gam(change~
+                   s(log10(plant.inf.intens),bs="cs",k=4)+
+                   #s(max.height,bs='cs',k=4)+
+                   #s(mean.temp,bs="cs",k=4)+
+                   s(max.temp,bs="cs",k=4)+
+                   s(min.temp,bs="cs",k=4)+
+                   #s(mean.abs.hum,bs="cs",k=4)+
+                   s(max.abs.hum,bs="cs",k=4)+
+                   #s(min.abs.hum,bs="cs",k=4)+
+                   #s(mean.solar,bs="cs",k=4)+
+                   #(tot.rain,bs="cs",k=4)+
+                   s(site,bs="re",k=4),
+                   data=delta.plants.change,
+                   family = binomial())
+  summary(change.mod1) #Dropping marginially significant min.temp leads to model w/ lower AIC, so we retain it in the model. 
   
-  saveRDS(mod1,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS")
+  saveRDS(change.mod1,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.change.model.RDS")
+  
+  ### model growth
+  
+  growth.mod0<-gam(log10(plant.inf.intens.next)~
+                     s(log10(plant.inf.intens),bs="cs",k=4)+
+                     te(log10(plant.inf.intens),max.height,by=time,bs="cs",k=4)+
+                     s(mean.temp,by=time,bs="cs",k=4)+
+                     s(max.temp,by=time,bs="cs",k=4)+
+                     s(min.temp,by=time,bs="cs",k=4)+
+                     s(mean.abs.hum,by=time,bs="cs",k=4)+
+                     s(max.abs.hum,by=time,bs="cs",k=4)+
+                     s(min.abs.hum,by=time,bs="cs",k=4)+
+                     s(mean.solar,by=time,bs="cs",k=4)+
+                     s(tot.rain,bs="cs",k=4)+
+                     s(site,bs="re",k=4),
+                   data=delta.plants.plus)
+  summary(growth.mod0) #indicates that all but s(log10(plant.inf.intens) and te(log10(plant.inf.intens),max.height) are insignificant 
+  
+  growth.mod1<-gam(log10(plant.inf.intens.next)~
+                     s(log10(plant.inf.intens),bs="cs",k=4)+
+                     te(log10(plant.inf.intens),max.height,by=time,bs="cs",k=4)+
+                     #s(mean.temp,by=time,bs="cs",k=4)+
+                     #s(max.temp,by=time,bs="cs",k=4)+
+                     #s(min.temp,by=time,bs="cs",k=4)+
+                     #s(mean.abs.hum,by=time,bs="cs",k=4)+
+                     #s(max.abs.hum,by=time,bs="cs",k=4)+
+                     #s(min.abs.hum,by=time,bs="cs",k=4)+
+                     #s(mean.solar,by=time,bs="cs",k=4)+
+                     #s(tot.rain,bs="cs",k=4)+
+                     s(site,bs="re",k=4),
+                   data=delta.plants.plus)
+  summary(growth.mod1) #all predictors now significant
+  
+  saveRDS(growth.mod1,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.growth.model.RDS")
+  
+  ## model shrinkage
+  
+  shrink.mod0<-gam(log10(plant.inf.intens.next)~
+                     s(log10(plant.inf.intens),bs="cs",k=4)+
+                     te(log10(plant.inf.intens),max.height,by=time,bs="cs",k=4)+
+                     s(mean.temp,by=time,bs="cs",k=4)+
+                     s(max.temp,by=time,bs="cs",k=4)+
+                     s(min.temp,by=time,bs="cs",k=4)+
+                     s(mean.abs.hum,by=time,bs="cs",k=4)+
+                     s(max.abs.hum,by=time,bs="cs",k=4)+
+                     s(min.abs.hum,by=time,bs="cs",k=4)+
+                     s(mean.solar,by=time,bs="cs",k=4)+
+                     s(tot.rain,bs="cs",k=4)+
+                     s(site,bs="re",k=4),
+                   data=delta.plants.minus)
+  summary(shrink.mod0) #indicates that all but log10(plant.inf.intes), te(log10(plant.inf.intens,max.height)), max.temp, max.abs.hum insignificant, mean.temp marginally significant
+  
+  shrink.mod1<-gam(log10(plant.inf.intens.next)~
+                     s(log10(plant.inf.intens),bs="cs",k=4)+
+                     te(log10(plant.inf.intens),max.height,by=time,bs="cs",k=4)+
+                     s(mean.temp,by=time,bs="cs",k=4)+
+                     s(max.temp,by=time,bs="cs",k=4)+
+                     #s(min.temp,by=time,bs="cs",k=4)+
+                     #s(mean.abs.hum,by=time,bs="cs",k=4)+
+                     s(max.abs.hum,by=time,bs="cs",k=4)+
+                     #s(min.abs.hum,by=time,bs="cs",k=4)+
+                     #s(mean.solar,by=time,bs="cs",k=4)+
+                     #s(tot.rain,bs="cs",k=4)+
+                     s(site,bs="re",k=4),
+                   data=delta.plants.minus) 
+  summary(shrink.mod1) #Dropping marginially significant mean.temp leads to model w/ lower AIC, so we retain it in the model. 
+  
+  saveRDS(shrink.mod1,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.shrinkage.model.RDS")
+  
 }
 
 ## load best model
 
-plants.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS")
+plants.change.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.change.model.RDS")
+plants.growth.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.growth.model.RDS")
+plants.shrinkage.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.shrinkage.model.RDS")
 
 ## model checking
-#plot(plants.model,scale=0,pages=1) #plot smooths
-#gam.check(plants.model) #indicates k=4 leads to unevenly distributed residuals, but increasing k doesn't solve issue and leads to overfitting
+### overall results are acceptable
+### change model
+#draw(plants.change.model) #plot smooths
 
-## visualize model
-draw(plants.model)
+#par(mfrow=c(2,2))
+#gam.check(plants.change.model) #indicates k vals are sufficient
 
-# predict climate change effect
+### growth model
+#par(mfrow=c(2,2))
+#plot(plants.growth.model,scale=0,select=1)
+#vis.gam(plants.growth.model,plot.type="contour")
+#plot(plants.growth.model,scale=0,select=3)
+
+#par(mfrow=c(1,1))
+#plot(log10(delta.plants.plus$plant.inf.intens),log10(delta.plants.plus$plant.inf.intens.next))
+#abline(0,1)
+
+#par(mfrow=c(2,2))
+#gam.check(plant.growth.model) # indicates k vals arre sufficient
+
+### shrinkage model
+#par(mfrow=c(2,3))
+#plot(plants.shrinkage.model,scale=0,select=1)
+#vis.gam(plants.shrinkage.model,plot.type="contour")
+#plot(plants.shrinkage.model,scale=0,select=3)
+#plot(plants.shrinkage.model,scale=0,select=4)
+#plot(plants.shrinkage.model,scale=0,select=5)
+#plot(plants.shrinkage.model,scale=0,select=6)
+
+#par(mfrow=c(1,1))
+#plot(log10(delta.plants.minus$plant.inf.intens),predict(plants.shrinkage.model)) #
+#abline(0,1) 
+
+#par(mfrow=c(2,2))
+#gam.check(plants.shrinkage.model) # indicates k vals arre sufficient
+
+## plot model pedictions against data
+
+preds<-rep(NA,nrow(delta.plants))
+
+for(i in 1:nrow(delta.plants))
+{
+  newdata=delta.plants[i,]
+  odds<-predict(plants.change.model,newdata = newdata,type="response")
+  if(runif(1) <= odds)
+  {
+   preds[i]<-predict(plants.growth.model,newdata=newdata,type="response") 
+  } else
+  {
+    preds[i]<-predict(plants.shrinkage.model,newdata=newdata,type="response") 
+    
+  }
+}
+
+plot(log10(delta.plants$plant.inf.intens.next),preds)
+
+
+## visualize model predictions
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
 library("MASS")
 par(mfrow=c(1,2),mar=c(6,6,6,6))
-plot(0,0,xlim=c(-1,5),ylim=c(-1,5),type="n",xlab="log 10 plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
+plot(0,0,xlim=c(-1,5),ylim=c(-1,5),type="n",xlab="log 10 plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=1,cex.lab=1.2)
 day.indicies<-c(75,113,135)
 colors<-c("orange","red","purple")
 for(day in day.indicies)
@@ -116,17 +249,35 @@ for(day in day.indicies)
   for(i in 10^seq(-1,5,.25))
   {
     pred.data<-get.pred.data.temp.mean.quantile.plants.model(day,dummy.data.inf.intens=i,dummy.data.height=60)
-    Xp <- predict(plants.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
-    beta <- coef(plants.model) ## posterior mean of coefs
-    Vb   <- vcov(plants.model) ## posterior  cov of coefs
+    
+    odds<-predict(change.mod0,newdata = pred.data,type="response")
     n <- 1000
-    mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
-    preds <- rep(NA, n)
-    ilink <- family(plants.model)$linkinv
-    for (j in seq_len(n)) { 
-      preds[j]   <- ilink(Xp %*% mrand[j, ])
+    n.growth<-round(odds*n)
+    n.shrink<-1000-n.growth
+    
+    Xp.growth <- predict(growth.mod0, newdata = pred.data, exlude="s(site)",type="lpmatrix")
+    beta.growth <- coef(growth.mod0) ## posterior mean of coefs
+    Vb.growth  <- vcov(growth.mod0) ## posterior  cov of coefs
+    mrand.growth <- mvrnorm(n.growth, beta.growth, Vb.growth) ## simulate n rep coef vectors from posterior
+    ilink <- family(growth.mod0)$linkinv
+    
+    preds.growth<-rep(NA,n.growth)
+    for (j in seq_len(n.growth)) { 
+      preds.growth[j]   <- ilink(Xp.growth %*% mrand.growth[j, ])
     }
-    y<-preds
+    
+    Xp.shrink <- predict(shrink.mod0, newdata = pred.data, exlude="s(site)",type="lpmatrix")
+    beta.shrink <- coef(shrink.mod0) ## posterior mean of coefs
+    Vb.shrink  <- vcov(shrink.mod0) ## posterior  cov of coefs
+    mrand.shrink <- mvrnorm(n.shrink, beta.shrink, Vb.shrink) ## simulate n rep coef vectors from posterior
+    ilink <- family(shrink.mod0)$linkinv
+    
+    preds.shrink<-rep(NA,n.shrink)
+    for (j in seq_len(n.shrink)) { 
+      preds.shrink[j]   <- ilink(Xp.shrink %*% mrand.shrink[j, ])
+    }
+    
+    y<-c(preds.growth,preds.shrink)
     lower=rbind(lower,data.frame(x=log10(i),y=quantile(y,.05)))
     upper=rbind(upper,data.frame(x=log10(i),y=quantile(y,.95)))
     points(log10(i),mean(y),col=colors[index],pch=16,cex=2)
@@ -135,9 +286,10 @@ for(day in day.indicies)
   polygon(polygon$x,polygon$y,col=colors[index],density=25)
 }
 abline(0,1,lty=2)
-legend("topright",legend = c("50% quantile hottest days","75% quantile hottest days","90% quantile hottest days"),col = c("orange","red","purple"),pch=16,cex=1,bty="n")
+legend("topleft",legend = c("50% quantile hottest days","75% quantile hottest days","90% quantile hottest days"),col = c("orange","red","purple"),pch=16,cex=1,bty="n")
 
-plot(0,0,xlim=c(-1,5),ylim=c(-1,5),type="n",xlab="plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=2,cex.lab=2)
+
+plot(0,0,xlim=c(-1,5),ylim=c(-1,5),type="n",xlab="plant infection intensity",ylab="pred. next obs. plant infection intensity",cex.axis=1,cex.lab=1.2)
 temp.additions<-c(0,1.8,3.7)
 colors<-c("orange","red","purple")
 for(temp.addition in temp.additions)
@@ -148,17 +300,35 @@ for(temp.addition in temp.additions)
   for(i in 10^seq(-1,5,.25))
   {
     pred.data<-get.pred.data.temp.mean.quantile.plants.model(75,dummy.data.inf.intens=i,dummy.data.height=15,temp.addition = temp.addition)
-    Xp <- predict(plants.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
-    beta <- coef(plants.model) ## posterior mean of coefs
-    Vb   <- vcov(plants.model) ## posterior  cov of coefs
-    n <- 10000
-    mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
-    preds <- rep(NA, n)
-    ilink <- family(plants.model)$linkinv
-    for (j in seq_len(n)) { 
-      preds[j]   <- ilink(Xp %*% mrand[j, ])
+    
+    odds<-predict(change.mod0,newdata = pred.data,type="response")
+    n <- 1000
+    n.growth<-round(odds*n)
+    n.shrink<-1000-n.growth
+    
+    Xp.growth <- predict(growth.mod0, newdata = pred.data, exlude="s(site)",type="lpmatrix")
+    beta.growth <- coef(growth.mod0) ## posterior mean of coefs
+    Vb.growth  <- vcov(growth.mod0) ## posterior  cov of coefs
+    mrand.growth <- mvrnorm(n.growth, beta.growth, Vb.growth) ## simulate n rep coef vectors from posterior
+    ilink <- family(growth.mod0)$linkinv
+    
+    preds.growth<-rep(NA,n.growth)
+    for (j in seq_len(n.growth)) { 
+      preds.growth[j]   <- ilink(Xp.growth %*% mrand.growth[j, ])
     }
-    y<-preds
+    
+    Xp.shrink <- predict(shrink.mod0, newdata = pred.data, exlude="s(site)",type="lpmatrix")
+    beta.shrink <- coef(shrink.mod0) ## posterior mean of coefs
+    Vb.shrink  <- vcov(shrink.mod0) ## posterior  cov of coefs
+    mrand.shrink <- mvrnorm(n.shrink, beta.shrink, Vb.shrink) ## simulate n rep coef vectors from posterior
+    ilink <- family(shrink.mod0)$linkinv
+    
+    preds.shrink<-rep(NA,n.shrink)
+    for (j in seq_len(n.shrink)) { 
+      preds.shrink[j]   <- ilink(Xp.shrink %*% mrand.shrink[j, ])
+    }
+    
+    y<-c(preds.growth,preds.shrink)
     lower=rbind(lower,data.frame(x=log10(i),y=quantile(y,.05)))
     upper=rbind(upper,data.frame(x=log10(i),y=quantile(y,.95)))
     points(log10(i),mean(y),col=colors[index],pch=16,cex=2)
@@ -167,7 +337,7 @@ for(temp.addition in temp.additions)
   polygon(polygon$x,polygon$y,col=colors[index],density=25)
 }
 abline(0,1,lty=2)
-legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),pch=16,cex=1,bty="n")
+legend("topleft",legend = c("50% quantile hottest days","75% quantile hottest days","90% quantile hottest days"),col = c("orange","red","purple"),pch=16,cex=1,bty="n")
 
 predict.plant.inf.trajectory<-function(site,temp.addition,plant.height,color,pred.window=2,plot=T,output=F)
 {  
