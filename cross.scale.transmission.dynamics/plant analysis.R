@@ -221,7 +221,7 @@ for(i in 1:nrow(delta.plants))
 {
   newdata=delta.plants[i,]
   odds<-predict(plants.change.model,newdata = newdata,type="response")
-  if(runif(1) <= odds)
+  if(odds >= .5)
   {
    preds[i]<-predict(plants.growth.model,newdata=newdata,type="response") 
   } else
