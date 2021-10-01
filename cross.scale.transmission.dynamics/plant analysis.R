@@ -250,27 +250,27 @@ for(day in day.indicies)
   {
     pred.data<-get.pred.data.temp.mean.quantile.plants.model(day,dummy.data.inf.intens=i,dummy.data.height=60)
     
-    odds<-predict(change.mod0,newdata = pred.data,type="response")
+    odds<-predict(plants.change.model,newdata = pred.data,type="response")
     n <- 1000
     n.growth<-round(odds*n)
     n.shrink<-1000-n.growth
     
-    Xp.growth <- predict(growth.mod0, newdata = pred.data, exlude="s(site)",type="lpmatrix")
-    beta.growth <- coef(growth.mod0) ## posterior mean of coefs
-    Vb.growth  <- vcov(growth.mod0) ## posterior  cov of coefs
+    Xp.growth <- predict(plants.growth.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
+    beta.growth <- coef(plants.growth.model) ## posterior mean of coefs
+    Vb.growth  <- vcov(plants.growth.model) ## posterior  cov of coefs
     mrand.growth <- mvrnorm(n.growth, beta.growth, Vb.growth) ## simulate n rep coef vectors from posterior
-    ilink <- family(growth.mod0)$linkinv
+    ilink <- family(plants.growth.model)$linkinv
     
     preds.growth<-rep(NA,n.growth)
     for (j in seq_len(n.growth)) { 
       preds.growth[j]   <- ilink(Xp.growth %*% mrand.growth[j, ])
     }
     
-    Xp.shrink <- predict(shrink.mod0, newdata = pred.data, exlude="s(site)",type="lpmatrix")
-    beta.shrink <- coef(shrink.mod0) ## posterior mean of coefs
-    Vb.shrink  <- vcov(shrink.mod0) ## posterior  cov of coefs
+    Xp.shrink <- predict(plants.shrinkage.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
+    beta.shrink <- coef(plants.shrinkage.model) ## posterior mean of coefs
+    Vb.shrink  <- vcov(plants.shrinkage.model) ## posterior  cov of coefs
     mrand.shrink <- mvrnorm(n.shrink, beta.shrink, Vb.shrink) ## simulate n rep coef vectors from posterior
-    ilink <- family(shrink.mod0)$linkinv
+    ilink <- family(plants.shrinkage.model)$linkinv
     
     preds.shrink<-rep(NA,n.shrink)
     for (j in seq_len(n.shrink)) { 
@@ -301,27 +301,27 @@ for(temp.addition in temp.additions)
   {
     pred.data<-get.pred.data.temp.mean.quantile.plants.model(75,dummy.data.inf.intens=i,dummy.data.height=15,temp.addition = temp.addition)
     
-    odds<-predict(change.mod0,newdata = pred.data,type="response")
+    odds<-predict(plants.change.model,newdata = pred.data,type="response")
     n <- 1000
     n.growth<-round(odds*n)
     n.shrink<-1000-n.growth
     
-    Xp.growth <- predict(growth.mod0, newdata = pred.data, exlude="s(site)",type="lpmatrix")
-    beta.growth <- coef(growth.mod0) ## posterior mean of coefs
-    Vb.growth  <- vcov(growth.mod0) ## posterior  cov of coefs
+    Xp.growth <- predict(plants.growth.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
+    beta.growth <- coef(plants.growth.model) ## posterior mean of coefs
+    Vb.growth  <- vcov(plants.growth.model) ## posterior  cov of coefs
     mrand.growth <- mvrnorm(n.growth, beta.growth, Vb.growth) ## simulate n rep coef vectors from posterior
-    ilink <- family(growth.mod0)$linkinv
+    ilink <- family(plants.growth.model)$linkinv
     
     preds.growth<-rep(NA,n.growth)
     for (j in seq_len(n.growth)) { 
       preds.growth[j]   <- ilink(Xp.growth %*% mrand.growth[j, ])
     }
     
-    Xp.shrink <- predict(shrink.mod0, newdata = pred.data, exlude="s(site)",type="lpmatrix")
-    beta.shrink <- coef(shrink.mod0) ## posterior mean of coefs
-    Vb.shrink  <- vcov(shrink.mod0) ## posterior  cov of coefs
+    Xp.shrink <- predict(plants.shrinkage.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
+    beta.shrink <- coef(plants.shrinkage.model) ## posterior mean of coefs
+    Vb.shrink  <- vcov(plants.shrinkage.model) ## posterior  cov of coefs
     mrand.shrink <- mvrnorm(n.shrink, beta.shrink, Vb.shrink) ## simulate n rep coef vectors from posterior
-    ilink <- family(shrink.mod0)$linkinv
+    ilink <- family(plants.shrinkage.model)$linkinv
     
     preds.shrink<-rep(NA,n.shrink)
     for (j in seq_len(n.shrink)) { 
@@ -368,19 +368,37 @@ predict.plant.inf.trajectory<-function(site,temp.addition,plant.height,color,pre
       pred.data.h<-pred.data
       colnames(pred.data.h)[which(colnames(pred.data.h)=="max.height")]<-"height"
       
-      beta <- coef(plants.model) ## posterior mean of coefs
-      Vb   <- vcov(plants.model) ## posterior  cov of coefs
-      n <-2
-      mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
-      Xp <- predict(plants.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
-      ilink <- family(plants.model)$linkinv
-      preds <- rep(NA,n)
-      for (l in seq_len(n)) { 
-        preds[l]   <- ilink(Xp %*% mrand[l, ])[1]
+      odds<-predict(plants.change.model,newdata = pred.data,type="response")
+      draw<-runif(1)
+      if(draw<=odds)
+      {
+        Xp.growth <- predict(plants.growth.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
+        beta.growth <- coef(plants.growth.model) ## posterior mean of coefs
+        Vb.growth  <- vcov(plants.growth.model) ## posterior  cov of coefs
+        n <-2
+        mrand.growth <- mvrnorm(n, beta.growth, Vb.growth) ## simulate n rep coef vectors from posterior
+        ilink <- family(plants.growth.model)$linkinv
+        preds <- rep(NA,n)
+        for (l in seq_len(l)) { 
+          preds[l]   <- ilink(Xp.growth %*% mrand.growth[l, ])
+        }
+        y<-preds[1]
+        i<-10^y
+      } else
+      {
+        Xp.shrink <- predict(plants.shrinkage.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
+        beta.shrink <- coef(plants.shrinkage.model) ## posterior mean of coefs
+        Vb.shrink  <- vcov(plants.shrinkage.model) ## posterior  cov of coefs
+        n <-2
+        mrand.shrink <- mvrnorm(n, beta.shrink, Vb.shrink) ## simulate n rep coef vectors from posterior
+        ilink <- family(plants.shrinkage.model)$linkinv
+        preds <- rep(NA,n)
+        for (l in seq_len(l)) { 
+          preds[l]   <- ilink(Xp.shrink %*% mrand.shrink[l, ])
+        }
+        y<-preds[1]
+        i<-10^y
       }
-      y<-preds[1]
-      i<-10^y
-      #if(i<.1) {i<-.1}
       
       beta.h <- coef(plant.growth.model) ## posterior mean of coefs
       Vb.h   <- vcov(plant.growth.model) ## posterior  cov of coefs
@@ -392,7 +410,7 @@ predict.plant.inf.trajectory<-function(site,temp.addition,plant.height,color,pre
       for (l in seq_len(n.h)) { 
         preds.h[l]   <- ilink(Xp.h %*% mrand.h[l, ])[1]
       }
-      h<-preds.h[1]
+      h<-h+preds.h[1]
       
       
       reps<-reps+pred.window
