@@ -468,6 +468,9 @@ dat3<-predict.plant.inf.trajectory("GM",3.7,plant.height=plant.height,pred.windo
 points(1:36,colMeans(dat3[[1]]),type="l",col="purple",lwd=4,lty=2)
 
 plot(0,0,type="n",xlim=c(1,36),ylim=c(-1,5),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
+polygon(c(1:36,36:1),c(apply(dat1[[1]],2,quantile,probs=.05),rev(apply(dat1[[1]],2,quantile,probs=.95))),col=plot.orange,density=100)
+polygon(c(1:36,36:1),c(apply(dat2[[1]],2,quantile,probs=.05),rev(apply(dat2[[1]],2,quantile,probs=.95))),col=plot.red,density=100)
+polygon(c(1:36,36:1),c(apply(dat3[[1]],2,quantile,probs=.05),rev(apply(dat3[[1]],2,quantile,probs=.95))),col=plot.purple,density=100)
 points(1:36,colMeans(dat1[[1]]),type="l",col="orange",lwd=4,lty=2)
 points(1:36,colMeans(dat2[[1]]),type="l",col="red",lwd=4,lty=2)
 points(1:36,colMeans(dat3[[1]]),type="l",col="purple",lwd=4,lty=2)
