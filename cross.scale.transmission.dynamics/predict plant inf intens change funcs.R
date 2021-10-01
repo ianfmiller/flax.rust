@@ -1,9 +1,9 @@
 # load data and model
 library(MASS)
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
-plant.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.model.RDS")
-n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS")
-pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
+plants.change.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.change.model.RDS")
+plants.growth.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.growth.model.RDS")
+plants.shrinkage.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.shrinkage.model.RDS")
 
 
 # function for subsetting temp/rh
@@ -55,7 +55,11 @@ predict.plant.inf.intens<-function(plant.inf.intens.last,max.height.last,site,da
                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                         "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
                         "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain)
-  plant.inf.intens.next<-10^predict(plant.model,newdata=pred.data,exclude = 's(site)')
+  
+  odds<-predict(plants.change.model,newdata = pred.data,type="response")
+  
+  if(odds >= .5) {plant.inf.intens.next<-10^predict(plants.growth.model,newdata=pred.data,exclude = 's(site)')}
+  else {plant.inf.intens.next<-10^predict(plants.shrinkage.model,newdata=pred.data,exclude = 's(site)')}
   if(plant.inf.intens.next<.01) {plant.inf.intens.next<-.01}
   plant.inf.intens.next
 }
@@ -106,17 +110,37 @@ predict.plant.inf.intens.boot<-function(plant.inf.intens.last,max.height.last,si
                         "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
                         "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain)
   
-  Xp <- predict(plant.model, newdata = pred.data, exlude='s(site)',type="lpmatrix")
-  beta <- coef(plant.model) ## posterior mean of coefs
-  Vb   <- vcov(plant.model) ## posterior  cov of coefs
-  n <- 2
-  mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
-  preds <- rep(NA, n)
-  ilink <- family(plant.model)$linkinv
-  for (j in seq_len(n)) { 
-    preds[j]   <- ilink(Xp %*% mrand[j, ])
+  odds<-predict(plants.change.model,newdata = pred.data,type="response")
+  
+  draw<-runif(1)
+  if(draw<=odds)
+  {
+    Xp.growth <- predict(plants.growth.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
+    beta.growth <- coef(plants.growth.model) ## posterior mean of coefs
+    Vb.growth  <- vcov(plants.growth.model) ## posterior  cov of coefs
+    n <-2
+    mrand.growth <- mvrnorm(n, beta.growth, Vb.growth) ## simulate n rep coef vectors from posterior
+    ilink <- family(plants.growth.model)$linkinv
+    preds <- rep(NA,n)
+    for (l in seq_len(n)) { 
+      preds[l]   <- ilink(Xp.growth %*% mrand.growth[l, ])
+    }
+    plant.inf.intens.next<-10^preds[1]
+  } else
+  {
+    Xp.shrink <- predict(plants.shrinkage.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
+    beta.shrink <- coef(plants.shrinkage.model) ## posterior mean of coefs
+    Vb.shrink  <- vcov(plants.shrinkage.model) ## posterior  cov of coefs
+    n <-2
+    mrand.shrink <- mvrnorm(n, beta.shrink, Vb.shrink) ## simulate n rep coef vectors from posterior
+    ilink <- family(plants.shrinkage.model)$linkinv
+    preds <- rep(NA,n)
+    for (l in seq_len(n)) { 
+      preds[l]   <- ilink(Xp.shrink %*% mrand.shrink[l, ])
+    }
+    plant.inf.intens.next<-10^preds[1]
   }
-  plant.inf.intens.next<-10^preds[1]
+  
   if(plant.inf.intens.next<.01) {plant.inf.intens.next<-.01}
   plant.inf.intens.next
 }
@@ -171,7 +195,9 @@ predict.plant.inf.intens.last<-function(plant.inf.intens.next,max.height.last,si
                           "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                           "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
                           "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain)
-    plant.inf.intens.next.pred<-10^predict(plant.model,newdata=pred.data,exclude = 's(site)')
+    odds<-predict(plants.change.model,newdata = pred.data,type="response")
+    if(odds >= .5) {plant.inf.intens.next.pred<-10^predict(plants.growth.model,newdata=pred.data,exclude = 's(site)')}
+    else {plant.inf.intens.next.pred<-10^predict(plants.shrinkage.model,newdata=pred.data,exclude = 's(site)')}
     abs(plant.inf.intens.next.pred-plant.inf.intens.next)
   }
   plant.inf.intens.last<-optim(c(plant.inf.intens.next),pred.func,method = "Brent",lower=0,upper=10e6)$par
