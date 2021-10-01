@@ -56,7 +56,7 @@ predict.plant.growth<-function(height.last,site,date0,date1,exclude.site=T)
                         "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
                         "site"=site)
   
-  if(exclude.site) {height.next<-predict(plant.growth.model,newdata=pred.data,exclude = 's(site)')} else {height.next<-predict(plant.growth.model,newdata=pred.data)}
+  if(exclude.site) {height.next<-height.last+predict(plant.growth.model,newdata=pred.data,exclude = 's(site)')} else {height.next<-height.last+predict(plant.growth.model,newdata=pred.data)}
   if(height.next<1) {height.next<-1}
   height.next
 }
@@ -119,7 +119,7 @@ predict.plant.growth.boot<-function(height.last,site,date0,date1)
   for (j in seq_len(n)) { 
     preds[j]   <- ilink(Xp %*% mrand[j, ])
   }
-  height.next<-preds[1]
+  height.next<-height.last+preds[1]
   if(height.next<1) {height.next<-1}
   height.next
 }
@@ -176,7 +176,7 @@ predict.plant.growth.last<-function(height.next,site,date0,date1,exclude.site=T)
                            "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
                            "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
                            "site"=site)
-    if(exclude.site) {plant.height.next.pred<-predict(plant.growth.model,newdata=pred.data,exclude = 's(site)')} else {plant.height.next.pred<-predict(plant.growth.model,newdata=pred.data)}
+    if(exclude.site) {plant.height.next.pred<-plant.height.last.test+predict(plant.growth.model,newdata=pred.data,exclude = 's(site)')} else {plant.height.next.pred<-plant.height.last.test+predict(plant.growth.model,newdata=pred.data)}
     abs(plant.height.next.pred-height.next)
   }
   plant.height.last<-optim(c(height.next),pred.func,method = "Brent",lower=0,upper=10e6)$par
