@@ -379,7 +379,7 @@ predict.plant.inf.trajectory<-function(site,temp.addition,plant.height,color,pre
         mrand.growth <- mvrnorm(n, beta.growth, Vb.growth) ## simulate n rep coef vectors from posterior
         ilink <- family(plants.growth.model)$linkinv
         preds <- rep(NA,n)
-        for (l in seq_len(l)) { 
+        for (l in seq_len(n)) { 
           preds[l]   <- ilink(Xp.growth %*% mrand.growth[l, ])
         }
         y<-preds[1]
@@ -393,7 +393,7 @@ predict.plant.inf.trajectory<-function(site,temp.addition,plant.height,color,pre
         mrand.shrink <- mvrnorm(n, beta.shrink, Vb.shrink) ## simulate n rep coef vectors from posterior
         ilink <- family(plants.shrinkage.model)$linkinv
         preds <- rep(NA,n)
-        for (l in seq_len(l)) { 
+        for (l in seq_len(n)) { 
           preds[l]   <- ilink(Xp.shrink %*% mrand.shrink[l, ])
         }
         y<-preds[1]
