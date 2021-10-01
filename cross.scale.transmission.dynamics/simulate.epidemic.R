@@ -122,45 +122,6 @@ simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
     new.tot.rain<-sum(weath.sub$rain,na.rm=T)
     new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
     
-    
-    #predict pustule growth from pustule growth model and enviro conditions
-    #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
-    pustule.model.new.area<-.01 #predict change for small pustule, arbitrarily pick .01
-    obs.time<-delta.days
-    pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,
-                                        "time"=delta.days,"site"=site,
-                                        "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                                        "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                        "mean.wetness"=new.mean.wetness,
-                                        "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain)
-    pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,exclude = 's(site)')
-    
-    #predict change in number of pustules from enviro conditions
-    #n.pustule.model.vars<-names(fixef(n.pustule.model))[2:length(names(fixef(n.pustule.model)))]
-    n.pustules.model.new.n.pustules<-0 #included only for offset, picked 0 for ease of interpretability
-    obs.time<-delta.days
-    n.pustules.model.pred.data<-data.frame("n.pustules"=n.pustules.model.new.n.pustules,
-                                           "time"=delta.days,"site"=site,
-                                           "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                                           "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                           "mean.wetness"=new.mean.wetness,
-                                           "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
-                                           "pred.pustule.diam.growth"=pred.pustule.diam.growth)
-    pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,exclude = 's(site)')
-    
-    #predict change in plant.inf.intensity from enviro conditions
-    plant.model.new.plant.inf.intens<-1
-    obs.time<-delta.days
-    plant.model.pred.data<-data.frame("plant.inf.intens"=plant.model.new.plant.inf.intens,
-                                      "time"=delta.days,"site"=site,
-                                      "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                                      "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                                      "mean.wetness"=new.mean.wetness,
-                                      "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain,
-                                      "pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase)
-    pred.plant.inf.intens.increase<-predict(plant.model,newdata=plant.model.pred.data,exclude = 's(site)')
-    
-    
     ### compare weather data coverage to make sure foi is not being underestimated
     time.diff.weather.data<-weath.sub$date[nrow(weath.sub)]-weath.sub$date[1]
     units(time.diff.weather.data)<-"days"
@@ -190,7 +151,7 @@ simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
           foi<-foi+predict.kernel.tilted.plume(q=q,H=half.height,k=4.828517e-07,alphaz=1.687830e-06,Ws=9.299220e-01,xtarget=xcord-sourceX,ytarget=ycord-sourceY,wind.data=weath.sub)
         }
         foi<-foi*foi.mod ### correct for any gaps in weath data
-        pred.inf.odds<-predict(foi.model,newdata = data.frame("site"=site,"foi"=foi,"height.cm"=last.epi[i,"max.height"],"pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase,"pred.plant.inf.intens.increase"=pred.plant.inf.intens.increase,"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp),type="response",re.form=NA) ### predict odds of becoming infected
+        pred.inf.odds<-predict(foi.model,newdata = data.frame("site"=site,"foi"=foi,"height.cm"=last.epi[i,"max.height"],"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp),type="response",re.form=NA) ### predict odds of becoming infected
         #pred.inf.odds<-predict(foi.model,newdata = data.frame("foi"=foi,"height.cm"=last.epi[i,"max.height"],"mean.temp.days.16.22"=mean.temp.days.16.22,"mean.temp.7.30.dew.point.days"=mean.temp.7.30.dew.point.days),type="response",re.form=NA) ### predict odds of becoming infected
         #pred.inf.odds<-predict(foi.model,newdata=data.frame("foi"=foi),type="response")
         draw<-runif(1) ### draw random number between 0 and 1
