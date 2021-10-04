@@ -9,4 +9,4 @@
 #SBATCH --mail-type=END
 #SBATCH --mail-user=ifmiller@princeton.edu
 
-srun R CMD BATCH analysis.R
+srun R CMD BATCH simulate.epidemic.R
