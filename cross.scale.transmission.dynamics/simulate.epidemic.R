@@ -186,7 +186,7 @@ simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
 }
 
 # run simulations
-step.size<-7
+step.size<-1
 site<-"GM"
 
 
