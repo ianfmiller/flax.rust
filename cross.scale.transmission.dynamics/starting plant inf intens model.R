@@ -25,7 +25,7 @@ for(tag in unique(plants$Tag)) # loop to pull out plant inf intens of newly dise
 }
 
 data.vec<-data.vec[which(data.vec<=100)] #subset out observations likely to not be truly new infections
-model.data<-hist(data.vec,breaks=100,xlab="plant inf. intens.",main="Histogram of starting plant inf. intens.")
+model.data<-hist(data.vec,breaks=100,plot=F)
 y<-model.data$density
 x<-model.data$mids
 mod<-nls(y~c*exp(-c*x),start=list(c=.5))
