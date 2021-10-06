@@ -128,6 +128,7 @@ new.data.1<-data.frame("foi"=fois,
                      "max.temp"=mean(foi.data$max.temp),
                      "min.temp"=mean(foi.data$min.temp),
                      "mean.abs.hum"=mean(foi.data$mean.abs.hum),
+                     "max.abs.hum"=mean(foi.data$max.abs.hum),
                      "tot.rain"=mean(foi.data$tot.rain),
                      "site"="CC"
                      )
@@ -137,6 +138,7 @@ new.data.2<-data.frame("foi"=fois,
                        "max.temp"=mean(foi.data$max.temp),
                        "min.temp"=mean(foi.data$min.temp),
                        "mean.abs.hum"=mean(foi.data$mean.abs.hum),
+                       "max.abs.hum"=mean(foi.data$max.abs.hum),
                        "tot.rain"=mean(foi.data$tot.rain),
                        "site"="CC"
                       )
@@ -146,6 +148,7 @@ new.data.3<-data.frame("foi"=fois,
                        "max.temp"=mean(foi.data$max.temp),
                        "min.temp"=mean(foi.data$min.temp),
                        "mean.abs.hum"=mean(foi.data$mean.abs.hum),
+                       "max.abs.hum"=mean(foi.data$max.abs.hum),
                        "tot.rain"=mean(foi.data$tot.rain),
                        "site"="CC"
                       )
@@ -155,6 +158,7 @@ new.data.4<-data.frame("foi"=fois,
                        "max.temp"=mean(foi.data$max.temp),
                        "min.temp"=mean(foi.data$min.temp),
                        "mean.abs.hum"=mean(foi.data$mean.abs.hum),
+                       "max.abs.hum"=mean(foi.data$max.abs.hum),
                        "tot.rain"=mean(foi.data$tot.rain),
                        "site"="CC"
                       )
