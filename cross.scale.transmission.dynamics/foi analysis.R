@@ -61,55 +61,32 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   mod0<-gam(status.next~
             log10(foi)+
             s(height.cm,bs="cs",k=4) +
-            s(mean.temp,bs="cs",k=4) + 
-            s(max.temp,bs="cs",k=4) + 
-            s(min.temp,bs="cs",k=4) + 
-            s(mean.abs.hum,bs="cs",k=4) + 
-            s(max.abs.hum,bs="cs",k=4) + 
-            s(min.abs.hum,bs="cs",k=4) + 
-            s(tot.rain,bs="cs",k=4) + 
-            s(mean.solar,bs="cs",k=4)+
             s(site,bs="re",k=4),
             data = foi.data,
             family = binomial()
   )
-  summary(mod0) #indicates all but log10(foi), height.cm are insignificant
+  summary(mod0)
   
   mod1<-gam(status.next~
               log10(foi)+
-              s(height.cm,bs="cs",k=4)+
-              #s(mean.temp,bs="cs",k=4) + 
-              #s(max.temp,bs="cs",k=4) + 
-              #s(min.temp,bs="cs",k=4) + 
-              #s(mean.abs.hum,bs="cs",k=4) + 
-              #s(max.abs.hum,bs="cs",k=4) + 
-              #s(min.abs.hum,bs="cs",k=4) + 
-              #s(tot.rain,bs="cs",k=4) + 
-              #s(mean.solar,bs="cs",k=4)+
+              height.cm +
               s(site,bs="re",k=4),
             data = foi.data,
             family = binomial()
   )
-  summary(mod1) #indicates that height.cm is no longer significant
+  summary(mod1)
   
   mod2<-gam(status.next~
-            log10(foi)+
-            #s(height.cm,bs="cs",k=4),
-            #s(mean.temp,bs="cs",k=4) + 
-            #s(max.temp,bs="cs",k=4) + 
-            #s(min.temp,bs="cs",k=4) + 
-            #s(mean.abs.hum,bs="cs",k=4) + 
-            #s(max.abs.hum,bs="cs",k=4) + 
-            #s(min.abs.hum,bs="cs",k=4) + 
-            #s(tot.rain,bs="cs",k=4) + 
-            #s(mean.solar,bs="cs",k=4)+
-            s(site,bs="re",k=4),
+              log10(foi)+
+              s(site,bs="re",k=4),
             data = foi.data,
             family = binomial()
-  ) # all predictors now significant
+  )
   summary(mod2)
   
-  saveRDS(mod2,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
+  AIC(mod0,mod1,mod2)
+  
+  saveRDS(mod0,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
 }
 
 foi.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
