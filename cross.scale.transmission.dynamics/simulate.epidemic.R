@@ -189,7 +189,7 @@ simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
 
 # run simulations
 step.size<-7
-site<-"HM"
+site<-"GM"
 
 
 if(any((!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.site.",site,".step.size.",step.size,".RDS"))),
@@ -200,7 +200,7 @@ if(any((!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmissi
   library(doParallel)
   n.cores<-4
   registerDoParallel(n.cores)
-  pred.epi.all.0<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,0,step.size=step.size,print.progress = F)
+  pred.epi.all.0<-foreach(k = 1:4, .multicombine = T) %dopar% simulate.epi(site,0,step.size=step.size,print.progress = F)
   saveRDS(pred.epi.all.0,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.site.",site,".step.size.",step.size,".RDS"))
   
   pred.epi.all.1.8<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,1.8,step.size=step.size,print.progress = F)
@@ -235,14 +235,14 @@ sub.locs<-corrected.locs[which(corrected.locs$Site==site),]
 
 par(mfrow=c(1,1))
 par(mar=c(5,5,1,1))
-plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,.4),xlab="date",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
+plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,.1),xlab="date",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
 xvals<-c()
 yvals<-c()
-for(i in 1:length(pred.epi.all.0))
+for(i in 1:length(unique(sub.epi$Date.First.Observed.Diseased)))
 {
   date<-unique(sub.epi$Date.First.Observed.Diseased)[i]
   xvals<-c(xvals,date)
-  yvals<-c(yvals,dim(sub.epi[which(sub.epi$Date.First.Observed.Diseased<=date),])[1]/dim(sub.locs)[1])
+  yvals<-c(yvals,nrow(sub.epi[which(sub.epi$Date.First.Observed.Diseased<=date),])/nrow(sub.locs))
 }
 points(xvals,yvals,type="l",col="black",lwd=4)
 
