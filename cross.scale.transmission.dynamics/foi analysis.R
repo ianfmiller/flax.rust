@@ -91,59 +91,38 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 
 foi.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
 
-par(mfrow=c(1,1),mar=c(6,8,6,6))
-plot(log10(foi.data$foi),jitter(foi.data$status.next,factor=.5),xlab="predicted spore deposition",ylab="",axes=F,cex.lab=1.5,ylim=c(-.2,1.2),xlim=c(-6,3))
-axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=1.5,line=3,tick = F)
-axis(2,at=c(0,.25,.5,.75,1),cex.axis=1.5,col="red",col.axis="red")
+par(mar=c(6,8,6,0))
+layout(matrix(c(1,1,1,1,2),1,5))
+plot(log10(foi.data$foi),jitter(foi.data$status.next*.1,factor=.5),xlab="predicted log 10 spore deposition",ylab="",axes=F,cex.lab=1.5,ylim=c(-.025,0.125),xlim=c(-6,3))
+axis(2,at=c(0,.1),labels = c("healthy","infected"),cex.axis=1.5,line=3,tick = F)
+axis(2,at=c(0,.05,.1),cex.axis=1.5,col="red",col.axis="red")
 mtext("odds of infection",side=2,line=2.5,cex=1.5,col="red")
 axis(1,cex.axis=1.5)
 
-fois<-10^seq(-6,3,.25)
+fois<-10^seq(-6,2.3,.1)
 new.data.1<-data.frame("foi"=fois,
                      "height.cm"=5,
-                     "mean.temp"=mean(foi.data$mean.temp),
-                     "max.temp"=mean(foi.data$max.temp),
-                     "min.temp"=mean(foi.data$min.temp),
-                     "mean.abs.hum"=mean(foi.data$mean.abs.hum),
-                     "max.abs.hum"=mean(foi.data$max.abs.hum),
-                     "tot.rain"=mean(foi.data$tot.rain),
                      "site"="CC"
                      )
 new.data.2<-data.frame("foi"=fois,
                        "height.cm"=10,
-                       "mean.temp"=mean(foi.data$mean.temp),
-                       "max.temp"=mean(foi.data$max.temp),
-                       "min.temp"=mean(foi.data$min.temp),
-                       "mean.abs.hum"=mean(foi.data$mean.abs.hum),
-                       "max.abs.hum"=mean(foi.data$max.abs.hum),
-                       "tot.rain"=mean(foi.data$tot.rain),
                        "site"="CC"
                       )
 new.data.3<-data.frame("foi"=fois,
                        "height.cm"=25,
-                       "mean.temp"=mean(foi.data$mean.temp),
-                       "max.temp"=mean(foi.data$max.temp),
-                       "min.temp"=mean(foi.data$min.temp),
-                       "mean.abs.hum"=mean(foi.data$mean.abs.hum),
-                       "max.abs.hum"=mean(foi.data$max.abs.hum),
-                       "tot.rain"=mean(foi.data$tot.rain),
                        "site"="CC"
                       )
 new.data.4<-data.frame("foi"=fois,
                        "height.cm"=50,
-                       "mean.temp"=mean(foi.data$mean.temp),
-                       "max.temp"=mean(foi.data$max.temp),
-                       "min.temp"=mean(foi.data$min.temp),
-                       "mean.abs.hum"=mean(foi.data$mean.abs.hum),
-                       "max.abs.hum"=mean(foi.data$max.abs.hum),
-                       "tot.rain"=mean(foi.data$tot.rain),
                        "site"="CC"
                       )
 points(log10(new.data.1$foi),predict(foi.model,newdata = new.data.1,type = "response",exclude = "s(site)"),type="l",col="red",lwd=2,lty=1)
 points(log10(new.data.2$foi),predict(foi.model,newdata = new.data.2,type = "response",exclude = "s(site)"),type="l",col="red",lwd=2,lty=2)
 points(log10(new.data.3$foi),predict(foi.model,newdata = new.data.3,type = "response",exclude = "s(site)"),type="l",col="red",lwd=2,lty=3)
 points(log10(new.data.4$foi),predict(foi.model,newdata = new.data.4,type = "response",exclude = "s(site)"),type="l",col="red",lwd=2,lty=4)
-legend("topright",legend=c("50cm","25cm","10cm","5cm"),col="red",lty=c(4,3,2,1),bty="n",cex=1.5,lwd=2)
+par(mar=c(0,0,0,0))
+plot(0,0,type="n",axes=F,xlab = "",ylab="")
+legend("left",legend=c("50cm","25cm","10cm","5cm"),col="red",lty=c(4,3,2,1),bty="n",cex=1.5,lwd=2)
 
 par(mfrow=c(1,1),mar=c(6,8,6,6))
 plot(0,0,type = "n",xlab="predicted spore deposition",ylab="relative odds of infection",axes=F,cex.lab=1.5,ylim=c(0,100),xlim = c(-6,3))
