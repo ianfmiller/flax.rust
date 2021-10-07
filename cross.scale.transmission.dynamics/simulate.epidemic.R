@@ -198,15 +198,18 @@ if(any((!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmissi
 )) {
   library(parallel)
   library(doParallel)
+  library(foreach)
+  library(doRNG)
+  
   n.cores<-4
   registerDoParallel(n.cores)
-  pred.epi.all.0<-foreach(k = 1:4, .multicombine = T) %dopar% simulate.epi(site,0,step.size=step.size,print.progress = F)
+  pred.epi.all.0<-foreach(k = 1:4, .multicombine = T, .options.RNG=2389572) %dorng% simulate.epi(site,0,step.size=step.size,print.progress = F)
   saveRDS(pred.epi.all.0,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.site.",site,".step.size.",step.size,".RDS"))
   
-  pred.epi.all.1.8<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,1.8,step.size=step.size,print.progress = F)
+  pred.epi.all.1.8<-foreach(k = 1:10, .multicombine = T, .options.RNG=2389572) %dorng% simulate.epi(site,1.8,step.size=step.size,print.progress = F)
   saveRDS(pred.epi.all.1.8,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.site.",site,".step.size.",step.size,".RDS"))
   
-  pred.epi.all.3.7<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,3.7,step.size=step.size,print.progress = F)
+  pred.epi.all.3.7<-foreach(k = 1:10, .multicombine = T, .options.RNG=2389572) %dorng% simulate.epi(site,3.7,step.size=step.size,print.progress = F)
   saveRDS(pred.epi.all.3.7,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.site.",site,".step.size.",step.size,".RDS"))
 } else 
 {
@@ -235,7 +238,7 @@ sub.locs<-corrected.locs[which(corrected.locs$Site==site),]
 
 par(mfrow=c(1,1))
 par(mar=c(5,5,1,1))
-plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,.1),xlab="date",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
+plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,.4),xlab="date",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
 xvals<-c()
 yvals<-c()
 for(i in 1:length(unique(sub.epi$Date.First.Observed.Diseased)))
