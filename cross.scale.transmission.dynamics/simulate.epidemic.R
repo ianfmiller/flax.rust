@@ -173,7 +173,7 @@ simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
       {
         new.status<-1
         
-        new.plant.inf.intens<-predict.plant.inf.intens.boot(plant.inf.intens.last = last.epi[i,"plant.inf.intens"], max.height.last = last.epi[i,"max.height"], site = site,date0 = date0,date1 = date1)
+        new.plant.inf.intens<-predict.plant.inf.intens.boot(plant.inf.intens.last = last.epi[i,"plant.inf.intens"], max.height.last = last.epi[i,"max.height"], site = site,date0 = date0,date1 = date1,temp.addition=temp.addition)
       }
       
       ### plant growth
