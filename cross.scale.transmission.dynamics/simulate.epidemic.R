@@ -203,7 +203,7 @@ if(any((!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmissi
   
   n.cores<-4
   registerDoParallel(n.cores)
-  pred.epi.all.0<-foreach(k = 1:4, .multicombine = T, .options.RNG=2389572) %dorng% simulate.epi(site,0,step.size=step.size,print.progress = F)
+  pred.epi.all.0<-foreach(k = 1:10, .multicombine = T, .options.RNG=2389572) %dorng% simulate.epi(site,0,step.size=step.size,print.progress = F)
   saveRDS(pred.epi.all.0,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.site.",site,".step.size.",step.size,".RDS"))
   
   pred.epi.all.1.8<-foreach(k = 1:10, .multicombine = T, .options.RNG=2389572) %dorng% simulate.epi(site,1.8,step.size=step.size,print.progress = F)
