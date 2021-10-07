@@ -64,7 +64,7 @@ predict.plant.inf.intens<-function(plant.inf.intens.last,max.height.last,site,da
   plant.inf.intens.next
 }
 
-predict.plant.inf.intens.boot<-function(plant.inf.intens.last,max.height.last,site,date0,date1)
+predict.plant.inf.intens.boot<-function(plant.inf.intens.last,max.height.last,site,date0,date1,temp.addition=0)
 {
   # load weather data
   ## subst temp rh data to relevant window
@@ -73,6 +73,7 @@ predict.plant.inf.intens.boot<-function(plant.inf.intens.last,max.height.last,si
   temp.rh.sub<-subset(temp.rh.sub,date.time>=date0) #### pull out relevant data
   temp.rh.sub<-subset(temp.rh.sub,!is.na(temp.c)) #### throw out NAs
   temp.rh.sub<-cbind(temp.rh.sub,interval.length=c(diff(as.numeric(temp.rh.sub$date.time))/(60*60*24),NA)) #add interval length in days
+  temp.rh.sub$temp.c<-temp.rh.sub$temp.c+temp.addition ### shift temperature
   
   ## subset weather data to relevant window
   weath.sub<-all.weath[which(all.weath$site==site),] #pull out weath data for site
