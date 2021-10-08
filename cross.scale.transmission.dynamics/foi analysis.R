@@ -65,7 +65,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
             data = foi.data,
             family = binomial()
   )
-  summary(mod0)
+  summary(mod0) # height not significant
   
   mod1<-gam(status.next~
               log10(foi)+
@@ -84,9 +84,9 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   )
   summary(mod2)
   
-  AIC(mod0,mod1,mod2)
+  AIC(mod1,mod2)
   
-  saveRDS(mod0,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
+  saveRDS(mod1,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
 }
 
 foi.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
