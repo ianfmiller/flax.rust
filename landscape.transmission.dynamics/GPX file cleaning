@@ -1,0 +1,11 @@
+GPX file cleaning
+Methods:
+1) Open .gpx file in GPX editor
+2) Zoom in all the way with 'Apple Standard' view
+3) Trace path from beginning
+4) Whenever an irregular pattern (apparent deviation from a normal path) occurs:
+	a)Switch view to 'Apple Satelite' (this will zoom map out a bit)
+	b)Check to see if deviation is real based on satellite imagery
+	c)If it is real, delete points
+5) Delete all waypoints backtracking from end of transect to start
+6) Save file as x.cleaned.gpx
