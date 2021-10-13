@@ -71,28 +71,62 @@ gpx_tracks <- get_gpx_tracks()
 
 # visualize gpx data
 
+## create line from gpx tracks
 line<-st_sfc(st_linestring(cbind(gpx_tracks$longitude,gpx_tracks$latitude))) ## draw line through all gps points
+
+## sample a point every meter along line
 n.points<-floor(as.numeric(st_length(st_sfc(line, crs = "+proj=longlat +datum=WGS84")))) ## set number of points to sample as distance of gps track in meters
-points<-st_line_sample(line,n=n.points,type="regular") #3 sample points at a reular interval along track
+points<-st_line_sample(line,n=n.points,type="regular") ## 3 sample points at a reular interval along track
 
-line<-st_sfc(line, crs = "+proj=longlat +datum=WGS84") # convert to coordinates
-points<-st_sfc(points, crs = "+proj=longlat +datum=WGS84")  # convert to coordinates
+## convert line and points to correct coordinate system
+line<-st_sfc(line, crs = "+proj=longlat +datum=WGS84") ## convert to coordinates
+points<-st_sfc(points, crs = "+proj=longlat +datum=WGS84")  ## convert to coordinates
 
-plot(line) ## plot original track
-plot(points,col="red",add=T) ## plot sampled points
-plot(st_sfc(st_cast(points,"LINESTRING"),crs = "+proj=longlat +datum=WGS84"),col="blue",add=T) ## plot track made from sampled points
+## create new line from sampled points
+new_line<-st_linestring(st_coordinates(points))
+new_line<-st_sfc(line, crs = "+proj=longlat +datum=WGS84")
+
+## visualize 
+
+### plot original track (blue)
+leaflet() %>% 
+  addTiles() %>% 
+  addPolylines(data=line,col="blue")
+
+### plot original track (not visible), sampled points (green, appears as line due to high density), and new line (red)
+leaflet() %>% 
+  addTiles() %>% 
+  addPolylines(data=line,col="blue",weight=15) %>%
+  addCircles(data=st_cast(points,"POINT"),col="green",radius=5) %>%
+  addPolylines(data=new_line,col="red",weight=4)
+
+## create ribbon with width = 5m along 
+
+line_mod <- st_transform(new_line, crs = 3501)
+plot(st_geometry(line_mod))
+ribbon <- st_buffer(line_mod, dist = 2.5, endCapStyle = "FLAT",joinStyle = "ROUND")
+plot(st_geometry(ribbon), add = TRUE,col="green")
+
+leaflet() %>% 
+  addTiles() %>% 
+  addMeasure(primaryLengthUnit = "meters") %>% 
+  addPolylines(data = st_transform(line_mod,crs="+proj=longlat +datum=WGS84")) %>% 
+  addPolygons(data = st_transform(ribbon,crs="+proj=longlat +datum=WGS84"),col="red")
 
 
-## proof of concept illustrated with fewer points
-#line<-st_sfc(st_linestring(cbind(gpx_tracks$longitude,gpx_tracks$latitude)))
-#points<-st_line_sample(line,density = 100,type="regular")
-#plot(st_sfc(line, crs = "+proj=longlat +datum=WGS84"))
-#plot(st_sfc(points, crs = "+proj=longlat +datum=WGS84"),col="red",add=T)
-#plot(st_sfc(st_cast(points,"LINESTRING"),crs = "+proj=longlat +datum=WGS84"),col="blue",add=T)
+# load flax population data
 
-
+flax_pops <- read.csv("~/Documents/GitHub/flax.rust/data/landscape.transect.data/landscape.transects.csv")
 
 test.point<-st_sfc(st_point(cbind(gpx_tracks$longitude[1],gpx_tracks$latitude[1])),crs = "+proj=longlat +datum=WGS84")
-st_distance(st_cast(points,"POINT"),test.point)
+dists<-c(st_distance(st_cast(points,"POINT"),test.point))
 
 x<-st_distance(test.point,st_cast(points,"POINT"))
+
+
+library(sf)
+
+
+
+
+
