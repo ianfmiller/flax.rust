@@ -187,7 +187,7 @@ simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
 
 # run simulations
 step.size<-2
-site<-"GM"
+site<-"HM"
 
 
 if(any((!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.site.",site,".step.size.",step.size,".RDS"))),
@@ -209,11 +209,6 @@ if(any((!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmissi
   
   pred.epi.all.3.7<-foreach(k = 1:10, .multicombine = T, .options.RNG=2389572) %dorng% simulate.epi(site,3.7,step.size=step.size,print.progress = F)
   saveRDS(pred.epi.all.3.7,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.site.",site,".step.size.",step.size,".RDS"))
-} else 
-{
-  pred.epi.all.0<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.site.",site,".step.size.",step.size,".RDS"))
-  pred.epi.all.1.8<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.site.",site,".step.size.",step.size,".RDS"))
-  pred.epi.all.3.7<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.site.",site,".step.size.",step.size,".RDS"))
 }
 
 # plot simulations
@@ -231,118 +226,142 @@ plot.purple<-t_col("purple",75)
 plot.red<-t_col("red",75)
 plot.orange<-t_col("orange",75)
 
-sub.epi<-corrected.epi[which(corrected.epi$Site==site),]
-sub.locs<-corrected.locs[which(corrected.locs$Site==site),]
-
-par(mfrow=c(1,1))
-par(mar=c(5,5,1,1))
-plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,.4),xlab="date",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
-xvals<-c()
-yvals<-c()
-for(i in 1:length(unique(sub.epi$Date.First.Observed.Diseased)))
+plot.func<-function(site,step.size)
 {
-  date<-unique(sub.epi$Date.First.Observed.Diseased)[i]
-  xvals<-c(xvals,date)
-  yvals<-c(yvals,nrow(sub.epi[which(sub.epi$Date.First.Observed.Diseased<=date),])/nrow(sub.locs))
-}
-points(xvals,yvals,type="l",col="black",lwd=4)
-
-
-for(k in 1:length(pred.epi.all.0))
-{
+  
+  pred.epi.all.0<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.site.",site,".step.size.",step.size,".RDS"))
+  pred.epi.all.1.8<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.site.",site,".step.size.",step.size,".RDS"))
+  pred.epi.all.3.7<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.site.",site,".step.size.",step.size,".RDS"))
+  
+  sub.epi<-corrected.epi[which(corrected.epi$Site==site),]
+  sub.locs<-corrected.locs[which(corrected.locs$Site==site),]
+  
+  if(site=="GM")
+  {
+    plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,.4),xlab="date",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
+  }
+  
+  if(site=="HM")
+  {
+    plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,.05),xlab="date",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
+  }
+  
+  
   xvals<-c()
   yvals<-c()
-  pred.epi<-pred.epi.all.0[[k]]
-  for(i in 1:length(unique(pred.epi.all.0[[1]]$date)))
+  for(i in 1:length(unique(sub.epi$Date.First.Observed.Diseased)))
   {
-    date<-unique(pred.epi$date)[i]
+    date<-unique(sub.epi$Date.First.Observed.Diseased)[i]
     xvals<-c(xvals,date)
-    yvals<-c(yvals,sum(pred.epi[which(pred.epi$date==date),"status"])/dim(sub.locs)[1])
+    yvals<-c(yvals,nrow(sub.epi[which(sub.epi$Date.First.Observed.Diseased<=date),])/nrow(sub.locs))
   }
-  points(xvals,yvals,type="l",col=plot.orange)
-}
-
-xvals<-c()
-yvals<-c()
-for(k in 1:length(unique(pred.epi.all.0[[1]]$date)))
-{
-  sub.prevs<-c()
-  date<-unique(pred.epi.all.0[[1]]$date)[k]
-  for(j in 1:length(pred.epi.all.0))
+  points(xvals,yvals,type="l",col="black",lwd=4)
+  
+  
+  for(k in 1:length(pred.epi.all.0))
   {
-   sub.dat<-pred.epi.all.0[[j]]
-   sub.dat<-sub.dat[which(sub.dat$date==date),]
-   sub.prevs<-c(sub.prevs,sum(sub.dat$status)/dim(sub.dat)[1])
+    xvals<-c()
+    yvals<-c()
+    pred.epi<-pred.epi.all.0[[k]]
+    for(i in 1:length(unique(pred.epi.all.0[[1]]$date)))
+    {
+      date<-unique(pred.epi$date)[i]
+      xvals<-c(xvals,date)
+      yvals<-c(yvals,sum(pred.epi[which(pred.epi$date==date),"status"])/dim(sub.locs)[1])
+    }
+    points(xvals,yvals,type="l",col=plot.orange)
   }
-  yvals<-c(yvals,mean(sub.prevs))
-  xvals<-c(xvals,date)
-}
-points(xvals,yvals,type="l",col="orange",lwd=4)
-
-
-for(k in 1:length(pred.epi.all.1.8))
-{
+  
   xvals<-c()
   yvals<-c()
-  pred.epi<-pred.epi.all.1.8[[k]]
-  for(i in 1:length(unique(pred.epi.all.1.8[[1]]$date)))
+  for(k in 1:length(unique(pred.epi.all.0[[1]]$date)))
   {
-    date<-unique(pred.epi$date)[i]
+    sub.prevs<-c()
+    date<-unique(pred.epi.all.0[[1]]$date)[k]
+    for(j in 1:length(pred.epi.all.0))
+    {
+      sub.dat<-pred.epi.all.0[[j]]
+      sub.dat<-sub.dat[which(sub.dat$date==date),]
+      sub.prevs<-c(sub.prevs,sum(sub.dat$status)/dim(sub.dat)[1])
+    }
+    yvals<-c(yvals,mean(sub.prevs))
     xvals<-c(xvals,date)
-    yvals<-c(yvals,sum(pred.epi[which(pred.epi$date==date),"status"])/dim(sub.locs)[1])
   }
-  points(xvals,yvals,type="l",col=plot.red)
-}
-
-xvals<-c()
-yvals<-c()
-for(k in 1:length(unique(pred.epi.all.1.8[[1]]$date)))
-{
-  sub.prevs<-c()
-  date<-unique(pred.epi.all.1.8[[1]]$date)[k]
-  for(j in 1:length(pred.epi.all.1.8))
+  points(xvals,yvals,type="l",col="orange",lwd=4)
+  
+  
+  for(k in 1:length(pred.epi.all.1.8))
   {
-    sub.dat<-pred.epi.all.1.8[[j]]
-    sub.dat<-sub.dat[which(sub.dat$date==date),]
-    sub.prevs<-c(sub.prevs,sum(sub.dat$status)/dim(sub.dat)[1])
+    xvals<-c()
+    yvals<-c()
+    pred.epi<-pred.epi.all.1.8[[k]]
+    for(i in 1:length(unique(pred.epi.all.1.8[[1]]$date)))
+    {
+      date<-unique(pred.epi$date)[i]
+      xvals<-c(xvals,date)
+      yvals<-c(yvals,sum(pred.epi[which(pred.epi$date==date),"status"])/dim(sub.locs)[1])
+    }
+    points(xvals,yvals,type="l",col=plot.red)
   }
-  yvals<-c(yvals,mean(sub.prevs))
-  xvals<-c(xvals,date)
-}
-points(xvals,yvals,type="l",col="red",lwd=4)
-
-
-for(k in 1:length(pred.epi.all.3.7))
-{
+  
   xvals<-c()
   yvals<-c()
-  pred.epi<-pred.epi.all.3.7[[k]]
-  for(i in 1:length(unique(pred.epi.all.3.7[[1]]$date)))
+  for(k in 1:length(unique(pred.epi.all.1.8[[1]]$date)))
   {
-    date<-unique(pred.epi$date)[i]
+    sub.prevs<-c()
+    date<-unique(pred.epi.all.1.8[[1]]$date)[k]
+    for(j in 1:length(pred.epi.all.1.8))
+    {
+      sub.dat<-pred.epi.all.1.8[[j]]
+      sub.dat<-sub.dat[which(sub.dat$date==date),]
+      sub.prevs<-c(sub.prevs,sum(sub.dat$status)/dim(sub.dat)[1])
+    }
+    yvals<-c(yvals,mean(sub.prevs))
     xvals<-c(xvals,date)
-    yvals<-c(yvals,sum(pred.epi[which(pred.epi$date==date),"status"])/dim(sub.locs)[1])
   }
-  points(xvals,yvals,type="l",col=plot.purple)
+  points(xvals,yvals,type="l",col="red",lwd=4)
+  
+  
+  for(k in 1:length(pred.epi.all.3.7))
+  {
+    xvals<-c()
+    yvals<-c()
+    pred.epi<-pred.epi.all.3.7[[k]]
+    for(i in 1:length(unique(pred.epi.all.3.7[[1]]$date)))
+    {
+      date<-unique(pred.epi$date)[i]
+      xvals<-c(xvals,date)
+      yvals<-c(yvals,sum(pred.epi[which(pred.epi$date==date),"status"])/dim(sub.locs)[1])
+    }
+    points(xvals,yvals,type="l",col=plot.purple)
+  }
+  
+  xvals<-c()
+  yvals<-c()
+  for(k in 1:length(unique(pred.epi.all.3.7[[1]]$date)))
+  {
+    sub.prevs<-c()
+    date<-unique(pred.epi.all.3.7[[1]]$date)[k]
+    for(j in 1:length(pred.epi.all.3.7))
+    {
+      sub.dat<-pred.epi.all.3.7[[j]]
+      sub.dat<-sub.dat[which(sub.dat$date==date),]
+      sub.prevs<-c(sub.prevs,sum(sub.dat$status)/dim(sub.dat)[1])
+    }
+    yvals<-c(yvals,mean(sub.prevs))
+    xvals<-c(xvals,date)
+  }
+  points(xvals,yvals,type="l",col="purple",lwd=4)
+  legend("topleft",legend=c("data","+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col=c("black","orange","red","purple"),lwd=4,cex=1,bty="n")
 }
 
-xvals<-c()
-yvals<-c()
-for(k in 1:length(unique(pred.epi.all.3.7[[1]]$date)))
-{
-  sub.prevs<-c()
-  date<-unique(pred.epi.all.3.7[[1]]$date)[k]
-  for(j in 1:length(pred.epi.all.3.7))
-  {
-    sub.dat<-pred.epi.all.3.7[[j]]
-    sub.dat<-sub.dat[which(sub.dat$date==date),]
-    sub.prevs<-c(sub.prevs,sum(sub.dat$status)/dim(sub.dat)[1])
-  }
-  yvals<-c(yvals,mean(sub.prevs))
-  xvals<-c(xvals,date)
-}
-points(xvals,yvals,type="l",col="purple",lwd=4)
-legend("topleft",legend=c("data","+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col=c("black","orange","red","purple"),lwd=4,cex=1,bty="n")
+par(mfrow=c(1,2),mar=c(5,5,3,3))
+plot.func("GM",2)
+mtext("GM",cex = 2)
+plot.func("HM",2)
+mtext("HM",cex=2)
+
+
 
 par(mfrow=c(2,4))
 
