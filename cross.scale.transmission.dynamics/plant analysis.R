@@ -187,7 +187,7 @@ plants.shrinkage.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transm
 ### growth model
 #par(mfrow=c(2,2))
 #plot(plants.growth.model,scale=0,select=1)
-#vis.gam(plants.growth.model,plot.type="contour")
+#plot(plants.growth.model,select=2,scheme=2,too.far=5,contour.col="black",labcex=1.5)
 #plot(plants.growth.model,scale=0,select=3)
 
 #par(mfrow=c(1,1))
@@ -200,7 +200,7 @@ plants.shrinkage.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transm
 ### shrinkage model
 #par(mfrow=c(2,3))
 #plot(plants.shrinkage.model,scale=0,select=1)
-#vis.gam(plants.shrinkage.model,plot.type="contour")
+#plot(plants.shrinkage.model,select=2,scheme=2,too.far=5,contour.col="black",labcex=1.5)
 #plot(plants.shrinkage.model,scale=0,select=3)
 #plot(plants.shrinkage.model,scale=0,select=4)
 #plot(plants.shrinkage.model,scale=0,select=5)
