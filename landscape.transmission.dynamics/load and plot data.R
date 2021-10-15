@@ -52,8 +52,8 @@ Plot(summer_solar_radiation)
 
 # load gpx data and population data
 
-#all_transects <- c('RG' , 'GL' , 'WM', 'TR' , 'NP' , 'CL' , 'LG' , 'MB' , 'HM'  , 'CT' , 'CB' , 'SH' , 'DC' , 'VB' , 'BG' , 'CM' , 'BC' , 'WS' , 'UL' , 'RL' , 'ER' , 'ME' , 'OBJ' , 'TC') ## transects to consider
-all_transects<-c("UL")
+#transects <- c('RG' , 'GL' , 'WM', 'TR' , 'NP' , 'CL' , 'LG' , 'MB' , 'HM'  , 'CT' , 'CB' , 'SH' , 'DC' , 'VB' , 'BG' , 'CM' , 'BC' , 'WS' , 'UL' , 'RL' , 'ER' , 'ME' , 'OBJ' , 'TC') ## transects to consider
+transects<-c("UL")
 
 ## function to extract and clean gpx data
 get_gpx_tracks <- function(transects = all_transects) {
@@ -80,6 +80,15 @@ map<-leaflet() %>%
 
 ## plotting option
 plot<-T
+
+## setup data objects
+
+all_transects<-data.frame("transect"=character(),"chunk"=integer(),"flax.presence"=integer(),"incidence"=numeric(),"elevation"=numeric(),"landcover"=numeric(),"solar"=numeric())
+
+all_populations<-data.frame("transect"=character(),"chunk"=integer(),"density"=numeric(),"prevalence"=numeric(),"incidence"=numeric(),"nearest.pop.dist"=numeric(),"nearest.D.pop.dist"=numeric(),"elevation"=numeric(),"landcover"=numeric(),"solar"=numeric())
+
+all_sub_populations<-data.frame("transect"=character(),"chunk"=integer(),"density"=numeric(),"prevalence"=numeric(),"incidence"=numeric(),"nearest.pop.dist"=numeric(),"nearest.D.pop.dist"=numeric(),"elevation"=numeric(),"landcover"=numeric(),"solar"=numeric())
+
 
 ## loop to extract data
 
