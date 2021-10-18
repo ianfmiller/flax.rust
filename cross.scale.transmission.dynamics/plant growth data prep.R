@@ -1,10 +1,10 @@
 ## Plant Growth
 library(lubridate)
-if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.plant.heights.RDS")) | !(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plant.heights.RDS")))
+if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.heights.RDS")) | !(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plant.heights.RDS")))
 {
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
   
-  # clean healthy plant data
+  # clean data from healthy focal plants
   healthyraw <- read.csv("~/Documents/GitHub/flax.rust/data/healthyplants.csv")
   healthy <- healthyraw[!is.na(healthyraw$max.height),]
   tags <- unique(healthy$Tag)
@@ -25,11 +25,90 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   healthyindiv$Date <- mdy(healthyindiv$Date)
   healthyindiv$plant.inf.intens <- 0
   
-  ## load diseased plant data
+  ## make data object for diseased healthy 
+  
+  ### load data
+  within.host<-read.csv("~/Documents/GitHub/flax.rust/data/Withinhost.csv")
+  
+  ### subset to 2020
+  within.host<-within.host[which(within.host$Year==2020),]
+  
+  ### pull out relevant columns
+  plants<-within.host[,c("Year","Site","Tag","Date","N.Stems","N.D.Stems","max.height","picture","stem.index","stem.height","percent.tissue.infected","length.tissue.infected","N.pustules.middle")]
+  
+  ### get rid of data with missing  or NA length.tissue.infected or N.pustules.middle or stem.height
+  if(any(is.na(plants$length.tissue.infected))) {plants<-plants[-which(is.na(plants$length.tissue.infected)),]}
+  if(any(is.na(plants$length.tissue.infected))) {plants<-plants[-which(plants$length.tissue.infected==""),]}
+  if(any(is.na(plants$N.pustules.middle))) {plants<-plants[-which(is.na(plants$N.pustules.middle)),]}
+  if(any(is.na(plants$N.pustules.middle))) {plants<-plants[-which(plants$N.pustules.middle==""),]}
+  if(any(is.na(plants$stem.height))) {plants<-plants[-which(is.na(plants$stem.height)),]}
+  if(any(is.na(plants$stem.height))) {plants<-plants[-which(plants$stem.height==""),]}
+  
+  ## summarize by plant for each date
+  years<-c()
+  sites<-c()
+  dates<-c()
+  tags<-c()
+  n.stems<-c()
+  n.d.stems<-c()
+  max.heights<-c()
+  reference.pictures<-c()
+  plant.inf.intens<-c()
+  
+  for (tag in unique(plants$Tag))
+  {
+    sub.plants.1<-plants[which(plants$Tag==tag),]
+    
+    for (date in unique(sub.plants.1$Date))
+    {
+      sub.plants.2<-sub.plants.1[which(sub.plants.1$Date==date),]
+      
+      if(any(!is.na(sub.plants.2$N.Stems)) & any(!is.na(sub.plants.2$N.D.Stems)))
+      {
+        ## new values
+        new.year<-sub.plants.2[1,"Year"]
+        new.site<-sub.plants.2[1,"Site"]
+        new.tag<-sub.plants.2[1,"Tag"]
+        new.date<-date
+        new.n.stems<-sub.plants.2[1,"N.Stems"]
+        new.n.d.stems<-sub.plants.2[1,"N.D.Stems"]
+        new.max.height<-sub.plants.2[1,"max.height"]
+        new.reference.picture<-sub.plants.2[1,"picture"]
+        
+        ## calculate plant infection intensity
+        new.plant.inf.intens<-new.n.d.stems*mean(as.numeric(sub.plants.2$length.tissue.infected)*as.numeric(sub.plants.2$N.pustules.middle))
+        
+        ## store new values
+        years<-c(years,new.year)
+        sites<-c(sites,new.site)
+        dates<-c(dates,new.date)
+        tags<-c(tags,new.tag)
+        n.stems<-c(n.stems,new.n.stems)
+        n.d.stems<-c(n.d.stems,new.n.d.stems)
+        max.heights<-c(max.heights,new.max.height)
+        reference.pictures<-c(reference.pictures,new.reference.picture)
+        plant.inf.intens<-c(plant.inf.intens,new.plant.inf.intens)
+        
+      }
+    }
+  }
+  
+  plants<-data.frame("Year"=years,"Site"=sites,"Tag"=tags,"Date"=dates,"N.Stems"=n.stems,"N.D.Stems"=n.d.stems,"max.height"=max.heights,"picture"=reference.pictures,"plant.inf.intens"=plant.inf.intens)
+  
+  ## correct 0 intensities to .1, logic being that this is a measure of tot infection load, and it shouldn't be less than 1 pustule (coded as .1cm infected tissue, 1 pustule/leaf)
+  plants$plant.inf.intens[which(plants$plant.inf.intens<.1)]<-.1
+  
+  
+  ## finish cleaning
+  plants$Date<-as.Date(plants$Date,tryFormats = "%m/%d/%y")
+  
+  ## save data
+  saveRDS(plants,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plants.RDS")
+  
   plantsraw <- readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plants.RDS")
   plants <- plantsraw[!is.na(plantsraw$max.height),]
   
-  ## merge data
+  ## merge height data from healthy and diseased focal plants
   subs <- c("Year", "Site", "Tag", "Date", "max.height", "plant.inf.intens")
   plant.heights <- rbind(healthyindiv[subs], plants[subs])
   colnames(plant.heights) <- c("year", "site", "tag", "date", "max.height", "plant.inf.intens")
@@ -45,21 +124,19 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   end.vals<-c()
   inf.intens.vals<-c()
   days<-c()
-  temp.days<-c()
-  temp.days.16.22<-c()
-  temp.days.7.30<-c()
-  dew.point.days<-c()
-  temp.dew.point.days<-c()
-  temp.16.22.dew.point.days<-c()
-  temp.7.30.dew.point.days<-c()
-  wetness.days<-c()
-  temp.wetness.days<-c()
-  temp.16.22.wetness.days<-c()
-  temp.7.30.wetness.days<-c()
-  tot.rains<-c()
-  solar.days<-c()
-  wind.speed.days<-c()
-  gust.speed.days<-c()
+  mean.temp<-c()
+  max.temp<-c()
+  min.temp<-c()
+  mean.abs.hum<-c() #absolute humidity
+  max.abs.hum<-c()
+  min.abs.hum<-c()
+  #mean.vpd<-c() #vapor pressure deficit
+  #max.vpd<-c() 
+  #min.vpd<-c() 
+  mean.wetness<-c()
+  tot.rain<-c()
+  mean.solar<-c()
+  mean.soil.moisture<-c()
 
   for (tag in unique(plant.heights$tag))
   {
@@ -71,7 +148,9 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
     {
       #pull reference data
       date0<-sub.plant.heights[i,"date"]
+      date0<-as.POSIXct(paste0(date0," 12:00:00"),tz="UTC")
       date1<-sub.plant.heights[i+1,"date"]
+      date1<-as.POSIXct(paste0(date1," 12:00:00"),tz="UTC")
       site<-sub.plant.heights[i,"site"]
       
       #subset temp data to relevant window
@@ -91,25 +170,27 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       weath.sub<-cbind(weath.sub,interval.length=c(diff(as.numeric(weath.sub$date))/(60*60*24),NA))
       
       #calculate environmental variable metrics
-      new.temp.days<-sum(temp.rh.sub$temp.c*temp.rh.sub$interval.length,na.rm = T) #temperature days
-      new.temp.days.16.22<-sum(1*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T) #time (in days) during which temp between 16 and 22 celsius
-      new.temp.days.7.30<-sum(1*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T) #time (in days) during which temp between 7 and 30 celsius
-      new.dew.point.days<-sum(temp.rh.sub$dew.pt.c*temp.rh.sub$interval.length,na.rm = T) #Dew point days
+      new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
+      new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
+      new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
       
-      #calculate weather metrics
-      new.wetness.days<-sum(weath.sub$wetness*weath.sub$interval.length,na.rm = T)
+      abs.hum<-6.112*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh*2.1674/(273.15+T)
+      new.mean.abs.hum<-mean(abs.hum,na.rm=T) #absolute humidity, see https://www.medrxiv.org/content/10.1101/2020.02.12.20022467v1.full.pdf
+      new.max.abs.hum<-max(abs.hum,na.rm=T)
+      new.min.abs.hum<-min(abs.hum,na.rm=T)
+      
+      #svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
+      #avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
+      #vpds<-avps-svps
+      
+      #new.mean.vpd<-mean(vpds,na.rm=T)
+      #new.max.vpd<-max(vpds,na.rm=T)
+      #new.min.vpd<-min(vpds,na.rm=T)
+      
+      new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
       new.tot.rain<-sum(weath.sub$rain,na.rm=T)
-      new.solar.days<-sum(weath.sub$solar.radiation*weath.sub$interval.length,na.rm = T)
-      new.wind.speed.days<-sum(weath.sub$wind.speed*weath.sub$interval.length,na.rm = T)
-      new.gust.speed.days<-sum(weath.sub$wind.direction*weath.sub$interval.length,na.rm = T)
-      
-      #calculate joint environmental variable metrics--accounts for temporal co-occurence of environmental variables
-      new.temp.dew.point.days<-sum(temp.rh.sub$temp.c*temp.rh.sub$dew.pt.c*temp.rh.sub$interval.length,na.rm = T)
-      new.temp.16.22.dew.point.days<-sum(1*temp.rh.sub.func(temp.rh.sub,16,22)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T)
-      new.temp.7.30.dew.point.days<-sum(1*temp.rh.sub.func(temp.rh.sub,7,30)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T)
-      new.temp.wetness.days<-sum(weath.sub$temp*weath.sub$wetness*weath.sub$interval.length,na.rm = T)
-      new.temp.16.22.wetness.days<-sum(weath.sub$temp.16.22*weath.sub$wetness*weath.sub$interval.length,na.rm = T)
-      new.temp.7.30.wetness.days<-sum(weath.sub$temp.7.30*weath.sub$wetness*weath.sub$interval.length,na.rm = T)
+      new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
+      new.mean.soil.moisture<-mean(weath.sub$soil.moisture,na.rm=T)
       
       #pull out core predictors
       start.val<-sub.plant.heights[i,"max.height"]
@@ -125,32 +206,29 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       inf.intens.vals<-c(inf.intens.vals,sub.plant.heights[i,"plant.inf.intens"])
       days<-c(days,delta.days)
       
-      temp.days.16.22<-c(temp.days.16.22,new.temp.days.16.22)
-      temp.days.7.30<-c(temp.days.7.30,new.temp.days.7.30)
-      temp.days<-c(temp.days,new.temp.days)
-      dew.point.days<-c(dew.point.days,new.dew.point.days)
-      temp.dew.point.days<-c(temp.dew.point.days,new.temp.dew.point.days)
-      temp.16.22.dew.point.days<-c(temp.16.22.dew.point.days,new.temp.16.22.dew.point.days)
-      temp.7.30.dew.point.days<-c(temp.7.30.dew.point.days,new.temp.7.30.dew.point.days)
-      
-      wetness.days<-c(wetness.days,new.wetness.days)
-      temp.wetness.days<-c(temp.wetness.days,new.temp.wetness.days)
-      temp.16.22.wetness.days<-c(temp.16.22.wetness.days,new.temp.16.22.wetness.days)
-      temp.7.30.wetness.days<-c(temp.7.30.wetness.days,new.temp.7.30.wetness.days)
-      tot.rains<-c(tot.rains,new.tot.rain)
-      solar.days<-c(solar.days,new.solar.days)
-      wind.speed.days<-c(wind.speed.days,new.wind.speed.days)
-      gust.speed.days<-c(gust.speed.days,new.gust.speed.days)
+      mean.temp<-c(mean.temp,new.mean.temp)
+      max.temp<-c(max.temp,new.max.temp)
+      min.temp<-c(min.temp,new.min.temp)
+      mean.abs.hum<-c(mean.abs.hum,new.mean.abs.hum)
+      max.abs.hum<-c(max.abs.hum,new.max.abs.hum)
+      min.abs.hum<-c(min.abs.hum,new.min.abs.hum)
+      #mean.vpd<-c(mean.vpd,new.mean.vpd)
+      #max.vpd<-c(max.vpd,new.max.vpd)
+      #min.vpd<-c(min.vpd,new.min.vpd)
+      mean.wetness<-c(mean.wetness,new.mean.wetness)
+      tot.rain<-c(tot.rain,new.tot.rain)
+      mean.solar<-c(mean.solar,new.mean.solar)
+      mean.soil.moisture<-c(mean.soil.moisture,new.mean.soil.moisture)
     }
   }
   delta.height<-data.frame(tag=factor(tags),site=factor(sites), height=start.vals, height.next=end.vals,inf.intens=inf.intens.vals,time=days,
-                             temp.days=temp.days,temp.days.16.22=temp.days.16.22,temp.days.7.30=temp.days.7.30,
-                             dew.point.days=dew.point.days,temp.dew.point.days=temp.dew.point.days,temp.16.22.dew.point.days=temp.16.22.dew.point.days,temp.7.30.dew.point.days=temp.7.30.dew.point.days,
-                             wetness.days=wetness.days,temp.wetness.days=temp.wetness.days,temp.16.22.wetness.days=temp.16.22.wetness.days,temp.7.30.wetness.days=temp.7.30.wetness.days,
-                             tot.rain=tot.rains,solar.days=solar.days,wind.speed.days=wind.speed.days,gust.speed.days=gust.speed.days)
+                           mean.temp=mean.temp,max.temp=max.temp,min.temp=min.temp,
+                           mean.abs.hum=mean.abs.hum,max.abs.hum=max.abs.hum,min.abs.hum=min.abs.hum,
+                           #mean.vpd=mean.vpd,max.vpd=max.vpd,min.vpd=min.vpd,
+                           mean.wetness=mean.wetness,tot.rain=tot.rain,mean.solar=mean.solar,mean.soil.moisture=mean.soil.moisture)
   
   saveRDS(plant.heights,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plant.heights.RDS")
-  saveRDS(delta.height,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.height.RDS")
+  saveRDS(delta.height,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.heights.RDS")
 }
 plant.heights<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plant.heights.RDS")
-delta.height<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.height.RDS")
+delta.height<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.heights.RDS")

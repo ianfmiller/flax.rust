@@ -1,26 +1,29 @@
 # load + prep data
-library(lme4)
+library(mgcv)
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant loc dataset building.R")
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/predict plant inf intens change funcs.R")
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/spore deposition functions tilt.R")
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/predict plant height change funcs.R")
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/starting plant inf intens model.R")
 foi.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
+heights<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plant.heights.RDS")
 plant.inf.intens<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plants.RDS")
-
+rm(site)
 
 
 # simulate epi function
 
-simulate.epi<-function(site,temp.addition,print.progress=T)
+simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
 {
   ## setup
   
   ### subset data
   sub.locs<-corrected.locs[which(corrected.locs$Site==site),]
   sub.epi<-corrected.epi[which(corrected.epi$Site==site),]
-  #start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased==min(sub.epi$Date.First.Observed.Diseased)),]
-  start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased<=unique(sub.epi$Date.First.Observed.Diseased)[2]),] ## option for shorter sim
+  start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased==min(sub.epi$Date.First.Observed.Diseased)),]
+  if(site=="GM") {start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased<=as.Date("2020-06-23")),]}
+  if(site=="HM") {start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased<=as.Date("2020-06-25")),]}
+  if(site=="BT") {start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased<=as.Date("2020-06-24")),]}
   
   ### data frame to fill
   pred.epi<-data.frame("site"=factor(),"tag"=factor(),"X"=numeric(),"Y"=numeric(),"x"=numeric(),"y"=numeric(),"date"=character(),"tot.stems"=numeric(),"status"=numeric(),"max.height"=numeric(),"plant.inf.intens"=numeric())
@@ -30,7 +33,18 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
   for(i in 1:dim(sub.locs)[1])
   {
     date0<-max(start.epi$Date.First.Observed.Diseased) ### first observed date
+    
     tag<-sub.locs[i,"tag"] ### tag
+    if (as.Date(sub.locs[i,"Date"],tryFormats = "%m/%d/%y")==date0) ### simulate height on date0
+    {
+      new.max.height<-max(sub.locs[i,"height.cm"],5,na.rm = T)} else 
+        {
+          if((as.Date(sub.locs[i,"Date"],tryFormats = "%m/%d/%y") >= as.Date(date0) ) & is.na(sub.locs[i,"height.cm"])) {new.max.height<-5} else 
+            {
+              new.max.height<-predict.plant.growth(height.last=max(sub.locs[i,"height.cm"],5,na.rm = T),site=site,date0=as.Date(sub.locs[i,"Date"],tryFormats = "%m/%d/%y"),date1=as.Date(date0),exclude.site = F) #set max height to 5 for seedlings w/o max height recorded  
+            }
+          }
+    
     if(sub.locs[i,"tag"] %in% start.epi$Tag) ### if plant is starting diseased
     {
       status<-1 ### set status to diseased
@@ -47,7 +61,7 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
           target.date.set<-target.date.set[which(target.date.set>date0)] #### look at those after date0
           target.date<-min(target.date.set) #### get closest date w/ observation after date0
           target.date.plant.inf.intens<-plant.inf.intens[intersect(which(plant.inf.intens$Date==target.date),which(plant.inf.intens$Tag==tag)),"plant.inf.intens"] #### get observed plant.inf.intens on target date
-          new.plant.inf.intens<-predict.plant.inf.intens.last(target.date.plant.inf.intens,site,as.POSIXct(paste0(date0," 12:00:00")),as.POSIXct(paste0(target.date," 12:00:00"))) #### hindcast plant.inf.intens for date0 
+          new.plant.inf.intens<-predict.plant.inf.intens.last(plant.inf.intens.next = target.date.plant.inf.intens, max.height.last = new.max.height, site,as.POSIXct(paste0(date0," 12:00:00")),as.POSIXct(paste0(target.date," 12:00:00"))) #### hindcast plant.inf.intens for date0 
         }
       }
     } else ### if plant is starting healthy
@@ -55,17 +69,21 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
       status<-0 ### set status to healthy
       new.plant.inf.intens<-NA  ### set plant.inf.intens to NA
     }
-    new.row<-data.frame("site"=site,"tag"=sub.locs[i,"tag"],"X"=sub.locs[i,"X"],"Y"=sub.locs[i,"Y"],"x"=sub.locs[i,"x"],"y"=sub.locs[i,"y"],"date"= date0,"status"=status,"max.height"=max(sub.locs[i,"height.cm"],5,na.rm = T),"plant.inf.intens"=new.plant.inf.intens) ### new data row; set max height to 5 for seedlings w/o max height recorded         
+    new.row<-data.frame("site"=site,"tag"=sub.locs[i,"tag"],"X"=sub.locs[i,"X"],"Y"=sub.locs[i,"Y"],"x"=sub.locs[i,"x"],"y"=sub.locs[i,"y"],"date"= date0,"status"=status,"max.height"=new.max.height,"plant.inf.intens"=new.plant.inf.intens) ### new data row       
     pred.epi<-rbind(pred.epi,new.row) ### join data
   }
   
-  ## loopt to simulate epi process
+  ## loop to simulate epi process
+  start.date<-min(pred.epi$date)
+  end.date<-max(unique(sub.epi$Date.First.Observed.Diseased))
+  sim.dates<-seq(start.date,end.date,step.size)
+  if(site=="HM") {sim.dates<-sim.dates[which(sim.dates<as.Date("2020-07-10"))]}
   
-  for(date.index in 1:(length(unique(sub.epi$Date.First.Observed.Diseased))-2)) 
+  for(date.index in 1:(length(sim.dates)-1)) 
   {
-    date0<-unique(sub.epi$Date.First.Observed.Diseased)[date.index+1] ### last date
+    date0<-sim.dates[date.index] ### last date
     date0<-as.POSIXct(paste0(date0," 12:00:00")) ### convert format
-    date1<-unique(sub.epi$Date.First.Observed.Diseased)[date.index+2] ### next date
+    date1<-sim.dates[date.index+1] ### next date
     date1<-as.POSIXct(paste0(date1," 12:00:00")) ### convert format
     delta.days<-as.numeric(as.Date(date1)-as.Date(date0))
     
@@ -85,54 +103,26 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
     weath.sub<-cbind(weath.sub,interval.length=c(diff(as.numeric(weath.sub$date))/(60*60*24),NA))
     
     #### calculate environmental variable metrics
-    mean.temp.days<-sum(temp.rh.sub$temp.c*temp.rh.sub$interval.length,na.rm = T)/delta.days #temperature days
-    mean.temp.days.16.22<-sum(1*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T)/delta.days  #time (in days) during which temp between 16 and 22 celsius
-    mean.temp.days.7.30<-sum(1*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T)/delta.days  #time (in days) during which temp between 7 and 30 celsius
-    mean.dew.point.days<-sum(temp.rh.sub$dew.pt.c*temp.rh.sub$interval.length,na.rm = T)/delta.days  #Dew point days
+    new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
+    new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
+    new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
     
-    #calculate weather metrics
-    mean.wetness.days<-sum(weath.sub$wetness*weath.sub$interval.length,na.rm = T)/delta.days 
-    mean.tot.rain<-sum(weath.sub$rain,na.rm=T)/delta.days 
-    mean.solar.days<-sum(weath.sub$solar.radiation*weath.sub$interval.length,na.rm = T)/delta.days 
-    mean.wind.speed.days<-sum(weath.sub$wind.speed*weath.sub$interval.length,na.rm = T)/delta.days 
-    mean.gust.speed.days<-sum(weath.sub$wind.direction*weath.sub$interval.length,na.rm = T)/delta.days 
+    abs.hum<-6.112*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh*2.1674/(273.15+T)
+    new.mean.abs.hum<-mean(abs.hum,na.rm=T) #absolute humidity, see https://www.medrxiv.org/content/10.1101/2020.02.12.20022467v1.full.pdf
+    new.max.abs.hum<-max(abs.hum,na.rm=T)
+    new.min.abs.hum<-min(abs.hum,na.rm=T)
     
-    #calculate joint environmental variable metrics--accounts for temporal co-occurence of environmental variables
-    mean.temp.dew.point.days<-sum(temp.rh.sub$temp.c*temp.rh.sub$dew.pt.c*temp.rh.sub$interval.length,na.rm = T)/delta.days 
-    mean.temp.16.22.dew.point.days<-sum(1*temp.rh.sub.func(temp.rh.sub,16,22)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T)/delta.days 
-    mean.temp.7.30.dew.point.days<-sum(1*temp.rh.sub.func(temp.rh.sub,7,30)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T)/delta.days 
-    mean.temp.wetness.days<-sum(weath.sub$temp*weath.sub$wetness*weath.sub$interval.length,na.rm = T)/delta.days 
-    mean.temp.16.22.wetness.days<-sum(weath.sub$temp.16.22*weath.sub$wetness*weath.sub$interval.length,na.rm = T)/delta.days 
-    mean.temp.7.30.wetness.days<-sum(weath.sub$temp.7.30*weath.sub$wetness*weath.sub$interval.length,na.rm = T)/delta.days 
+    #svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
+    #avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
+    #vpds<-avps-svps
     
-    #calculate weather metrics
-    new.wetness.days<-sum(weath.sub$wetness*weath.sub$interval.length,na.rm = T)
+    #new.mean.vpd<-mean(vpds,na.rm=T)
+    #new.max.vpd<-max(vpds,na.rm=T)
+    #new.min.vpd<-min(vpds,na.rm=T)
+    
+    new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
     new.tot.rain<-sum(weath.sub$rain,na.rm=T)
-    new.solar.days<-sum(weath.sub$solar.radiation*weath.sub$interval.length,na.rm = T)
-    new.wind.speed.days<-sum(weath.sub$wind.speed*weath.sub$interval.length,na.rm = T)
-    new.gust.speed.days<-sum(weath.sub$wind.direction*weath.sub$interval.length,na.rm = T)
-    
-    
-    #predict pustule growth from pustule growth model and enviro conditions
-    #pustule.model.vars<-names(fixef(pustule.model))[2:length(names(fixef(pustule.model)))]
-    pustule.model.new.area<-.01 #predict change for small pustule, arbitrarily pick .01
-    obs.time<-delta.days
-    pustule.model.pred.data<-data.frame("area"=pustule.model.new.area,"temp.days.16.22"=mean.temp.days.16.22,"dew.point.days"=mean.dew.point.days,"temp.16.22.dew.point.days"=mean.temp.16.22.dew.point.days,"temp.wetness.days"=mean.temp.wetness.days,"tot.rain"=new.tot.rain/delta.days)
-    pred.pustule.diam.growth<-predict(pustule.model,newdata=pustule.model.pred.data,re.form=~0)
-    
-    #predict change in number of pustules from enviro conditions
-    #n.pustule.model.vars<-names(fixef(n.pustule.model))[2:length(names(fixef(n.pustule.model)))]
-    n.pustules.model.new.n.pustules<-0 #included only for offset, picked 0 for ease of interpretability
-    obs.time<-delta.days
-    n.pustules.model.pred.data<-data.frame("n.pustules"=n.pustules.model.new.n.pustules,"temp.days.16.22"=mean.temp.days.16.22,"temp.16.22.wetness.days"=mean.temp.16.22.wetness.days)
-    pred.pustule.num.increase<-predict(n.pustules.model,newdata=n.pustules.model.pred.data,re.form=~0)
-    
-    #predict change in plant.inf.intensity from enviro conditions
-    #plant.model.vars<-names(fixef(plant.model))[2:length(names(fixef(plant.model)))]
-    plant.model.new.plant.inf.intens<-.1
-    obs.time<-delta.days
-    plant.model.pred.data<-data.frame("plant.inf.intens"=plant.model.new.plant.inf.intens,"dew.point.days"=mean.dew.point.days,"temp.7.30.dew.point.days"=mean.temp.7.30.dew.point.days,"pred.pustule.diam.growth"=pred.pustule.diam.growth,"site"=site)
-    pred.plant.inf.intens.increase<-10^predict(plant.model,newdata=plant.model.pred.data,exclude = 's(site)')
+    new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
     
     ### compare weather data coverage to make sure foi is not being underestimated
     time.diff.weather.data<-weath.sub$date[nrow(weath.sub)]-weath.sub$date[1]
@@ -163,9 +153,7 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
           foi<-foi+predict.kernel.tilted.plume(q=q,H=half.height,k=4.828517e-07,alphaz=1.687830e-06,Ws=9.299220e-01,xtarget=xcord-sourceX,ytarget=ycord-sourceY,wind.data=weath.sub)
         }
         foi<-foi*foi.mod ### correct for any gaps in weath data
-        pred.inf.odds<-predict(foi.model,newdata = data.frame("foi"=foi,"height.cm"=last.epi[i,"max.height"],"mean.temp.days.16.22"=mean.temp.days.16.22,"mean.temp.days.7.30"=mean.temp.days.7.30,"mean.dew.point.days"=mean.dew.point.days,"mean.temp.7.30.dew.point.days"=mean.temp.7.30.dew.point.days,"mean.wetness.days"=mean.wetness.days,"mean.temp.wetness.days"=mean.temp.wetness.days,"pred.pustule.diam.growth"=pred.pustule.diam.growth,"pred.pustule.num.increase"=pred.pustule.num.increase),type="response") ### predict odds of becoming infected
-        #pred.inf.odds<-predict(foi.model,newdata = data.frame("foi"=foi,"height.cm"=last.epi[i,"max.height"],"mean.temp.days.16.22"=mean.temp.days.16.22,"mean.temp.7.30.dew.point.days"=mean.temp.7.30.dew.point.days),type="response",re.form=NA) ### predict odds of becoming infected
-        #pred.inf.odds<-predict(foi.model,newdata=data.frame("foi"=foi),type="response")
+        pred.inf.odds<-predict(foi.model,newdata = data.frame("site"=site,"foi"=foi,"height.cm"=last.epi[i,"max.height"],"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp),type="response") ### predict odds of becoming infected
         draw<-runif(1) ### draw random number between 0 and 1
         
         if(draw<=pred.inf.odds) ### if draw <= odds make plant infected
@@ -183,7 +171,7 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
       {
         new.status<-1
         
-        new.plant.inf.intens<-predict.plant.inf.intens.boot(plant.inf.intens.last = last.epi[i,"plant.inf.intens"],site = site,date0 = date0,date1 = date1)
+        new.plant.inf.intens<-predict.plant.inf.intens.boot(plant.inf.intens.last = last.epi[i,"plant.inf.intens"], max.height.last = last.epi[i,"max.height"], site = site,date0 = date0,date1 = date1,temp.addition=temp.addition)
       }
       
       ### plant growth
@@ -197,22 +185,33 @@ simulate.epi<-function(site,temp.addition,print.progress=T)
   pred.epi
 }
 
-simulate.epi("GM",0,print.progress = T)->pred.epi
+# run simulations
+step.size<-2
+site<-"HM"
 
-par(mfrow=c(3,3))
-for(date in unique(pred.epi$date))
-{
-  hist(pred.epi[which(pred.epi$date==date),"plant.inf.intens"],breaks=20)
+
+if(any((!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.site.",site,".step.size.",step.size,".RDS"))),
+        (!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.site.",site,".step.size.",step.size,".RDS"))),
+         (!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.site.",site,".step.size.",step.size,".RDS")))
+)) {
+  library(parallel)
+  library(doParallel)
+  library(foreach)
+  library(doRNG)
+  
+  n.cores<-4
+  registerDoParallel(n.cores)
+  pred.epi.all.0<-foreach(k = 1:10, .multicombine = T, .options.RNG=2389572) %dorng% simulate.epi(site,0,step.size=step.size,print.progress = F)
+  saveRDS(pred.epi.all.0,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.site.",site,".step.size.",step.size,".RDS"))
+  
+  pred.epi.all.1.8<-foreach(k = 1:10, .multicombine = T, .options.RNG=2389572) %dorng% simulate.epi(site,1.8,step.size=step.size,print.progress = F)
+  saveRDS(pred.epi.all.1.8,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.site.",site,".step.size.",step.size,".RDS"))
+  
+  pred.epi.all.3.7<-foreach(k = 1:10, .multicombine = T, .options.RNG=2389572) %dorng% simulate.epi(site,3.7,step.size=step.size,print.progress = F)
+  saveRDS(pred.epi.all.3.7,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.site.",site,".step.size.",step.size,".RDS"))
 }
 
-library(parallel)
-library(doParallel)
-n.cores<-4
-registerDoParallel(n.cores)
-site<-"GM"
-pred.epi.all.0<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,0,print.progress = T)
-pred.epi.all.1.8<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,1.8,print.progress = F)
-pred.epi.all.3.7<-foreach(k = 1:10, .multicombine = T) %dopar% simulate.epi(site,3.7,print.progress = F)
+# plot simulations
 
 t_col <- function(color, percent = 50, name = NULL) {
   rgb.val <- col2rgb(color)
@@ -227,119 +226,140 @@ plot.purple<-t_col("purple",75)
 plot.red<-t_col("red",75)
 plot.orange<-t_col("orange",75)
 
-sub.epi<-corrected.epi[which(corrected.epi$Site==site),]
-sub.locs<-corrected.locs[which(corrected.locs$Site==site),]
-
-par(mfrow=c(1,1))
-par(mar=c(6,6,6,6))
-plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,.4),xlab="date",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
-xvals<-c()
-yvals<-c()
-for(i in 1:9)
+plot.func<-function(site,step.size)
 {
-  date<-unique(sub.epi$Date.First.Observed.Diseased)[i]
-  xvals<-c(xvals,date)
-  yvals<-c(yvals,dim(sub.epi[which(sub.epi$Date.First.Observed.Diseased<=date),])[1]/dim(sub.locs)[1])
-}
-points(xvals,yvals,type="l",col="black",lwd=4)
-
-
-for(k in 1:length(pred.epi.all.0))
-{
+  
+  pred.epi.all.0<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.site.",site,".step.size.",step.size,".RDS"))
+  pred.epi.all.1.8<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.site.",site,".step.size.",step.size,".RDS"))
+  pred.epi.all.3.7<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.site.",site,".step.size.",step.size,".RDS"))
+  
+  sub.epi<-corrected.epi[which(corrected.epi$Site==site),]
+  sub.locs<-corrected.locs[which(corrected.locs$Site==site),]
+  
+  if(site=="GM")
+  {
+    plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,.4),xlab="date",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
+  }
+  
+  if(site=="HM")
+  {
+    plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,.05),xlab="date",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
+  }
+  
+  
   xvals<-c()
   yvals<-c()
-  pred.epi<-pred.epi.all.0[[k]]
-  for(i in 1:9)
+  for(i in 1:length(unique(sub.epi$Date.First.Observed.Diseased)))
   {
-    date<-unique(pred.epi$date)[i]
+    date<-unique(sub.epi$Date.First.Observed.Diseased)[i]
     xvals<-c(xvals,date)
-    yvals<-c(yvals,sum(pred.epi[which(pred.epi$date==date),"status"])/dim(sub.locs)[1])
+    yvals<-c(yvals,nrow(sub.epi[which(sub.epi$Date.First.Observed.Diseased<=date),])/nrow(sub.locs))
   }
-  points(xvals,yvals,type="l",col=plot.orange)
-}
-
-xvals<-c()
-yvals<-c()
-for(k in 1:length(unique(pred.epi.all.0[[1]]$date)))
-{
-  sub.prevs<-c()
-  date<-unique(pred.epi.all.0[[1]]$date)[k]
-  for(j in 1:length(pred.epi.all.0))
+  points(xvals,yvals,type="l",col="black",lwd=4)
+  
+  
+  for(k in 1:length(pred.epi.all.0))
   {
-   sub.dat<-pred.epi.all.0[[j]]
-   sub.dat<-sub.dat[which(sub.dat$date==date),]
-   sub.prevs<-c(sub.prevs,sum(sub.dat$status)/dim(sub.dat)[1])
+    xvals<-c()
+    yvals<-c()
+    pred.epi<-pred.epi.all.0[[k]]
+    for(i in 1:length(unique(pred.epi.all.0[[1]]$date)))
+    {
+      date<-unique(pred.epi$date)[i]
+      xvals<-c(xvals,date)
+      yvals<-c(yvals,sum(pred.epi[which(pred.epi$date==date),"status"])/dim(sub.locs)[1])
+    }
+    points(xvals,yvals,type="l",col=plot.orange)
   }
-  yvals<-c(yvals,mean(sub.prevs))
-  xvals<-c(xvals,date)
-}
-points(xvals,yvals,type="l",col="orange",lwd=4)
-
-
-for(k in 1:length(pred.epi.all.1.8))
-{
+  
   xvals<-c()
   yvals<-c()
-  pred.epi<-pred.epi.all.1.8[[k]]
-  for(i in 1:9)
+  for(k in 1:length(unique(pred.epi.all.0[[1]]$date)))
   {
-    date<-unique(pred.epi$date)[i]
+    sub.prevs<-c()
+    date<-unique(pred.epi.all.0[[1]]$date)[k]
+    for(j in 1:length(pred.epi.all.0))
+    {
+      sub.dat<-pred.epi.all.0[[j]]
+      sub.dat<-sub.dat[which(sub.dat$date==date),]
+      sub.prevs<-c(sub.prevs,sum(sub.dat$status)/dim(sub.dat)[1])
+    }
+    yvals<-c(yvals,mean(sub.prevs))
     xvals<-c(xvals,date)
-    yvals<-c(yvals,sum(pred.epi[which(pred.epi$date==date),"status"])/dim(sub.locs)[1])
   }
-  points(xvals,yvals,type="l",col=plot.red)
-}
-
-xvals<-c()
-yvals<-c()
-for(k in 1:length(unique(pred.epi.all.1.8[[1]]$date)))
-{
-  sub.prevs<-c()
-  date<-unique(pred.epi.all.1.8[[1]]$date)[k]
-  for(j in 1:length(pred.epi.all.0))
+  points(xvals,yvals,type="l",col="orange",lwd=4)
+  
+  
+  for(k in 1:length(pred.epi.all.1.8))
   {
-    sub.dat<-pred.epi.all.1.8[[j]]
-    sub.dat<-sub.dat[which(sub.dat$date==date),]
-    sub.prevs<-c(sub.prevs,sum(sub.dat$status)/dim(sub.dat)[1])
+    xvals<-c()
+    yvals<-c()
+    pred.epi<-pred.epi.all.1.8[[k]]
+    for(i in 1:length(unique(pred.epi.all.1.8[[1]]$date)))
+    {
+      date<-unique(pred.epi$date)[i]
+      xvals<-c(xvals,date)
+      yvals<-c(yvals,sum(pred.epi[which(pred.epi$date==date),"status"])/dim(sub.locs)[1])
+    }
+    points(xvals,yvals,type="l",col=plot.red)
   }
-  yvals<-c(yvals,mean(sub.prevs))
-  xvals<-c(xvals,date)
-}
-points(xvals,yvals,type="l",col="red",lwd=4)
-
-
-for(k in 1:length(pred.epi.all.3.7))
-{
+  
   xvals<-c()
   yvals<-c()
-  pred.epi<-pred.epi.all.3.7[[k]]
-  for(i in 1:9)
+  for(k in 1:length(unique(pred.epi.all.1.8[[1]]$date)))
   {
-    date<-unique(pred.epi$date)[i]
+    sub.prevs<-c()
+    date<-unique(pred.epi.all.1.8[[1]]$date)[k]
+    for(j in 1:length(pred.epi.all.1.8))
+    {
+      sub.dat<-pred.epi.all.1.8[[j]]
+      sub.dat<-sub.dat[which(sub.dat$date==date),]
+      sub.prevs<-c(sub.prevs,sum(sub.dat$status)/dim(sub.dat)[1])
+    }
+    yvals<-c(yvals,mean(sub.prevs))
     xvals<-c(xvals,date)
-    yvals<-c(yvals,sum(pred.epi[which(pred.epi$date==date),"status"])/dim(sub.locs)[1])
   }
-  points(xvals,yvals,type="l",col=plot.purple)
-}
-
-xvals<-c()
-yvals<-c()
-for(k in 1:length(unique(pred.epi.all.3.7[[1]]$date)))
-{
-  sub.prevs<-c()
-  date<-unique(pred.epi.all.3.7[[1]]$date)[k]
-  for(j in 1:length(pred.epi.all.3.7))
+  points(xvals,yvals,type="l",col="red",lwd=4)
+  
+  
+  for(k in 1:length(pred.epi.all.3.7))
   {
-    sub.dat<-pred.epi.all.3.7[[j]]
-    sub.dat<-sub.dat[which(sub.dat$date==date),]
-    sub.prevs<-c(sub.prevs,sum(sub.dat$status)/dim(sub.dat)[1])
+    xvals<-c()
+    yvals<-c()
+    pred.epi<-pred.epi.all.3.7[[k]]
+    for(i in 1:length(unique(pred.epi.all.3.7[[1]]$date)))
+    {
+      date<-unique(pred.epi$date)[i]
+      xvals<-c(xvals,date)
+      yvals<-c(yvals,sum(pred.epi[which(pred.epi$date==date),"status"])/dim(sub.locs)[1])
+    }
+    points(xvals,yvals,type="l",col=plot.purple)
   }
-  yvals<-c(yvals,mean(sub.prevs))
-  xvals<-c(xvals,date)
+  
+  xvals<-c()
+  yvals<-c()
+  for(k in 1:length(unique(pred.epi.all.3.7[[1]]$date)))
+  {
+    sub.prevs<-c()
+    date<-unique(pred.epi.all.3.7[[1]]$date)[k]
+    for(j in 1:length(pred.epi.all.3.7))
+    {
+      sub.dat<-pred.epi.all.3.7[[j]]
+      sub.dat<-sub.dat[which(sub.dat$date==date),]
+      sub.prevs<-c(sub.prevs,sum(sub.dat$status)/dim(sub.dat)[1])
+    }
+    yvals<-c(yvals,mean(sub.prevs))
+    xvals<-c(xvals,date)
+  }
+  points(xvals,yvals,type="l",col="purple",lwd=4)
+  legend("topleft",legend=c("data","+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col=c("black","orange","red","purple"),lwd=4,cex=1,bty="n")
 }
-points(xvals,yvals,type="l",col="purple",lwd=4)
-legend("top",legend=c("data","+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col=c("black","orange","red","purple"),lwd=4,cex=2,bty="n")
 
+par(mfrow=c(1,2),mar=c(5,5,3,3))
+plot.func("GM",2)
+mtext("GM",cex = 2)
+plot.func("HM",2)
+mtext("HM",cex=2)
 
 
 

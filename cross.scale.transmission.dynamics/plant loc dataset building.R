@@ -5,7 +5,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 {
   # load + prep data and functions
   ## load functions
-  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/predict plant inf intens change funcs.R")
+  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant growth data prep.R")
   ## load data
   epi<-read.csv("~/Documents/GitHub/flax.rust/data/Epidemiology.csv")
   within.host<-read.csv("~/Documents/GitHub/flax.rust/data/Withinhost.csv")

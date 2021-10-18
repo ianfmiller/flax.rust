@@ -31,23 +31,17 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   start.vals<-c()
   end.vals<-c()
   days<-c()
-  temp.days<-c()
-  temp.days.16.22<-c()
-  temp.days.7.30<-c()
-  dew.point.days<-c()
-  temp.dew.point.days<-c()
-  temp.16.22.dew.point.days<-c()
-  temp.7.30.dew.point.days<-c()
-  wetness.days<-c()
-  temp.wetness.days<-c()
-  temp.16.22.wetness.days<-c()
-  temp.7.30.wetness.days<-c()
-  tot.rains<-c()
-  solar.days<-c()
-  wind.speed.days<-c()
-  gust.speed.days<-c()
-  measurer.ids<-c()
-  
+  mean.temp<-c()
+  max.temp<-c()
+  min.temp<-c()
+  mean.abs.hum<-c() #absolute humidity
+  max.abs.hum<-c()
+  min.abs.hum<-c()
+  #mean.vpd<-c() #vapor pressure deficit
+  #max.vpd<-c() 
+  #min.vpd<-c() 
+  tot.rain<-c()
+  mean.solar<-c()
   
   for (tag in unique(pustules$tag))
   {
@@ -96,32 +90,31 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
               weath.sub<-cbind(weath.sub,interval.length=c(diff(as.numeric(weath.sub$date))/(60*60*24),NA))
               
               #calculate environmental variable metrics
-              new.temp.days<-sum(temp.rh.sub$temp.c*temp.rh.sub$interval.length,na.rm = T) #temperature days
-              new.temp.days.16.22<-sum(1*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T) #time (in days) during which temp between 16 and 22 celsius
-              new.temp.days.7.30<-sum(1*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T) #time (in days) during which temp between 7 and 30 celsius
-              new.dew.point.days<-sum(temp.rh.sub$dew.pt.c*temp.rh.sub$interval.length,na.rm = T) #Dew point days
+              new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
+              new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
+              new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
               
-              #calculate weather metrics
-              new.wetness.days<-sum(weath.sub$wetness*weath.sub$interval.length,na.rm = T)
+              abs.hum<-6.112*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh*2.1674/(273.15+T)
+              new.mean.abs.hum<-mean(abs.hum,na.rm=T) #absolute humidity, see https://www.medrxiv.org/content/10.1101/2020.02.12.20022467v1.full.pdf
+              new.max.abs.hum<-max(abs.hum,na.rm=T)
+              new.min.abs.hum<-min(abs.hum,na.rm=T)
+              
+              #svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
+              #avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
+              #vpds<-avps-svps
+              
+              #new.mean.vpd<-mean(vpds,na.rm=T)
+              #new.max.vpd<-max(vpds,na.rm=T)
+              #new.min.vpd<-min(vpds,na.rm=T)
+              
               new.tot.rain<-sum(weath.sub$rain,na.rm=T)
-              new.solar.days<-sum(weath.sub$solar.radiation*weath.sub$interval.length,na.rm = T)
-              new.wind.speed.days<-sum(weath.sub$wind.speed*weath.sub$interval.length,na.rm = T)
-              new.gust.speed.days<-sum(weath.sub$wind.direction*weath.sub$interval.length,na.rm = T)
-              
-              #calculate joint environmental variable metrics--accounts for temporal co-occurence of environmental variables
-              new.temp.dew.point.days<-sum(temp.rh.sub$temp.c*temp.rh.sub$dew.pt.c*temp.rh.sub$interval.length,na.rm = T)
-              new.temp.16.22.dew.point.days<-sum(1*temp.rh.sub.func(temp.rh.sub,16,22)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,16,22)$interval.length,na.rm = T)
-              new.temp.7.30.dew.point.days<-sum(1*temp.rh.sub.func(temp.rh.sub,7,30)$dew.pt.c*temp.rh.sub.func(temp.rh.sub,7,30)$interval.length,na.rm = T)
-              new.temp.wetness.days<-sum(weath.sub$temp*weath.sub$wetness*weath.sub$interval.length,na.rm = T)
-              new.temp.16.22.wetness.days<-sum(weath.sub$temp.16.22*weath.sub$wetness*weath.sub$interval.length,na.rm = T)
-              new.temp.7.30.wetness.days<-sum(weath.sub$temp.7.30*weath.sub$wetness*weath.sub$interval.length,na.rm = T)
+              new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
               
               #pull out core predictors
               start.val<-sub.pustules4[i,"area"]
               end.val<-sub.pustules4[i+1,"area"]
               delta.days<-date1-date0
-              measurer.id<-sub.pustules4[i,"who.entered"] #same person did all measurements for each pustule
-              
+
               #store values
               tags<-c(tags,tag)
               sites<-c(sites,site)
@@ -133,24 +126,17 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
               end.vals<-c(end.vals,end.val)
               days<-c(days,delta.days)
               
-              temp.days.16.22<-c(temp.days.16.22,new.temp.days.16.22)
-              temp.days.7.30<-c(temp.days.7.30,new.temp.days.7.30)
-              temp.days<-c(temp.days,new.temp.days)
-              dew.point.days<-c(dew.point.days,new.dew.point.days)
-              temp.dew.point.days<-c(temp.dew.point.days,new.temp.dew.point.days)
-              temp.16.22.dew.point.days<-c(temp.16.22.dew.point.days,new.temp.16.22.dew.point.days)
-              temp.7.30.dew.point.days<-c(temp.7.30.dew.point.days,new.temp.7.30.dew.point.days)
-              
-              wetness.days<-c(wetness.days,new.wetness.days)
-              temp.wetness.days<-c(temp.wetness.days,new.temp.wetness.days)
-              temp.16.22.wetness.days<-c(temp.16.22.wetness.days,new.temp.16.22.wetness.days)
-              temp.7.30.wetness.days<-c(temp.7.30.wetness.days,new.temp.7.30.wetness.days)
-              tot.rains<-c(tot.rains,new.tot.rain)
-              solar.days<-c(solar.days,new.solar.days)
-              wind.speed.days<-c(wind.speed.days,new.wind.speed.days)
-              gust.speed.days<-c(gust.speed.days,new.gust.speed.days)
-              
-              measurer.ids<-c(measurer.ids,measurer.id)
+              mean.temp<-c(mean.temp,new.mean.temp)
+              max.temp<-c(max.temp,new.max.temp)
+              min.temp<-c(min.temp,new.min.temp)
+              mean.abs.hum<-c(mean.abs.hum,new.mean.abs.hum)
+              max.abs.hum<-c(max.abs.hum,new.max.abs.hum)
+              min.abs.hum<-c(min.abs.hum,new.min.abs.hum)
+              #mean.vpd<-c(mean.vpd,new.mean.vpd)
+              #max.vpd<-c(max.vpd,new.max.vpd)
+              #min.vpd<-c(min.vpd,new.min.vpd)
+              tot.rain<-c(tot.rain,new.tot.rain)
+              mean.solar<-c(mean.solar,new.mean.solar)
               
             } 
           }
@@ -160,10 +146,10 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   }
   
   delta.pustules<-data.frame(tag=factor(tags),site=factor(sites),stem.iter=stem.iters,leaf.iter=leaf.iters,pustule.num=pustule.nums,area=start.vals,area.next=end.vals,time=days,
-                             temp.days=temp.days,temp.days.16.22=temp.days.16.22,temp.days.7.30=temp.days.7.30,
-                             dew.point.days=dew.point.days,temp.dew.point.days=temp.dew.point.days,temp.16.22.dew.point.days=temp.16.22.dew.point.days,temp.7.30.dew.point.days=temp.7.30.dew.point.days,
-                             wetness.days=wetness.days,temp.wetness.days=temp.wetness.days,temp.16.22.wetness.days=temp.16.22.wetness.days,temp.7.30.wetness.days=temp.7.30.wetness.days,
-                             tot.rain=tot.rains,solar.days=solar.days,wind.speed.days=wind.speed.days,gust.speed.days=gust.speed.days,who.measured=measurer.ids)
+                             mean.temp=mean.temp,max.temp=max.temp,min.temp=min.temp,
+                             mean.abs.hum=mean.abs.hum,max.abs.hum=max.abs.hum,min.abs.hum=min.abs.hum,
+                             #mean.vpd=mean.vpd,max.vpd=max.vpd,min.vpd=min.vpd,
+                             tot.rain=tot.rain,mean.solar=mean.solar)
   
   saveRDS(pustules,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pustules.RDS")
   saveRDS(delta.pustules,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.pustules.RDS")
