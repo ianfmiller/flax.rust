@@ -20,35 +20,19 @@ library(exactextractr)
 library(Rcpp)
 
 # load spatial data
-
 ## define area of interest
-area_of_interest <- extent(matrix(c(315000,335000, 4300000,433000), nrow=2,byrow=TRUE)) # Bounds the spatial datasets to speed up computation time: (somewhat arbitrarily at the moment)
-
-topography_raw <- "https://rmbl-sdp.s3.us-east-2.amazonaws.com/data_products/released/release1/UER_dem_filled_1m_v2.tif"
+topography_raw <- "https://rmbl-sdp.s3.us-east-2.amazonaws.com/data_products/released/release3/UG_dem_1m_v1.tif"
 topography_adjusted <- paste("/vsicurl/",topography_raw,sep="")
 topography <- raster(topography_adjusted, progress='text')
-topography_cropped <- crop(topography, area_of_interest, filename=tempfile(),progress="text")
 
-landcover_raw <- "https://rmbl-sdp.s3.us-east-2.amazonaws.com/data_products/released/release1/UER_landcover_1m_v4.tif"
+landcover_raw <- "https://rmbl-sdp.s3.us-east-2.amazonaws.com/data_products/released/release3/UG_landcover_1m_v4.tif"
 landcover_adjusted <- paste("/vsicurl/",landcover_raw,sep="")
 landcover <- raster(landcover_adjusted, progress='text')
-landcover_cropped <- crop(landcover, area_of_interest, filename=tempfile(), progress="text")
-
-surface_water_cover_raw <- "https://rmbl-sdp.s3.us-east-2.amazonaws.com/data_products/released/release1/UER_surface_water_1m_v3.tif"
-surface_water_cover_adjusted <- paste("/vsicurl/",surface_water_cover_raw,sep="")
-surface_water_cover <- raster(surface_water_cover_adjusted, progress='text')
-surface_water_cover_cropped <- crop(surface_water_cover, area_of_interest, filename=tempfile(),progress="text")
-
-summer_solar_radiation_adjusted <- "/vsicurl/https://rmbl-sdp.s3.us-east-2.amazonaws.com/data_products/released/release2/UER_srad_bareearth_day172_3m_v1.tif"
-summer_solar_radiation <- raster(summer_solar_radiation_adjusted, progress='text')
-summer_solar_radiation_cropped <- crop(summer_solar_radiation, area_of_interest, filename=tempfile(),progress="text")
 
 # visualize spatial data
 clearPlot()
 Plot(topography)
 Plot(landcover)
-Plot(surface_water_cover)
-Plot(summer_solar_radiation)
 
 # load gpx data and population data
 
@@ -56,7 +40,7 @@ Plot(summer_solar_radiation)
 transects<-c("UL")
 
 ## function to extract and clean gpx data
-get_gpx_tracks <- function(transects = all_transects) {
+get_gpx_tracks <- function(transect = transects) {
   gpx_tracks<-data.frame("transect"=character(),"longitude"=numeric(),"latitude"=numeric())
   filenames <- paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/gpx/cleaned/",transects, ".gpx") 
   for (transect in transects) {
@@ -82,20 +66,16 @@ map<-leaflet() %>%
 plot<-T
 
 ## setup data objects
-
-all_transects<-data.frame("transect"=character(),"chunk"=integer(),"flax.presence"=integer(),"incidence"=numeric(),"elevation"=numeric(),"landcover"=numeric(),"solar"=numeric())
-
-all_populations<-data.frame("transect"=character(),"chunk"=integer(),"density"=numeric(),"prevalence"=numeric(),"incidence"=numeric(),"nearest.pop.dist"=numeric(),"nearest.D.pop.dist"=numeric(),"elevation"=numeric(),"landcover"=numeric(),"solar"=numeric())
-
-all_sub_populations<-data.frame("transect"=character(),"chunk"=integer(),"density"=numeric(),"prevalence"=numeric(),"incidence"=numeric(),"nearest.pop.dist"=numeric(),"nearest.D.pop.dist"=numeric(),"elevation"=numeric(),"landcover"=numeric(),"solar"=numeric())
-
+all_transects<-data.frame("transect"=character(),"chunk"=integer(),"flax.presence"=integer(),"incidence"=numeric(),"elevation"=numeric(),"landcover"=numeric())
+all_populations<-data.frame("transect"=character(),"chunk"=integer(),"density"=numeric(),"num.H"=numeric(),"num.D"=numeric(),"incidence"=numeric(),"nearest.pop.dist"=numeric(),"nearest.D.pop.dist"=numeric(),"elevation"=numeric(),"mode.landcover"=numeric(),"p.landcover.1"=numeric(),"p.landcover.2"=numeric(),"p.landcover.3"=numeric(),"p.landcover.4"=numeric(),"p.landcover.5"=numeric(),"p.landcover.6"=numeric())
 
 ## loop to extract data
-
-for(transect in all_transects) ### for each transect
+for(transect in transects) ### for each transect
 {
+  print(paste0("starting transect ",transect))
+  
   sub_gpx_tracks<-gpx_tracks[which(gpx_tracks$transect==transect),] #### subset gpx data
-  flax_sub_pop<-flax_pops[which(flax_pops$transect=="UL"),] #### subset flax population data
+  flax_sub_pop<-cbind(flax_pops[which(flax_pops$transect==transect),],"chunk"=NA) #### subset flax population data
   
   line<-st_linestring(cbind(sub_gpx_tracks$longitude,sub_gpx_tracks$latitude)) #### draw line through all gps points
   n.points<-floor(4*as.numeric(st_length(st_sfc(line, crs = "+proj=longlat +datum=WGS84")))) ### set number of points to sample such that sampling will occur every 0.25m (4* distance of gps track in meters)
@@ -111,7 +91,6 @@ for(transect in all_transects) ### for each transect
   transect.coded<-data.frame(track_points,"class"="nfz","chunk"=NA) #### set up data frame for flax populations, default class to 'no flax zone' = 'nfz
   
   #### subdivide gps data into 'chunks' of no flax/healthy flax/diseased flax
-  
   chunk<-1 #### set starting chunk index to 1
   
   for(i in 1:nrow(flax_sub_pop)) ##### for each flax population
@@ -132,18 +111,23 @@ for(transect in all_transects) ### for each transect
     transect.coded[start.index:(end.index-40),"class"]<-new.status ##### set class of chunk containing flax pop, backing up 10m from recorded end pont (per sampling protocol)
     transect.coded[which(is.na(transect.coded[1:start.index,"chunk"])),"chunk"]<-chunk ##### set chunk index of chunk with class nfz preceeding flax population
     transect.coded[start.index:(end.index-40),"chunk"]<-chunk+1 ##### set chunk index of flax population , backing up 10m from recorded end pont (per sampling protocol)
+    flax_sub_pop[i,"chunk"]<-chunk+1
     chunk<-chunk+ 2 ##### set next hunk index
     if(i==nrow(flax_sub_pop)) {transect.coded[which(is.na(transect.coded$chunk)),"chunk"]<-chunk} ##### after the last flax population, set chunk of remaining nfz if it exists
+    
   }
   
+  print(paste0("finished gps processing"))
+  
+  
   #### for each chunk, extract landscape data and plot 
-  for(chunk in 1:max(transect.coded$chunk))
+  for(chunk in unique(transect.coded$chunk))
   {
     sub.transect.coded<-transect.coded[which(transect.coded$chunk==chunk),] ##### subset data
   
-    if(sub.transect.coded[1,"class"]=="nfz") {col<-"grey"} ##### set plot color based on class
-    if(sub.transect.coded[1,"class"]=="fz") {col<-"green"}
-    if(sub.transect.coded[1,"class"]=="dfz") {col<-"yellow"}
+    if(sub.transect.coded[1,"class"]=="nfz") {col<-"grey"; flax.presence<-0; incidence<-0} ##### set plot color based on class
+    if(sub.transect.coded[1,"class"]=="fz") {col<-"green"; flax.presence<-1; incidence<-0}
+    if(sub.transect.coded[1,"class"]=="dfz") {col<-"yellow"; flax.presence<-1; incidence<-1}
     
     
     line<-st_linestring(cbind(sub.transect.coded$X,sub.transect.coded$Y)) ##### draw line through all gps points
@@ -154,16 +138,79 @@ for(transect in all_transects) ### for each transect
     if(plot) {map<-addPolygons(map=map,data = st_transform(ribbon,crs="+proj=longlat +datum=WGS84"),col=col)} ##### add polygon to map
     
     sample_points<-st_sample(ribbon,size=as.numeric(floor(st_area(ribbon))),type="regular") ##### regularly sample 1 point per m2 from polygon 
+    sample_points<-st_transform(sample_points,crs=proj4string(topography)) ##### align crs of sample_points and data
     
     #if(plot) {map<-addCircleMarkers(map=map,data=st_transform(sample_points,crs="+proj=longlat +datum=WGS84"),col="black",radius = .1,weight=0)}
     
-    unlist(raster::extract(x=topography,y=as(sample_points,"Spatial"),method="bilinear"))->x
-    length(x)
-    dim(st_coordinates(sample_points))
-    }
+    elevation_data<-unlist(raster::extract(x=topography,y=as(sample_points,"Spatial"),method="bilinear",na.rm=T)) ##### extract data
+    landcover_data<-unlist(raster::extract(x=landcover,y=as(sample_points,"Spatial"),method="simple",na.rm=T))
+    
+    ##### store data
+    
+    ###### make new data tables
+    new_all_transects<-data.frame("transect"=transect,
+                                  "chunk"=chunk,
+                                  "flax.presence"=flax.presence,
+                                  "incidence"=incidence,
+                                  "elevation"=elevation_data,
+                                  "landcover"=landcover_data)
+    all_transects<-rbind(all_transects,new_all_transects)
+    
+    num.H<-if(chunk %in% flax_sub_pop$chunk) {flax_sub_pop[which(flax_sub_pop$chunk==chunk),"num.H"]} else {0} ###### number of H plants
+    num.D<-if(chunk %in% flax_sub_pop$chunk) {flax_sub_pop[which(flax_sub_pop$chunk==chunk),"num.H"]} else {0}  ###### number of D plants
+    prevalence<-if(chunk %in% flax_sub_pop$chunk) {num.D/(num.H+num.D)} ###### prevalence
+    incidence<-if(chunk %in% flax_sub_pop$chunk) {flax_sub_pop[which(flax_sub_pop$chunk==chunk),"incidence"]} else {0} ###### incidence
+    
+    ###### get distance to nearest diseased and healthy populations by making use of point indicies. Points are spaced 1m apart, so the difference in indicies represents distance (in m) along transect between populations
+    chunk.indicies<-which(transect.coded$chunk==chunk)
+    chunk.endpoint.1<-min(chunk.indicies)
+    chunk.endpoint.2<-max(chunk.indicies)
+    
+    flax.indicies.all<-which(transect.coded$class %in% c("dfz","fz"))
+    flax.indicies<-flax.indicies.all[which(!(flax.indicies.all %in% chunk.indicies))]
+    disease.indicies.all<-which(transect.coded$class=="dfz")
+    disease.indicies<-disease.indicies.all[which(!(disease.indicies.all %in% chunk.indicies))]
+    
+    nearest.pop.dist<-min(min(abs(chunk.endpoint.1-flax.indicies)),min(abs(chunk.endpoint.2-flax.indicies)))
+    nearest.D.pop.dist<-min(min(abs(chunk.endpoint.1-disease.indicies)),min(abs(chunk.endpoint.2-disease.indicies)))
+    
+    ###### extract landcover varriables
+    landcover.table<-table(landcover_data)
+    mode.landcover<-as.numeric(names(landcover.table)[which.max(landcover.table)])
+    p.landcover.1<-if(1 %in% names(landcover.table)) {landcover.table[which(names(landcover.table)==1)]/sum(landcover.table)} else{0}
+    p.landcover.2<-if(2 %in% names(landcover.table)) {landcover.table[which(names(landcover.table)==2)]/sum(landcover.table)} else{0}
+    p.landcover.3<-if(3 %in% names(landcover.table)) {landcover.table[which(names(landcover.table)==3)]/sum(landcover.table)} else{0}
+    p.landcover.4<-if(4 %in% names(landcover.table)) {landcover.table[which(names(landcover.table)==4)]/sum(landcover.table)} else{0}
+    p.landcover.5<-if(5 %in% names(landcover.table)) {landcover.table[which(names(landcover.table)==5)]/sum(landcover.table)} else{0}
+    p.landcover.6<-if(6 %in% names(landcover.table)) {landcover.table[which(names(landcover.table)==6)]/sum(landcover.table)} else{0}
+    
+    ###### insert new data tables into main tables
+    new_all_populations<-data.frame("transect"=transect,
+                                    "chunk"=chunk,
+                                    "density"=num.H+num.D,
+                                    "num.H"=num.H,
+                                    "num.D"=num.D,
+                                    "incidence"=incidence,
+                                    "nearest.pop.dist"=nearest.pop.dist,
+                                    "nearest.D.pop.dist"=nearest.D.pop.dist,
+                                    "elevation"=mean(elevation_data),
+                                    "mode.landcover"=mode.landcover,
+                                    "p.landcover.1"=p.landcover.1,
+                                    "p.landcover.2"=p.landcover.2,
+                                    "p.landcover.3"=p.landcover.3,
+                                    "p.landcover.4"=p.landcover.4,
+                                    "p.landcover.5"=p.landcover.5,
+                                    "p.landcover.6"=p.landcover.6)
+    all_populations<-rbind(all_populations,new_all_populations)
+    
+    print(paste0("finished data extract chunk ",chunk," of ",max(transect.coded$chunk)))
+  }
+  print(paste0("finished transect ",transect))
 }
 
+map
 
-raster::extract(x=topography,y=as(ribbon,"Spatial"),method="bilinear")->x
+head(all_transects)
+head(all_populations)
 
 
