@@ -46,13 +46,13 @@ plot(jitter(log10(foi.data[which(foi.data$site=="HM"),"foi"]+1e-10)),jitter(foi.
 axis(2,at=c(0,1),labels = c("healthy","infected"))
 
 par(mfrow=c(2,1),mar=c(5,5,2,2))
-plot(jitter(foi.data$foi),jitter(foi.data$status.next),xlab="predicted spore deposition",ylab="",axes=F,cex.lab=1.5)
-axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=1.5)
-axis(1,cex.axis=1.5)
+plot(jitter(foi.data$foi),jitter(foi.data$status.next),xlab="predicted spore deposition",ylab="",axes=F,cex.lab=2)
+axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=2)
+axis(1,cex.axis=2)
 
-plot(jitter(log10(foi.data$foi)),jitter(foi.data$status.next),xlab=expression('predicted '*log[10]*'spore deposition'),ylab="",axes=F,cex.lab=1.5)
-axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=1.5)
-axis(1,cex.axis=1.5)
+plot(jitter(log10(foi.data$foi)),jitter(foi.data$status.next),xlab=expression('predicted '*log[10]*'spore deposition'),ylab="",axes=F,cex.lab=2)
+axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=2)
+axis(1,cex.axis=2)
 
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS"))
@@ -93,10 +93,10 @@ foi.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynami
 
 par(mar=c(6,8,6,0))
 layout(matrix(c(1,1,1,1,2),1,5))
-plot(log10(foi.data$foi),jitter(foi.data$status.next*.1,factor=.5),xlab="predicted log 10 spore deposition",ylab="",axes=F,cex.lab=1.5,ylim=c(-.025,0.125),xlim=c(-6,3))
-axis(2,at=c(0,.1),labels = c("healthy","infected"),cex.axis=1.5,line=3,tick = F)
-axis(2,at=c(0,.05,.1),cex.axis=1.5,col="red",col.axis="red")
-mtext("odds of infection",side=2,line=2.5,cex=1.5,col="red")
+plot(log10(foi.data$foi),jitter(foi.data$status.next*.1,factor=.5),xlab=expression('predicted '*log[10]*' spore depositin'),ylab="",axes=F,cex.lab=2,ylim=c(-.025,0.125),xlim=c(-6,3))
+axis(2,at=c(0,.1),labels = c("healthy","infected"),cex.axis=2,line=3,tick = F)
+axis(2,at=c(0,.05,.1),cex.axis=2,col="red",col.axis="red")
+mtext("odds of infection",side=2,line=2.5,cex=2,col="red")
 axis(1,cex.axis=1.5)
 
 fois<-10^seq(-6,2.3,.1)
@@ -116,24 +116,24 @@ new.data.4<-data.frame("foi"=fois,
                        "height.cm"=50,
                        "site"="CC"
                       )
-points(log10(new.data.1$foi),predict(foi.model,newdata = new.data.1,type = "response",exclude = "s(site)"),type="l",col="red",lwd=2,lty=1)
-points(log10(new.data.2$foi),predict(foi.model,newdata = new.data.2,type = "response",exclude = "s(site)"),type="l",col="red",lwd=2,lty=2)
-points(log10(new.data.3$foi),predict(foi.model,newdata = new.data.3,type = "response",exclude = "s(site)"),type="l",col="red",lwd=2,lty=3)
-points(log10(new.data.4$foi),predict(foi.model,newdata = new.data.4,type = "response",exclude = "s(site)"),type="l",col="red",lwd=2,lty=4)
+points(log10(new.data.1$foi),predict(foi.model,newdata = new.data.1,type = "response",exclude = "s(site)"),type="l",col="red",lwd=4,lty=1)
+points(log10(new.data.2$foi),predict(foi.model,newdata = new.data.2,type = "response",exclude = "s(site)"),type="l",col="red",lwd=4,lty=2)
+points(log10(new.data.3$foi),predict(foi.model,newdata = new.data.3,type = "response",exclude = "s(site)"),type="l",col="red",lwd=4,lty=3)
+points(log10(new.data.4$foi),predict(foi.model,newdata = new.data.4,type = "response",exclude = "s(site)"),type="l",col="red",lwd=4,lty=4)
 par(mar=c(0,0,0,0))
 plot(0,0,type="n",axes=F,xlab = "",ylab="")
-legend("left",legend=c("50cm","25cm","10cm","5cm"),col="red",lty=c(4,3,2,1),bty="n",cex=1.5,lwd=2)
+legend("left",legend=c("50cm","25cm","10cm","5cm"),col="red",lty=c(4,3,2,1),bty="n",cex=2,lwd=4)
 
 par(mfrow=c(1,1),mar=c(6,8,6,6))
-plot(0,0,type = "n",xlab="predicted spore deposition",ylab="relative odds of infection",axes=F,cex.lab=1.5,ylim=c(0,100),xlim = c(-6,3))
+plot(0,0,type = "n",xlab=expression('predicted '*log[10]*' spore depositin'),ylab="relative odds of infection",axes=F,cex.lab=2,ylim=c(0,100),xlim = c(-6,3))
 axis(1)
 axis(2)
 base.pred<-predict(foi.model,newdata = new.data.1,type = "response",re.form=NA)[1]
-points(log10(new.data.1$foi),predict(foi.model,newdata = new.data.1,type = "response",re.form=NA)/base.pred,type="l",col="red",lwd=2,lty=1)
-points(log10(new.data.2$foi),predict(foi.model,newdata = new.data.2,type = "response",re.form=NA)/base.pred,type="l",col="red",lwd=2,lty=2)
-points(log10(new.data.3$foi),predict(foi.model,newdata = new.data.3,type = "response",re.form=NA)/base.pred,type="l",col="red",lwd=2,lty=3)
-points(log10(new.data.4$foi),predict(foi.model,newdata = new.data.4,type = "response",re.form=NA)/base.pred,type="l",col="red",lwd=2,lty=4)
-legend("topleft",legend=c("50cm","25cm","10cm","5cm"),col="red",lty=c(4,3,2,1),bty="n",cex=1.5,lwd=2)
+points(log10(new.data.1$foi),predict(foi.model,newdata = new.data.1,type = "response",re.form=NA)/base.pred,type="l",col="red",lwd=4,lty=1)
+points(log10(new.data.2$foi),predict(foi.model,newdata = new.data.2,type = "response",re.form=NA)/base.pred,type="l",col="red",lwd=4,lty=2)
+points(log10(new.data.3$foi),predict(foi.model,newdata = new.data.3,type = "response",re.form=NA)/base.pred,type="l",col="red",lwd=4,lty=3)
+points(log10(new.data.4$foi),predict(foi.model,newdata = new.data.4,type = "response",re.form=NA)/base.pred,type="l",col="red",lwd=4,lty=4)
+legend("topleft",legend=c("50cm","25cm","10cm","5cm"),col="red",lty=c(4,3,2,1),bty="n",cex=2,lwd=4)
 
 
          

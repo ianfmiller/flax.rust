@@ -13,7 +13,19 @@ delta.plants.minus<-delta.plants[which(delta.plants.change$change==0),] #subset 
 
 ## plot trajectories
 par(mfrow=c(2,1),new=F,mar=c(5,5,5,5))
-plot(c(min(as.Date(plants$Date,tryFormats = "%m/%d/%Y")),max(as.Date(plants$Date,tryFormats = "%m/%d/%Y"))),c(-1,max(log10(plants$plant.inf.intens))),type="n",xlab="date",ylab="log 10 plant infection intensity",main="plant infection intensity",cex.lab=1.25,cex.axis=1.25,cex.main=1.25)
+
+plot(c(min(as.Date(plants$Date,tryFormats = "%m/%d/%Y")),max(as.Date(plants$Date,tryFormats = "%m/%d/%Y"))),c(0,max(plants$plant.inf.intens)),type="n",xlab="date",ylab="plant infection intensity",main="plant infection intensity",cex.lab=1.25,cex.axis=1.25,cex.main=1.25)
+i<-0
+plot.cols<-sample(rainbow(101))
+
+for (tag in unique(plants$Tag))
+{
+  sub.plants.1<-plants[which(plants$Tag==tag),]
+  points(sub.plants.1$Date,sub.plants.1$plant.inf.intens,col=plot.cols[i],type="l",lwd=2)
+  i<-i+1
+}
+
+plot(c(min(as.Date(plants$Date,tryFormats = "%m/%d/%Y")),max(as.Date(plants$Date,tryFormats = "%m/%d/%Y"))),c(-1,max(log10(plants$plant.inf.intens))),type="n",xlab="date",ylab="log 10 plant infection intensity",main="log 10 plant infection intensity",cex.lab=1.25,cex.axis=1.25,cex.main=1.25)
 i<-0
 plot.cols<-sample(rainbow(101))
 
@@ -24,16 +36,6 @@ for (tag in unique(plants$Tag))
   i<-i+1
 }
 
-plot(c(min(as.Date(plants$Date,tryFormats = "%m/%d/%Y")),max(as.Date(plants$Date,tryFormats = "%m/%d/%Y"))),c(0,max(plants$plant.inf.intens)),type="n",xlab="date",ylab="log 10 plant infection intensity",main="plant infection intensity",cex.lab=1.25,cex.axis=1.25,cex.main=1.25)
-i<-0
-plot.cols<-sample(rainbow(101))
-
-for (tag in unique(plants$Tag))
-{
-  sub.plants.1<-plants[which(plants$Tag==tag),]
-  points(sub.plants.1$Date,sub.plants.1$plant.inf.intens,col=plot.cols[i],type="l",lwd=2)
-  i<-i+1
-}
 
 ## histograms
 par(mfrow=c(2,1))
@@ -53,7 +55,7 @@ par(new=F,mar=c(5,5,5,5))
 
 ## plot transformed data to model
 par(mfrow=c(1,1))
-plot(log10(delta.plants$plant.inf.intens),log10(delta.plants$plant.inf.intens.next))
+plot(log10(delta.plants$plant.inf.intens),log10(delta.plants$plant.inf.intens.next),xlab=expression(log[10]*' plant infection intensity'),ylab=expression(log[10]*' next observed plant infection intensity'),cex.lab=2)
 abline(0,1)
 ## Indicates that most changes are small increases or decreases, but there are many large increases for low infection intensity (around -1), and several large decreases for medium infection intensity (around 0 to 2.5)
 ## Modeling the change in infection intensity as a single process resulted in a model that  1) often predicted log10(infection intensities) <  -1, 2) generally underpredicted infection intensity but 3) failed to capture large decreases
@@ -179,16 +181,22 @@ plants.shrinkage.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transm
 ## model checking
 ### overall results are acceptable
 ### change model
-#draw(plants.change.model) #plot smooths
+### plot smooths
+#par(mfrow=c(2,3),mar=c(5,5,5,5))
+#plot(plants.change.model,select = 1,scale=-1,xlab=expression(log[10]*'plant infection intensity'),ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2)
+#plot(plants.change.model,select = 2,scale=-1,xlab="maximm temperature (C)",ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2,main="")
+#plot(plants.change.model,select = 3,scale=-1,xlab="minimum temperature (C)",ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2,main="")
+#plot(plants.change.model,select = 4,scale=-1,xlab="maximm absolute humidity",ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2,main="")
+#plot(plants.change.model,select = 5,scale=-1,xlab="site",ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2,main="")
 
 #par(mfrow=c(2,2))
 #gam.check(plants.change.model) #indicates k vals are sufficient
 
 ### growth model
-#par(mfrow=c(2,2))
-#plot(plants.growth.model,scale=0,select=1)
-#plot(plants.growth.model,select=2,scheme=2,too.far=5,contour.col="black",labcex=1.5)
-#plot(plants.growth.model,scale=0,select=3)
+#par(mfrow=c(2,2),mar=c(5,6,5,5))
+#plot(plants.growth.model,select = 1,scale=-1,xlab=expression(log[10]*' plant infection intensity'),ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2)
+#plot(plants.growth.model,select=2,scheme=2,too.far=5,contour.col="black",labcex=1.5,xlab=expression(log[10]*' plant infection intensity'),cex.lab=2,main="")
+#plot(plants.growth.model,select = 3,scale=-1,xlab="site",ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2,main="")
 
 #par(mfrow=c(1,1))
 #plot(log10(delta.plants.plus$plant.inf.intens),log10(delta.plants.plus$plant.inf.intens.next))
@@ -199,12 +207,13 @@ plants.shrinkage.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transm
 
 ### shrinkage model
 #par(mfrow=c(2,3))
-#plot(plants.shrinkage.model,scale=0,select=1)
-#plot(plants.shrinkage.model,select=2,scheme=2,too.far=5,contour.col="black",labcex=1.5)
-#plot(plants.shrinkage.model,scale=0,select=3)
-#plot(plants.shrinkage.model,scale=0,select=4)
-#plot(plants.shrinkage.model,scale=0,select=5)
-#plot(plants.shrinkage.model,scale=0,select=6)
+#plot(plants.shrinkage.model,select = 1,scale=0,xlab=expression(log[10]*' plant infection intensity'),ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2)
+#plot(plants.shrinkage.model,select=2,scheme=2,too.far=5,contour.col="black",labcex=1.5,xlab=expression(log[10]*' plant infection intensity'),cex.lab=2,main="")
+#plot(plants.shrinkage.model,select = 3,scale=0,xlab="mean temperature",ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2,main="")
+#plot(plants.shrinkage.model,select = 4,scale=0,xlab="maximum temperature",ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2,main="")
+#plot(plants.shrinkage.model,select = 5,scale=0,xlab="maximum absolute humidity",ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2,main="")
+#plot(plants.shrinkage.model,select = 6,scale=0,xlab="site",ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2,main="")
+
 
 #par(mfrow=c(1,1))
 #plot(log10(delta.plants.minus$plant.inf.intens),predict(plants.shrinkage.model)) #
@@ -456,8 +465,9 @@ plot.orange<-t_col("orange",80)
 plant.height<-15
 
 ### one day ahead projection
-layout(matrix(c(1,1,2),1,3,byrow = T))
-plot(0,0,type="n",xlim=c(1,36),ylim=c(-1,5),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
+#layout(matrix(c(1,1,2),1,3,byrow = T))
+par(mfrow=c(1,1))
+plot(0,0,type="n",xlim=c(1,36),ylim=c(-1,5),ylab=expression(log[10]*'plant inf. intensity'),xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
 dat1<-predict.plant.inf.trajectory("GM",0,plant.height=plant.height,pred.window=1,plot.orange,T,T) 
 points(1:36,colMeans(dat1[[1]]),type="l",col="orange",lwd=4,lty=2)
 
@@ -467,7 +477,7 @@ points(1:36,colMeans(dat2[[1]]),type="l",col="red",lwd=4,lty=2)
 dat3<-predict.plant.inf.trajectory("GM",3.7,plant.height=plant.height,pred.window=1,plot.purple,T,T) 
 points(1:36,colMeans(dat3[[1]]),type="l",col="purple",lwd=4,lty=2)
 
-plot(0,0,type="n",xlim=c(1,36),ylim=c(-1,5),ylab='plant inf. intens.',xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
+plot(0,0,type="n",xlim=c(1,36),ylim=c(-1,5),ylab=expression(log[10]*'plant inf. intensity'),xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
 polygon(c(1:36,36:1),c(apply(dat1[[1]],2,quantile,probs=.05),rev(apply(dat1[[1]],2,quantile,probs=.95))),col=plot.orange,density=100)
 polygon(c(1:36,36:1),c(apply(dat2[[1]],2,quantile,probs=.05),rev(apply(dat2[[1]],2,quantile,probs=.95))),col=plot.red,density=100)
 polygon(c(1:36,36:1),c(apply(dat3[[1]],2,quantile,probs=.05),rev(apply(dat3[[1]],2,quantile,probs=.95))),col=plot.purple,density=100)
