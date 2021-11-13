@@ -17,7 +17,7 @@ hist(delta.n.pustules$n.pustules.next-delta.n.pustules$n.pustules,main="change i
 
 ## plot trajectories
 par(mfrow=c(1,1))
-plot(c(min(n.pustules$date),max(n.pustules$date)),c(0,max(n.pustules$N.pustules)),type="n",xlab="date",ylab="pustule area")
+plot(c(min(n.pustules$date),max(n.pustules$date)),c(0,max(n.pustules$N.pustules)),type="n",xlab="date",ylab="N pustules")
 
 i<-0
 
@@ -46,7 +46,7 @@ for (tag in unique(n.pustules$tag))
 par(mfrow=c(1,1),mar=c(6,6,6,6))
 tags<-c(86,88,106,112,124)
 i<-0
-plot.cols<-sample(rainbow(36))
+plot.cols<-sample(rainbow(28))
 plot(c(min(n.pustules[which(n.pustules$tag %in% tags),]$date),max(n.pustules[which(n.pustules$tag %in% tags),]$date)),c(0,max(n.pustules[which(n.pustules$tag %in% tags),]$N.pustules)),type="n",xlab="date",ylab="N pustules",cex.lab=2,cex.axis=2)
 sub.n.pustules1<-n.pustules[which(n.pustules$tag==tag),]
 for (tag in tags)
@@ -62,7 +62,7 @@ for (tag in tags)
       sub.n.pustules3<-sub.n.pustules2[which(sub.n.pustules2$leaf.iteration==leaf.iteration),]
       
       i<-i+1
-      points(sub.n.pustules3$date,sub.n.pustules3$N.pustules,col=plot.cols[i],type="l",lwd=5)
+      points(sub.n.pustules3$date,sub.n.pustules3$N.pustules,col=plot.cols[i],type="l",lwd=2)
       
     }
   }
@@ -73,7 +73,7 @@ for (tag in tags)
 par(mfrow=c(1,1))
 plot(delta.n.pustules$n.pustules,delta.n.pustules$n.pustules.next,col="black",xlab = "N pustules",ylab="next obs. N pustules",cex.lab=2,cex.axis=2)
 abline(0,1,lty=2)
-mtext(text="N = 650",cex=2)
+#mtext(text="N = 650",cex=2)
 
 # analyze data
 
@@ -96,7 +96,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   
   summary(mod0)
   
-  mod1<-gam(n.pustules.next-n.pustules~0+s(n.pustules,by=time,bs="cs",k=4),
+  mod1<-gam(n.pustules.next-n.pustules~0+s(n.pustules,by=time,bs="cs",k=4)+
               #s(mean.temp,by=time,bs="cs",k=4)+
               #s(max.temp,by=time,bs="cs",k=4)+
               #s(min.temp,by=time,bs="cs",k=4)+
@@ -105,7 +105,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
               #s(min.abs.hum,by=time,bs="cs",k=4)+
               #s(mean.solar,by=time,bs="cs",k=4)+
               #s(tot.rain,bs="cs",k=4)+
-              #s(site,bs="re",k=4),
+              s(site,bs="re",k=4),
             data=delta.n.pustules)
   summary(mod1)    # All now significant. Mod1 fit via stepwise removal that resulted in 2 marginally signiificant terms. The AIC of this model is significantly less than that of the model without the marginally significant terms.
   saveRDS(mod1,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS")
@@ -118,6 +118,12 @@ n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission
 ## model checking
 #plot(n.pustules.model,scale=0,pages=1) #plot smooths
 #gam.check(n.pustules.model) #indicates that the number of knots is sufficient, except for mean temperature. Increasing knots doesn't resolve issue, which indicates the issue is with the data, and the model is OK.
+
+## visualize model
+
+par(mfrow=c(1,2),mar=c(5,5,5,5))
+plot(n.pustules.model,select = 1,scale=-1,xlab="N pustules",ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2)
+plot(n.pustules.model,select = 2,scale=-1,xlab="site",ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2,main="")
 
 # predict climate change effect
 
