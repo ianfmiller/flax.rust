@@ -37,7 +37,7 @@ Plot(landcover)
 # load gpx data and population data
 
 #transects <- c('RG' , 'GL' , 'WM', 'TR' , 'NP' , 'CL' , 'LG' , 'MB' , 'HM'  , 'CT' , 'CB' , 'SH' , 'DC' , 'VB' , 'BG' , 'CM' , 'BC' , 'WS' , 'UL' , 'RL' , 'ER' , 'ME' , 'OBJ' , 'TC') ## transects to consider
-transects<-c("UL")
+transects<-c("UL","RL","SH","TC","TR","VB","WM","WS")
 
 ## function to extract and clean gpx data
 get_gpx_tracks <- function(transect = transects) {
@@ -142,8 +142,16 @@ for(transect in transects) ### for each transect
     
     #if(plot) {map<-addCircleMarkers(map=map,data=st_transform(sample_points,crs="+proj=longlat +datum=WGS84"),col="black",radius = .1,weight=0)}
     
-    elevation_data<-unlist(raster::extract(x=topography,y=as(sample_points,"Spatial"),method="bilinear",na.rm=T)) ##### extract data
-    landcover_data<-unlist(raster::extract(x=landcover,y=as(sample_points,"Spatial"),method="simple",na.rm=T))
+    if(!file.exists(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".elevation.RDS")) | !file.exists(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".landcover.RDS")) )
+    {
+      elevation_data<-unlist(raster::extract(x=topography,y=as(sample_points,"Spatial"),method="bilinear",na.rm=T)) ##### extract data
+      landcover_data<-unlist(raster::extract(x=landcover,y=as(sample_points,"Spatial"),method="simple",na.rm=T))
+      saveRDS(elevation_data,file=paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".elevation.RDS"))
+      saveRDS(landcover_data,file=paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".landcover.RDS"))
+    }
+    
+    landcover_data<-readRDS(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".elevation.RDS"))
+    landcover_data<-readRDS(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".landcover.RDS"))
     
     ##### store data
     
