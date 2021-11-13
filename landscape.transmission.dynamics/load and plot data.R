@@ -221,4 +221,7 @@ map
 head(all_transects)
 head(all_populations)
 
+saveRDS(all_transects,file="~/Documents/GitHub/flax.rust/landscape.transmission.dynamics/summarized.data/all_transects.RDS")
+saveRDS(all_populations,file="~/Documents/GitHub/flax.rust/landscape.transmission.dynamics/summarized.data/all_populations.RDS")
+
 
