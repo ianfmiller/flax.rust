@@ -105,8 +105,8 @@ for(transect in transects) ### for each transect
     end.dists<-c(st_distance(st_cast(points,"POINT"),end.point)) ##### get distances between gpx coordinates along transect line and population end point
     end.index<-which.min(end.dists) ##### get index of minimum distance
     
-    if(flax_sub_pop[i,"incidence"]==0) {new.status<-"fz"} ##### set class to 'flax zone' if there is no disease
-    if(flax_sub_pop[i,"incidence"]==1) {new.status<-"dfz"} ##### set class to 'diseased flax zone' if there is disease
+    if(isTRUE(flax_sub_pop[i,"incidence"]==0)) {new.status<-"fz"} ##### set class to 'flax zone' if there is no disease
+    if(isTRUE(flax_sub_pop[i,"incidence"]==1)) {new.status<-"dfz"} ##### set class to 'diseased flax zone' if there is disease
     
     transect.coded[start.index:(end.index-40),"class"]<-new.status ##### set class of chunk containing flax pop, backing up 10m from recorded end pont (per sampling protocol)
     transect.coded[which(is.na(transect.coded[1:start.index,"chunk"])),"chunk"]<-chunk ##### set chunk index of chunk with class nfz preceeding flax population
