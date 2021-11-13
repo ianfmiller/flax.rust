@@ -187,7 +187,7 @@ simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
 
 # run simulations
 step.size<-2
-site<-"HM"
+site<-"BT"
 
 
 if(any((!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.site.",site,".step.size.",step.size,".RDS"))),
@@ -352,7 +352,7 @@ plot.func<-function(site,step.size)
     xvals<-c(xvals,date)
   }
   points(xvals,yvals,type="l",col="purple",lwd=4)
-  legend("topleft",legend=c("data","+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col=c("black","orange","red","purple"),lwd=4,cex=1,bty="n")
+  legend("topleft",legend=c("data","+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col=c("black","orange","red","purple"),lwd=4,cex=2,bty="n")
 }
 
 par(mfrow=c(1,2),mar=c(5,5,3,3))
