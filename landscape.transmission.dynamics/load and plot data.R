@@ -142,7 +142,7 @@ for(transect in transects) ### for each transect
     
     #if(plot) {map<-addCircleMarkers(map=map,data=st_transform(sample_points,crs="+proj=longlat +datum=WGS84"),col="black",radius = .1,weight=0)}
     
-    if(!file.exists(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".elevation.RDS")) | !file.exists(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".landcover.RDS")) )
+    if(!file.exists(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".elevation.RDS")) | !file.exists(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".landcover.RDS")) )
     {
       elevation_data<-unlist(raster::extract(x=topography,y=as(sample_points,"Spatial"),method="bilinear",na.rm=T)) ##### extract data
       landcover_data<-unlist(raster::extract(x=landcover,y=as(sample_points,"Spatial"),method="simple",na.rm=T))
