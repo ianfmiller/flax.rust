@@ -146,12 +146,12 @@ for(transect in transects) ### for each transect
     {
       elevation_data<-unlist(raster::extract(x=topography,y=as(sample_points,"Spatial"),method="bilinear",na.rm=T)) ##### extract data
       landcover_data<-unlist(raster::extract(x=landcover,y=as(sample_points,"Spatial"),method="simple",na.rm=T))
-      saveRDS(elevation_data,file=paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".elevation.RDS"))
-      saveRDS(landcover_data,file=paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".landcover.RDS"))
+      saveRDS(elevation_data,file=paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".elevation.RDS"))
+      saveRDS(landcover_data,file=paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".landcover.RDS"))
     }
     
-    elevation_data<-readRDS(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".elevation.RDS"))
-    landcover_data<-readRDS(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".landcover.RDS"))
+    elevation_data<-readRDS(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".elevation.RDS"))
+    landcover_data<-readRDS(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".elevation.RDS"))
     
     ##### store data
     
