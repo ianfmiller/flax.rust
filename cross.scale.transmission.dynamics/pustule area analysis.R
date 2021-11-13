@@ -20,7 +20,7 @@ hist(delta.pustules$area.next-delta.pustules$area,main="change in pustule area",
 plot(c(min(pustules$date),max(pustules$date)),c(0,max(pustules$area)),type="n",xlab="date",ylab="pustule area")
 i<-0
 
-plot.cols<-sample(rainbow(2042))
+plot.cols<-sample(rainbow(2007))
 
 for (tag in unique(pustules$tag))
 {
@@ -45,10 +45,40 @@ for (tag in unique(pustules$tag))
   }
 }
 
+## just a few trajectories
+
+plot(c(min(pustules$date),max(pustules$date)),c(0,.25),type="n",xlab="date",ylab="pustule area")
+i<-0
+
+plot.cols<-sample(rainbow(37))
+
+for (tag in unique(pustules$tag)[1:1])
+{
+  sub.pustules1<-pustules[which(pustules$tag==tag),]
+  
+  for (color in unique(sub.pustules1$color))
+  {
+    sub.pustules2<-sub.pustules1[which(sub.pustules1$color==color),]
+    
+    for(leaf.iteration in unique(sub.pustules2$leaf.iteration)) 
+    {
+      sub.pustules3<-sub.pustules2[which(sub.pustules2$leaf.iteration==leaf.iteration),]
+      
+      for(pustule.number in unique(sub.pustules3$pustule.number))
+      {
+        i<-i+1
+        sub.pustules4<-sub.pustules3[which(sub.pustules3$pustule.number==pustule.number),]
+        sub.pustules4<-sub.pustules4[order(sub.pustules4$date),]
+        points(sub.pustules4$date,sub.pustules4$area,col=plot.cols[i],type="l",lwd=1)
+      }
+    }
+  }
+}
+
 ## plot change
-par(mfrow=c(1,1),mar=c(5,5,5,5))
-plot(delta.pustules$area,delta.pustules$area.next,col="grey",xlab = expression(area(mm^2)),ylab=expression('next obs. area '*(mm^2)),cex.lab=1.5)
-abline(0,1)
+par(mfrow=c(1,1),mar=c(5,6,5,5))
+plot(delta.pustules$area,delta.pustules$area.next,col="black",xlab = expression(area(mm^2)),ylab=expression('next obs. area '*(mm^2)),cex.lab=2,cex.axis=2)
+abline(0,1,lty=2)
 
 # analyze data
 
