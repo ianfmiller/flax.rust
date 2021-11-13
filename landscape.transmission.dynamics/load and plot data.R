@@ -150,7 +150,7 @@ for(transect in transects) ### for each transect
       saveRDS(landcover_data,file=paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".landcover.RDS"))
     }
     
-    landcover_data<-readRDS(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".elevation.RDS"))
+    elevation_data<-readRDS(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".elevation.RDS"))
     landcover_data<-readRDS(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".landcover.RDS"))
     
     ##### store data
