@@ -59,7 +59,8 @@ flax_pops <- read.csv("~/Documents/GitHub/flax.rust/data/landscape.transect.data
 
 ## initiate map
 map<-leaflet() %>% 
-  addTiles() %>% 
+  addTiles(group = 'OSM') %>%
+  addProviderTiles(providers$OpenTopoMap, group='Topo') %>%
   addMeasure(primaryLengthUnit = "meters")
 
 ## plotting option
@@ -128,7 +129,7 @@ for(transect in transects) ### for each transect
   {
     sub.transect.coded<-transect.coded[which(transect.coded$chunk==chunk),] ##### subset data
   
-    if(sub.transect.coded[1,"class"]=="nfz") {col<-"grey"; flax.presence<-0; incidence<-0} ##### set plot color based on class
+    if(sub.transect.coded[1,"class"]=="nfz") {col<-"darkgrey"; flax.presence<-0; incidence<-0} ##### set plot color based on class
     if(sub.transect.coded[1,"class"]=="fz") {col<-"green"; flax.presence<-1; incidence<-0}
     if(sub.transect.coded[1,"class"]=="dfz") {col<-"yellow"; flax.presence<-1; incidence<-1}
     
@@ -154,7 +155,7 @@ for(transect in transects) ### for each transect
     }
     
     elevation_data<-readRDS(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".elevation.RDS"))
-    landcover_data<-readRDS(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".elevation.RDS"))
+    landcover_data<-readRDS(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".landcover.RDS"))
     
     ##### store data
     
