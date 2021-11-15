@@ -99,22 +99,25 @@ for(transect in transects) ### for each transect
     start.point<-st_sfc(st_point(start.cords),crs = "+proj=longlat +datum=WGS84") ##### set crs
     start.dists<-c(st_distance(st_cast(points,"POINT"),start.point)) ##### get distances between gps coordinates along transect line and population start point
     start.index<-which.min(start.dists) ##### get index of minimun distance
+    if(flax_sub_pop[i,"notes"]=="no flax") {start.index<-1}
     
     end.cords<-as.numeric(flax_sub_pop[i,c("end.long","end.lat")]) ##### get end coordinates
     end.point<-st_sfc(st_point(end.cords),crs = "+proj=longlat +datum=WGS84") ##### set crs
     end.dists<-c(st_distance(st_cast(points,"POINT"),end.point)) ##### get distances between gpx coordinates along transect line and population end point
     end.index<-which.min(end.dists) ##### get index of minimum distance
+    if(flax_sub_pop[i,"notes"]=="no flax") {end.index<-length(end.dists)}
     
+    new.status<-"nfz"
     if(isTRUE(flax_sub_pop[i,"incidence"]==0)) {new.status<-"fz"} ##### set class to 'flax zone' if there is no disease
     if(isTRUE(flax_sub_pop[i,"incidence"]==1)) {new.status<-"dfz"} ##### set class to 'diseased flax zone' if there is disease
-    
+
     transect.coded[start.index:(end.index-40),"class"]<-new.status ##### set class of chunk containing flax pop, backing up 10m from recorded end pont (per sampling protocol)
     transect.coded[which(is.na(transect.coded[1:start.index,"chunk"])),"chunk"]<-chunk ##### set chunk index of chunk with class nfz preceeding flax population
     transect.coded[start.index:(end.index-40),"chunk"]<-chunk+1 ##### set chunk index of flax population , backing up 10m from recorded end pont (per sampling protocol)
     flax_sub_pop[i,"chunk"]<-chunk+1
     chunk<-chunk+ 2 ##### set next hunk index
     if(i==nrow(flax_sub_pop)) {transect.coded[which(is.na(transect.coded$chunk)),"chunk"]<-chunk} ##### after the last flax population, set chunk of remaining nfz if it exists
-    
+    if(all(transect.coded$class=="nfz")) {transect.coded$chunk<-1}
   }
   
   print(paste0("finished gps processing"))
@@ -137,13 +140,13 @@ for(transect in transects) ### for each transect
   
     if(plot) {map<-addPolygons(map=map,data = st_transform(ribbon,crs="+proj=longlat +datum=WGS84"),col=col)} ##### add polygon to map
     
-    sample_points<-st_sample(ribbon,size=as.numeric(floor(st_area(ribbon))),type="regular") ##### regularly sample 1 point per m2 from polygon 
-    sample_points<-st_transform(sample_points,crs=proj4string(topography)) ##### align crs of sample_points and data
-    
-    #if(plot) {map<-addCircleMarkers(map=map,data=st_transform(sample_points,crs="+proj=longlat +datum=WGS84"),col="black",radius = .1,weight=0)}
-    
     if(!file.exists(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".elevation.RDS")) | !file.exists(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".landcover.RDS")) )
     {
+      sample_points<-st_sample(ribbon,size=as.numeric(floor(st_area(ribbon))),type="regular") ##### regularly sample 1 point per m2 from polygon 
+      sample_points<-st_transform(sample_points,crs=proj4string(topography)) ##### align crs of sample_points and data
+      
+      #if(plot) {map<-addCircleMarkers(map=map,data=st_transform(sample_points,crs="+proj=longlat +datum=WGS84"),col="black",radius = .1,weight=0)}
+      
       elevation_data<-unlist(raster::extract(x=topography,y=as(sample_points,"Spatial"),method="bilinear",na.rm=T)) ##### extract data
       landcover_data<-unlist(raster::extract(x=landcover,y=as(sample_points,"Spatial"),method="simple",na.rm=T))
       saveRDS(elevation_data,file=paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".elevation.RDS"))
