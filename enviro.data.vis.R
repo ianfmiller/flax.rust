@@ -1,7 +1,7 @@
 ### temp data visualization ###
 library(lubridate)
 
-source("~/Documents/Github/flax.rust/prep.enviro.data.R")
+source("~/Documents/Github/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
 
 make.transparent<-function(col,alpha)
 {
@@ -19,13 +19,13 @@ par(mfrow=c(2,2),oma=c(0,0,2,0),mar=c(5.1,4.1,4.1,2.1))
 
 plot.func<-function(x,title)
 {
-  plot(x[,1],x[,2],type="l",col="red",main=title,ylim=c(-5,100),xlim=c(min(all.temp.rh[,1],na.rm=T),max(all.temp.rh[,1],na.rm = T)),xlab="date",ylab="")
+  plot(x[,1],x[,2],type="l",col="red",main=title,ylim=c(-5,100),xlim=c(min(all.temp.rh[,3],na.rm=T),max(all.temp.rh[,1],na.rm = T)),xlab="date",ylab="")
   mtext("temp",2,cex=par()$cex,line=2.25,col="red")
   lines(x[,1],x[,3],type="l",col="blue")
   mtext("RH",2,cex=par()$cex,line=3,col="blue",las=0)
 }
 
-plot.func(hm,"high meadow")
+plot.func(all.temp.rh[which(all.temp.rh$site=="HM"),],"high meadow")
 plot.func(gm,"gothic mountain")
 plot.func(bt,"bus turnaround")
 plot.func(cc,"cement creek")
