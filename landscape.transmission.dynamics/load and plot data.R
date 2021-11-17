@@ -169,7 +169,7 @@ for(transect in transects) ### for each transect
     all_transects<-rbind(all_transects,new_all_transects)
     
     num.H<-if(chunk %in% flax_sub_pop$chunk) {flax_sub_pop[which(flax_sub_pop$chunk==chunk),"num.H"]} else {0} ###### number of H plants
-    num.D<-if(chunk %in% flax_sub_pop$chunk) {flax_sub_pop[which(flax_sub_pop$chunk==chunk),"num.H"]} else {0}  ###### number of D plants
+    num.D<-if(chunk %in% flax_sub_pop$chunk) {flax_sub_pop[which(flax_sub_pop$chunk==chunk),"num.D"]} else {0}  ###### number of D plants
     prevalence<-if(chunk %in% flax_sub_pop$chunk) {num.D/(num.H+num.D)} ###### prevalence
     incidence<-if(chunk %in% flax_sub_pop$chunk) {flax_sub_pop[which(flax_sub_pop$chunk==chunk),"incidence"]} else {0} ###### incidence
     
