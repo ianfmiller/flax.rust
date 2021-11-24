@@ -36,8 +36,7 @@ Plot(landcover)
 
 # load gpx data and population data
 
-#transects <- c('RG' , 'GL' , 'WM', 'TR' , 'NP' , 'CL' , 'LG' , 'MB' , 'HM'  , 'CT' , 'CB' , 'SH' , 'DC' , 'VB' , 'BG' , 'CM' , 'BC' , 'WS' , 'UL' , 'RL' , 'ER' , 'ME' , 'OBJ' , 'TC') ## transects to consider
-transects<-c("UL","RL","SH","TC","TR","VB","WM","WS")
+transects <- c('RG' , 'GL' , 'WM', 'TR' , 'NP' , 'CL' , 'LG' , 'MB' , 'HM'  , 'CT' , 'CB' , 'SH' , 'DC' , 'VB' , 'BG' , 'CM' , 'BC' , 'WS' , 'UL' , 'RL' , 'ER' , 'ME' , 'OBJ' , 'TC') ## transects to consider
 
 ## function to extract and clean gpx data
 get_gpx_tracks <- function(transect = transects) {
@@ -75,17 +74,16 @@ for(transect in transects) ### for each transect
 {
   print(paste0("starting transect ",transect))
   
-  sub_gpx_tracks<-gpx_tracks[which(gpx_tracks$transect==transect),] #### subset gpx data
   flax_sub_pop<-cbind(flax_pops[which(flax_pops$transect==transect),],"chunk"=NA) #### subset flax population data
   
+  sub_gpx_tracks<-gpx_tracks[which(gpx_tracks$transect==transect),] #### subset gpx data
   line<-st_linestring(cbind(sub_gpx_tracks$longitude,sub_gpx_tracks$latitude)) #### draw line through all gps points
   n.points<-floor(4*as.numeric(st_length(st_sfc(line, crs = "+proj=longlat +datum=WGS84")))) ### set number of points to sample such that sampling will occur every 0.25m (4* distance of gps track in meters)
   points<-st_line_sample(line,n=n.points,type="regular") #### sample points at regular interval along track
   points<-st_sfc(points,crs = "+proj=longlat +datum=WGS84") #### add crs to pio ts
-  
   new_line<-st_linestring(st_coordinates(points)[,c("X","Y")]) #### convert points to line
   new_line<-st_sfc(new_line, crs = "+proj=longlat +datum=WGS84") #### add crs
-  
+    
   if(plot) {map<-addPolylines(map=map,data = st_transform(new_line,crs="+proj=longlat +datum=WGS84"),col="black",weight=1)} #### add track to map
   
   track_points<-st_coordinates(new_line)[,c("X","Y")] #### extract raw track coordinates
@@ -129,7 +127,7 @@ for(transect in transects) ### for each transect
   {
     sub.transect.coded<-transect.coded[which(transect.coded$chunk==chunk),] ##### subset data
   
-    if(sub.transect.coded[1,"class"]=="nfz") {col<-"darkgrey"; flax.presence<-0; incidence<-0} ##### set plot color based on class
+    if(sub.transect.coded[1,"class"]=="nfz") {col<-"red"; flax.presence<-0; incidence<-0} ##### set plot color based on class
     if(sub.transect.coded[1,"class"]=="fz") {col<-"green"; flax.presence<-1; incidence<-0}
     if(sub.transect.coded[1,"class"]=="dfz") {col<-"yellow"; flax.presence<-1; incidence<-1}
     
