@@ -7,9 +7,78 @@
 		<name>Gothic Elevation Transect</name>
 		<type>4</type>
 		<trkseg>
-			<trkpt lat="38.9827020" lon="-107.0096620">
-				<ele>2983.0</ele>
-				<time>2021-07-19T14:29:38Z</time>
+			<trkpt lat="38.982206" lon="-107.006314">
+				<ele>0.000000</ele>
+			</trkpt>
+			<trkpt lat="38.982157" lon="-107.006371">
+			</trkpt>
+			<trkpt lat="38.982137" lon="-107.006416">
+			</trkpt>
+			<trkpt lat="38.982107" lon="-107.006516">
+			</trkpt>
+			<trkpt lat="38.982085" lon="-107.006611">
+			</trkpt>
+			<trkpt lat="38.982069" lon="-107.006717">
+			</trkpt>
+			<trkpt lat="38.982062" lon="-107.006853">
+			</trkpt>
+			<trkpt lat="38.982059" lon="-107.006971">
+			</trkpt>
+			<trkpt lat="38.982064" lon="-107.007011">
+			</trkpt>
+			<trkpt lat="38.982069" lon="-107.007049">
+			</trkpt>
+			<trkpt lat="38.982075" lon="-107.007076">
+			</trkpt>
+			<trkpt lat="38.982082" lon="-107.007111">
+			</trkpt>
+			<trkpt lat="38.982097" lon="-107.007152">
+			</trkpt>
+			<trkpt lat="38.982118" lon="-107.007200">
+			</trkpt>
+			<trkpt lat="38.982274" lon="-107.007461">
+			</trkpt>
+			<trkpt lat="38.982299" lon="-107.007514">
+			</trkpt>
+			<trkpt lat="38.982313" lon="-107.007564">
+			</trkpt>
+			<trkpt lat="38.982322" lon="-107.007626">
+			</trkpt>
+			<trkpt lat="38.982323" lon="-107.007684">
+			</trkpt>
+			<trkpt lat="38.982330" lon="-107.007827">
+			</trkpt>
+			<trkpt lat="38.982368" lon="-107.007920">
+			</trkpt>
+			<trkpt lat="38.982370" lon="-107.007949">
+			</trkpt>
+			<trkpt lat="38.982373" lon="-107.008060">
+			</trkpt>
+			<trkpt lat="38.982377" lon="-107.008154">
+			</trkpt>
+			<trkpt lat="38.982389" lon="-107.008216">
+			</trkpt>
+			<trkpt lat="38.982407" lon="-107.008301">
+			</trkpt>
+			<trkpt lat="38.982428" lon="-107.008378">
+			</trkpt>
+			<trkpt lat="38.982454" lon="-107.008485">
+			</trkpt>
+			<trkpt lat="38.982461" lon="-107.008577">
+			</trkpt>
+			<trkpt lat="38.982497" lon="-107.008876">
+			</trkpt>
+			<trkpt lat="38.982548" lon="-107.009125">
+			</trkpt>
+			<trkpt lat="38.982575" lon="-107.009232">
+			</trkpt>
+			<trkpt lat="38.982610" lon="-107.009347">
+			</trkpt>
+			<trkpt lat="38.982641" lon="-107.009438">
+			</trkpt>
+			<trkpt lat="38.982686" lon="-107.009550">
+			</trkpt>
+			<trkpt lat="38.982709" lon="-107.009618">
 			</trkpt>
 			<trkpt lat="38.9827050" lon="-107.0096740">
 				<ele>2983.2</ele>

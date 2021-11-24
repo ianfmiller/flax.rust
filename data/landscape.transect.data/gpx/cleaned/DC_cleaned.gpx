@@ -7,6 +7,14 @@
 		<name>Deer Creek Elevation Transect</name>
 		<type>4</type>
 		<trkseg>
+			<trkpt lat="38.953490" lon="-106.988151">
+			</trkpt>
+			<trkpt lat="38.953423" lon="-106.988090">
+			</trkpt>
+			<trkpt lat="38.953299" lon="-106.988142">
+			</trkpt>
+			<trkpt lat="38.953118" lon="-106.988144">
+			</trkpt>
 			<trkpt lat="38.9528390" lon="-106.9879060">
 				<ele>2882.5</ele>
 				<time>2021-07-15T20:05:42Z</time>
