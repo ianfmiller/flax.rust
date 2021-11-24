@@ -219,6 +219,7 @@ for(transect in transects) ### for each transect
 }
 
 map
+saveRDS(map,file="~/Documents/GitHub/flax.rust/landscape.transmission.dynamics/summarized.data/map.RDS")
 
 head(all_transects)
 head(all_populations)
