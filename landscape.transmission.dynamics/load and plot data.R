@@ -181,9 +181,16 @@ for(transect in transects) ### for each transect
     disease.indicies.all<-which(transect.coded$class=="dfz")
     disease.indicies<-disease.indicies.all[which(!(disease.indicies.all %in% chunk.indicies))]
     
-    nearest.pop.dist<-min(min(abs(chunk.endpoint.1-flax.indicies)),min(abs(chunk.endpoint.2-flax.indicies)))
-    nearest.D.pop.dist<-min(min(abs(chunk.endpoint.1-disease.indicies)),min(abs(chunk.endpoint.2-disease.indicies)))
+    if(length(flax.indicies)>0)
+    {
+      nearest.pop.dist<-min(min(abs(chunk.endpoint.1-flax.indicies)),min(abs(chunk.endpoint.2-flax.indicies)))
+    } else {nearest.pop.dist<-NA}
     
+    if(length(disease.indicies)>0)
+    {
+      nearest.D.pop.dist<-min(min(abs(chunk.endpoint.1-disease.indicies)),min(abs(chunk.endpoint.2-disease.indicies)))
+    } else{nearest.D.pop.dist<-NA}
+
     ###### extract landcover varriables
     landcover.table<-table(landcover_data)
     mode.landcover<-as.numeric(names(landcover.table)[which.max(landcover.table)])
