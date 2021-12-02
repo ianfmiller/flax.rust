@@ -8,7 +8,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   pustules<-read.csv("~/Documents/GitHub/flax.rust/data/pustule measurements.csv")
   
   ## add in area
-  area<-pi*(pustules$max.diam..mm./4)*(pustules$min.diam..mm./4)
+  area<-pi*(pustules$max.diam..mm./2)*(pustules$min.diam..mm./2)
   pustules$date<-as.POSIXct(pustules$date,tryFormats = "%m/%d/%y %H:%M",tz="UTC")
   pustules$area<-area
   
