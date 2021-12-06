@@ -1,3 +1,4 @@
+set.seed(34020968)
 library(mgcv)
 library(lme4)
 library(lmerTest)
@@ -10,14 +11,18 @@ source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/pustule a
 delta.pustules<-subset(delta.pustules,time<=7)
 
 # visualize data
-
+layout(matrix(c(1,2,4,4,3,3,3,3),2,4,byrow = T))
+par(mar=c(5,5,3,0.5))
 ## histograms
-par(mfrow=c(1,1))
-hist(delta.pustules$area,main="pustule area",breaks=100,xlab="area")
-hist(delta.pustules$area.next-delta.pustules$area,main="change in pustule area",breaks=100,xlab="change in area")
+hist(delta.pustules$area,main="",breaks=100,xlab="area",cex.lab=2,cex.axis=2,cex.main=2)
+mtext("A",side=3,adj=1,line=-3,cex=2)
+hist(delta.pustules$area.next-delta.pustules$area,main="",breaks=100,xlab="change in area",cex.lab=2,cex.axis=2,cex.main=2)
+mtext("B",side=3,adj=1,line=-3,cex=2)
 
 ## plot trajectories
-plot(c(min(pustules$date),max(pustules$date)),c(0,max(pustules$area)),type="n",xlab="date",ylab="pustule area")
+par(mar=c(2,5,0,0.5))
+plot(c(min(pustules$date),max(pustules$date)),c(0,max(pustules$area)),type="n",xlab="",ylab="pustule area",cex.lab=2,cex.axis=2)
+mtext("D",side=3,adj=1,line=-3,cex=2)
 i<-0
 
 plot.cols<-sample(rainbow(2007))
@@ -47,74 +52,65 @@ for (tag in unique(pustules$tag))
 
 ## just a few trajectories
 
-plot(c(min(pustules$date),max(pustules$date)),c(0,.25),type="n",xlab="date",ylab="pustule area")
-i<-0
+#plot(c(min(pustules$date),max(pustules$date)),c(0,1),type="n",xlab="date",ylab="pustule area")
+#i<-0
 
-plot.cols<-sample(rainbow(37))
+#plot.cols<-sample(rainbow(37))
 
-for (tag in unique(pustules$tag)[1:1])
-{
-  sub.pustules1<-pustules[which(pustules$tag==tag),]
-  
-  for (color in unique(sub.pustules1$color))
-  {
-    sub.pustules2<-sub.pustules1[which(sub.pustules1$color==color),]
-    
-    for(leaf.iteration in unique(sub.pustules2$leaf.iteration)) 
-    {
-      sub.pustules3<-sub.pustules2[which(sub.pustules2$leaf.iteration==leaf.iteration),]
-      
-      for(pustule.number in unique(sub.pustules3$pustule.number))
-      {
-        i<-i+1
-        sub.pustules4<-sub.pustules3[which(sub.pustules3$pustule.number==pustule.number),]
-        sub.pustules4<-sub.pustules4[order(sub.pustules4$date),]
-        points(sub.pustules4$date,sub.pustules4$area,col=plot.cols[i],type="l",lwd=1)
-      }
-    }
-  }
-}
+#for (tag in unique(pustules$tag)[1:1])
+#{
+#  sub.pustules1<-pustules[which(pustules$tag==tag),]
+#  
+#  for (color in unique(sub.pustules1$color))
+#  {
+#    sub.pustules2<-sub.pustules1[which(sub.pustules1$color==color),]
+#    
+#    for(leaf.iteration in unique(sub.pustules2$leaf.iteration)) 
+#    {
+#      sub.pustules3<-sub.pustules2[which(sub.pustules2$leaf.iteration==leaf.iteration),]
+#      
+#      for(pustule.number in unique(sub.pustules3$pustule.number))
+#      {
+#        i<-i+1
+#        sub.pustules4<-sub.pustules3[which(sub.pustules3$pustule.number==pustule.number),]
+#        sub.pustules4<-sub.pustules4[order(sub.pustules4$date),]
+#        points(sub.pustules4$date,sub.pustules4$area,col=plot.cols[i],type="l",lwd=1)
+#      }
+#    }
+#  }
+#}
 
 ## plot change
-par(mfrow=c(1,1),mar=c(5,6,5,5))
+par(mar=c(5,5,3,0.5))
 plot(delta.pustules$area,delta.pustules$area.next,col="black",xlab = expression(area(mm^2)),ylab=expression('next obs. area '*(mm^2)),cex.lab=2,cex.axis=2)
+mtext("C",side=3,adj=1,line=-3.25,cex=2)
 abline(0,1,lty=2)
 
 # analyze data
 
-## fit models--only if not already fit
+## fit model--only if not already fit
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS"))
 {
-  ### omit maximum and minimum temperature due to very wide se intervals generated in best model
-  mod0<-gam(area.next-area~0+s(area,by=time,bs="cs",k=4)+
-              s(mean.temp,by=time,bs="cs",k=4)+
-              s(max.temp,by=time,bs="cs",k=4)+
-              s(min.temp,by=time,bs="cs",k=4)+
-              s(mean.abs.hum,by=time,bs="cs",k=4)+
-              s(max.abs.hum,by=time,bs="cs",k=4)+
-              s(min.abs.hum,by=time,bs="cs",k=4)+
-              s(mean.solar,by=time,bs="cs",k=4)+
-              s(tot.rain,bs="cs",k=4)+
-              s(site,bs="re",k=4),
-            data=delta.pustules)
-
-  summary(mod0) #indicates that mean.temp and mean.abs.hum are not significant predictors
+  mod<-gam(area.next-area~0+
+              te(area,time)+
+              s(mean.temp)+
+              s(max.temp)+
+              s(min.temp)+
+              s(mean.abs.hum)+
+              s(max.abs.hum)+
+              s(min.abs.hum)+
+              s(mean.solar)+
+              s(tot.rain)+
+              s(mean.wetness)+
+              s(tag,bs="re")+
+              s(site,bs="re"),
+            select = T,
+            method="REML",
+            data=delta.pustules,
+            control = list(nthreads=4))
   
-  mod1<-gam(area.next-area~0+s(area,by=time,bs="cs",k=4)+
-              #s(mean.temp,by=time,bs="cs",k=4)+
-              s(max.temp,by=time,bs="cs",k=4)+
-              s(min.temp,by=time,bs="cs",k=4)+
-              #s(mean.abs.hum,by=time,bs="cs",k=4)+
-              s(max.abs.hum,by=time,bs="cs",k=4)+
-              s(min.abs.hum,by=time,bs="cs",k=4)+
-              s(mean.solar,by=time,bs="cs",k=4)+
-              s(tot.rain,bs="cs",k=4)+
-              s(site,bs="re",k=4),
-            data=delta.pustules)
-  summary(mod1) # All now significant. Stepwise removal yields the same result.
-  
-  saveRDS(mod1,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
+  saveRDS(mod,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
 }
 
 ## load best model
@@ -122,21 +118,61 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
 
 ## model checking
-#plot(pustule.model,scale=0,pages=1) #plot smooths
-#gam.check(pustule.model) #indicates more knots needed
-#more.knots.mod<-gam(area.next ~ s(area, by = time, bs = "cs", k = 20) + s(mean.temp,by = time, bs = "cs", k = 20) + s(max.abs.hum, by = time, bs = "cs", k = 20) + s(mean.solar, by = time, bs = "cs", k = 20) + s(tot.rain, bs = "cs", k = 20) + s(site, bs = "re", k = 20),data=delta.pustules)
-#gam.check(more.knots.mod) #indicates that increasing number of knots doesn't solve the issue of unevenly distributed residuals. This indicates that the data is the root cause and original model is OK
+gam.check(pustule.model) #Indicates that k should be higher all smooths aside from the tensor. Increasing k to significantly higher values is not possible due to terms having fewer unique covariate combinations than specified maximum degrees of freedom. 
+concurvity(pustule.model,full=F) #Concurvity is expected between all weather variables. The non-pessimistic estimations of concurvity (under $estimate and $observed) indicate that it is not a serious issue in the model fit.
 
-## better visualize model
-par(mfrow=c(2,4),mar=c(5,5,5,5))
-plot(pustule.model,select = 1,scale=-1,xlab=expression(area(mm^2)),ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2)
-plot(pustule.model,select = 2,scale=-1,xlab="max temperature",ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2)
-plot(pustule.model,select = 3,scale=-1,xlab="min temperature",ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2)
-plot(pustule.model,select = 4,scale=-1,xlab="max absolute humidity",ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2)
-plot(pustule.model,select = 5,scale=-1,xlab="minimum absolute humidity",ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2)
-plot(pustule.model,select = 6,scale=-1,xlab="mean solar radiation",ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2)
-plot(pustule.model,select = 7,scale=-1,xlab="rainfall",ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2)
-plot(pustule.model,select = 8,scale=-1,xlab="site",ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2,main="")
+## visualize model
+layout(matrix(c(1,1,1,1,2,3,3,3,3,4,4,4,4,5,5,5,5,14,15,6,6,6,6,7,7,7,7,8,8,8,8,9,9,9,9,16,17,10,10,10,10,11,11,11,11,12,12,12,12,13,13,13,13,17),3,18,byrow = T))
+par(mar=c(4,7,3,1.5))
+options(warn=-1) ## suppress warnings due to passing levels to vis.gam
+vis.gam(pustule.model,plot.type = "contour",type="response",labcex=.75,contour.col = "black",color="cm",zlim=c(-.35,.35),nCol = 100,too.far = .1,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('pustule area ('*mm^2*')'),ylab="time (days)")
+points(delta.pustules$area,delta.pustules$time,pch=".")
+par(mar=c(4,1,3,4))
+plot(0,0,type="n",xlim=c(0,1),ylim=c(-0.35-.0035,0.35+.035),axes=F,xlab="",ylab="")
+for(i in 1:101)
+{
+  ii<-seq(-.35,0.35,length.out=101)[i]
+  rect(0,ii-.0035,1,ii+.0035,col=cm.colors(101)[i],border = NA)
+}
+rect(0,-.35-.0035,1,0.35+.0035)
+mtext("A",cex=1.25,font=2)
+mtext("te(pustule area, time)",side=4,line=.5)
+axis(2,cex.axis=1.5)
+par(mar=c(4,4.5,3,4))
+plot(pustule.model,select = 2,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="mean temperature (°C)",ylab="s(mean temperature)")
+grid()
+mtext("B",adj=1,cex=1.25,font=2)
+plot(pustule.model,select = 3,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="max. temperature (°C)",ylab="s(max. temperature)")
+grid()
+mtext("C",adj=1,cex=1.25,font=2)
+plot(pustule.model,select = 4,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="min. temperature (°C)",ylab="s(min. temperature)")
+grid()
+mtext("D",adj=1,cex=1.25,font=2)
+plot(pustule.model,select = 5,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('mean abs. humidity ('*g/m^3*')'),ylab="s(mean abs. humidity)")
+grid()
+mtext("E",adj=1,cex=1.25,font=2)
+plot(pustule.model,select = 6,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('max. abs. humidity ('*g/m^3*')'),ylab="s(max. abs. humidity)")
+grid()
+mtext("F",adj=1,cex=1.25,font=2)
+plot(pustule.model,select = 7,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('min abs. humidity ('*g/m^3*')'),ylab="s(min. abs. humidity)")
+grid()
+mtext("G",adj=1,cex=1.25,font=2)
+plot(pustule.model,select = 8,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('mean solar radiation ('*W/m^2*')'),ylab="s(mean solalr radiation")
+grid()
+mtext("H",adj=1,cex=1.25,font=2)
+plot(pustule.model,select = 9,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="total rainfall (mm)",ylab="s(total rainfall)")
+grid()
+mtext("I",adj=1,cex=1.25,font=2)
+plot(pustule.model,select = 10,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="mean leaf wetness (%)",ylab="s(mean leaf wetness)")
+grid()
+mtext("J",adj=1,cex=1.25,font=2)
+plot(pustule.model,select = 11,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(tag)")
+grid()
+mtext("K",adj=1,cex=1.25,font=2)
+plot(pustule.model,select = 12,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(site)")
+grid()
+mtext("L",adj=1,cex=1.25,font=2)
+
 
 # predict climate change effect
 
@@ -146,7 +182,7 @@ plot(pustule.model,select = 8,scale=-1,xlab="site",ylab="effect",shade=T,shade.c
 
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
 par(mfrow=c(1,2),mar=c(6,6,6,6))
-plot(0,0,xlim=c(0,.1),ylim=c(-.01,.01),type="n",xlab="area (cm)",ylab="pred. change in area (mm^2)",cex.axis=1,cex.lab=1.2)
+plot(0,0,xlim=c(0,1.5),ylim=c(-2,.5),type="n",xlab="area (cm)",ylab="pred. change in area (mm^2)",cex.axis=1,cex.lab=1.2)
 day.indicies<-c(75,113,135)
 colors<-c("orange","red","purple")
 for(day in day.indicies)
@@ -154,11 +190,11 @@ for(day in day.indicies)
   index<-which(day.indicies==day)
   lower<-data.frame(x=numeric(),y=numeric())
   upper<-data.frame(x=numeric(),y=numeric())
-  for(i in seq(0,.1,.01))
+  for(i in seq(0,1.5,.1))
   {
     pred.data<-get.pred.data.temp.mean.quantile.pustule.model(day,i)
     
-    Xp <- predict(pustule.model, newdata = pred.data, exlude='s(site)',type="lpmatrix")
+    Xp <- suppressWarnings(predict(pustule.model, newdata = pred.data, exlude='s(site)',type="lpmatrix"))
     beta <- coef(pustule.model) ## posterior mean of coefs
     Vb   <- vcov(pustule.model) ## posterior  cov of coefs
     n <- 100
@@ -181,7 +217,7 @@ legend("topright",legend = c("50% quantile hottest days","75% quantile hottest d
 
 ### climate modeled as ~50th quantile hotest day + temperature addition
 
-plot(0,0,xlim=c(0,.1),ylim=c(-.01,.01),type="n",xlab="area (cm)",ylab="pred. change in area (mm^2)",cex.axis=1,cex.lab=1.2)
+plot(0,0,xlim=c(0,1.5),ylim=c(-2,.5),type="n",xlab="area (cm)",ylab="pred. change in area (mm^2)",cex.axis=1,cex.lab=1.2)
 temp.additions<-c(0,1.8,3.7)
 colors<-c("orange","red","purple")
 for(temp.addition in temp.additions)
@@ -189,7 +225,7 @@ for(temp.addition in temp.additions)
   index<-which(temp.additions==temp.addition)
   lower<-data.frame(x=numeric(),y=numeric())
   upper<-data.frame(x=numeric(),y=numeric())
-  for(i in seq(0,.1,.01))
+  for(i in seq(0,1.5,.1))
   {
     pred.data<-get.pred.data.temp.mean.quantile.pustule.model(75,i,temp.addition = temp.addition)
     Xp <- predict(pustule.model, newdata = pred.data, exlude='s(site)',type="lpmatrix")
@@ -221,7 +257,7 @@ predict.pustule.trajectory<-function(site,temp.addition,color,start.date,end.dat
   min.date<-start.date
   max.date<-end.date
   dates<-seq(min.date,max.date,pred.window)
-  start.area<-.01
+  start.area<-.1
   xcords<-rep(NA,length(dates))
   ycords<-rep(NA,length(dates))
   
@@ -291,7 +327,7 @@ par(mar=c(6,6,2,2),mfrow=c(4,2))
 ### one day ahead projection
 start.date<-as.Date("2020-06-23")
 end.date<-as.Date("2020-06-27")
-plot(0,0,type="n",xlim=c(1,5),ylim=c(0,.05),ylab='pustule area (mm^2)',xlab="day",cex.lab=1.5,cex.axis=1.5,main=paste0("start date: ",start.date))
+plot(0,0,type="n",xlim=c(1,5),ylim=c(0,0.7),ylab='pustule area (mm^2)',xlab="day",cex.lab=1.75,cex.axis=1.75,main=paste0("start date: ",start.date),cex.main=1.5)
 dat1<-predict.pustule.trajectory("GM",0,plot.orange,start.date,end.date,pred.window=1,T,T) 
 dat2<-predict.pustule.trajectory("GM",1.8,plot.red,start.date,end.date,pred.window=1,T,T) 
 dat3<-predict.pustule.trajectory("GM",3.7,plot.purple,start.date,end.date,pred.window=1,T,T) 
@@ -301,7 +337,7 @@ points(1:5,colMeans(dat3),type="l",col="purple",lwd=4,lty=2)
 
 start.date<-as.Date("2020-06-28")
 end.date<-as.Date("2020-07-02")
-plot(0,0,type="n",xlim=c(1,5),ylim=c(0,.05),ylab='pustule area (mm^2)',xlab="day",cex.lab=1.5,cex.axis=1.5,main=paste0("start date: ",start.date))
+plot(0,0,type="n",xlim=c(1,5),ylim=c(0,.7),ylab='pustule area (mm^2)',xlab="day",cex.lab=1.75,cex.axis=1.75,main=paste0("start date: ",start.date),cex.main=1.5)
 dat1<-predict.pustule.trajectory("GM",0,plot.orange,start.date,end.date,pred.window=1,T,T) 
 dat2<-predict.pustule.trajectory("GM",1.8,plot.red,start.date,end.date,pred.window=1,T,T) 
 dat3<-predict.pustule.trajectory("GM",3.7,plot.purple,start.date,end.date,pred.window=1,T,T) 
@@ -311,7 +347,7 @@ points(1:5,colMeans(dat3),type="l",col="purple",lwd=4,lty=2)
 
 start.date<-as.Date("2020-07-03")
 end.date<-as.Date("2020-07-07")
-plot(0,0,type="n",xlim=c(1,5),ylim=c(0,.05),ylab='pustule area (mm^2)',xlab="day",cex.lab=1.5,cex.axis=1.5,main=paste0("start date: ",start.date))
+plot(0,0,type="n",xlim=c(1,5),ylim=c(0,.7),ylab='pustule area (mm^2)',xlab="day",cex.lab=1.75,cex.axis=1.75,main=paste0("start date: ",start.date),cex.main=1.5)
 dat1<-predict.pustule.trajectory("GM",0,plot.orange,start.date,end.date,pred.window=1,T,T) 
 dat2<-predict.pustule.trajectory("GM",1.8,plot.red,start.date,end.date,pred.window=1,T,T) 
 dat3<-predict.pustule.trajectory("GM",3.7,plot.purple,start.date,end.date,pred.window=1,T,T) 
@@ -321,7 +357,7 @@ points(1:5,colMeans(dat3),type="l",col="purple",lwd=4,lty=2)
 
 start.date<-as.Date("2020-07-08")
 end.date<-as.Date("2020-07-12")
-plot(0,0,type="n",xlim=c(1,5),ylim=c(0,.05),ylab='pustule area (mm^2)',xlab="day",cex.lab=1.5,cex.axis=1.5,main=paste0("start date: ",start.date))
+plot(0,0,type="n",xlim=c(1,5),ylim=c(0,.7),ylab='pustule area (mm^2)',xlab="day",cex.lab=1.75,cex.axis=1.75,main=paste0("start date: ",start.date),cex.main=1.5)
 dat1<-predict.pustule.trajectory("GM",0,plot.orange,start.date,end.date,pred.window=1,T,T) 
 dat2<-predict.pustule.trajectory("GM",1.8,plot.red,start.date,end.date,pred.window=1,T,T) 
 dat3<-predict.pustule.trajectory("GM",3.7,plot.purple,start.date,end.date,pred.window=1,T,T) 
@@ -331,7 +367,7 @@ points(1:5,colMeans(dat3),type="l",col="purple",lwd=4,lty=2)
 
 start.date<-as.Date("2020-07-13")
 end.date<-as.Date("2020-07-17")
-plot(0,0,type="n",xlim=c(1,5),ylim=c(0,.05),ylab='pustule area (mm^2)',xlab="day",cex.lab=1.5,cex.axis=1.5,main=paste0("start date: ",start.date))
+plot(0,0,type="n",xlim=c(1,5),ylim=c(0,.7),ylab='pustule area (mm^2)',xlab="day",cex.lab=1.75,cex.axis=1.75,main=paste0("start date: ",start.date),cex.main=1.5)
 dat1<-predict.pustule.trajectory("GM",0,plot.orange,start.date,end.date,pred.window=1,T,T) 
 dat2<-predict.pustule.trajectory("GM",1.8,plot.red,start.date,end.date,pred.window=1,T,T) 
 dat3<-predict.pustule.trajectory("GM",3.7,plot.purple,start.date,end.date,pred.window=1,T,T) 
@@ -342,7 +378,7 @@ points(1:5,colMeans(dat3),type="l",col="purple",lwd=4,lty=2)
 
 start.date<-as.Date("2020-07-18")
 end.date<-as.Date("2020-07-22")
-plot(0,0,type="n",xlim=c(1,5),ylim=c(0,.05),ylab='pustule area (mm^2)',xlab="day",cex.lab=1.5,cex.axis=1.5,main=paste0("start date: ",start.date))
+plot(0,0,type="n",xlim=c(1,5),ylim=c(0,.7),ylab='pustule area (mm^2)',xlab="day",cex.lab=1.75,cex.axis=1.75,main=paste0("start date: ",start.date),cex.main=1.5)
 dat1<-predict.pustule.trajectory("GM",0,plot.orange,start.date,end.date,pred.window=1,T,T) 
 dat2<-predict.pustule.trajectory("GM",1.8,plot.red,start.date,end.date,pred.window=1,T,T) 
 dat3<-predict.pustule.trajectory("GM",3.7,plot.purple,start.date,end.date,pred.window=1,T,T) 
@@ -352,7 +388,7 @@ points(1:5,colMeans(dat3),type="l",col="purple",lwd=4,lty=2)
 
 start.date<-as.Date("2020-07-23")
 end.date<-as.Date("2020-07-27")
-plot(0,0,type="n",xlim=c(1,5),ylim=c(0,.05),ylab='pustule area (mm^2)',xlab="day",cex.lab=1.5,cex.axis=1.5,main=paste0("start date: ",start.date))
+plot(0,0,type="n",xlim=c(1,5),ylim=c(0,.7),ylab='pustule area (mm^2)',xlab="day",cex.lab=1.75,cex.axis=1.75,main=paste0("start date: ",start.date),cex.main=1.5)
 dat1<-predict.pustule.trajectory("GM",0,plot.orange,start.date,end.date,pred.window=1,T,T) 
 dat2<-predict.pustule.trajectory("GM",1.8,plot.red,start.date,end.date,pred.window=1,T,T) 
 dat3<-predict.pustule.trajectory("GM",3.7,plot.purple,start.date,end.date,pred.window=1,T,T) 
@@ -361,7 +397,7 @@ points(1:5,colMeans(dat2),type="l",col="red",lwd=4,lty=2)
 points(1:5,colMeans(dat3),type="l",col="purple",lwd=4,lty=2)
 
 plot(0,0,type="n",axes=F,bty="n")
-legend("center",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5,bty="n")
+legend("center",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=4,cex=4,bty="n")
 
 
 
