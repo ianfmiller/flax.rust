@@ -54,18 +54,10 @@ get.pred.data.temp.mean.quantile.pustule.model<-function(day.set,dummy.data,temp
   new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
   new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
   
-  abs.hum<-6.112*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh*2.1674/(273.15+T)
-  new.mean.abs.hum<-mean(abs.hum,na.rm=T) #absolute humidity, see https://www.medrxiv.org/content/10.1101/2020.02.12.20022467v1.full.pdf
+  abs.hum<-0.1324732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+T)
+  new.mean.abs.hum<-mean(abs.hum,na.rm=T)
   new.max.abs.hum<-max(abs.hum,na.rm=T)
   new.min.abs.hum<-min(abs.hum,na.rm=T)
-  
-  #svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
-  #avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
-  #vpds<-avps-svps
-  
-  #new.mean.vpd<-mean(vpds,na.rm=T)
-  #new.max.vpd<-max(vpds,na.rm=T)
-  #new.min.vpd<-min(vpds,na.rm=T)
   
   new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.tot.rain<-sum(weath.sub$rain,na.rm=T)
@@ -74,7 +66,6 @@ get.pred.data.temp.mean.quantile.pustule.model<-function(day.set,dummy.data,temp
   out.data<-data.frame(area=dummy.data,time=rep(delta.days,times=dim),site=rep(site,times=dim),
                              mean.temp=rep(new.mean.temp,times=dim),max.temp=rep(new.max.temp,times=dim),min.temp=rep(new.min.temp,times=dim),
                              mean.abs.hum=rep(new.mean.abs.hum,times=dim),max.abs.hum=rep(new.max.abs.hum,times=dim),min.abs.hum=rep(new.min.abs.hum,times=dim),
-                             #mean.vpd=rep(new.mean.vpd,times=dim),max.vpd=rep(new.max.vpd,times=dim),min.vpd=rep(new.min.vpd,times=dim),
                              mean.wetness=rep(new.mean.wetness,times=dim),tot.rain=rep(new.tot.rain,times=dim),mean.solar=rep(new.mean.solar,times=dim))
   out.data
 }
@@ -114,18 +105,10 @@ get.pred.data.temp.mean.quantile.n.pustules.model<-function(day.set,dummy.data,t
   new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
   new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
   
-  abs.hum<-6.112*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh*2.1674/(273.15+T)
+  abs.hum<-0.1324732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+T)
   new.mean.abs.hum<-mean(abs.hum,na.rm=T) #absolute humidity, see https://www.medrxiv.org/content/10.1101/2020.02.12.20022467v1.full.pdf
   new.max.abs.hum<-max(abs.hum,na.rm=T)
   new.min.abs.hum<-min(abs.hum,na.rm=T)
-  
-  #svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
-  #avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
-  #vpds<-avps-svps
-  
-  #new.mean.vpd<-mean(vpds,na.rm=T)
-  #new.max.vpd<-max(vpds,na.rm=T)
-  #new.min.vpd<-min(vpds,na.rm=T)
   
   new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.tot.rain<-sum(weath.sub$rain,na.rm=T)
@@ -134,7 +117,6 @@ get.pred.data.temp.mean.quantile.n.pustules.model<-function(day.set,dummy.data,t
   out.data<-data.frame(n.pustules=dummy.data,time=rep(delta.days,times=dim),site=rep(site,times=dim),
                        mean.temp=rep(new.mean.temp,times=dim),max.temp=rep(new.max.temp,times=dim),min.temp=rep(new.min.temp,times=dim),
                        mean.abs.hum=rep(new.mean.abs.hum,times=dim),max.abs.hum=rep(new.max.abs.hum,times=dim),min.abs.hum=rep(new.min.abs.hum,times=dim),
-                       #mean.vpd=rep(new.mean.vpd,times=dim),max.vpd=rep(new.max.vpd,times=dim),min.vpd=rep(new.min.vpd,times=dim),
                        mean.wetness=rep(new.mean.wetness,times=dim),tot.rain=rep(new.tot.rain,times=dim),mean.solar=rep(new.mean.solar,times=dim))
   out.data
 }
@@ -174,18 +156,10 @@ get.pred.data.temp.mean.quantile.plants.model<-function(day.set,dummy.data.inf.i
   new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
   new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
   
-  abs.hum<-6.112*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh*2.1674/(273.15+T)
+  abs.hum<-0.1324732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+T)
   new.mean.abs.hum<-mean(abs.hum,na.rm=T) #absolute humidity, see https://www.medrxiv.org/content/10.1101/2020.02.12.20022467v1.full.pdf
   new.max.abs.hum<-max(abs.hum,na.rm=T)
   new.min.abs.hum<-min(abs.hum,na.rm=T)
-  
-  #svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
-  #avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
-  #vpds<-avps-svps
-  
-  #new.mean.vpd<-mean(vpds,na.rm=T)
-  #new.max.vpd<-max(vpds,na.rm=T)
-  #new.min.vpd<-min(vpds,na.rm=T)
   
   new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.tot.rain<-sum(weath.sub$rain,na.rm=T)
@@ -235,18 +209,10 @@ get.pred.data.temp.mean.quantile.plant.growth.model<-function(day.set,dummy.data
   new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
   new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
   
-  abs.hum<-6.112*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh*2.1674/(273.15+T)
-  new.mean.abs.hum<-mean(abs.hum,na.rm=T) #absolute humidity, see https://www.medrxiv.org/content/10.1101/2020.02.12.20022467v1.full.pdf
+  abs.hum<-0.1324732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+T)
+  new.mean.abs.hum<-mean(abs.hum,na.rm=T)
   new.max.abs.hum<-max(abs.hum,na.rm=T)
   new.min.abs.hum<-min(abs.hum,na.rm=T)
-  
-  #svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
-  #avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
-  #vpds<-avps-svps
-  
-  #new.mean.vpd<-mean(vpds,na.rm=T)
-  #new.max.vpd<-max(vpds,na.rm=T)
-  #new.min.vpd<-min(vpds,na.rm=T)
   
   new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.tot.rain<-sum(weath.sub$rain,na.rm=T)
@@ -289,18 +255,10 @@ get.pred.data<-function(site,date0,date1,dummy.data,dummy.data.max.height=15,tem
   new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
   new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
   
-  abs.hum<-6.112*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh*2.1674/(273.15+T)
-  new.mean.abs.hum<-mean(abs.hum,na.rm=T) #absolute humidity, see https://www.medrxiv.org/content/10.1101/2020.02.12.20022467v1.full.pdf
+  abs.hum<-0.1324732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+T)
+  new.mean.abs.hum<-mean(abs.hum,na.rm=T)
   new.max.abs.hum<-max(abs.hum,na.rm=T)
   new.min.abs.hum<-min(abs.hum,na.rm=T)
-  
-  #svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
-  #avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
-  #vpds<-avps-svps
-  
-  #new.mean.vpd<-mean(vpds,na.rm=T)
-  #new.max.vpd<-max(vpds,na.rm=T)
-  #new.min.vpd<-min(vpds,na.rm=T)
   
   new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.tot.rain<-sum(weath.sub$rain,na.rm=T)
@@ -311,7 +269,6 @@ get.pred.data<-function(site,date0,date1,dummy.data,dummy.data.max.height=15,tem
   out.data<-data.frame(area=dummy.data,n.pustules=dummy.data,plant.inf.intens=dummy.data,time=rep(delta.days,times=dim),max.height=dummy.data.max.height,site=rep(site,times=dim),
                        mean.temp=rep(new.mean.temp,times=dim),max.temp=rep(new.max.temp,times=dim),min.temp=rep(new.min.temp,times=dim),
                        mean.abs.hum=rep(new.mean.abs.hum,times=dim),max.abs.hum=rep(new.max.abs.hum,times=dim),min.abs.hum=rep(new.min.abs.hum,times=dim),
-                       #mean.vpd=rep(new.mean.vpd,times=dim),max.vpd=rep(new.max.vpd,times=dim),min.vpd=rep(new.min.vpd,times=dim),
                        mean.wetness=rep(new.mean.wetness,times=dim),tot.rain=rep(new.tot.rain,times=dim),mean.solar=rep(new.mean.solar,times=dim))
   out.data
   
