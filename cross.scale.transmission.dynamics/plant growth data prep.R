@@ -174,18 +174,10 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
       new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
       
-      abs.hum<-6.112*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh*2.1674/(273.15+T)
-      new.mean.abs.hum<-mean(abs.hum,na.rm=T) #absolute humidity, see https://www.medrxiv.org/content/10.1101/2020.02.12.20022467v1.full.pdf
+      abs.hum<-0.1324732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+T)
+      new.mean.abs.hum<-mean(abs.hum,na.rm=T)
       new.max.abs.hum<-max(abs.hum,na.rm=T)
       new.min.abs.hum<-min(abs.hum,na.rm=T)
-      
-      #svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
-      #avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
-      #vpds<-avps-svps
-      
-      #new.mean.vpd<-mean(vpds,na.rm=T)
-      #new.max.vpd<-max(vpds,na.rm=T)
-      #new.min.vpd<-min(vpds,na.rm=T)
       
       new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
       new.tot.rain<-sum(weath.sub$rain,na.rm=T)
@@ -212,9 +204,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       mean.abs.hum<-c(mean.abs.hum,new.mean.abs.hum)
       max.abs.hum<-c(max.abs.hum,new.max.abs.hum)
       min.abs.hum<-c(min.abs.hum,new.min.abs.hum)
-      #mean.vpd<-c(mean.vpd,new.mean.vpd)
-      #max.vpd<-c(max.vpd,new.max.vpd)
-      #min.vpd<-c(min.vpd,new.min.vpd)
+
       mean.wetness<-c(mean.wetness,new.mean.wetness)
       tot.rain<-c(tot.rain,new.tot.rain)
       mean.solar<-c(mean.solar,new.mean.solar)
@@ -224,7 +214,6 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   delta.height<-data.frame(tag=factor(tags),site=factor(sites), height=start.vals, height.next=end.vals,inf.intens=inf.intens.vals,time=days,
                            mean.temp=mean.temp,max.temp=max.temp,min.temp=min.temp,
                            mean.abs.hum=mean.abs.hum,max.abs.hum=max.abs.hum,min.abs.hum=min.abs.hum,
-                           #mean.vpd=mean.vpd,max.vpd=max.vpd,min.vpd=min.vpd,
                            mean.wetness=mean.wetness,tot.rain=tot.rain,mean.solar=mean.solar,mean.soil.moisture=mean.soil.moisture)
   
   saveRDS(plant.heights,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plant.heights.RDS")
