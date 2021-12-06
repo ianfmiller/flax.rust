@@ -14,9 +14,9 @@ delta.pustules<-subset(delta.pustules,time<=7)
 layout(matrix(c(1,2,4,4,3,3,3,3),2,4,byrow = T))
 par(mar=c(5,5,3,0.5))
 ## histograms
-hist(delta.pustules$area,main="",breaks=100,xlab="area",cex.lab=2,cex.axis=2,cex.main=2)
+hist(delta.pustules$area,main="",breaks=100,xlab="pustule area",cex.lab=2,cex.axis=2,cex.main=2)
 mtext("A",side=3,adj=1,line=-3,cex=2)
-hist(delta.pustules$area.next-delta.pustules$area,main="",breaks=100,xlab="change in area",cex.lab=2,cex.axis=2,cex.main=2)
+hist(delta.pustules$area.next-delta.pustules$area,main="",breaks=100,xlab="change in pustule area",cex.lab=2,cex.axis=2,cex.main=2)
 mtext("B",side=3,adj=1,line=-3,cex=2)
 
 ## plot trajectories
