@@ -10,47 +10,67 @@ source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant gro
 delta.height<-subset(delta.height,time<=7)
 
 # visualize data
-par(mfrow =c(1,1))
-colors <- ifelse(delta.height$height.next > delta.height$height, "green", "red")
-plot(height.next-height~height, data = delta.height, col = colors,xlab="height",ylab="change in heght")
 
+layout(matrix(c(1,2,4,4,3,3,3,3),2,4,byrow = T))
+par(mar=c(5,5,3,0.5))
+
+## histograms
+hist(delta.height$height,main="",breaks=100,xlab="plant height",cex.lab=2,cex.axis=2,cex.main=2)
+mtext("A",side=3,adj=1,line=-3,cex=2)
+hist(delta.height$height.next-delta.height$height,main="",breaks=100,xlab="change in plant height",cex.lab=2,cex.axis=2,cex.main=2)
+mtext("B",side=3,adj=1,line=-3,cex=2)
+
+## plot trajectories
+par(mar=c(2,5,0,0.5))
+plot(c(min(plant.heights$date),max(plant.heights$date)),c(0,max(plant.heights$max.height)),type="n",xlab="",ylab="plant height",cex.lab=2,cex.axis=2)
+mtext("D",side=3,adj=1,line=-3,cex=2)
+i<-0
+
+plot.cols<-sample(rainbow(180))
+
+for (i in 1:length(unique(plant.heights$tag)))
+{
+  tag<-unique(plant.heights$tag)[i]
+  sub.heights<-plant.heights[which(plant.heights$tag==tag),]
+  sub.heights<-sub.heights[order(sub.heights$date),]
+  points(sub.heights$date,sub.heights$max.height,col=plot.cols[i],type="l",lwd=.5)
+
+}
+
+## plot change
+par(mar=c(5,5,3,0.5))
+plot(delta.height$height,delta.height$height.next,col="black",xlab = "observed height",ylab="next observed height",cex.lab=2,cex.axis=2)
+mtext("C",side=3,adj=1,line=-3.25,cex=2)
+abline(0,1,lty=2)
+
+# analyze data
 
 ## fit models--only if not already fit
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS"))
 {
+  mod<-gam(height.next-height~0+
+             te(height,time)+
+             te(height,inf.intens)+
+             s(mean.temp)+
+             s(max.temp)+
+             s(min.temp)+
+             s(mean.abs.hum)+
+             s(max.abs.hum)+
+             s(min.abs.hum)+
+             s(mean.solar)+
+             s(tot.rain)+
+             s(mean.wetness)+
+             s(mean.soil.moisture)+
+             s(tag,bs="re")+
+             s(site,bs="re"),
+           select = T,
+           method="REML",
+           data=delta.height,
+           control = list(nthreads=4))
+  summary(mod)
 
-  mod0<-gam(height.next-height~0+s(height,by=time,bs="cs",k=4)+
-              s(inf.intens,by=time,bs="cs",k=4)+
-              s(mean.temp,by=time,bs="cs",k=4)+
-              s(max.temp,by=time,bs="cs",k=4)+
-              s(min.temp,by=time,bs="cs",k=4)+
-              s(mean.abs.hum,by=time,bs="cs",k=4)+
-              s(max.abs.hum,by=time,bs="cs",k=4)+
-              s(min.abs.hum,by=time,bs="cs",k=4)+
-              s(tot.rain,by=time,bs="cs",k=4)+
-              s(mean.solar,by=time,bs="cs",k=4)+
-              s(mean.soil.moisture,by=time,bs="cs",k=4)+
-              s(site,bs="re",k=4)
-            ,data=delta.height)
-  summary(mod0) #indicates that all but max.abs.hum and min.abs.hum are not significant. Min.abs.hum becomes insignificant once others are dropped.
-  
-  mod1<-gam(height.next-height~0+s(height,by=time,bs="cs",k=4)+
-              #s(inf.intens,by=time,bs="cs",k=4)+
-              #s(mean.temp,by=time,bs="cs",k=4)+
-              #s(max.temp,by=time,bs="cs",k=4)+
-              #s(min.temp,by=time,bs="cs",k=4)+
-              #s(mean.abs.hum,by=time,bs="cs",k=4)+
-              s(max.abs.hum,by=time,bs="cs",k=4)+
-              #s(min.abs.hum,by=time,bs="cs",k=4)+
-              #s(tot.rain,by=time,bs="cs",k=4)+
-              #s(mean.solar,by=time,bs="cs",k=4)+
-              #s(mean.soil.moisture,by=time,bs="cs",k=4)+
-              s(site,bs="re",k=4)
-            ,data=delta.height)
-  summary(mod1) #indicates that all predictors are now significant
-
-  saveRDS(mod1,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS")
+  saveRDS(mod,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS")
 }
 
 ## load best model
@@ -58,14 +78,89 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 plant.growth.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS")
 
 ## model checking
-draw(plant.growth.model) #plot smooths
-#gam.check(plant.growth.model) #indicates no more knots needed
+par(mfrow=c(2,2))
+gam.check(plant.growth.model) #indicates that basis dimension is sufficient
+concurvity(plant.growth.model,full=F) #no obvious issues
+
+## visualize model
+
+layout(matrix(c(17,1,1,1,1,2,3,3,3,3,4,5,5,5,5,6,6,6,6,18,7,7,7,7,8,8,8,8,9,9,9,9,10,10,10,10,11,11,11,11,12,12,12,12,13,13,13,13,14,14,14,14,15,15,15,15,16,16,16,16),3,20,byrow = T))
+
+par(mar=c(4,7,3,1.5))
+options(warn=-1) ## suppress warnings due to passing levels to vis.gam
+vis.gam(plant.growth.model,view=c("height","time"),plot.type = "contour",type="response",labcex=.75,contour.col = "black",color="cm",zlim=c(-2.5,2.5),nCol = 100,main="",cex.lab=1.5,cex.axis=1.5,xlab="plant height (cm)",ylab="time (days)")
+points(delta.height$height,delta.height$time,pch=".")
+par(mar=c(4,1,3,4))
+plot(0,0,type="n",xlim=c(0,1),ylim=c(-2.5-0.025,2.5+0.025),axes=F,xlab="",ylab="")
+for(i in 1:101)
+{
+  ii<-seq(-2.5,2.5,length.out=101)[i]
+  rect(0,ii-0.025,1,ii+0.025,col=cm.colors(101)[i],border = NA)
+}
+rect(0,-2.5-0.025,1,2.5+0.025)
+mtext("A",cex=1.25,font=2)
+mtext("te(plant height, time)",side=4,line=.5)
+axis(2,cex.axis=1.5)
+
+par(mar=c(4,7,3,1.5))
+vis.gam(plant.growth.model,view=c("height","inf.intens"),plot.type = "contour",type="response",labcex=.75,contour.col = "black",color="cm",zlim=c(-2.5,2.5),nCol = 100,main="",cex.lab=1.5,cex.axis=1.5,xlab="plant height (cm)",ylab="infection intensity")
+points(delta.height$height,delta.height$inf.intens,pch=".")
+par(mar=c(4,1,3,4))
+plot(0,0,type="n",xlim=c(0,1),ylim=c(-2.5-0.025,2.5+0.025),axes=F,xlab="",ylab="")
+for(i in 1:101)
+{
+  ii<-seq(-2.5,2.5,length.out=101)[i]
+  rect(0,ii-0.025,1,ii+0.025,col=cm.colors(101)[i],border = NA)
+}
+rect(0,-2.5-0.025,1,2.5+0.025)
+mtext("B",cex=1.25,font=2)
+mtext("te(plant height, time)",side=4,line=.5)
+axis(2,cex.axis=1.5)
+
+par(mar=c(4,4.5,3,4))
+plot(plant.growth.model,select = 3,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="mean temperature (°C)",ylab="s(mean temperature)")
+grid()
+mtext("C",adj=1,cex=1.25,font=2)
+plot(plant.growth.model,select = 4,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="max. temperature (°C)",ylab="s(max. temperature)")
+grid()
+mtext("D",adj=1,cex=1.25,font=2)
+plot(plant.growth.model,select = 5,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="min. temperature (°C)",ylab="s(min. temperature)")
+grid()
+mtext("E",adj=1,cex=1.25,font=2)
+plot(plant.growth.model,select = 6,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('mean abs. humidity ('*g/m^3*')'),ylab="s(mean abs. humidity)")
+grid()
+mtext("F",adj=1,cex=1.25,font=2)
+plot(plant.growth.model,select = 7,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('max. abs. humidity ('*g/m^3*')'),ylab="s(max. abs. humidity)")
+grid()
+mtext("G",adj=1,cex=1.25,font=2)
+plot(plant.growth.model,select = 8,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('min abs. humidity ('*g/m^3*')'),ylab="s(min. abs. humidity)")
+grid()
+mtext("H",adj=1,cex=1.25,font=2)
+plot(plant.growth.model,select = 9,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('mean solar radiation ('*W/m^2*')'),ylab="s(mean solalr radiation")
+grid()
+mtext("I",adj=1,cex=1.25,font=2)
+plot(plant.growth.model,select = 10,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="total rainfall (mm)",ylab="s(total rainfall)")
+grid()
+mtext("J",adj=1,cex=1.25,font=2)
+plot(plant.growth.model,select = 11,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="mean leaf wetness (%)",ylab="s(mean leaf wetness)")
+grid()
+mtext("K",adj=1,cex=1.25,font=2)
+plot(plant.growth.model,select = 12,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('mean soil moisture ('*m^3*' '*H[2]*0/m^3*' soil)'),ylab="s(mean soil moisture)")
+grid()
+mtext("L",adj=1,cex=1.25,font=2)
+plot(plant.growth.model,select = 13,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(tag)")
+grid()
+mtext("M",adj=1,cex=1.25,font=2)
+plot(plant.growth.model,select = 14,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(site)")
+grid()
+mtext("N",adj=1,cex=1.25,font=2)
+
 
 # model vis
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
 library("MASS")
 par(mfrow=c(1,2),mar=c(6,6,6,6))
-plot(0,0,xlim=c(5,80),ylim=c(-2,2),type="n",xlab="plant height",ylab="pred. change in plant height per day",cex.axis=1,cex.lab=1.2)
+plot(0,0,xlim=c(5,80),ylim=c(-5,5),type="n",xlab="plant height",ylab="pred. change in plant height per day",cex.axis=1,cex.lab=1.2)
 day.indicies<-c(75,113,135)
 colors<-c("orange","red","purple")
 for(day in day.indicies)
@@ -76,6 +171,7 @@ for(day in day.indicies)
   for(i in seq(5,80,5))
   {
     pred.data<-get.pred.data.temp.mean.quantile.plant.growth.model(day,dummy.data.height=i)
+    pred.data<-cbind(pred.data,inf.intens=0)
     Xp <- predict(plant.growth.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
     beta <- coef(plant.growth.model) ## posterior mean of coefs
     Vb   <- vcov(plant.growth.model) ## posterior  cov of coefs
@@ -96,7 +192,7 @@ for(day in day.indicies)
 }
 legend("topright",legend = c("50% quantile hottest days","75% quantile hottest days","90% quantile hottest days"),col = c("orange","red","purple"),pch=16,cex=1,bty="n")
 
-plot(0,0,xlim=c(5,80),ylim=c(-2,2),type="n",xlab="plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=1,cex.lab=1.2)
+plot(0,0,xlim=c(5,80),ylim=c(-5,5),type="n",xlab="plant infection intensity",ylab="pred. change in plant infection intensity",cex.axis=1,cex.lab=1.2)
 temp.additions<-c(0,1.8,3.7)
 colors<-c("orange","red","purple")
 for(temp.addition in temp.additions)
@@ -107,6 +203,7 @@ for(temp.addition in temp.additions)
   for(i in seq(5,80,5))
   {
     pred.data<-get.pred.data.temp.mean.quantile.plant.growth.model(75,dummy.data.height=i,temp.addition = temp.addition)
+    pred.data<-cbind(pred.data,inf.intens=0)
     Xp <- predict(plant.growth.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
     beta <- coef(plant.growth.model) ## posterior mean of coefs
     Vb   <- vcov(plant.growth.model) ## posterior  cov of coefs
@@ -136,11 +233,11 @@ predict.plant.height.traj<-function(site,temp.addition,color,pred.window=1,plot=
   min.date<-max(min(unique(as.Date(weath.dat$date))),min(unique(as.Date(temp.rh.dat$date.time))))
   max.date<-min(max(unique(as.Date(weath.dat$date))),max(unique(as.Date(temp.rh.dat$date.time))))
   dates<-seq(min.date,max.date,pred.window)
-  start.height<-20
+  start.height<-10
   xcords<-rep(NA,length(dates)) #time values
   ycords<-rep(NA,length(dates)) #height values
 
-  for(j in 1:100) #simulation iteration
+  for(j in 1:10) #simulation iteration
   {
     reps<-1
     i<-start.height
@@ -151,7 +248,8 @@ predict.plant.height.traj<-function(site,temp.addition,color,pred.window=1,plot=
     {
       date0<-as.POSIXct(dates[k])
       date1<-as.POSIXct(dates[k+1])
-      pred.data<-get.pred.data(site,date0,date1,dummy.data = NA,dummy.data.max.height=i,temp.addition = temp.addition) #includes some irrelevant and meaningless predictors
+      pred.data<-get.pred.data(site,date0,date1,dummy.data = NA,dummy.data.max.height=i,temp.addition = temp.addition)
+      pred.data<-cbind(pred.data,inf.intens=0)
       colnames(pred.data)[which(colnames(pred.data)=="max.height")]<-"height"
       
       beta <- coef(plant.growth.model) ## posterior mean of coefs
@@ -166,7 +264,7 @@ predict.plant.height.traj<-function(site,temp.addition,color,pred.window=1,plot=
       }
       y<-preds[1]
       i<-i+y
-      #if(i<.1) {i<-.1}
+      if(i<5) {i<-5}
 
       reps<-reps+pred.window
       xcords.new<-c(xcords.new,reps)
