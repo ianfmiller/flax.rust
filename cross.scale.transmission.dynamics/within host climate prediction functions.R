@@ -46,18 +46,18 @@ get.pred.data.temp.mean.quantile.pustule.model<-function(day.set,dummy.data,temp
   #pull out core predictors
   delta.days<-as.numeric(date1-date0)
   
-  #adjust temp data
-  temp.rh.sub$temp.c<-temp.rh.sub$temp.c+temp.addition
-  
-  #calculate environmental variable metrics
-  new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
-  new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
-  new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
-  
   abs.hum<-0.1324732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+T)
   new.mean.abs.hum<-mean(abs.hum,na.rm=T)
   new.max.abs.hum<-max(abs.hum,na.rm=T)
   new.min.abs.hum<-min(abs.hum,na.rm=T)
+  
+  #adjust temp data
+  temp.rh.sub$temp.c<-temp.rh.sub$temp.c+temp.addition
+  
+
+  new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
+  new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
+  new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
   
   new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)/(60*24)
@@ -97,18 +97,18 @@ get.pred.data.temp.mean.quantile.n.pustules.model<-function(day.set,dummy.data,t
   #pull out core predictors
   delta.days<-as.numeric(date1-date0)
   
-  #adjust temp data
-  temp.rh.sub$temp.c<-temp.rh.sub$temp.c+temp.addition
-  
-  #calculate environmental variable metrics
-  new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
-  new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
-  new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
-  
   abs.hum<-0.1324732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+T)
   new.mean.abs.hum<-mean(abs.hum,na.rm=T) #absolute humidity, see https://www.medrxiv.org/content/10.1101/2020.02.12.20022467v1.full.pdf
   new.max.abs.hum<-max(abs.hum,na.rm=T)
   new.min.abs.hum<-min(abs.hum,na.rm=T)
+  
+  #adjust temp data
+  temp.rh.sub$temp.c<-temp.rh.sub$temp.c+temp.addition
+  
+
+  new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
+  new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
+  new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
   
   new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)/(60*24)
@@ -148,18 +148,18 @@ get.pred.data.temp.mean.quantile.plants.model<-function(day.set,dummy.data.inf.i
   #pull out core predictors
   delta.days<-as.numeric(date1-date0)
   
-  #adjust temp data
-  temp.rh.sub$temp.c<-temp.rh.sub$temp.c+temp.addition
-  
-  #calculate environmental variable metrics
-  new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
-  new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
-  new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
-  
   abs.hum<-0.1324732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+T)
   new.mean.abs.hum<-mean(abs.hum,na.rm=T) #absolute humidity, see https://www.medrxiv.org/content/10.1101/2020.02.12.20022467v1.full.pdf
   new.max.abs.hum<-max(abs.hum,na.rm=T)
   new.min.abs.hum<-min(abs.hum,na.rm=T)
+  
+  #adjust temp data
+  temp.rh.sub$temp.c<-temp.rh.sub$temp.c+temp.addition
+  
+
+  new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
+  new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
+  new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
   
   new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)/(60*24)
@@ -201,18 +201,18 @@ get.pred.data.temp.mean.quantile.plant.growth.model<-function(day.set,dummy.data
   #pull out core predictors
   delta.days<-as.numeric(date1-date0)
   
-  #adjust temp data
-  temp.rh.sub$temp.c<-temp.rh.sub$temp.c+temp.addition
-  
-  #calculate environmental variable metrics
-  new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
-  new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
-  new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
-  
   abs.hum<-0.1324732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+T)
   new.mean.abs.hum<-mean(abs.hum,na.rm=T)
   new.max.abs.hum<-max(abs.hum,na.rm=T)
   new.min.abs.hum<-min(abs.hum,na.rm=T)
+  
+  #adjust temp data
+  temp.rh.sub$temp.c<-temp.rh.sub$temp.c+temp.addition
+  
+
+  new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
+  new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
+  new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
   
   new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)/(60*24)
@@ -247,18 +247,18 @@ get.pred.data<-function(site,date0,date1,dummy.data,dummy.data.max.height=15,tem
   #pull out core predictors
   delta.days<-as.numeric(date1-date0)
   
-  #adjust temp data
-  temp.rh.sub$temp.c<-temp.rh.sub$temp.c+temp.addition
-  
-  #calculate environmental variable metrics
-  new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
-  new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
-  new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
-  
   abs.hum<-0.1324732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+T)
   new.mean.abs.hum<-mean(abs.hum,na.rm=T)
   new.max.abs.hum<-max(abs.hum,na.rm=T)
   new.min.abs.hum<-min(abs.hum,na.rm=T)
+  
+  #adjust temp data
+  temp.rh.sub$temp.c<-temp.rh.sub$temp.c+temp.addition
+  
+
+  new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
+  new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
+  new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
   
   new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)/(60*24)
