@@ -67,7 +67,6 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
            method="REML",
            data=delta.height,
            control = list(nthreads=4))
-  summary(mod)
 
   saveRDS(mod,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS")
 }
