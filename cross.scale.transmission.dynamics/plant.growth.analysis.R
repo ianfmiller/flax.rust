@@ -17,7 +17,7 @@ par(mar=c(5,5,3,0.5))
 ## histograms
 hist(delta.height$height,main="",breaks=100,xlab="plant height",cex.lab=2,cex.axis=2,cex.main=2)
 mtext("A",side=3,adj=1,line=-3,cex=2)
-hist(delta.height$height.next-delta.height$height,main="",breaks=100,xlab="change in plant height",cex.lab=2,cex.axis=2,cex.main=2)
+hist((delta.height$height.next-delta.height$height)/delta.height$time,main="",breaks=100,xlab="change in plant height per day",cex.lab=2,cex.axis=2,cex.main=2)
 mtext("B",side=3,adj=1,line=-3,cex=2)
 
 ## plot trajectories
@@ -49,8 +49,7 @@ abline(0,1,lty=2)
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS"))
 {
-  mod<-gam(height.next-height~0+
-             te(height,time)+
+  mod<-gam((height.next-height)/time~0+
              te(height,inf.intens)+
              s(mean.temp)+
              s(max.temp)+
@@ -59,7 +58,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
              s(max.abs.hum)+
              s(min.abs.hum)+
              s(mean.solar)+
-             s(tot.rain)+
+             s(mean.daily.rain)+
              s(mean.wetness)+
              s(mean.soil.moisture)+
              s(tag,bs="re")+
@@ -84,76 +83,61 @@ concurvity(plant.growth.model,full=F) #no obvious issues
 
 ## visualize model
 
-layout(matrix(c(17,1,1,1,1,2,3,3,3,3,4,5,5,5,5,6,6,6,6,18,7,7,7,7,8,8,8,8,9,9,9,9,10,10,10,10,11,11,11,11,12,12,12,12,13,13,13,13,14,14,14,14,15,15,15,15,16,16,16,16),3,20,byrow = T))
+layout(matrix(c(15,15,15,1,1,1,1,2,3,3,3,3,4,4,4,4,16,16,16,16,5,5,5,5,6,6,6,6,7,7,7,7,8,8,8,8,9,9,9,9,10,10,10,10,11,11,11,11,12,12,12,12,13,13,13,13,14,14,14,14),3,20,byrow = T))
 
 par(mar=c(4,7,3,1.5))
 options(warn=-1) ## suppress warnings due to passing levels to vis.gam
-vis.gam(plant.growth.model,view=c("height","time"),plot.type = "contour",type="response",labcex=.75,contour.col = "black",color="cm",zlim=c(-2.5,2.5),nCol = 100,main="",cex.lab=1.5,cex.axis=1.5,xlab="plant height (cm)",ylab="time (days)")
-points(delta.height$height,delta.height$time,pch=".")
+vis.gam(plant.growth.model,view=c("height","inf.intens"),plot.type = "contour",type="response",labcex=.75,contour.col = "black",color="cm",zlim=c(-.75,.75),nCol = 100,main="",cex.lab=1.5,cex.axis=1.5,xlab="plant height (cm)",ylab="infection intensity")
+points(delta.height$height,delta.height$inf.intens,pch=".")
 par(mar=c(4,1,3,4))
-plot(0,0,type="n",xlim=c(0,1),ylim=c(-2.5-0.025,2.5+0.025),axes=F,xlab="",ylab="")
+plot(0,0,type="n",xlim=c(0,1),ylim=c(-.75-0.0075,.75+0.0075),axes=F,xlab="",ylab="")
 for(i in 1:101)
 {
-  ii<-seq(-2.5,2.5,length.out=101)[i]
-  rect(0,ii-0.025,1,ii+0.025,col=cm.colors(101)[i],border = NA)
+  ii<-seq(-0.75,0.75,length.out=101)[i]
+  rect(0,ii-0.0075,1,ii+0.0075,col=cm.colors(101)[i],border = NA)
 }
-rect(0,-2.5-0.025,1,2.5+0.025)
+rect(0,-0.75-0.0075,1,0.75+0.0075)
 mtext("A",cex=1.25,font=2)
 mtext("te(plant height, time)",side=4,line=.5)
 axis(2,cex.axis=1.5)
 
-par(mar=c(4,7,3,1.5))
-vis.gam(plant.growth.model,view=c("height","inf.intens"),plot.type = "contour",type="response",labcex=.75,contour.col = "black",color="cm",zlim=c(-2.5,2.5),nCol = 100,main="",cex.lab=1.5,cex.axis=1.5,xlab="plant height (cm)",ylab="infection intensity")
-points(delta.height$height,delta.height$inf.intens,pch=".")
-par(mar=c(4,1,3,4))
-plot(0,0,type="n",xlim=c(0,1),ylim=c(-2.5-0.025,2.5+0.025),axes=F,xlab="",ylab="")
-for(i in 1:101)
-{
-  ii<-seq(-2.5,2.5,length.out=101)[i]
-  rect(0,ii-0.025,1,ii+0.025,col=cm.colors(101)[i],border = NA)
-}
-rect(0,-2.5-0.025,1,2.5+0.025)
-mtext("B",cex=1.25,font=2)
-mtext("te(plant height, time)",side=4,line=.5)
-axis(2,cex.axis=1.5)
-
 par(mar=c(4,4.5,3,4))
-plot(plant.growth.model,select = 3,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="mean temperature (°C)",ylab="s(mean temperature)")
+plot(plant.growth.model,select = 2,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="mean temperature (°C)",ylab="s(mean temperature)")
+grid()
+mtext("B",adj=1,cex=1.25,font=2)
+plot(plant.growth.model,select = 3,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="max. temperature (°C)",ylab="s(max. temperature)")
 grid()
 mtext("C",adj=1,cex=1.25,font=2)
-plot(plant.growth.model,select = 4,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="max. temperature (°C)",ylab="s(max. temperature)")
+plot(plant.growth.model,select = 4,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="min. temperature (°C)",ylab="s(min. temperature)")
 grid()
 mtext("D",adj=1,cex=1.25,font=2)
-plot(plant.growth.model,select = 5,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="min. temperature (°C)",ylab="s(min. temperature)")
+plot(plant.growth.model,select = 5,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('mean abs. humidity ('*g/m^3*')'),ylab="s(mean abs. humidity)")
 grid()
 mtext("E",adj=1,cex=1.25,font=2)
-plot(plant.growth.model,select = 6,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('mean abs. humidity ('*g/m^3*')'),ylab="s(mean abs. humidity)")
+plot(plant.growth.model,select = 6,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('max. abs. humidity ('*g/m^3*')'),ylab="s(max. abs. humidity)")
 grid()
 mtext("F",adj=1,cex=1.25,font=2)
-plot(plant.growth.model,select = 7,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('max. abs. humidity ('*g/m^3*')'),ylab="s(max. abs. humidity)")
+plot(plant.growth.model,select = 7,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('min abs. humidity ('*g/m^3*')'),ylab="s(min. abs. humidity)")
 grid()
 mtext("G",adj=1,cex=1.25,font=2)
-plot(plant.growth.model,select = 8,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('min abs. humidity ('*g/m^3*')'),ylab="s(min. abs. humidity)")
+plot(plant.growth.model,select = 8,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('mean solar radiation ('*W/m^2*')'),ylab="s(mean solalr radiation")
 grid()
 mtext("H",adj=1,cex=1.25,font=2)
-plot(plant.growth.model,select = 9,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('mean solar radiation ('*W/m^2*')'),ylab="s(mean solalr radiation")
+plot(plant.growth.model,select = 9,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="total rainfall (mm)",ylab="s(total rainfall)")
 grid()
 mtext("I",adj=1,cex=1.25,font=2)
-plot(plant.growth.model,select = 10,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="total rainfall (mm)",ylab="s(total rainfall)")
+plot(plant.growth.model,select = 10,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="mean leaf wetness (%)",ylab="s(mean leaf wetness)")
 grid()
 mtext("J",adj=1,cex=1.25,font=2)
-plot(plant.growth.model,select = 11,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="mean leaf wetness (%)",ylab="s(mean leaf wetness)")
+plot(plant.growth.model,select = 11,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('mean soil moisture ('*m^3*' '*H[2]*0/m^3*' soil)'),ylab="s(mean soil moisture)")
 grid()
 mtext("K",adj=1,cex=1.25,font=2)
-plot(plant.growth.model,select = 12,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('mean soil moisture ('*m^3*' '*H[2]*0/m^3*' soil)'),ylab="s(mean soil moisture)")
+plot(plant.growth.model,select = 12,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(tag)")
 grid()
 mtext("L",adj=1,cex=1.25,font=2)
-plot(plant.growth.model,select = 13,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(tag)")
+plot(plant.growth.model,select = 13,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(site)")
 grid()
 mtext("M",adj=1,cex=1.25,font=2)
-plot(plant.growth.model,select = 14,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(site)")
-grid()
-mtext("N",adj=1,cex=1.25,font=2)
 
 
 # model vis
@@ -233,7 +217,7 @@ predict.plant.height.traj<-function(site,temp.addition,color,pred.window=1,plot=
   min.date<-max(min(unique(as.Date(weath.dat$date))),min(unique(as.Date(temp.rh.dat$date.time))))
   max.date<-min(max(unique(as.Date(weath.dat$date))),max(unique(as.Date(temp.rh.dat$date.time))))
   dates<-seq(min.date,max.date,pred.window)
-  start.height<-10
+  start.height<-20
   xcords<-rep(NA,length(dates)) #time values
   ycords<-rep(NA,length(dates)) #height values
 
