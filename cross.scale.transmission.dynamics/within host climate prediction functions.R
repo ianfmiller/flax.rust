@@ -263,13 +263,14 @@ get.pred.data<-function(site,date0,date1,dummy.data,dummy.data.max.height=15,tem
   new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.tot.rain<-sum(weath.sub$rain,na.rm=T)
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
+  new.mean.soil.moisture<-mean(weath.sub$soil.moisture,na.rm=T)
   
 
   #area, n.pustules, and plant.inf.intens are all set to dummy data so that this function can be used interchangably for predictions at different scales without specifying the scale.
   out.data<-data.frame(area=dummy.data,n.pustules=dummy.data,plant.inf.intens=dummy.data,time=rep(delta.days,times=dim),max.height=dummy.data.max.height,site=rep(site,times=dim),
                        mean.temp=rep(new.mean.temp,times=dim),max.temp=rep(new.max.temp,times=dim),min.temp=rep(new.min.temp,times=dim),
                        mean.abs.hum=rep(new.mean.abs.hum,times=dim),max.abs.hum=rep(new.max.abs.hum,times=dim),min.abs.hum=rep(new.min.abs.hum,times=dim),
-                       mean.wetness=rep(new.mean.wetness,times=dim),tot.rain=rep(new.tot.rain,times=dim),mean.solar=rep(new.mean.solar,times=dim))
+                       mean.wetness=rep(new.mean.wetness,times=dim),tot.rain=rep(new.tot.rain,times=dim),mean.solar=rep(new.mean.solar,times=dim),mean.soil.moisture=rep(new.mean.soil.moisture,times=dim))
   out.data
   
 }
