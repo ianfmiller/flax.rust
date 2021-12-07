@@ -37,7 +37,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   mean.abs.hum<-c() #absolute humidity
   max.abs.hum<-c()
   min.abs.hum<-c()
-  tot.rain<-c()
+  mean.daily.rain<-c()
   mean.solar<-c()
   mean.wetness<-c()
   mean.windspeed<-c()
@@ -99,7 +99,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
               new.max.abs.hum<-max(abs.hum,na.rm=T)
               new.min.abs.hum<-min(abs.hum,na.rm=T)
               
-              new.tot.rain<-sum(weath.sub$rain,na.rm=T)
+              new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)/(60*24)
               new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
               new.mean.wetness<-mean(weath.sub$wetness,na.rm=T)
               new.mean.windspeed<-mean(weath.sub$wind.speed,na.rm=T)
@@ -128,7 +128,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
               max.abs.hum<-c(max.abs.hum,new.max.abs.hum)
               min.abs.hum<-c(min.abs.hum,new.min.abs.hum)
 
-              tot.rain<-c(tot.rain,new.tot.rain)
+              mean.daily.rain<-c(mean.daily.rain,new.mean.daily.rain)
               mean.solar<-c(mean.solar,new.mean.solar)
               mean.wetness<-c(mean.wetness,new.mean.wetness)
               mean.windspeed<-c(mean.windspeed,new.mean.windspeed)
@@ -144,7 +144,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   delta.pustules<-data.frame(tag=factor(tags),site=factor(sites),stem.iter=stem.iters,leaf.iter=leaf.iters,pustule.num=pustule.nums,area=start.vals,area.next=end.vals,time=days,
                              mean.temp=mean.temp,max.temp=max.temp,min.temp=min.temp,
                              mean.abs.hum=mean.abs.hum,max.abs.hum=max.abs.hum,min.abs.hum=min.abs.hum,
-                             tot.rain=tot.rain,mean.solar=mean.solar,mean.wetness=mean.wetness,mean.windspeed=mean.windspeed,mean.soil.moisture=mean.soil.moisture)
+                             mean.daily.rain=mean.daily.rain,mean.solar=mean.solar,mean.wetness=mean.wetness,mean.windspeed=mean.windspeed,mean.soil.moisture=mean.soil.moisture)
   
   saveRDS(pustules,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pustules.RDS")
   saveRDS(delta.pustules,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.pustules.RDS")
