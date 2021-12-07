@@ -16,7 +16,7 @@ par(mar=c(5,5,3,0.5))
 ## histograms
 hist(delta.pustules$area,main="",breaks=100,xlab="pustule area",cex.lab=2,cex.axis=2,cex.main=2)
 mtext("A",side=3,adj=1,line=-3,cex=2)
-hist(delta.pustules$area.next-delta.pustules$area,main="",breaks=100,xlab="change in pustule area",cex.lab=2,cex.axis=2,cex.main=2)
+hist((delta.pustules$area.next-delta.pustules$area)/delta.pustules$time,main="",breaks=100,xlab="change in pustule area per day",cex.lab=2,cex.axis=2,cex.main=2)
 mtext("B",side=3,adj=1,line=-3,cex=2)
 
 ## plot trajectories
@@ -92,8 +92,8 @@ abline(0,1,lty=2)
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS"))
 {
-  mod<-gam(area.next-area~0+
-              te(area,time)+
+  mod<-gam((area.next-area)/time~0+
+              s(area)+
               s(mean.temp)+
               s(max.temp)+
               s(min.temp)+
@@ -101,7 +101,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
               s(max.abs.hum)+
               s(min.abs.hum)+
               s(mean.solar)+
-              s(tot.rain)+
+              s(mean.daily.rain)+
               s(mean.wetness)+
               s(tag,bs="re")+
               s(site,bs="re"),
@@ -123,23 +123,10 @@ gam.check(pustule.model) #Indicates that k should be higher all smooths aside fr
 concurvity(pustule.model,full=F) #Concurvity is expected between all weather variables. The non-pessimistic estimations of concurvity (under $estimate and $observed) indicate that it is not a serious issue in the model fit.
 
 ## visualize model
-layout(matrix(c(1,1,1,1,2,3,3,3,3,4,4,4,4,5,5,5,5,14,15,6,6,6,6,7,7,7,7,8,8,8,8,9,9,9,9,16,17,10,10,10,10,11,11,11,11,12,12,12,12,13,13,13,13,17),3,18,byrow = T))
-par(mar=c(4,7,3,1.5))
-options(warn=-1) ## suppress warnings due to passing levels to vis.gam
-vis.gam(pustule.model,plot.type = "contour",type="response",labcex=.75,contour.col = "black",color="cm",zlim=c(-.35,.35),nCol = 100,too.far = .1,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('pustule area ('*mm^2*')'),ylab="time (days)")
-points(delta.pustules$area,delta.pustules$time,pch=".")
-par(mar=c(4,1,3,4))
-plot(0,0,type="n",xlim=c(0,1),ylim=c(-0.35-.0035,0.35+.035),axes=F,xlab="",ylab="")
-for(i in 1:101)
-{
-  ii<-seq(-.35,0.35,length.out=101)[i]
-  rect(0,ii-.0035,1,ii+.0035,col=cm.colors(101)[i],border = NA)
-}
-rect(0,-.35-.0035,1,0.35+.0035)
-mtext("A",cex=1.25,font=2)
-mtext("te(pustule area, time)",side=4,line=.5)
-axis(2,cex.axis=1.5)
-par(mar=c(4,4.5,3,4))
+par(mfrow=c(3,4),mar=c(4,4.5,3,4))
+plot(pustule.model,select = 1,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('pustule area ('*cm^2*')'),ylab="s(pustule area)")
+grid()
+mtext("B",adj=1,cex=1.25,font=2)
 plot(pustule.model,select = 2,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="mean temperature (°C)",ylab="s(mean temperature)")
 grid()
 mtext("B",adj=1,cex=1.25,font=2)
@@ -183,7 +170,7 @@ mtext("L",adj=1,cex=1.25,font=2)
 
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
 par(mfrow=c(1,2),mar=c(6,6,6,6))
-plot(0,0,xlim=c(0,1.5),ylim=c(-.5,.1),type="n",xlab="area (cm)",ylab="pred. change in area (mm^2)",cex.axis=1,cex.lab=1.2)
+plot(0,0,xlim=c(0,1.5),ylim=c(-.2,.05),type="n",xlab="area (cm)",ylab="pred. change in area (mm^2)",cex.axis=1,cex.lab=1.2)
 day.indicies<-c(75,113,135)
 colors<-c("orange","red","purple")
 for(day in day.indicies)
@@ -218,7 +205,7 @@ legend("topright",legend = c("50% quantile hottest days","75% quantile hottest d
 
 ### climate modeled as ~50th quantile hotest day + temperature addition
 
-plot(0,0,xlim=c(0,1.5),ylim=c(-.5,.1),type="n",xlab="area (cm)",ylab="pred. change in area (mm^2)",cex.axis=1,cex.lab=1.2)
+plot(0,0,xlim=c(0,1.5),ylim=c(-.2,.05),type="n",xlab="area (cm)",ylab="pred. change in area (mm^2)",cex.axis=1,cex.lab=1.2)
 temp.additions<-c(0,1.8,3.7)
 colors<-c("orange","red","purple")
 for(temp.addition in temp.additions)
@@ -324,81 +311,90 @@ plot.red<-t_col("red",90)
 plot.orange<-t_col("orange",90)
 
 par(mar=c(6,6,2,2),mfrow=c(4,2))
+layout(matrix(c(1,2,3,4,5,6,7,8,9,9)),5,2)
 
 ### one day ahead projection
 start.date<-as.Date("2020-06-23")
 end.date<-as.Date("2020-06-27")
 plot(0,0,type="n",xlim=c(1,5),ylim=c(0,0.5),ylab='pustule area (mm^2)',xlab="day",cex.lab=1.75,cex.axis=1.75,main=paste0("start date: ",start.date),cex.main=1.5)
 dat1<-predict.pustule.trajectory("GM",0,plot.orange,start.date,end.date,pred.window=1,T,T) 
-dat2<-predict.pustule.trajectory("GM",1.8,plot.red,start.date,end.date,pred.window=1,T,T) 
-dat3<-predict.pustule.trajectory("GM",3.7,plot.purple,start.date,end.date,pred.window=1,T,T) 
+#dat2<-predict.pustule.trajectory("GM",1.8,plot.red,start.date,end.date,pred.window=1,T,T) 
+#dat3<-predict.pustule.trajectory("GM",3.7,plot.purple,start.date,end.date,pred.window=1,T,T) 
 points(1:5,colMeans(dat1),type="l",col="orange",lwd=4,lty=2)
-points(1:5,colMeans(dat2),type="l",col="red",lwd=4,lty=2)
-points(1:5,colMeans(dat3),type="l",col="purple",lwd=4,lty=2)
+#points(1:5,colMeans(dat2),type="l",col="red",lwd=4,lty=2)
+#points(1:5,colMeans(dat3),type="l",col="purple",lwd=4,lty=2)
 
 start.date<-as.Date("2020-06-28")
 end.date<-as.Date("2020-07-02")
 plot(0,0,type="n",xlim=c(1,5),ylim=c(0,.5),ylab='pustule area (mm^2)',xlab="day",cex.lab=1.75,cex.axis=1.75,main=paste0("start date: ",start.date),cex.main=1.5)
 dat1<-predict.pustule.trajectory("GM",0,plot.orange,start.date,end.date,pred.window=1,T,T) 
-dat2<-predict.pustule.trajectory("GM",1.8,plot.red,start.date,end.date,pred.window=1,T,T) 
-dat3<-predict.pustule.trajectory("GM",3.7,plot.purple,start.date,end.date,pred.window=1,T,T) 
+#dat2<-predict.pustule.trajectory("GM",1.8,plot.red,start.date,end.date,pred.window=1,T,T) 
+#dat3<-predict.pustule.trajectory("GM",3.7,plot.purple,start.date,end.date,pred.window=1,T,T) 
 points(1:5,colMeans(dat1),type="l",col="orange",lwd=4,lty=2)
-points(1:5,colMeans(dat2),type="l",col="red",lwd=4,lty=2)
-points(1:5,colMeans(dat3),type="l",col="purple",lwd=4,lty=2)
+#points(1:5,colMeans(dat2),type="l",col="red",lwd=4,lty=2)
+#points(1:5,colMeans(dat3),type="l",col="purple",lwd=4,lty=2)
 
 start.date<-as.Date("2020-07-03")
 end.date<-as.Date("2020-07-07")
 plot(0,0,type="n",xlim=c(1,5),ylim=c(0,.5),ylab='pustule area (mm^2)',xlab="day",cex.lab=1.75,cex.axis=1.75,main=paste0("start date: ",start.date),cex.main=1.5)
 dat1<-predict.pustule.trajectory("GM",0,plot.orange,start.date,end.date,pred.window=1,T,T) 
-dat2<-predict.pustule.trajectory("GM",1.8,plot.red,start.date,end.date,pred.window=1,T,T) 
-dat3<-predict.pustule.trajectory("GM",3.7,plot.purple,start.date,end.date,pred.window=1,T,T) 
+#dat2<-predict.pustule.trajectory("GM",1.8,plot.red,start.date,end.date,pred.window=1,T,T) 
+#dat3<-predict.pustule.trajectory("GM",3.7,plot.purple,start.date,end.date,pred.window=1,T,T) 
 points(1:5,colMeans(dat1),type="l",col="orange",lwd=4,lty=2)
-points(1:5,colMeans(dat2),type="l",col="red",lwd=4,lty=2)
-points(1:5,colMeans(dat3),type="l",col="purple",lwd=4,lty=2)
+#points(1:5,colMeans(dat2),type="l",col="red",lwd=4,lty=2)
+#points(1:5,colMeans(dat3),type="l",col="purple",lwd=4,lty=2)
 
 start.date<-as.Date("2020-07-08")
 end.date<-as.Date("2020-07-12")
 plot(0,0,type="n",xlim=c(1,5),ylim=c(0,.5),ylab='pustule area (mm^2)',xlab="day",cex.lab=1.75,cex.axis=1.75,main=paste0("start date: ",start.date),cex.main=1.5)
 dat1<-predict.pustule.trajectory("GM",0,plot.orange,start.date,end.date,pred.window=1,T,T) 
-dat2<-predict.pustule.trajectory("GM",1.8,plot.red,start.date,end.date,pred.window=1,T,T) 
-dat3<-predict.pustule.trajectory("GM",3.7,plot.purple,start.date,end.date,pred.window=1,T,T) 
+#dat2<-predict.pustule.trajectory("GM",1.8,plot.red,start.date,end.date,pred.window=1,T,T) 
+#dat3<-predict.pustule.trajectory("GM",3.7,plot.purple,start.date,end.date,pred.window=1,T,T) 
 points(1:5,colMeans(dat1),type="l",col="orange",lwd=4,lty=2)
-points(1:5,colMeans(dat2),type="l",col="red",lwd=4,lty=2)
-points(1:5,colMeans(dat3),type="l",col="purple",lwd=4,lty=2)
+#points(1:5,colMeans(dat2),type="l",col="red",lwd=4,lty=2)
+#points(1:5,colMeans(dat3),type="l",col="purple",lwd=4,lty=2)
 
 start.date<-as.Date("2020-07-13")
 end.date<-as.Date("2020-07-17")
 plot(0,0,type="n",xlim=c(1,5),ylim=c(0,.5),ylab='pustule area (mm^2)',xlab="day",cex.lab=1.75,cex.axis=1.75,main=paste0("start date: ",start.date),cex.main=1.5)
 dat1<-predict.pustule.trajectory("GM",0,plot.orange,start.date,end.date,pred.window=1,T,T) 
-dat2<-predict.pustule.trajectory("GM",1.8,plot.red,start.date,end.date,pred.window=1,T,T) 
-dat3<-predict.pustule.trajectory("GM",3.7,plot.purple,start.date,end.date,pred.window=1,T,T) 
+#dat2<-predict.pustule.trajectory("GM",1.8,plot.red,start.date,end.date,pred.window=1,T,T) 
+#dat3<-predict.pustule.trajectory("GM",3.7,plot.purple,start.date,end.date,pred.window=1,T,T) 
 points(1:5,colMeans(dat1),type="l",col="orange",lwd=4,lty=2)
-points(1:5,colMeans(dat2),type="l",col="red",lwd=4,lty=2)
-points(1:5,colMeans(dat3),type="l",col="purple",lwd=4,lty=2)
+#points(1:5,colMeans(dat2),type="l",col="red",lwd=4,lty=2)
+#points(1:5,colMeans(dat3),type="l",col="purple",lwd=4,lty=2)
 
 
 start.date<-as.Date("2020-07-18")
 end.date<-as.Date("2020-07-22")
 plot(0,0,type="n",xlim=c(1,5),ylim=c(0,.5),ylab='pustule area (mm^2)',xlab="day",cex.lab=1.75,cex.axis=1.75,main=paste0("start date: ",start.date),cex.main=1.5)
 dat1<-predict.pustule.trajectory("GM",0,plot.orange,start.date,end.date,pred.window=1,T,T) 
-dat2<-predict.pustule.trajectory("GM",1.8,plot.red,start.date,end.date,pred.window=1,T,T) 
-dat3<-predict.pustule.trajectory("GM",3.7,plot.purple,start.date,end.date,pred.window=1,T,T) 
+#dat2<-predict.pustule.trajectory("GM",1.8,plot.red,start.date,end.date,pred.window=1,T,T) 
+#dat3<-predict.pustule.trajectory("GM",3.7,plot.purple,start.date,end.date,pred.window=1,T,T) 
 points(1:5,colMeans(dat1),type="l",col="orange",lwd=4,lty=2)
-points(1:5,colMeans(dat2),type="l",col="red",lwd=4,lty=2)
-points(1:5,colMeans(dat3),type="l",col="purple",lwd=4,lty=2)
+#points(1:5,colMeans(dat2),type="l",col="red",lwd=4,lty=2)
+#points(1:5,colMeans(dat3),type="l",col="purple",lwd=4,lty=2)
 
 start.date<-as.Date("2020-07-23")
 end.date<-as.Date("2020-07-27")
 plot(0,0,type="n",xlim=c(1,5),ylim=c(0,.5),ylab='pustule area (mm^2)',xlab="day",cex.lab=1.75,cex.axis=1.75,main=paste0("start date: ",start.date),cex.main=1.5)
 dat1<-predict.pustule.trajectory("GM",0,plot.orange,start.date,end.date,pred.window=1,T,T) 
-dat2<-predict.pustule.trajectory("GM",1.8,plot.red,start.date,end.date,pred.window=1,T,T) 
-dat3<-predict.pustule.trajectory("GM",3.7,plot.purple,start.date,end.date,pred.window=1,T,T) 
+#dat2<-predict.pustule.trajectory("GM",1.8,plot.red,start.date,end.date,pred.window=1,T,T) 
+#dat3<-predict.pustule.trajectory("GM",3.7,plot.purple,start.date,end.date,pred.window=1,T,T) 
 points(1:5,colMeans(dat1),type="l",col="orange",lwd=4,lty=2)
-points(1:5,colMeans(dat2),type="l",col="red",lwd=4,lty=2)
-points(1:5,colMeans(dat3),type="l",col="purple",lwd=4,lty=2)
+#points(1:5,colMeans(dat2),type="l",col="red",lwd=4,lty=2)
+#points(1:5,colMeans(dat3),type="l",col="purple",lwd=4,lty=2)
 
 plot(0,0,type="n",axes=F,bty="n")
 legend("center",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=4,cex=3,bty="n")
 
-
+start.date<-as.Date("2020-06-23")
+end.date<-as.Date("2020-07-27")
+plot(0,0,type="n",xlim=c(1,5),ylim=c(0,0.5),ylab='pustule area (mm^2)',xlab="day",cex.lab=1.75,cex.axis=1.75,main=paste0("start date: ",start.date),cex.main=1.5)
+dat1<-predict.pustule.trajectory("GM",0,plot.orange,start.date,end.date,pred.window=1,T,T) 
+#dat2<-predict.pustule.trajectory("GM",1.8,plot.red,start.date,end.date,pred.window=1,T,T) 
+#dat3<-predict.pustule.trajectory("GM",3.7,plot.purple,start.date,end.date,pred.window=1,T,T) 
+points(1:length(colMeans(dat1)),colMeans(dat1),type="l",col="orange",lwd=4,lty=2)
+#points(1:5,colMeans(dat2),type="l",col="red",lwd=4,lty=2)
+#points(1:5,colMeans(dat3),type="l",col="purple",lwd=4,lty=2)
 
