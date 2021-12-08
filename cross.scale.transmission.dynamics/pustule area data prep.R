@@ -2,25 +2,22 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
 {
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
     
-  # clean data
-  
-  ## load data
+  # load data
   pustules<-read.csv("~/Documents/GitHub/flax.rust/data/pustule measurements.csv")
   
-  ## add in area
+  # add in area
   area<-pi*(pustules$max.diam..mm./2)*(pustules$min.diam..mm./2)
   pustules$date<-as.POSIXct(pustules$date,tryFormats = "%m/%d/%y %H:%M",tz="UTC")
   pustules$area<-area
   
-  ## clean data
+  # clean data
   pustules<-pustules[which(pustules$pustule.ID.confidence=="Yes"),]
   pustules<-pustules[which(pustules$area>0),]
   
-  ## cut out incomplete records
+  #  cut out incomplete records
   pustules<-pustules[-intersect(which(pustules$site=="HM"),which(pustules$date>"2020-07-10 00:00:00 UTC")),]
   
-  ## make new data object for change in pustule size
-  
+  # make new data object for change in pustule size
   temp.rh.sub.func<-function(x,lower.bound,upper.bound) {out<-subset(x,temp.c>=lower.bound); out<-subset(out,temp.c<=upper.bound); out}
   
   tags<-c()
@@ -34,7 +31,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   mean.temp<-c()
   max.temp<-c()
   min.temp<-c()
-  mean.abs.hum<-c() #absolute humidity
+  mean.abs.hum<-c()
   max.abs.hum<-c()
   min.abs.hum<-c()
   mean.daily.rain<-c()
@@ -71,28 +68,28 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
             }
             for(i in 1:(dim(sub.pustules4)[1]-1))
             {
-              #pull reference data
+              ## pull reference data
               date0<-sub.pustules4[i,"date"]
               date1<-sub.pustules4[i+1,"date"]
               site<-sub.pustules4[i,"site"]
               
-              #subset temp data to relevant window
-              temp.rh.sub<-all.temp.rh[which(all.temp.rh$site==site),] #pull out temp data for site
-              temp.rh.sub<-subset(temp.rh.sub,date.time<=date1) #pull out relevant data
-              temp.rh.sub<-subset(temp.rh.sub,date.time>=date0) #pull out relevant data
-              temp.rh.sub<-subset(temp.rh.sub,!is.na(temp.c)) #throw out NAs
-              temp.rh.sub<-cbind(temp.rh.sub,interval.length=c(diff(as.numeric(temp.rh.sub$date.time))/(60*60*24),NA)) #add interval length in days
+              ## subset temp data to relevant window
+              temp.rh.sub<-all.temp.rh[which(all.temp.rh$site==site),] ####pull out temp data for site
+              temp.rh.sub<-subset(temp.rh.sub,date.time<=date1) ###pull out relevant data
+              temp.rh.sub<-subset(temp.rh.sub,date.time>=date0) ###pull out relevant data
+              temp.rh.sub<-subset(temp.rh.sub,!is.na(temp.c)) ###throw out NAs
+              temp.rh.sub<-cbind(temp.rh.sub,interval.length=c(diff(as.numeric(temp.rh.sub$date.time))/(60*60*24),NA)) ###add interval length in days
               
-              #subset weather data to relevant window
-              weath.sub<-all.weath[which(all.weath$site==site),] #pull out weath data for site
-              weath.sub<-subset(weath.sub,date<=date1) #pull out relevant data
-              weath.sub<-subset(weath.sub,date>=date0) #pull out relevant data
+              ## subset weather data to relevant window
+              weath.sub<-all.weath[which(all.weath$site==site),] ###pull out weath data for site
+              weath.sub<-subset(weath.sub,date<=date1) ###pull out relevant data
+              weath.sub<-subset(weath.sub,date>=date0) ###pull out relevant data
               weath.sub<-cbind(weath.sub,interval.length=c(diff(as.numeric(weath.sub$date))/(60*60*24),NA))
               
-              #calculate environmental variable metrics
-              new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
-              new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
-              new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
+              ## calculate environmental variable metrics
+              new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) ###mean temperature
+              new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) ###max temperature
+              new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) ###min temperature
               
               abs.hum<-0.1324732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+T)
               new.mean.abs.hum<-mean(abs.hum,na.rm=T)
@@ -105,12 +102,12 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
               new.mean.windspeed<-mean(weath.sub$wind.speed,na.rm=T)
               new.mean.soil.moisture<-mean(weath.sub$soil.moisture,na.rm=T)
               
-              #pull out core predictors
+              ## pull out core predictors
               start.val<-sub.pustules4[i,"area"]
               end.val<-sub.pustules4[i+1,"area"]
               delta.days<-date1-date0
 
-              #store values
+              ## store values
               tags<-c(tags,tag)
               sites<-c(sites,site)
               stem.iters<-c(stem.iters,color)
