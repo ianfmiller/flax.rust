@@ -1,21 +1,32 @@
 if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.n.pustules.RDS")) | !(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/n.pustules.RDS")))
 {
-
+  
+  # load data
+  pustules<-read.csv("~/Documents/GitHub/flax.rust/data/pustule measurements.csv")
+  
+  # pull out relevant columns
+  n.pustules<-pustules[,c("who.entered","date","picture","site","tag","color","leaf.iteration","N.pustules","N.pustule.count.confidence")]
+  
+  # format time
+  n.pustules$date<-as.POSIXct(n.pustules$date,tryFormats = "%m/%d/%y %H:%M",tz="UTC")
+  
+  # cut out incomplete records
+  n.pustules<-n.pustules[-intersect(which(n.pustules$site=="HM"),which(n.pustules$date>"2020-07-10 00:00:00 UTC")),]
+  
+  # subset to data of suitable quality
+  n.pustules<-subset(n.pustules,N.pustule.count.confidence=="Yes")
+  
+  # get rid of 0 counts
+  n.pustules<-subset(n.pustules,N.pustules>0)
+  
+  # subset to unique data (duplicates exist because a separate row was entered for each measurment of an individual pustule)
+  n.pustules<-unique(n.pustules)
+  
+  
   # prep enviro data
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
   
-  # subset 'pustules' data set to get unqiue number of pustules data
-  
-  ## pull out relevant columns
-  n.pustules<-pustules[,c("who.entered","date","picture","site","tag","color","leaf.iteration","N.pustules","N.pustule.count.confidence")]
-  
-  ## subset to data of suitable quality
-  n.pustules<-subset(n.pustules,N.pustule.count.confidence=="Yes")
-  
-  ## subset to unique data (duplicates exist because a separate row was entered for each measurment of an individual pustule)
-  n.pustules<-unique(n.pustules)
-  
-  ## make new data object for change in pustule size
+  # make new data object for change in pustule size
   
   temp.rh.sub.func<-function(x,lower.bound,upper.bound) {out<-subset(x,temp.c>=lower.bound); out<-subset(out,temp.c<=upper.bound); out}
   
