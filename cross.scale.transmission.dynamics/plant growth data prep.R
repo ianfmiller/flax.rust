@@ -208,7 +208,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       mean.soil.moisture<-c(mean.soil.moisture,new.mean.soil.moisture)
     }
   }
-  delta.height<-data.frame(tag=factor(tags),site=factor(sites), height=start.vals, height.next=end.vals,inf.intens=inf.intens.vals,time=days,
+  delta.plant.heights<-data.frame(tag=factor(tags),site=factor(sites), height=start.vals, height.next=end.vals,inf.intens=inf.intens.vals,time=days,
                            mean.temp=mean.temp,max.temp=max.temp,min.temp=min.temp,
                            mean.abs.hum=mean.abs.hum,max.abs.hum=max.abs.hum,min.abs.hum=min.abs.hum,
                            mean.wetness=mean.wetness,mean.daily.rain=mean.daily.rain,mean.solar=mean.solar,mean.soil.moisture=mean.soil.moisture)
@@ -217,4 +217,4 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   saveRDS(delta.height,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.heights.RDS")
 }
 plant.heights<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plant.heights.RDS")
-delta.height<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.heights.RDS")
+delta.plant.heights<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.plant.heights.RDS")

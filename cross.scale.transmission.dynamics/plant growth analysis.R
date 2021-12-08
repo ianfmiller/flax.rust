@@ -7,7 +7,7 @@ library(gratia)
 # load data
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant growth data prep.R")
 
-delta.height<-subset(delta.height,time<=8)
+delta.plant.heights<-subset(delta.plant.heights,time<=8)
 
 # visualize data
 
@@ -15,9 +15,9 @@ layout(matrix(c(1,2,4,4,3,3,3,3),2,4,byrow = T))
 par(mar=c(5,5,3,0.5))
 
 ## histograms
-hist(delta.height$height,main="",breaks=100,xlab="plant height",cex.lab=2,cex.axis=2,cex.main=2)
+hist(delta.plant.heights$height,main="",breaks=100,xlab="plant height",cex.lab=2,cex.axis=2,cex.main=2)
 mtext("A",side=3,adj=1,line=-3,cex=2)
-hist((delta.height$height.next-delta.height$height)/delta.height$time,main="",breaks=100,xlab="change in plant height per day",cex.lab=2,cex.axis=2,cex.main=2)
+hist((delta.plant.heights$height.next-delta.plant.heights$height)/delta.plant.heights$time,main="",breaks=100,xlab="change in plant height per day",cex.lab=2,cex.axis=2,cex.main=2)
 mtext("B",side=3,adj=1,line=-3,cex=2)
 
 ## plot trajectories
@@ -39,7 +39,7 @@ for (i in 1:length(unique(plant.heights$tag)))
 
 ## plot change
 par(mar=c(5,5,3,0.5))
-plot(delta.height$height,delta.height$height.next,col="black",xlab = "observed height",ylab="next observed height",cex.lab=2,cex.axis=2)
+plot(delta.plant.heights$height,delta.plant.heights$height.next,col="black",xlab = "observed height",ylab="next observed height",cex.lab=2,cex.axis=2)
 mtext("C",side=3,adj=1,line=-3.25,cex=2)
 abline(0,1,lty=2)
 
@@ -65,7 +65,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
              s(site,bs="re"),
            select = T,
            method="REML",
-           data=delta.height,
+           data=delta.plant.heights,
            control = list(nthreads=4))
 
   saveRDS(mod,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS")
@@ -87,7 +87,7 @@ layout(matrix(c(15,15,15,1,1,1,1,2,3,3,3,3,4,4,4,4,16,16,16,16,5,5,5,5,6,6,6,6,7
 par(mar=c(4,7,3,1.5))
 options(warn=-1) ## suppress warnings due to passing levels to vis.gam
 vis.gam(plant.growth.model,view=c("height","inf.intens"),plot.type = "contour",type="response",labcex=.75,contour.col = "black",color="cm",zlim=c(-.75,.75),nCol = 100,main="",cex.lab=1.5,cex.axis=1.5,xlab="plant height (cm)",ylab="infection intensity")
-points(delta.height$height,delta.height$inf.intens,pch=".")
+points(delta.plant.heights$height,delta.plant.heights$inf.intens,pch=".")
 par(mar=c(4,1,3,4))
 plot(0,0,type="n",xlim=c(0,1),ylim=c(-.75-0.0075,.75+0.0075),axes=F,xlab="",ylab="")
 for(i in 1:101)
