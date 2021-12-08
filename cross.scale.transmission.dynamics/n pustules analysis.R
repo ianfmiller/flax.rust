@@ -9,15 +9,17 @@ source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/n pustule
 delta.n.pustules<-subset(delta.n.pustules,time<=7)
 
 # visualize data
-
+layout(matrix(c(1,2,4,4,3,3,3,3),2,4,byrow = T))
+par(mar=c(5,5,3,0.5))
 ## histograms
-par(mfrow=c(2,1))
-hist(delta.n.pustules$n.pustules,main="n pustules",breaks=100,xlab="n pustules")
-hist(delta.n.pustules$n.pustules.next-delta.n.pustules$n.pustules,main="change in n pustules",breaks=100,xlab="change in n pustules")
-
+hist(delta.n.pustules$n.pustules,main="",breaks=100,xlab="N pustules",cex.lab=2,cex.axis=2,cex.main=2)
+mtext("A",side=3,adj=1,line=-3,cex=2)
+hist((delta.n.pustules$n.pustules.next-delta.n.pustules$n.pustules)/delta.n.pustules$time,main="",breaks=100,xlab="change in N pustules per day",cex.lab=2,cex.axis=2,cex.main=2)
+mtext("B",side=3,adj=1,line=-3,cex=2)
 ## plot trajectories
-par(mfrow=c(1,1))
+par(mar=c(2,5,0,0.5))
 plot(c(min(n.pustules$date),max(n.pustules$date)),c(0,max(n.pustules$N.pustules)),type="n",xlab="date",ylab="N pustules")
+mtext("D",side=3,adj=1,line=-3,cex=2)
 
 i<-0
 
@@ -43,37 +45,37 @@ for (tag in unique(n.pustules$tag))
 }
 
 ## just a few trajectories
-par(mfrow=c(1,1),mar=c(6,6,6,6))
-tags<-c(86,88,106,112,124)
-i<-0
-plot.cols<-sample(rainbow(28))
-plot(c(min(n.pustules[which(n.pustules$tag %in% tags),]$date),max(n.pustules[which(n.pustules$tag %in% tags),]$date)),c(0,max(n.pustules[which(n.pustules$tag %in% tags),]$N.pustules)),type="n",xlab="date",ylab="N pustules",cex.lab=2,cex.axis=2)
-sub.n.pustules1<-n.pustules[which(n.pustules$tag==tag),]
-for (tag in tags)
-{
-  sub.n.pustules1<-n.pustules[which(n.pustules$tag==tag),]
-  
-  for (color in unique(sub.n.pustules1$color))
-  {
-    sub.n.pustules2<-sub.n.pustules1[which(sub.n.pustules1$color==color),]
-    
-    for(leaf.iteration in unique(sub.n.pustules2$leaf.iteration)) 
-    {
-      sub.n.pustules3<-sub.n.pustules2[which(sub.n.pustules2$leaf.iteration==leaf.iteration),]
-      
-      i<-i+1
-      points(sub.n.pustules3$date,sub.n.pustules3$N.pustules,col=plot.cols[i],type="l",lwd=2)
-      
-    }
-  }
-}
+#par(mfrow=c(1,1),mar=c(6,6,6,6))
+#tags<-c(86,88,106,112,124)
+#i<-0
+#plot.cols<-sample(rainbow(28))
+#plot(c(min(n.pustules[which(n.pustules$tag %in% tags),]$date),max(n.pustules[which(n.pustules$tag %in% tags),]$date)),c(0,max(n.pustules[which(n.pustules$tag %in% tags),]$N.pustules)),type="n",xlab="date",ylab="N pustules",cex.lab=2,cex.axis=2)
+#sub.n.pustules1<-n.pustules[which(n.pustules$tag==tag),]
+#for (tag in tags)
+#{
+#  sub.n.pustules1<-n.pustules[which(n.pustules$tag==tag),]
+#  
+#  for (color in unique(sub.n.pustules1$color))
+#  {
+#    sub.n.pustules2<-sub.n.pustules1[which(sub.n.pustules1$color==color),]
+#    
+#    for(leaf.iteration in unique(sub.n.pustules2$leaf.iteration)) 
+#    {
+#      sub.n.pustules3<-sub.n.pustules2[which(sub.n.pustules2$leaf.iteration==leaf.iteration),]
+#      
+#      i<-i+1
+#      points(sub.n.pustules3$date,sub.n.pustules3$N.pustules,col=plot.cols[i],type="l",lwd=2)
+#      
+#    }
+#  }
+#}
 
 
 ## plot change
-par(mfrow=c(1,1))
-plot(delta.n.pustules$n.pustules,delta.n.pustules$n.pustules.next,col="black",xlab = "N pustules",ylab="next obs. N pustules",cex.lab=2,cex.axis=2)
+par(mar=c(5,5,3,0.5))
+plot(delta.n.pustules$n.pustules,delta.n.pustules$n.pustules.next,col="black",xlab = 'N pustules',ylab='next obs. N pustules',cex.lab=2,cex.axis=2)
+mtext("C",side=3,adj=1,line=-3.25,cex=2)
 abline(0,1,lty=2)
-#mtext(text="N = 650",cex=2)
 
 # analyze data
 
@@ -82,33 +84,26 @@ abline(0,1,lty=2)
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS"))
 {
-  mod0<-gam(n.pustules.next-n.pustules~0+s(n.pustules,by=time,bs="cs",k=4)+
-              s(mean.temp,by=time,bs="cs",k=4)+
-              s(max.temp,by=time,bs="cs",k=4)+
-              s(min.temp,by=time,bs="cs",k=4)+
-              s(mean.abs.hum,by=time,bs="cs",k=4)+
-              s(max.abs.hum,by=time,bs="cs",k=4)+
-              s(min.abs.hum,by=time,bs="cs",k=4)+
-              s(mean.solar,by=time,bs="cs",k=4)+
-              s(tot.rain,bs="cs",k=4)+
-              s(site,bs="re",k=4),
-            data=delta.n.pustules)
+  mod<-gam((n.pustules.next-n.pustules)/time~0+
+             s(n.pustules)+
+             s(mean.temp)+
+             s(max.temp)+
+             s(min.temp)+
+             s(mean.abs.hum)+
+             s(max.abs.hum)+
+             s(min.abs.hum)+
+             s(mean.solar)+
+             s(mean.daily.rain)+
+             s(mean.wetness)+
+             s(tag,bs="re")+
+             s(site,bs="re"),
+           select = T,
+           method="REML",
+           data=delta.n.pustules,
+           control = list(nthreads=4))
   
-  summary(mod0)
+  saveRDS(mod,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS")
   
-  mod1<-gam(n.pustules.next-n.pustules~0+s(n.pustules,by=time,bs="cs",k=4)+
-              #s(mean.temp,by=time,bs="cs",k=4)+
-              #s(max.temp,by=time,bs="cs",k=4)+
-              #s(min.temp,by=time,bs="cs",k=4)+
-              #s(mean.abs.hum,by=time,bs="cs",k=4)+
-              #s(max.abs.hum,by=time,bs="cs",k=4)+
-              #s(min.abs.hum,by=time,bs="cs",k=4)+
-              #s(mean.solar,by=time,bs="cs",k=4)+
-              #s(tot.rain,bs="cs",k=4)+
-              s(site,bs="re",k=4),
-            data=delta.n.pustules)
-  summary(mod1)    # All now significant. Mod1 fit via stepwise removal that resulted in 2 marginally signiificant terms. The AIC of this model is significantly less than that of the model without the marginally significant terms.
-  saveRDS(mod1,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS")
 }
 
 ## load best model
@@ -116,14 +111,54 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS")
 
 ## model checking
-#plot(n.pustules.model,scale=0,pages=1) #plot smooths
-#gam.check(n.pustules.model) #indicates that the number of knots is sufficient, except for mean temperature. Increasing knots doesn't resolve issue, which indicates the issue is with the data, and the model is OK.
+par(mfrow=c(2,2))
+gam.check(n.pustules.model) #Indicates that k should be higher all smooths aside from the tensor. Increasing k to significantly higher values is not possible due to terms having fewer unique covariate combinations than specified maximum degrees of freedom. 
+concurvity(n.pustules.model,full=F) #Concurvity is expected between all weather variables. The non-pessimistic estimations of concurvity (under $estimate and $observed) indicate that it is not a serious issue in the model fit.
 
 ## visualize model
 
 par(mfrow=c(1,2),mar=c(5,5,5,5))
 plot(n.pustules.model,select = 1,scale=-1,xlab="N pustules",ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2)
 plot(n.pustules.model,select = 2,scale=-1,xlab="site",ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2,main="")
+
+## visualize model
+par(mfrow=c(3,4),mar=c(4,4.5,3,4))
+plot(n.pustules.model,select = 1,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="N pustules",ylab="s(N pustules)")
+grid()
+mtext("B",adj=1,cex=1.25,font=2)
+plot(n.pustules.model,select = 2,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="mean temperature (°C)",ylab="s(mean temperature)")
+grid()
+mtext("B",adj=1,cex=1.25,font=2)
+plot(n.pustules.model,select = 3,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="max. temperature (°C)",ylab="s(max. temperature)")
+grid()
+mtext("C",adj=1,cex=1.25,font=2)
+plot(n.pustules.model,select = 4,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="min. temperature (°C)",ylab="s(min. temperature)")
+grid()
+mtext("D",adj=1,cex=1.25,font=2)
+plot(n.pustules.model,select = 5,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('mean abs. humidity ('*g/m^3*')'),ylab="s(mean abs. humidity)")
+grid()
+mtext("E",adj=1,cex=1.25,font=2)
+plot(n.pustules.model,select = 6,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('max. abs. humidity ('*g/m^3*')'),ylab="s(max. abs. humidity)")
+grid()
+mtext("F",adj=1,cex=1.25,font=2)
+plot(n.pustules.model,select = 7,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('min abs. humidity ('*g/m^3*')'),ylab="s(min. abs. humidity)")
+grid()
+mtext("G",adj=1,cex=1.25,font=2)
+plot(n.pustules.model,select = 8,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('mean solar radiation ('*W/m^2*')'),ylab="s(mean solalr radiation")
+grid()
+mtext("H",adj=1,cex=1.25,font=2)
+plot(n.pustules.model,select = 9,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="total rainfall (mm)",ylab="s(total rainfall)")
+grid()
+mtext("I",adj=1,cex=1.25,font=2)
+plot(n.pustules.model,select = 10,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="mean leaf wetness (%)",ylab="s(mean leaf wetness)")
+grid()
+mtext("J",adj=1,cex=1.25,font=2)
+plot(n.pustules.model,select = 11,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(tag)")
+grid()
+mtext("K",adj=1,cex=1.25,font=2)
+plot(n.pustules.model,select = 12,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(site)")
+grid()
+mtext("L",adj=1,cex=1.25,font=2)
 
 # predict climate change effect
 
@@ -133,7 +168,7 @@ plot(n.pustules.model,select = 2,scale=-1,xlab="site",ylab="effect",shade=T,shad
 
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
 par(mfrow=c(1,2),mar=c(6,6,6,6))
-plot(0,0,xlim=c(0,206),ylim=c(-5,5),type="n",xlab="N pustules",ylab="pred. change in N pustules",cex.axis=2,cex.lab=2)
+plot(0,0,xlim=c(0,206),ylim=c(-15,15),type="n",xlab="N pustules",ylab="pred. change in N pustules",cex.axis=2,cex.lab=2)
 day.indicies<-c(75,113,135)
 colors<-c("orange","red","purple")
 for(day in day.indicies)
@@ -272,10 +307,10 @@ plot.purple<-t_col("purple",80)
 plot.red<-t_col("red",80)
 plot.orange<-t_col("orange",80)
 
-par(mar=c(6,6,2,2),mfrow=c(3,1))
 
 ### one day ahead projection
-plot(0,0,type="n",xlim=c(1,36),ylim=c(0,20),ylab='N.pustules',xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
+par(mar=c(6,6,2,2),mfrow=c(1,1))
+plot(0,0,type="n",xlim=c(1,36),ylim=c(0,100),ylab='N.pustules',xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
 dat<-predict.n.pustules.trajectory("GM",0,pred.window=1,plot.orange,T,T) 
 points(1:36,colMeans(dat),type="l",col="orange",lwd=4,lty=2)
 
