@@ -7,7 +7,7 @@ library(gratia)
 # load data
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant growth data prep.R")
 
-delta.height<-subset(delta.height,time<=7)
+delta.height<-subset(delta.height,time<=8)
 
 # visualize data
 
@@ -220,7 +220,7 @@ predict.plant.height.traj<-function(site,temp.addition,color,pred.window=1,plot=
   xcords<-rep(NA,length(dates)) #time values
   ycords<-rep(NA,length(dates)) #height values
 
-  for(j in 1:10) #simulation iteration
+  for(j in 1:100) #simulation iteration
   {
     reps<-1
     i<-start.height
