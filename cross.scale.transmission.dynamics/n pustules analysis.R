@@ -6,7 +6,7 @@ library(progress)
 
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/n pustules data prep.R")
 
-delta.n.pustules<-subset(delta.n.pustules,time<=7)
+delta.n.pustules<-subset(delta.n.pustules,time<=8)
 
 # visualize data
 layout(matrix(c(1,2,4,4,3,3,3,3),2,4,byrow = T))
@@ -112,14 +112,8 @@ n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission
 
 ## model checking
 par(mfrow=c(2,2))
-gam.check(n.pustules.model) #Indicates that k should be higher all smooths aside from the tensor. Increasing k to significantly higher values is not possible due to terms having fewer unique covariate combinations than specified maximum degrees of freedom. 
+gam.check(n.pustules.model) #Indicates that k is sufficient for all significant predictor terms
 concurvity(n.pustules.model,full=F) #Concurvity is expected between all weather variables. The non-pessimistic estimations of concurvity (under $estimate and $observed) indicate that it is not a serious issue in the model fit.
-
-## visualize model
-
-par(mfrow=c(1,2),mar=c(5,5,5,5))
-plot(n.pustules.model,select = 1,scale=-1,xlab="N pustules",ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2)
-plot(n.pustules.model,select = 2,scale=-1,xlab="site",ylab="effect",shade=T,shade.col="palegreen",col="darkgreen",lwd=4,cex.lab=2,main="")
 
 ## visualize model
 par(mfrow=c(3,4),mar=c(4,4.5,3,4))
