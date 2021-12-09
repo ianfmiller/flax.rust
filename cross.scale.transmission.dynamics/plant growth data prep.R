@@ -4,7 +4,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
 {
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
   
-  # clean data from healthy focal plants
+  # make data object from healthy focal plants
   healthy.focal.plants.raw <- read.csv("~/Documents/GitHub/flax.rust/data/healthyplants.csv")
   healthy.focal.plants.raw <- healthy.focal.plants.raw[!is.na(healthy.focal.plants.raw$max.height),]
   tags <- unique(healthy.focal.plants.raw$Tag)
@@ -24,8 +24,12 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   }
   healthy.focal.plants$Date <- mdy(healthy.focal.plants$Date)
   healthy.focal.plants$plant.inf.intens <- 0
+  healthy.focal.plants<-healthy.focal.plants[,c("Year","Site","Date","Tag","max.height","plant.inf.intens")]
   
-  ## make data object for diseased focal plants 
+  ## save data object
+  if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/healthy.focal.plants.RDS")) {saveRDS(healthy.focal.plants,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/healthy.focal.plants.RDS")}
+  
+  # make data object for diseased focal plants 
   
   ### load data
   within.host<-read.csv("~/Documents/GitHub/flax.rust/data/Withinhost.csv")
@@ -98,9 +102,12 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   ## correct 0 intensities to .1, logic being that this is a measure of tot infection load, and it shouldn't be less than 1 pustule (coded as .1cm infected tissue, 1 pustule/leaf)
   diseased.focal.plants$plant.inf.intens[which(diseased.focal.plants$plant.inf.intens<.1)]<-.1
   
-  
-  ## finish cleaning
+  ## correct date structure
   diseased.focal.plants$Date<-as.Date(diseased.focal.plants$Date,tryFormats = "%m/%d/%y")
+  
+  ## save data object
+  if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/diseased.focal.plants.RDS")) {saveRDS(diseased.focal.plants,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/diseased.focal.plants.RDS")}
+  ## finish cleaning
   diseased.focal.plants <- diseased.focal.plants[!is.na(diseased.focal.plants$max.height),]
   
   ## merge height data from healthy and diseased focal plants
