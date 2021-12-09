@@ -218,7 +218,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
     }
   }
   
-  delta.infection.intensity<-data.frame(tag=factor(tags),site=factor(sites),max.height=max.heights,time=days,N.stems=n.stems,N.D.Stems=n.d.stems,max.height=max.heights,infection.intensity=start.infection.intensity,infection.intensity.next=end.infection.intensity,
+  delta.infection.intensity<-data.frame(tag=factor(tags),site=factor(sites),max.height=max.heights,time=days,N.stems=n.stems,N.D.Stems=n.d.stems,infection.intensity=start.infection.intensity,infection.intensity.next=end.infection.intensity,
                            mean.temp=mean.temp,max.temp=max.temp,min.temp=min.temp,
                            mean.abs.hum=mean.abs.hum,max.abs.hum=max.abs.hum,min.abs.hum=min.abs.hum,
                            mean.daily.rain=mean.daily.rain,mean.solar=mean.solar,mean.wetness=mean.wetness,mean.windspeed=mean.windspeed,mean.soil.moisture=mean.soil.moisture)
