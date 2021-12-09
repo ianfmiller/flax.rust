@@ -253,7 +253,7 @@ predict.n.pustules.trajectory<-function(site,temp.addition,color,pred.window=1,p
       date0<-as.POSIXct(dates[k])
       date1<-as.POSIXct(dates[k+1])
       pred.data<-get.pred.data(site,date0,date1,i,temp.addition = temp.addition)
-      Xp <- predict(n.pustules.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
+      Xp <- predict(n.pustules.model, newdata = pred.data, exclude=c("s(site)","s(tag)"),type="lpmatrix")
       n <-2
       ilink <- family(n.pustules.model)$linkinv
       preds <- rep(NA,n)
