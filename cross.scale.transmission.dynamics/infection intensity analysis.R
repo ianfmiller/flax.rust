@@ -78,6 +78,9 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 infection.intensity.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/infection.intensity.model.RDS")
 
 ## model checking 
+par(mfrow=c(2,2))
+gam.check(infection.intensity.model) #Indicates that k should be higher in some smooths. Increasing k to significantly higher values is not possible due to terms having fewer unique covariate combinations than specified maximum degrees of freedom. 
+concurvity(infection.intensity.model,full=F) #no obvious issues
 
 ## visualize model
 layout(matrix(c(1,1,1,1,2,3,3,3,3,4,4,4,4,5,5,5,5,14,15,6,6,6,6,7,7,7,7,8,8,8,8,9,9,9,9,16,17,10,10,10,10,11,11,11,11,12,12,12,12,13,13,13,13,18),3,18,byrow = T))
