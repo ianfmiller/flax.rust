@@ -121,7 +121,7 @@ get.pred.data.temp.mean.quantile.n.pustules.model<-function(day.set,dummy.data,t
   out.data
 }
 
-get.pred.data.temp.mean.quantile.plants.model<-function(day.set,dummy.data.inf.intens,dummy.data.height,temp.addition=0)
+get.pred.data.temp.mean.quantile.infection.intensity.model<-function(day.set,dummy.data.infection.intensity,dummy.data.height,temp.addition=0)
 {
   dim<-length(dummy.data.inf.intens)
   daily.means<-pull.temp.mean.quantile.data()
@@ -149,7 +149,7 @@ get.pred.data.temp.mean.quantile.plants.model<-function(day.set,dummy.data.inf.i
   delta.days<-as.numeric(date1-date0)
   
   abs.hum<-0.1324732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+T)
-  new.mean.abs.hum<-mean(abs.hum,na.rm=T) #absolute humidity, see https://www.medrxiv.org/content/10.1101/2020.02.12.20022467v1.full.pdf
+  new.mean.abs.hum<-mean(abs.hum,na.rm=T) 
   new.max.abs.hum<-max(abs.hum,na.rm=T)
   new.min.abs.hum<-min(abs.hum,na.rm=T)
   
@@ -166,10 +166,9 @@ get.pred.data.temp.mean.quantile.plants.model<-function(day.set,dummy.data.inf.i
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
   
   
-  out.data<-data.frame(plant.inf.intens=dummy.data.inf.intens,max.height=dummy.data.height,time=rep(delta.days,times=dim),site=rep(site,times=dim),
+  out.data<-data.frame(infection.intensity=dummy.data.inf.intens,max.height=dummy.data.height,time=rep(delta.days,times=dim),site=rep(site,times=dim),
                        mean.temp=rep(new.mean.temp,times=dim),max.temp=rep(new.max.temp,times=dim),min.temp=rep(new.min.temp,times=dim),
                        mean.abs.hum=rep(new.mean.abs.hum,times=dim),max.abs.hum=rep(new.max.abs.hum,times=dim),min.abs.hum=rep(new.min.abs.hum,times=dim),
-                       #mean.vpd=rep(new.mean.vpd,times=dim),max.vpd=rep(new.max.vpd,times=dim),min.vpd=rep(new.min.vpd,times=dim),
                        mean.wetness=rep(new.mean.wetness,times=dim),mean.daily.rain=rep(new.mean.daily.rain,times=dim),mean.solar=rep(new.mean.solar,times=dim))
   out.data
 }
