@@ -173,7 +173,7 @@ for(day in day.indicies)
   {
     pred.data<-get.pred.data.temp.mean.quantile.n.pustules.model(day,i)
     
-    Xp <- predict(n.pustules.model, newdata = pred.data, exlude='s(site)',type="lpmatrix")
+    Xp <- predict(n.pustules.model, newdata = pred.data, exclude=c("s(site)","s(tag)"),type="lpmatrix")
     beta <- coef(n.pustules.model) ## posterior mean of coefs
     Vb   <- vcov(n.pustules.model) ## posterior  cov of coefs
     n <- 100
@@ -205,7 +205,7 @@ for(temp.addition in temp.additions)
   {
     pred.data<-get.pred.data.temp.mean.quantile.n.pustules.model(75,i,temp.addition = temp.addition)
     
-    Xp <- predict(n.pustules.model, newdata = pred.data, exlude='s(site)',type="lpmatrix")
+    Xp <- predict(n.pustules.model, newdata = pred.data, exclude=c("s(site)","s(tag)"),type="lpmatrix")
     beta <- coef(n.pustules.model) ## posterior mean of coefs
     Vb   <- vcov(n.pustules.model) ## posterior  cov of coefs
     n <- 100

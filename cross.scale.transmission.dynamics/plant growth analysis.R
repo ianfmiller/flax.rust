@@ -151,7 +151,7 @@ for(day in day.indicies)
   {
     pred.data<-get.pred.data.temp.mean.quantile.plant.growth.model(day,dummy.data.height=i)
     pred.data<-cbind(pred.data,inf.intens=0)
-    Xp <- predict(plant.growth.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
+    Xp <- predict(plant.growth.model, newdata = pred.data, exclude=c("s(site)","s(tag)"),type="lpmatrix")
     beta <- coef(plant.growth.model) ## posterior mean of coefs
     Vb   <- vcov(plant.growth.model) ## posterior  cov of coefs
     n <- 10000
@@ -183,7 +183,7 @@ for(temp.addition in temp.additions)
   {
     pred.data<-get.pred.data.temp.mean.quantile.plant.growth.model(75,dummy.data.height=i,temp.addition = temp.addition)
     pred.data<-cbind(pred.data,inf.intens=0)
-    Xp <- predict(plant.growth.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
+    Xp <- predict(plant.growth.model, newdata = pred.data, exclude=c("s(site)","s(tag)"),type="lpmatrix")
     beta <- coef(plant.growth.model) ## posterior mean of coefs
     Vb   <- vcov(plant.growth.model) ## posterior  cov of coefs
     n <- 10000
@@ -235,7 +235,7 @@ predict.plant.height.traj<-function(site,temp.addition,color,pred.window=1,plot=
       Vb   <- vcov(plant.growth.model) ## posterior  cov of coefs
       n <-2
       mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
-      Xp <- predict(plant.growth.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
+      Xp <- predict(plant.growth.model, newdata = pred.data, exclude=c("s(site)","s(tag)"),type="lpmatrix")
       ilink <- family(plant.growth.model)$linkinv
       preds <- rep(NA,n)
       for (l in seq_len(n)) { 

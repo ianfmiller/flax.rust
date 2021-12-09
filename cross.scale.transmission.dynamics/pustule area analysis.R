@@ -179,7 +179,7 @@ for(day in day.indicies)
   {
     pred.data<-get.pred.data.temp.mean.quantile.pustule.model(day,i)
     
-    Xp <- suppressWarnings(predict(pustule.model, newdata = pred.data, exlude='s(site)',type="lpmatrix"))
+    Xp <- suppressWarnings(predict(pustule.model, newdata = pred.data, exclude=c("s(site)","s(tag)"),type="lpmatrix"))
     beta <- coef(pustule.model) ## posterior mean of coefs
     Vb   <- vcov(pustule.model) ## posterior  cov of coefs
     n <- 100
@@ -213,7 +213,7 @@ for(temp.addition in temp.additions)
   for(i in seq(0,1.5,.1))
   {
     pred.data<-get.pred.data.temp.mean.quantile.pustule.model(75,i,temp.addition = temp.addition)
-    Xp <- predict(pustule.model, newdata = pred.data, exlude='s(site)',type="lpmatrix")
+    Xp <- predict(pustule.model, newdata = pred.data, exclude=c("s(site)","s(tag)"),type="lpmatrix")
     beta <- coef(pustule.model) ## posterior mean of coefs
     Vb   <- vcov(pustule.model) ## posterior  cov of coefs
     n <- 100
@@ -260,7 +260,7 @@ predict.pustule.trajectory<-function(site,temp.addition,color,start.date,end.dat
       beta <- coef(pustule.model) ## posterior mean of coefs
       Vb   <- vcov(pustule.model) ## posterior  cov of coefs
       mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
-      Xp <- predict(pustule.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
+      Xp <- predict(pustule.model, newdata = pred.data, exclude=c("s(site)","s(tag)"),type="lpmatrix")
       n <-2
       ilink <- family(pustule.model)$linkinv
       preds <- rep(NA,n)
