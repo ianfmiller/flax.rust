@@ -2,44 +2,53 @@ library(mgcv)
 
 
 # load and prep data
-source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant data prep.R")
+source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/infection intensity data prep.R")
 plant.growth.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS")
-delta.plants<-subset(delta.plants,time<=10)
+delta.infection.intensity<-subset(delta.infection.intensity,time<=10)
 delta.plants.change<-cbind(delta.plants,"change"=ifelse(delta.plants$plant.inf.intens.next>=delta.plants$plant.inf.intens,1,0)) ## add binary variable indicating growth/stasis or shrinkage
 delta.plants.plus<-delta.plants[which(delta.plants.change$change==1),] #subset data to increase
 delta.plants.minus<-delta.plants[which(delta.plants.change$change==0),] #subset data to decrease
+
 # visualize data
+layout(matrix(c(1,2,4,4,3,3,3,3),2,4,byrow = T))
+par(mar=c(5,5,3,0.5))
+## histograms
+hist(delta.infection.intensity$infection.intensity,main="",breaks=100,xlab="infection intensity",cex.lab=2,cex.axis=2,cex.main=2)
+mtext("A",side=3,adj=1,line=-3,cex=2)
+hist((delta.infection.intensity$infection.intensity.next-delta.infection.intensity$infection.intensity)/delta.infection.intensity$time,main="",breaks=100,xlab="change in infection intensity per day",cex.lab=2,cex.axis=2,cex.main=2)
+mtext("B",side=3,adj=1,line=-3,cex=2)
 
 ## plot trajectories
-par(mfrow=c(2,1),new=F,mar=c(5,5,5,5))
 
-plot(c(min(as.Date(plants$Date,tryFormats = "%m/%d/%Y")),max(as.Date(plants$Date,tryFormats = "%m/%d/%Y"))),c(0,max(plants$plant.inf.intens)),type="n",xlab="date",ylab="plant infection intensity",main="plant infection intensity",cex.lab=1.25,cex.axis=1.25,cex.main=1.25)
+plot(c(min(as.Date(infection.intensity$Date,tryFormats = "%m/%d/%Y")),max(as.Date(infection.intensity$Date,tryFormats = "%m/%d/%Y"))),c(0,max(infection.intensity$infection.intensity)),type="n",xlab="date",ylab="infection intensity",main="infection intensity",cex.lab=1.25,cex.axis=1.25,cex.main=1.25)
 i<-0
 plot.cols<-sample(rainbow(101))
 
-for (tag in unique(plants$Tag))
+for (tag in unique(infection.intensity$Tag))
 {
-  sub.plants.1<-plants[which(plants$Tag==tag),]
-  points(sub.plants.1$Date,sub.plants.1$plant.inf.intens,col=plot.cols[i],type="l",lwd=2)
+  sub.infection.intensity.1<-infection.intensity[which(infection.intensity$Tag==tag),]
+  points(sub.infection.intensity.1$Date,sub.infection.intensity.1$infection.intensity,col=plot.cols[i],type="l",lwd=2)
   i<-i+1
 }
 
-plot(c(min(as.Date(plants$Date,tryFormats = "%m/%d/%Y")),max(as.Date(plants$Date,tryFormats = "%m/%d/%Y"))),c(-1,max(log10(plants$plant.inf.intens))),type="n",xlab="date",ylab="log 10 plant infection intensity",main="log 10 plant infection intensity",cex.lab=1.25,cex.axis=1.25,cex.main=1.25)
-i<-0
-plot.cols<-sample(rainbow(101))
+#plot(c(min(as.Date(infection.intensity$Date,tryFormats = "%m/%d/%Y")),max(as.Date(infection.intensity$Date,tryFormats = "%m/%d/%Y"))),c(-1,max(log10(infection.intensity$infection.intensity))),type="n",xlab="date",ylab="log 10 plant infection intensity",main="log 10 plant infection intensity",cex.lab=1.25,cex.axis=1.25,cex.main=1.25)
+#i<-0
+#plot.cols<-sample(rainbow(101))
+#
+#for (tag in unique(infection.intensity$Tag))
+#{
+#  sub.infection.intensity.1<-infection.intensity[which(infection.intensity$Tag==tag),]
+#  points(sub.infection.intensity.1$Date,log10(sub.infection.intensity.1$infection.intensity),col=plot.cols[i],type="l",lwd=2)
+#  i<-i+1
+#}
 
-for (tag in unique(plants$Tag))
-{
-  sub.plants.1<-plants[which(plants$Tag==tag),]
-  points(sub.plants.1$Date,log10(sub.plants.1$plant.inf.intens),col=plot.cols[i],type="l",lwd=2)
-  i<-i+1
-}
+## plot change
+par(mar=c(5,5,3,0.5))
+plot(delta.infection.intensity$infection.intensity,delta.infection.intensity$infection.intensity.next,col="black",xlab = 'infection intensity',ylab='next obs. infection intensity',cex.lab=2,cex.axis=2)
+mtext("C",side=3,adj=1,line=-3.25,cex=2)
+abline(0,1,lty=2)
 
 
-## histograms
-par(mfrow=c(2,1))
-hist(plants$plant.inf.intens,main="plant infection intensity",breaks=100,xlab="plant infection intensity")
-hist(delta.plants$plant.inf.intens.next-delta.plants$plant.inf.intens,main="change in plant infection intensity",breaks=100,xlab="change in plant infection intensity")
 
 ## plot change
 ### Indicates need to constrain outcomes, as the change in plant infection intensity is bounded by current infection intensiy.
