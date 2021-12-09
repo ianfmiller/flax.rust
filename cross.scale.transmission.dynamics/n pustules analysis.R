@@ -1,6 +1,5 @@
 library(mgcv)
-library(lmerTest)
-library(progress)
+
 
 # load data
 

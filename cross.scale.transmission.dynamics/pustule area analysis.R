@@ -1,9 +1,6 @@
 set.seed(34020968)
 library(mgcv)
-library(lme4)
-library(lmerTest)
-library(progress)
-library(MASS)
+
 
 # load data
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/pustule area data prep.R")

@@ -1,8 +1,4 @@
 library(mgcv)
-library(lme4)
-library(lmerTest)
-library(progress)
-library(gratia)
 
 # load data
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant growth data prep.R")

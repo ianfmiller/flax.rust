@@ -1,6 +1,5 @@
 library(mgcv)
-library(progress)
-library(gratia)
+
 
 # load and prep data
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant data prep.R")
