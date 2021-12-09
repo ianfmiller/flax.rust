@@ -33,7 +33,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   n.d.stems<-c()
   max.heights<-c()
   reference.pictures<-c()
-  plant.inf.intens<-c()
+  infection.intensity<-c()
   
   pustules<-read.csv("~/Documents/GitHub/flax.rust/data/pustule measurements.csv") ### load pustule data for date referencing
   
@@ -58,7 +58,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         new.reference.picture<-sub.focal.dis.plants.2[1,"picture"]
         
         ## #calculate plant infection intensity
-        new.plant.inf.intens<-new.n.d.stems*mean(as.numeric(sub.focal.dis.plants.2$length.tissue.infected)*as.numeric(sub.focal.dis.plants.2$N.pustules.middle))
+        new.infection.intensity<-new.n.d.stems*mean(as.numeric(sub.focal.dis.plants.2$length.tissue.infected)*as.numeric(sub.focal.dis.plants.2$N.pustules.middle))
         
         ### store new values
         years<-c(years,new.year)
@@ -69,16 +69,16 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         n.d.stems<-c(n.d.stems,new.n.d.stems)
         max.heights<-c(max.heights,new.max.height)
         reference.pictures<-c(reference.pictures,new.reference.picture)
-        plant.inf.intens<-c(plant.inf.intens,new.plant.inf.intens)
+        infection.intensity<-c(infection.intensity,new.infection.intensity)
         
       }
     }
   }
   
-  infection.intensity<-data.frame("Year"=years,"Site"=sites,"Tag"=tags,"Date"=dates,"N.Stems"=n.stems,"N.D.Stems"=n.d.stems,"max.height"=max.heights,"picture"=reference.pictures,"plant.inf.intens"=plant.inf.intens)
+  infection.intensity<-data.frame("Year"=years,"Site"=sites,"Tag"=tags,"Date"=dates,"N.Stems"=n.stems,"N.D.Stems"=n.d.stems,"max.height"=max.heights,"picture"=reference.pictures,"infection.intensity"=infection.intensity)
   
   ## correct 0 intensities to .1, logic being that this is a measure of tot infection load, and it shouldn't be less than 1 pustule (coded as .1cm infected tissue, 1 pustule/leaf)
-  infection.intensity$plant.inf.intens[which(infection.intensity$plant.inf.intens<.1)]<-.1
+  infection.intensity$infection.intensity[which(infection.intensity$infection.intensity<.1)]<-.1
   
   ## finish cleaning
   infection.intensity$Date<-as.Date(infection.intensity$Date,tryFormats = "%m/%d/%y")
@@ -101,8 +101,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   n.stems<-c()
   n.d.stems<-c()
   max.heights<-c()
-  start.plant.inf.intens<-c()
-  end.plant.inf.intens<-c()
+  start.infection.intensity<-c()
+  end.infection.intensity<-c()
   days<-c()
   mean.temp<-c()
   max.temp<-c()
@@ -183,8 +183,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         new.mean.soil.moisture<-mean(weath.sub$soil.moisture,na.rm=T)
         
         #pull out core predictors
-        new.start.plant.inf.intens<-sub.infection.intensity.1[i,"plant.inf.intens"]
-        new.end.plant.inf.intens<-sub.infection.intensity.1[i+1,"plant.inf.intens"]
+        new.start.infection.intensity<-sub.infection.intensity.1[i,"infection.intensity"]
+        new.end.infection.intensity<-sub.infection.intensity.1[i+1,"infection.intensity"]
         delta.days<-as.numeric(date1-date0)
         
         new.n.stems<-sub.infection.intensity.1[i,"N.Stems"]
@@ -195,8 +195,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         tags<-c(tags,tag)
         sites<-c(sites,site)
         
-        start.plant.inf.intens<-c(start.plant.inf.intens,new.start.plant.inf.intens)
-        end.plant.inf.intens<-c(end.plant.inf.intens,new.end.plant.inf.intens)
+        start.infection.intensity<-c(start.infection.intensity,new.start.infection.intensity)
+        end.infection.intensity<-c(end.infection.intensity,new.end.infection.intensity)
         n.stems<-c(n.stems,new.n.stems)
         n.d.stems<-c(n.d.stems,new.n.d.stems)
         max.heights<-c(max.heights,new.max.height)
@@ -218,7 +218,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
     }
   }
   
-  delta.infection.intensity<-data.frame(tag=factor(tags),site=factor(sites),max.height=max.heights,time=days,N.stems=n.stems,N.D.Stems=n.d.stems,max.height=max.heights,plant.inf.intens=start.plant.inf.intens,plant.inf.intens.next=end.plant.inf.intens,
+  delta.infection.intensity<-data.frame(tag=factor(tags),site=factor(sites),max.height=max.heights,time=days,N.stems=n.stems,N.D.Stems=n.d.stems,max.height=max.heights,infection.intensity=start.infection.intensity,infection.intensity.next=end.infection.intensity,
                            mean.temp=mean.temp,max.temp=max.temp,min.temp=min.temp,
                            mean.abs.hum=mean.abs.hum,max.abs.hum=max.abs.hum,min.abs.hum=min.abs.hum,
                            mean.daily.rain=mean.daily.rain,mean.solar=mean.solar,mean.wetness=mean.wetness,mean.windspeed=mean.windspeed,mean.soil.moisture=mean.soil.moisture)
