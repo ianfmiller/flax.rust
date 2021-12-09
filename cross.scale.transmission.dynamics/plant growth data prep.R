@@ -5,27 +5,27 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
   
   # clean data from healthy focal plants
-  healthyraw <- read.csv("~/Documents/GitHub/flax.rust/data/healthyplants.csv")
-  healthy <- healthyraw[!is.na(healthyraw$max.height),]
-  tags <- unique(healthy$Tag)
+  healthy.focal.plants.raw <- read.csv("~/Documents/GitHub/flax.rust/data/healthyplants.csv")
+  healthy.focal.plants.raw <- healthy.focal.plants.raw[!is.na(healthy.focal.plants.raw$max.height),]
+  tags <- unique(healthy.focal.plants.raw$Tag)
   
-  healthyindiv <- data.frame()
+  healthy.focal.plants <- data.frame()
   for (i in 1:length(tags)) {
     tag <- tags[i]
-    temp <- healthy[healthy$Tag == tag,]
+    temp <- healthy.focal.plants.raw[healthy.focal.plants.raw$Tag == tag,]
     uniquedates <- unique(temp$Date)
     if(length(uniquedates) == 1) next
     for (j in 1:length(uniquedates)) {
       date <- uniquedates[j]
       temp2 <- temp[temp$Date == date,]
       temp2[1,]
-      healthyindiv<- rbind(healthyindiv, temp2[1,])
+      healthy.focal.plants<- rbind(healthy.focal.plants, temp2[1,])
     }
   }
-  healthyindiv$Date <- mdy(healthyindiv$Date)
-  healthyindiv$plant.inf.intens <- 0
+  healthy.focal.plants$Date <- mdy(healthy.focal.plants$Date)
+  healthy.focal.plants$plant.inf.intens <- 0
   
-  ## make data object for diseased healthy 
+  ## make data object for diseased focal plants 
   
   ### load data
   within.host<-read.csv("~/Documents/GitHub/flax.rust/data/Withinhost.csv")
@@ -34,15 +34,15 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   within.host<-within.host[which(within.host$Year==2020),]
   
   ### pull out relevant columns
-  plants<-within.host[,c("Year","Site","Tag","Date","N.Stems","N.D.Stems","max.height","picture","stem.index","stem.height","percent.tissue.infected","length.tissue.infected","N.pustules.middle")]
+  diseased.focal.plants.raw<-within.host[,c("Year","Site","Tag","Date","N.Stems","N.D.Stems","max.height","picture","stem.index","stem.height","percent.tissue.infected","length.tissue.infected","N.pustules.middle")]
   
   ### get rid of data with missing  or NA length.tissue.infected or N.pustules.middle or stem.height
-  if(any(is.na(plants$length.tissue.infected))) {plants<-plants[-which(is.na(plants$length.tissue.infected)),]}
-  if(any(is.na(plants$length.tissue.infected))) {plants<-plants[-which(plants$length.tissue.infected==""),]}
-  if(any(is.na(plants$N.pustules.middle))) {plants<-plants[-which(is.na(plants$N.pustules.middle)),]}
-  if(any(is.na(plants$N.pustules.middle))) {plants<-plants[-which(plants$N.pustules.middle==""),]}
-  if(any(is.na(plants$stem.height))) {plants<-plants[-which(is.na(plants$stem.height)),]}
-  if(any(is.na(plants$stem.height))) {plants<-plants[-which(plants$stem.height==""),]}
+  if(any(is.na(diseased.focal.plants.raw$length.tissue.infected))) {diseased.focal.plants.raw<-diseased.focal.plants.raw[-which(is.na(diseased.focal.plants.raw$length.tissue.infected)),]}
+  if(any(is.na(diseased.focal.plants.raw$length.tissue.infected))) {diseased.focal.plants.raw<-diseased.focal.plants.raw[-which(diseased.focal.plants.raw$length.tissue.infected==""),]}
+  if(any(is.na(diseased.focal.plants.raw$N.pustules.middle))) {diseased.focal.plants.raw<-diseased.focal.plants.raw[-which(is.na(diseased.focal.plants.raw$N.pustules.middle)),]}
+  if(any(is.na(diseased.focal.plants.raw$N.pustules.middle))) {diseased.focal.plants.raw<-diseased.focal.plants.raw[-which(diseased.focal.plants.raw$N.pustules.middle==""),]}
+  if(any(is.na(diseased.focal.plants.raw$stem.height))) {diseased.focal.plants.raw<-diseased.focal.plants.raw[-which(is.na(diseased.focal.plants.raw$stem.height)),]}
+  if(any(is.na(diseased.focal.plants.raw$stem.height))) {diseased.focal.plants.raw<-diseased.focal.plants.raw[-which(diseased.focal.plants.raw$stem.height==""),]}
   
   ## summarize by plant for each date
   years<-c()
@@ -55,28 +55,28 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   reference.pictures<-c()
   plant.inf.intens<-c()
   
-  for (tag in unique(plants$Tag))
+  for (tag in unique(diseased.focal.plants.raw$Tag))
   {
-    sub.plants.1<-plants[which(plants$Tag==tag),]
+    sub.diseased.focal.plants.1<-diseased.focal.plants.raw[which(diseased.focal.plants.raw$Tag==tag),]
     
-    for (date in unique(sub.plants.1$Date))
+    for (date in unique(sub.diseased.focal.plants.1$Date))
     {
-      sub.plants.2<-sub.plants.1[which(sub.plants.1$Date==date),]
+      sub.diseased.focal.plants.2<-sub.diseased.focal.plants.1[which(sub.diseased.focal.plants.1$Date==date),]
       
-      if(any(!is.na(sub.plants.2$N.Stems)) & any(!is.na(sub.plants.2$N.D.Stems)))
+      if(any(!is.na(sub.diseased.focal.plants.2$N.Stems)) & any(!is.na(sub.diseased.focal.plants.2$N.D.Stems)))
       {
         ## new values
-        new.year<-sub.plants.2[1,"Year"]
-        new.site<-sub.plants.2[1,"Site"]
-        new.tag<-sub.plants.2[1,"Tag"]
+        new.year<-sub.diseased.focal.plants.2[1,"Year"]
+        new.site<-sub.diseased.focal.plants.2[1,"Site"]
+        new.tag<-sub.diseased.focal.plants.2[1,"Tag"]
         new.date<-date
-        new.n.stems<-sub.plants.2[1,"N.Stems"]
-        new.n.d.stems<-sub.plants.2[1,"N.D.Stems"]
-        new.max.height<-sub.plants.2[1,"max.height"]
-        new.reference.picture<-sub.plants.2[1,"picture"]
+        new.n.stems<-sub.diseased.focal.plants.2[1,"N.Stems"]
+        new.n.d.stems<-sub.diseased.focal.plants.2[1,"N.D.Stems"]
+        new.max.height<-sub.diseased.focal.plants.2[1,"max.height"]
+        new.reference.picture<-sub.diseased.focal.plants.2[1,"picture"]
         
         ## calculate plant infection intensity
-        new.plant.inf.intens<-new.n.d.stems*mean(as.numeric(sub.plants.2$length.tissue.infected)*as.numeric(sub.plants.2$N.pustules.middle))
+        new.plant.inf.intens<-new.n.d.stems*mean(as.numeric(sub.diseased.focal.plants.2$length.tissue.infected)*as.numeric(sub.diseased.focal.plants.2$N.pustules.middle))
         
         ## store new values
         years<-c(years,new.year)
@@ -93,24 +93,19 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
     }
   }
   
-  plants<-data.frame("Year"=years,"Site"=sites,"Tag"=tags,"Date"=dates,"N.Stems"=n.stems,"N.D.Stems"=n.d.stems,"max.height"=max.heights,"picture"=reference.pictures,"plant.inf.intens"=plant.inf.intens)
+  diseased.focal.plants<-data.frame("Year"=years,"Site"=sites,"Tag"=tags,"Date"=dates,"N.Stems"=n.stems,"N.D.Stems"=n.d.stems,"max.height"=max.heights,"picture"=reference.pictures,"plant.inf.intens"=plant.inf.intens)
   
   ## correct 0 intensities to .1, logic being that this is a measure of tot infection load, and it shouldn't be less than 1 pustule (coded as .1cm infected tissue, 1 pustule/leaf)
-  plants$plant.inf.intens[which(plants$plant.inf.intens<.1)]<-.1
+  diseased.focal.plants$plant.inf.intens[which(diseased.focal.plants$plant.inf.intens<.1)]<-.1
   
   
   ## finish cleaning
-  plants$Date<-as.Date(plants$Date,tryFormats = "%m/%d/%y")
-  
-  ## save data
-  saveRDS(plants,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plants.RDS")
-  
-  plantsraw <- readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plants.RDS")
-  plants <- plantsraw[!is.na(plantsraw$max.height),]
+  diseased.focal.plants$Date<-as.Date(diseased.focal.plants$Date,tryFormats = "%m/%d/%y")
+  diseased.focal.plants <- diseased.focal.plants[!is.na(diseased.focal.plants$max.height),]
   
   ## merge height data from healthy and diseased focal plants
   subs <- c("Year", "Site", "Tag", "Date", "max.height", "plant.inf.intens")
-  plant.heights <- rbind(healthyindiv[subs], plants[subs])
+  plant.heights <- rbind(healthy.focal.plants[subs], diseased.focal.plants[subs])
   colnames(plant.heights) <- c("year", "site", "tag", "date", "max.height", "plant.inf.intens")
   
   ## cut out incomplete records
