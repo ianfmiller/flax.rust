@@ -1,25 +1,95 @@
-if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.plants.RDS")) | !(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plants.RDS")))
+if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.infection.intensity.RDS")) | !(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/infection.intensity.RDS")))
 {
-  # load model and data from pustule area analysis
-  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/pustule area data prep.R")
-  delta.pustules<-subset(delta.pustules,time<=7)
-  pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
-  
-  # load model and data from n pustules analysis
-  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/n pustules data prep.R")
-  delta.n.pustules<-subset(delta.n.pustules,time<=7)
-  n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS")
-  
+
   # prep enviro data
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
   
-  # load plants data
+  # generate infection intensity data
   
-  plants<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plants.RDS")
-
+  ## load raw data
+  within.host<-read.csv("~/Documents/GitHub/flax.rust/data/Withinhost.csv")
+  
+  ## subset to 2020
+  within.host<-within.host[which(within.host$Year==2020),]
+  
+  ## pull out relevant columns
+  focal.dis.plants<-within.host[,c("Year","Site","Tag","Date","N.Stems","N.D.Stems","max.height","picture","stem.index","stem.height","percent.tissue.infected","length.tissue.infected","N.pustules.middle")]
+  
+  ## get rid of data with missing or NA length.tissue.infected or N.pustules.middle or stem.height
+  if(any(is.na(focal.dis.plants$length.tissue.infected))) {focal.dis.plants<-focal.dis.plants[-which(is.na(focal.dis.plants$length.tissue.infected)),]}
+  if(any(is.na(focal.dis.plants$length.tissue.infected))) {focal.dis.plants<-focal.dis.plants[-which(focal.dis.plants$length.tissue.infected==""),]}
+  if(any(is.na(focal.dis.plants$N.pustules.middle))) {focal.dis.plants<-focal.dis.plants[-which(is.na(focal.dis.plants$N.pustules.middle)),]}
+  if(any(is.na(focal.dis.plants$N.pustules.middle))) {focal.dis.plants<-focal.dis.plants[-which(focal.dis.plants$N.pustules.middle==""),]}
+  if(any(is.na(focal.dis.plants$stem.height))) {focal.dis.plants<-focal.dis.plants[-which(is.na(focal.dis.plants$stem.height)),]}
+  if(any(is.na(focal.dis.plants$stem.height))) {focal.dis.plants<-focal.dis.plants[-which(focal.dis.plants$stem.height==""),]}
+  
+  ## summarize by plant for each date
+  
+  years<-c()
+  sites<-c()
+  dates<-c()
+  tags<-c()
+  n.stems<-c()
+  n.d.stems<-c()
+  max.heights<-c()
+  reference.pictures<-c()
+  plant.inf.intens<-c()
+  
+  pustules<-read.csv("~/Documents/GitHub/flax.rust/data/pustule measurements.csv") ### load pustule data for date referencing
+  
+  for (tag in unique(focal.dis.plants$Tag))
+  {
+    sub.focal.dis.plants.1<-focal.dis.plants[which(focal.dis.plants$Tag==tag),]
+    
+    for (date in unique(sub.focal.dis.plants.1$Date))
+    {
+      sub.focal.dis.plants.2<-sub.focal.dis.plants.1[which(sub.focal.dis.plants.1$Date==date),]
+      
+      if(any(!is.na(sub.focal.dis.plants.2$N.Stems)) & any(!is.na(sub.focal.dis.plants.2$N.D.Stems)))
+      {
+        ### new values
+        new.year<-sub.focal.dis.plants.2[1,"Year"]
+        new.site<-sub.focal.dis.plants.2[1,"Site"]
+        new.tag<-sub.focal.dis.plants.2[1,"Tag"]
+        new.date<-date
+        new.n.stems<-sub.focal.dis.plants.2[1,"N.Stems"]
+        new.n.d.stems<-sub.focal.dis.plants.2[1,"N.D.Stems"]
+        new.max.height<-sub.focal.dis.plants.2[1,"max.height"]
+        new.reference.picture<-sub.focal.dis.plants.2[1,"picture"]
+        
+        ## #calculate plant infection intensity
+        new.plant.inf.intens<-new.n.d.stems*mean(as.numeric(sub.focal.dis.plants.2$length.tissue.infected)*as.numeric(sub.focal.dis.plants.2$N.pustules.middle))
+        
+        ### store new values
+        years<-c(years,new.year)
+        sites<-c(sites,new.site)
+        dates<-c(dates,new.date)
+        tags<-c(tags,new.tag)
+        n.stems<-c(n.stems,new.n.stems)
+        n.d.stems<-c(n.d.stems,new.n.d.stems)
+        max.heights<-c(max.heights,new.max.height)
+        reference.pictures<-c(reference.pictures,new.reference.picture)
+        plant.inf.intens<-c(plant.inf.intens,new.plant.inf.intens)
+        
+      }
+    }
+  }
+  
+  infection.intensity<-data.frame("Year"=years,"Site"=sites,"Tag"=tags,"Date"=dates,"N.Stems"=n.stems,"N.D.Stems"=n.d.stems,"max.height"=max.heights,"picture"=reference.pictures,"plant.inf.intens"=plant.inf.intens)
+  
+  ## correct 0 intensities to .1, logic being that this is a measure of tot infection load, and it shouldn't be less than 1 pustule (coded as .1cm infected tissue, 1 pustule/leaf)
+  infection.intensity$plant.inf.intens[which(infection.intensity$plant.inf.intens<.1)]<-.1
+  
+  ## finish cleaning
+  infection.intensity$Date<-as.Date(infection.intensity$Date,tryFormats = "%m/%d/%y")
+  
+  ## save data
+  saveRDS(infection.intensity,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/infection.intensity.RDS")
+  
+  # reformat to delta infection intensity
+  
   ## trim out records w/o temp/rh data
-  plants<-plants[-intersect(which(plants$Site=="HM"),which(as.Date(plants$Date,tryFormats = "%m/%d/%y")>as.Date("2020-07-10"))),]
-  
+  infection.intensity<-infection.intensity[-intersect(which(infection.intensity$Site=="HM"),which(as.Date(infection.intensity$Date,tryFormats = "%m/%d/%y")>as.Date("2020-07-10"))),]
   
   ## make new data object for change
   
@@ -37,49 +107,52 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   mean.temp<-c()
   max.temp<-c()
   min.temp<-c()
-  mean.abs.hum<-c() #absolute humidity
+  mean.abs.hum<-c()
   max.abs.hum<-c()
   min.abs.hum<-c()
-  #mean.vpd<-c() #vapor pressure deficit
-  #max.vpd<-c() 
-  #min.vpd<-c() 
-  tot.rain<-c()
+  mean.daily.rain<-c()
   mean.solar<-c()
+  mean.wetness<-c()
+  mean.windspeed<-c()
+  mean.soil.moisture<-c()
 
-  for (tag in unique(plants$Tag))
+  for (tag in unique(infection.intensity$Tag))
   {
-    sub.plants.1<-plants[which(plants$Tag==tag),]
-    sub.plants.1<-sub.plants.1[order(sub.plants.1$Date),]
-    if(dim(sub.plants.1)[1]>=2)
+    sub.infection.intensity.1<-infection.intensity[which(infection.intensity$Tag==tag),]
+    sub.infection.intensity.1<-sub.infection.intensity.1[order(sub.infection.intensity.1$Date),]
+    site<-sub.infection.intensity.1[1,"Site"]
+    if(dim(sub.infection.intensity.1)[1]>=2)
     {
-      for(i in 1:(dim(sub.plants.1)[1]-1))
+      for(i in 1:(dim(sub.infection.intensity.1)[1]-1))
       {
         ### pull reference data
         #### use pictures to get date times for plant, average
-        date0.pic<-sub.plants.1[i,"picture"]
-        date0<-pustules[which(pustules$picture==date0.pic)[1],"date"]
-        date1.pic<-sub.plants.1[i+1,"picture"]
-        date1<-pustules[which(pustules$picture==date1.pic)[1],"date"]
+        date0.pic<-sub.infection.intensity.1[i,"picture"]
+        date0<-pustules[which(pustules$picture==date0.pic)[1],"date"][1]
+        date0<-as.POSIXct(date0,tryFormats = "%m/%d/%y %H:%M",tz="UTC")
+        date1.pic<-sub.infection.intensity.1[i+1,"picture"]
+        date1<-pustules[which(pustules$picture==date1.pic)[1],"date"][1]
+        date1<-as.POSIXct(date1,tryFormats = "%m/%d/%y %H:%M",tz="UTC")
+        
         #### if unable to line up pic with date time, use mean date time of all measurments at site on given day
         if(is.na(date0))
         {
-          simple.date<-sub.plants.1[i,"Date"]
+          simple.date<-sub.infection.intensity.1[i,"Date"]
           sub.pustules<-pustules[which(pustules$site==site),]
-          sub.pustules<-sub.pustules[which(as.Date(sub.pustules$date)==as.Date(simple.date,tryFormats = "%m/%d/%y")),]
+          sub.pustules<-sub.pustules[which(as.Date(sub.pustules$date,tryFormats = "%m/%d/%y")==as.Date(simple.date,tryFormats = "%m/%d/%y")),]
           alt.date.0.pics<-unique(sub.pustules$picture)
           alt.dates<-pustules[which(pustules$picture %in% alt.date.0.pics),"date"]
-          date0<-mean(unique(alt.dates))
+          date0<-mean(as.POSIXct(alt.dates,tryFormats = "%m/%d/%y %H:%M",tz="UTC"))
         }
         if(is.na(date1))
         {
-          simple.date<-sub.plants.1[i+1,"Date"]
+          simple.date<-sub.infection.intensity.1[i+1,"Date"]
           sub.pustules<-pustules[which(pustules$site==site),]
-          sub.pustules<-sub.pustules[which(as.Date(sub.pustules$date)==as.Date(simple.date,tryFormats = "%m/%d/%y")),]
+          sub.pustules<-sub.pustules[which(as.Date(sub.pustules$date,tryFormats = "%m/%d/%y")==as.Date(simple.date,tryFormats = "%m/%d/%y")),]
           alt.date.1.pics<-unique(sub.pustules$picture)
           alt.dates<-pustules[which(pustules$picture %in% alt.date.1.pics),"date"]
-          date1<-mean(unique(alt.dates))
+          date1<-mean(as.POSIXct(alt.dates,tryFormats = "%m/%d/%y %H:%M",tz="UTC"))
         }
-        site<-sub.plants.1[i,"Site"]
         
         ### subset temp data to relevant window
         temp.rh.sub<-all.temp.rh[which(all.temp.rh$site==site),] #pull out temp data for site
@@ -98,30 +171,25 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
         new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
         
-        abs.hum<-6.112*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh*2.1674/(273.15+T)
-        new.mean.abs.hum<-mean(abs.hum,na.rm=T) #absolute humidity, see https://www.medrxiv.org/content/10.1101/2020.02.12.20022467v1.full.pdf
+        abs.hum<-0.1324732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+T)
+        new.mean.abs.hum<-mean(abs.hum,na.rm=T)
         new.max.abs.hum<-max(abs.hum,na.rm=T)
         new.min.abs.hum<-min(abs.hum,na.rm=T)
         
-        #svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
-        #avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
-        #vpds<-avps-svps
-        
-        #new.mean.vpd<-mean(vpds,na.rm=T)
-        #new.max.vpd<-max(vpds,na.rm=T)
-        #new.min.vpd<-min(vpds,na.rm=T)
-        
-        new.tot.rain<-sum(weath.sub$rain,na.rm=T)
+        new.mean.daily.rain<-sum(weath.sub$rain,na.rm=T)
         new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
+        new.mean.wetness<-mean(weath.sub$wetness,na.rm=T)
+        new.mean.windspeed<-mean(weath.sub$wind.speed,na.rm=T)
+        new.mean.soil.moisture<-mean(weath.sub$soil.moisture,na.rm=T)
         
         #pull out core predictors
-        new.start.plant.inf.intens<-sub.plants.1[i,"plant.inf.intens"]
-        new.end.plant.inf.intens<-sub.plants.1[i+1,"plant.inf.intens"]
+        new.start.plant.inf.intens<-sub.infection.intensity.1[i,"plant.inf.intens"]
+        new.end.plant.inf.intens<-sub.infection.intensity.1[i+1,"plant.inf.intens"]
         delta.days<-as.numeric(date1-date0)
         
-        new.n.stems<-sub.plants.1[i,"N.Stems"]
-        new.n.d.stems<-sub.plants.1[i,"N.D.Stems"]
-        new.max.height<-sub.plants.1[i,"max.height"]
+        new.n.stems<-sub.infection.intensity.1[i,"N.Stems"]
+        new.n.d.stems<-sub.infection.intensity.1[i,"N.D.Stems"]
+        new.max.height<-sub.infection.intensity.1[i,"max.height"]
         
         #store values
         tags<-c(tags,tag)
@@ -140,25 +208,25 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         mean.abs.hum<-c(mean.abs.hum,new.mean.abs.hum)
         max.abs.hum<-c(max.abs.hum,new.max.abs.hum)
         min.abs.hum<-c(min.abs.hum,new.min.abs.hum)
-        #mean.vpd<-c(mean.vpd,new.mean.vpd)
-        #max.vpd<-c(max.vpd,new.max.vpd)
-        #min.vpd<-c(min.vpd,new.min.vpd)
-        tot.rain<-c(tot.rain,new.tot.rain)
+
+        mean.daily.rain<-c(mean.daily.rain,new.mean.daily.rain)
         mean.solar<-c(mean.solar,new.mean.solar)
-              } 
+        mean.wetness<-c(mean.wetness,new.mean.wetness)
+        mean.windspeed<-c(mean.windspeed,new.mean.windspeed)
+        mean.soil.moisture<-c(mean.soil.moisture,new.mean.soil.moisture)
+      } 
     }
   }
   
-  delta.plants<-data.frame(tag=factor(tags),site=factor(sites),max.height=max.heights,time=days,N.stems=n.stems,N.D.Stems=n.d.stems,max.height=max.heights,plant.inf.intens=start.plant.inf.intens,plant.inf.intens.next=end.plant.inf.intens,
+  delta.infection.intensity<-data.frame(tag=factor(tags),site=factor(sites),max.height=max.heights,time=days,N.stems=n.stems,N.D.Stems=n.d.stems,max.height=max.heights,plant.inf.intens=start.plant.inf.intens,plant.inf.intens.next=end.plant.inf.intens,
                            mean.temp=mean.temp,max.temp=max.temp,min.temp=min.temp,
                            mean.abs.hum=mean.abs.hum,max.abs.hum=max.abs.hum,min.abs.hum=min.abs.hum,
-                           #mean.vpd=mean.vpd,max.vpd=max.vpd,min.vpd=min.vpd,
-                           tot.rain=tot.rain,mean.solar=mean.solar)
+                           mean.daily.rain=mean.daily.rain,mean.solar=mean.solar,mean.wetness=mean.wetness,mean.windspeed=mean.windspeed,mean.soil.moisture=mean.soil.moisture)
   
-  saveRDS(delta.plants,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.plants.RDS")
+  saveRDS(delta.infection.intensity,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.infection.intensity.RDS")
 }
 
-plants<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plants.RDS")
-delta.plants<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.plants.RDS")
+infection.intensity<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/infection.intensity.RDS")
+delta.infection.intensity<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.infection.intensity.RDS")
 
 
