@@ -123,7 +123,7 @@ get.pred.data.temp.mean.quantile.n.pustules.model<-function(day.set,dummy.data,t
 
 get.pred.data.temp.mean.quantile.infection.intensity.model<-function(day.set,dummy.data.infection.intensity,dummy.data.height,temp.addition=0)
 {
-  dim<-length(dummy.data.inf.intens)
+  dim<-length(dummy.data.infection.intensity)
   daily.means<-pull.temp.mean.quantile.data()
   temp.rh.sub.func<-function(x,lower.bound,upper.bound) {out<-subset(x,temp.c>=lower.bound); out<-subset(out,temp.c<=upper.bound); out}
   
@@ -166,7 +166,7 @@ get.pred.data.temp.mean.quantile.infection.intensity.model<-function(day.set,dum
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
   
   
-  out.data<-data.frame(infection.intensity=dummy.data.inf.intens,max.height=dummy.data.height,time=rep(delta.days,times=dim),site=rep(site,times=dim),
+  out.data<-data.frame(infection.intensity=dummy.data.infection.intensity,max.height=dummy.data.height,time=rep(delta.days,times=dim),site=rep(site,times=dim),
                        mean.temp=rep(new.mean.temp,times=dim),max.temp=rep(new.max.temp,times=dim),min.temp=rep(new.min.temp,times=dim),
                        mean.abs.hum=rep(new.mean.abs.hum,times=dim),max.abs.hum=rep(new.max.abs.hum,times=dim),min.abs.hum=rep(new.min.abs.hum,times=dim),
                        mean.wetness=rep(new.mean.wetness,times=dim),mean.daily.rain=rep(new.mean.daily.rain,times=dim),mean.solar=rep(new.mean.solar,times=dim))
@@ -265,8 +265,8 @@ get.pred.data<-function(site,date0,date1,dummy.data,dummy.data.max.height=15,tem
   new.mean.soil.moisture<-mean(weath.sub$soil.moisture,na.rm=T)
   
 
-  #area, n.pustules, and plant.inf.intens are all set to dummy data so that this function can be used interchangably for predictions at different scales without specifying the scale.
-  out.data<-data.frame(area=dummy.data,n.pustules=dummy.data,plant.inf.intens=dummy.data,time=rep(delta.days,times=dim),max.height=dummy.data.max.height,site=rep(site,times=dim),
+  #area, n.pustules, and infection.intensity are all set to dummy data so that this function can be used interchangably for predictions at different scales without specifying the scale.
+  out.data<-data.frame(area=dummy.data,n.pustules=dummy.data,infection.intensity=dummy.data,time=rep(delta.days,times=dim),max.height=dummy.data.max.height,site=rep(site,times=dim),
                        mean.temp=rep(new.mean.temp,times=dim),max.temp=rep(new.max.temp,times=dim),min.temp=rep(new.min.temp,times=dim),
                        mean.abs.hum=rep(new.mean.abs.hum,times=dim),max.abs.hum=rep(new.max.abs.hum,times=dim),min.abs.hum=rep(new.min.abs.hum,times=dim),
                        mean.wetness=rep(new.mean.wetness,times=dim),mean.daily.rain=rep(new.mean.daily.rain,times=dim),mean.solar=rep(new.mean.solar,times=dim),mean.soil.moisture=rep(new.mean.soil.moisture,times=dim))
