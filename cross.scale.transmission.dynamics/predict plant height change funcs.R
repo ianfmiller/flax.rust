@@ -163,5 +163,17 @@ predict.plant.growth.last<-function(height.next,inf.intens.last,site,date0,date1
   plant.height.last
 }
 
+predict.plant.growth.and.infection.intensity.last<-function(height.next,inf.intens.next,site,date0,date1)
+{
+  pred.func.2<-function(z)
+  {
+    pred.height.last<-predict.plant.growth.last(height.next,z,site,date0,date1,exclude.site=T)
+    pred.inf.intens.last<-predict.inf.intens.last(inf.intens.next,pred.height.last,site,date0,date1)
+    abs(z-pred.inf.intens.last)
+  }
+  
+  optim(c(height.next),pred.func.2,method = "Brent",lower=0,upper=10e6)$par
+}
+
 
 
