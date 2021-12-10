@@ -42,7 +42,7 @@ predict.inf.intens<-function(inf.intens.last,max.height.last,site,date0,date1)
   
   # make forward prediction
   pred.data<-data.frame("infection.intensity"=inf.intens.last,"max.height"=max.height.last,
-                        "time"=delta.days,"site"=site,
+                        "time"=delta.days,"site"=site,"tag"="NA",
                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                         "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
                         "mean.wetness"=new.mean.wetness,"mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.soil.moisture"=new.mean.soil.moisture)
@@ -88,7 +88,7 @@ predict.inf.intens.boot<-function(inf.intens.last,max.height.last,site,date0,dat
   
   # make forward prediction
   pred.data<-data.frame("infection.intensity"=inf.intens.last,"max.height"=max.height.last,
-                        "time"=delta.days,"site"=site,
+                        "time"=delta.days,"site"=site,"tag"="NA",
                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                         "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
                         "mean.wetness"=new.mean.wetness,"mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.soil.moisture"=new.mean.soil.moisture)
@@ -148,7 +148,7 @@ predict.inf.intens.last<-function(inf.intens.next,max.height.last,site,date0,dat
   {
     inf.intens.last.test<-x
     pred.data<-data.frame("infection.intensity"=inf.intens.last.test,"max.height"=max.height.last,
-                          "time"=delta.days,"site"=site,
+                          "time"=delta.days,"site"=site,"tag"="NA",
                           "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                           "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
                           "mean.wetness"=new.mean.wetness,"mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.soil.moisture"=new.mean.soil.moisture)
