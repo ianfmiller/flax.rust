@@ -1,16 +1,13 @@
 # load data and model
-library(MASS)
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
-plants.change.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.change.model.RDS")
-plants.growth.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.growth.model.RDS")
-plants.shrinkage.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plants.shrinkage.model.RDS")
+infection.intensity.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/infection.intensity.model.RDS")
 
 
 # function for subsetting temp/rh
 temp.rh.sub.func<-function(x,lower.bound,upper.bound) {out<-subset(x,temp.c>=lower.bound); out<-subset(out,temp.c<=upper.bound); out}
 
 #function for predicting plant inf intens change
-predict.plant.inf.intens<-function(plant.inf.intens.last,max.height.last,site,date0,date1)
+predict.inf.intens<-function(inf.intens.last,max.height.last,site,date0,date1)
 {
   # load weather data
   ## subst temp rh data to relevant window
@@ -31,40 +28,31 @@ predict.plant.inf.intens<-function(plant.inf.intens.last,max.height.last,site,da
   new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
   new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
   
-  abs.hum<-6.112*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh*2.1674/(273.15+T)
-  new.mean.abs.hum<-mean(abs.hum,na.rm=T) #absolute humidity, see https://www.medrxiv.org/content/10.1101/2020.02.12.20022467v1.full.pdf
+  abs.hum<-0.1324732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+T)
+  new.mean.abs.hum<-mean(abs.hum,na.rm=T)
   new.max.abs.hum<-max(abs.hum,na.rm=T)
   new.min.abs.hum<-min(abs.hum,na.rm=T)
   
-  #svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
-  #avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
-  #vpds<-avps-svps
-  
-  #new.mean.vpd<-mean(vpds,na.rm=T)
-  #new.max.vpd<-max(vpds,na.rm=T)
-  #new.min.vpd<-min(vpds,na.rm=T)
-  
-  new.tot.rain<-sum(weath.sub$rain,na.rm=T)
+  new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
+  new.mean.daily.rain<-sum(weath.sub$rain,na.rm=T)
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
+  new.mean.soil.moisture<-mean(weath.sub$soil.moisture,na.rm=T)
   
   delta.days<-as.numeric(date1-date0)
   
   # make forward prediction
-  pred.data<-data.frame("plant.inf.intens"=plant.inf.intens.last,"max.height"=max.height.last,
+  pred.data<-data.frame("infection.intensity"=inf.intens.last,"max.height"=max.height.last,
                         "time"=delta.days,"site"=site,
                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                         "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                        "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain)
+                        "mean.wetness"=new.mean.wetness,"mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.soil.moisture"=new.mean.soil.moisture)
   
-  odds<-predict(plants.change.model,newdata = pred.data,type="response")
-  
-  if(odds >= .5) {plant.inf.intens.next<-10^predict(plants.growth.model,newdata=pred.data,exclude = 's(site)')}
-  else {plant.inf.intens.next<-10^predict(plants.shrinkage.model,newdata=pred.data,exclude = 's(site)')}
-  if(plant.inf.intens.next<.01) {plant.inf.intens.next<-.01}
-  plant.inf.intens.next
+  inf.intens.next<-inf.intens.last+delta.days*predict(infection.intensity.model,newdata = pred.data,type="response",exclude = c('s(site)','s(tag)'))
+  if(inf.intens.next<.1) {inf.intens.next<-0}
+  inf.intens.next
 }
 
-predict.plant.inf.intens.boot<-function(plant.inf.intens.last,max.height.last,site,date0,date1,temp.addition=0)
+predict.inf.intens.boot<-function(inf.intens.last,max.height.last,site,date0,date1,temp.addition=0)
 {
   # load weather data
   ## subst temp rh data to relevant window
@@ -86,68 +74,42 @@ predict.plant.inf.intens.boot<-function(plant.inf.intens.last,max.height.last,si
   new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
   new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
   
-  abs.hum<-6.112*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh*2.1674/(273.15+T)
-  new.mean.abs.hum<-mean(abs.hum,na.rm=T) #absolute humidity, see https://www.medrxiv.org/content/10.1101/2020.02.12.20022467v1.full.pdf
+  abs.hum<-0.1324732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+T)
+  new.mean.abs.hum<-mean(abs.hum,na.rm=T)
   new.max.abs.hum<-max(abs.hum,na.rm=T)
   new.min.abs.hum<-min(abs.hum,na.rm=T)
   
-  #svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
-  #avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
-  #vpds<-avps-svps
-  
-  #new.mean.vpd<-mean(vpds,na.rm=T)
-  #new.max.vpd<-max(vpds,na.rm=T)
-  #new.min.vpd<-min(vpds,na.rm=T)
-  
-  new.tot.rain<-sum(weath.sub$rain,na.rm=T)
+  new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
+  new.mean.daily.rain<-sum(weath.sub$rain,na.rm=T)
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
+  new.mean.soil.moisture<-mean(weath.sub$soil.moisture,na.rm=T)
   
   delta.days<-as.numeric(date1-date0)
   
   # make forward prediction
-  pred.data<-data.frame("plant.inf.intens"=plant.inf.intens.last,"max.height"=max.height.last,
+  pred.data<-data.frame("infection.intensity"=inf.intens.last,"max.height"=max.height.last,
                         "time"=delta.days,"site"=site,
                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                         "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                        "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain)
+                        "mean.wetness"=new.mean.wetness,"mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.soil.moisture"=new.mean.soil.moisture)
   
-  odds<-predict(plants.change.model,newdata = pred.data,type="response")
-  
-  draw<-runif(1)
-  if(draw<=odds)
-  {
-    Xp.growth <- predict(plants.growth.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
-    beta.growth <- coef(plants.growth.model) ## posterior mean of coefs
-    Vb.growth  <- vcov(plants.growth.model) ## posterior  cov of coefs
-    n <-2
-    mrand.growth <- mvrnorm(n, beta.growth, Vb.growth) ## simulate n rep coef vectors from posterior
-    ilink <- family(plants.growth.model)$linkinv
-    preds <- rep(NA,n)
-    for (l in seq_len(n)) { 
-      preds[l]   <- ilink(Xp.growth %*% mrand.growth[l, ])
-    }
-    plant.inf.intens.next<-10^preds[1]
-  } else
-  {
-    Xp.shrink <- predict(plants.shrinkage.model, newdata = pred.data, exlude="s(site)",type="lpmatrix")
-    beta.shrink <- coef(plants.shrinkage.model) ## posterior mean of coefs
-    Vb.shrink  <- vcov(plants.shrinkage.model) ## posterior  cov of coefs
-    n <-2
-    mrand.shrink <- mvrnorm(n, beta.shrink, Vb.shrink) ## simulate n rep coef vectors from posterior
-    ilink <- family(plants.shrinkage.model)$linkinv
-    preds <- rep(NA,n)
-    for (l in seq_len(n)) { 
-      preds[l]   <- ilink(Xp.shrink %*% mrand.shrink[l, ])
-    }
-    plant.inf.intens.next<-10^preds[1]
+  Xp <- predict(infection.intensity.model, newdata = pred.data, exclude=c("s(site)","s(tag)"),type="lpmatrix")
+  beta <- coef(infection.intensity.model) ## posterior mean of coefs
+  Vb   <- vcov(infection.intensity.model) ## posterior  cov of coefs
+  n <- 2
+  mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
+  preds <- rep(NA, n)
+  ilink <- family(infection.intensity.model)$linkinv
+  for (j in seq_len(n)) { 
+    preds[j]   <- ilink(Xp %*% mrand[j, ])
   }
-  
-  if(plant.inf.intens.next<.01) {plant.inf.intens.next<-.01}
-  plant.inf.intens.next
+  inf.intens.next<-inf.intens.last+delta.days*preds[1]
+  if(inf.intens.next<.1) {inf.intens.next<-0}
+  inf.intens.next
 }
 
 #function for predicting plant inf intens change
-predict.plant.inf.intens.last<-function(plant.inf.intens.next,max.height.last,site,date0,date1)
+predict.inf.intens.last<-function(inf.intens.next,max.height.last,site,date0,date1)
 {
   # load weather data
   ## subst temp rh data to relevant window
@@ -168,42 +130,34 @@ predict.plant.inf.intens.last<-function(plant.inf.intens.next,max.height.last,si
   new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
   new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
   
-  abs.hum<-6.112*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh*2.1674/(273.15+T)
-  new.mean.abs.hum<-mean(abs.hum,na.rm=T) #absolute humidity, see https://www.medrxiv.org/content/10.1101/2020.02.12.20022467v1.full.pdf
+  abs.hum<-0.1324732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+T)
+  new.mean.abs.hum<-mean(abs.hum,na.rm=T)
   new.max.abs.hum<-max(abs.hum,na.rm=T)
   new.min.abs.hum<-min(abs.hum,na.rm=T)
   
-  #svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
-  #avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
-  #vpds<-avps-svps
-  
-  #new.mean.vpd<-mean(vpds,na.rm=T)
-  #new.max.vpd<-max(vpds,na.rm=T)
-  #new.min.vpd<-min(vpds,na.rm=T)
-  
-  new.tot.rain<-sum(weath.sub$rain,na.rm=T)
+  new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
+  new.mean.daily.rain<-sum(weath.sub$rain,na.rm=T)
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
+  new.mean.soil.moisture<-mean(weath.sub$soil.moisture,na.rm=T)
   
   delta.days<-as.numeric(date1-date0)
   
-  
+
   # make backwards prediction
   pred.func<-function(x)
   {
-    plant.inf.intens.last.test<-x
-    pred.data<-data.frame("plant.inf.intens"=plant.inf.intens.last.test,"max.height"=max.height.last,
+    inf.intens.last.test<-x
+    pred.data<-data.frame("infection.intensity"=inf.intens.last.test,"max.height"=max.height.last,
                           "time"=delta.days,"site"=site,
                           "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                           "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                          "mean.solar"=new.mean.solar,"tot.rain"=new.tot.rain)
-    odds<-predict(plants.change.model,newdata = pred.data,type="response")
-    if(odds >= .5) {plant.inf.intens.next.pred<-10^predict(plants.growth.model,newdata=pred.data,exclude = 's(site)')}
-    else {plant.inf.intens.next.pred<-10^predict(plants.shrinkage.model,newdata=pred.data,exclude = 's(site)')}
-    abs(plant.inf.intens.next.pred-plant.inf.intens.next)
+                          "mean.wetness"=new.mean.wetness,"mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.soil.moisture"=new.mean.soil.moisture)
+    inf.intens.next.pred<-inf.intens.last.test+delta.days*predict(infection.intensity.model,newdata=pred.data,exclude = c('s(site)','s(tag)'))
+    abs(inf.intens.next.pred-inf.intens.next)
   }
-  plant.inf.intens.last<-optim(c(plant.inf.intens.next),pred.func,method = "Brent",lower=0,upper=10e6)$par
-  if(plant.inf.intens.last<0.1) {plant.inf.intens.last<-.1}
-  plant.inf.intens.last
+  inf.intens.last<-optim(c(inf.intens.next),pred.func,method = "Brent",lower=0,upper=10e6)$par
+  if(plant.inf.intens.last<0.1) {inf.intens.last<-.1}
+  inf.intens.last
 }
 
 
