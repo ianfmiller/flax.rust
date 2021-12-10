@@ -67,9 +67,9 @@ for (site in sites)
           ###### if plant height was recorded in healthy plants
           if(length(healthy.focal.index)>0)
           {
-            if(!is.na(diseased.focal.index$max.height[healthy.focal.index]))
+            if(!is.na(healthy.focal.plants$max.height[healthy.focal.index]))
             {
-              corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=tag,"X"=sub.loc.data[i,"X"],"Y"=sub.loc.data[i,"Y"],"x"=sub.loc.data[i,"x"],"y"=sub.loc.data[i,"y"],"Date"=date,"height.cm"=diseased.focal.index[healthy.focal.index,"max.height"],"height.type"="observed"))
+              corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=tag,"X"=sub.loc.data[i,"X"],"Y"=sub.loc.data[i,"Y"],"x"=sub.loc.data[i,"x"],"y"=sub.loc.data[i,"y"],"Date"=date,"height.cm"=healthy.focal.plants[healthy.focal.index,"max.height"],"height.type"="observed"))
             }
           }
           ###### if plant height was recorded in within host
@@ -132,7 +132,7 @@ for (site in sites)
             obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="corrected.epi","height"=height,"height.type"="obs","infection.intensity"=inf.intens,"infection.intensity.type"="mean.start"))
           }
           
-          if(length(sub.loc.data[which(sub.loc.data$tag==tag),"Date"])>0 & length(sub.epi.data[which(sub.epi.data$Tag==tag),"Date.First.Observed.Diseased"])==0)
+          if(length(sub.loc.data[which(sub.loc.data$tag==tag),"Date"])>0)
           {
             record.dates<-as.Date(sub.loc.data[which(sub.loc.data$tag==tag),"Date"],tryFormats = "%m/%d/%Y")
             min.date<-record.dates[which.min(abs(difftime(record.dates,date)))]
@@ -143,6 +143,7 @@ for (site in sites)
           
           ###### pinpoint observation to use for forecast/hindcast, with preference for forecast
           if(length(which(is.na(obs.dates$height)))>0) {obs.dates<-obs.dates[-which(is.na(obs.dates$height)),]}
+          if(site=="HM" & any(obs.dates$Date>max(sub.data.dates))) {obs.dates<-obs.dates[-which(obs.dates$Date>max(sub.data.dates)),]}
           obs.dates.index<-which(abs(obs.dates$diff)==min(abs(obs.dates$diff)))
           if(length(obs.dates.index)>1) {obs.dates.index<-obs.dates.index[which.min(obs.dates$diff[obs.dates.index])]} ######## preference for forecast is set here--note absence of abs() and use of min()
           
@@ -211,7 +212,7 @@ for (site in sites)
             obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="corrected.epi","height"=height,"height.type"="obs","infection.intensity"=inf.intens,"infection.intensity.type"="mean.start"))
           }
           
-          if(length(sub.loc.data[which(loc.ID.strings==ID.string),"Date"])>0 & length(sub.epi.data[which(epi.ID.strings==ID.string),"Date.First.Observed.Diseased"])==0)
+          if(length(sub.loc.data[which(loc.ID.strings==ID.string),"Date"])>0)
           {
             record.dates<-as.Date(sub.loc.data[which(loc.ID.strings==ID.string),"Date"],tryFormats = "%m/%d/%Y")
             min.date<-record.dates[which.min(abs(difftime(record.dates,date)))]
@@ -224,6 +225,7 @@ for (site in sites)
           if(any(!is.na(obs.dates$height)))
           {
             if(length(which(is.na(obs.dates$height)))>0) {obs.dates<-obs.dates[-which(is.na(obs.dates$height)),]}
+            if(site=="HM" & any(obs.dates$Date>max(sub.data.dates))) {obs.dates<-obs.dates[-which(obs.dates$Date>max(sub.data.dates)),]}
             obs.dates.index<-which(abs(obs.dates$diff)==min(abs(obs.dates$diff)))
             if(length(obs.dates.index)>1) {obs.dates.index<-obs.dates.index[which.min(obs.dates$diff[obs.dates.index])]}
             ###### forecast
