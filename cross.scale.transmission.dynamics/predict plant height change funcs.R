@@ -6,8 +6,7 @@ plant.growth.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmissi
 # function for subsetting temp/rh
 temp.rh.sub.func<-function(x,lower.bound,upper.bound) {out<-subset(x,temp.c>=lower.bound); out<-subset(out,temp.c<=upper.bound); out}
 
-#function for predicting plant height change
-predict.plant.growth<-function(height.last,site,date0,date1,exclude.site=T)
+predict.plant.growth<-function(height.last,inf.intens.last,site,date0,date1,exclude.site=T)
 {
   suppressWarnings(if(class(date0)=="Date") {date0<-as.POSIXct(paste0(date0," 12:00:00"),tz="UTC")})
   suppressWarnings(if(class(date1)=="Date") {date1<-as.POSIXct(paste0(date1," 12:00:00"),tz="UTC")})
@@ -43,18 +42,18 @@ predict.plant.growth<-function(height.last,site,date0,date1,exclude.site=T)
   delta.days<-as.numeric(date1-date0)
   
   # make forward prediction
-  pred.data<-data.frame("time"=delta.days,"height"=height.last,
+  pred.data<-data.frame("time"=delta.days,"height"=height.last,"inf.intens"=inf.intens.last,
                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                         "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
                         "mean.wetness"=new.mean.wetness,"mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.soil.moisture"=new.mean.soil.moisture,
                         "site"=site)
   
-  if(exclude.site) {height.next<-height.last+predict(plant.growth.model,newdata=pred.data,exclude = 's(site)')} else {height.next<-height.last+predict(plant.growth.model,newdata=pred.data)}
+  if(exclude.site) {height.next<-height.last+(date1-date0)*predict(plant.growth.model,newdata=pred.data,exclude = c('s(site)','s(tag)'))} else {height.next<-height.last+predict(plant.growth.model,newdata=pred.data,exclude='s(tag)')}
   if(height.next<1) {height.next<-1}
   height.next
 }
 
-predict.plant.growth.boot<-function(height.last,site,date0,date1)
+predict.plant.growth.boot<-function(height.last,inf.intens.last,site,date0,date1)
 {
   if(class(date0)=="Date") {date0<-as.POSIXct(paste0(date0," 12:00:00"),tz="UTC")}
   if(class(date1)=="Date") {date1<-as.POSIXct(paste0(date1," 12:00:00"),tz="UTC")}
@@ -91,12 +90,12 @@ predict.plant.growth.boot<-function(height.last,site,date0,date1)
   delta.days<-as.numeric(date1-date0)
   
   # make forward prediction
-  pred.data<-data.frame("time"=delta.days,"height"=height.last,
+  pred.data<-data.frame("time"=delta.days,"height"=height.last,"inf.intens"=inf.intens.last,
                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                         "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                        "mean.solar"=new.mean.solar,"mean.daily.rain"=new.mean.daily.rain,
+                        "mean.wetness"=new.mean.wetness,"mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.soil.moisture"=new.mean.soil.moisture,
                         "site"=site)
-  Xp <- predict(plant.growth.model, newdata = pred.data, exlude='s(site)',type="lpmatrix")
+  Xp <- predict(plant.growth.model, newdata = pred.data, exlude=c('s(site)','s(tag)'),type="lpmatrix")
   beta <- coef(plant.growth.model) ## posterior mean of coefs
   Vb   <- vcov(plant.growth.model) ## posterior  cov of coefs
   n <- 2
@@ -106,13 +105,12 @@ predict.plant.growth.boot<-function(height.last,site,date0,date1)
   for (j in seq_len(n)) { 
     preds[j]   <- ilink(Xp %*% mrand[j, ])
   }
-  height.next<-height.last+preds[1]
+  height.next<-height.last+(date1-date0)*preds[1]
   if(height.next<1) {height.next<-1}
   height.next
 }
 
-#function for predicting plant height change
-predict.plant.growth.last<-function(height.next,site,date0,date1,exclude.site=T)
+predict.plant.growth.last<-function(height.next,inf.intens.last,site,date0,date1,exclude.site=T)
 {
   if(class(date0)=="Date") {date0<-as.POSIXct(paste0(date0," 12:00:00"),tz="UTC")}
   if(class(date1)=="Date") {date1<-as.POSIXct(paste0(date1," 12:00:00"),tz="UTC")}
@@ -152,19 +150,18 @@ predict.plant.growth.last<-function(height.next,site,date0,date1,exclude.site=T)
   pred.func<-function(x)
   {
     plant.height.last.test<-x
-    pred.data<-data.frame("time"=delta.days,"height"=plant.height.last.test,
+    pred.data<-data.frame("time"=delta.days,"height"=plant.height.last.test,"inf.intens"=inf.intens.last, ## assume infection intensity did not change--for simplicity, and because tyring to simultaneously back-cast 
                            "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                            "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                           "mean.solar"=new.mean.solar,"mean.daily.rain"=new.mean.daily.rain,
-                           "site"=site)
-    if(exclude.site) {plant.height.next.pred<-plant.height.last.test+predict(plant.growth.model,newdata=pred.data,exclude = 's(site)')} else {plant.height.next.pred<-plant.height.last.test+predict(plant.growth.model,newdata=pred.data)}
+                          "mean.wetness"=new.mean.wetness,"mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.soil.moisture"=new.mean.soil.moisture,
+                          "site"=site)
+    if(exclude.site) {plant.height.next.pred<-plant.height.last.test+(date1-date0)*predict(plant.growth.model,newdata=pred.data,exclude = 's(site)')} else {plant.height.next.pred<-plant.height.last.test+(date1-date0)*predict(plant.growth.model,newdata=pred.data,exclude='s(tag)')}
     abs(plant.height.next.pred-height.next)
   }
   plant.height.last<-optim(c(height.next),pred.func,method = "Brent",lower=0,upper=10e6)$par
   if(plant.height.last<1) {plant.height.last<-1}
   plant.height.last
 }
-
 
 
 
