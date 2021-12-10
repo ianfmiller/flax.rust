@@ -70,7 +70,7 @@ for (site in sites)
             if(!is.na(healthy.focal.plants$max.height[healthy.focal.index]))
             {
               corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=tag,"X"=sub.loc.data[i,"X"],"Y"=sub.loc.data[i,"Y"],"x"=sub.loc.data[i,"x"],"y"=sub.loc.data[i,"y"],"Date"=date,"height.cm"=healthy.focal.plants[healthy.focal.index,"max.height"],"height.type"="observed"))
-            }
+            } else{healthy.focal.index<-numeric(0)}
           }
           ###### if plant height was recorded in within host
           if(length(diseased.focal.index)>0)
@@ -78,7 +78,7 @@ for (site in sites)
             if(!is.na(diseased.focal.plants$max.height[diseased.focal.index]))
             {
               corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=tag,"X"=sub.loc.data[i,"X"],"Y"=sub.loc.data[i,"Y"],"x"=sub.loc.data[i,"x"],"y"=sub.loc.data[i,"y"],"Date"=date,"height.cm"=diseased.focal.plants[diseased.focal.index,"max.height"],"height.type"="observed"))
-            }
+            } else{diseased.focal.index<-numeric(0)}
           }
           
           ###### if plant height was recorded in epi data
@@ -87,7 +87,7 @@ for (site in sites)
             if(!is.na(sub.epi.data$max.height[sub.epi.index]))
             {
               corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=tag,"X"=sub.loc.data[i,"X"],"Y"=sub.loc.data[i,"Y"],"x"=sub.loc.data[i,"x"],"y"=sub.loc.data[i,"y"],"Date"=date,"height.cm"=sub.epi.data[sub.epi.index,"max.height"],"height.type"="observed"))
-            }
+            } else{sub.epi.index<-numeric(0)}
           }
           ###### if plant height was recorded in location data (includes demog data)
           if(length(sub.loc.index)>0)
@@ -95,7 +95,7 @@ for (site in sites)
             if(!is.na(sub.loc.data$height.cm[sub.loc.index]))
             {
               corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=tag,"X"=sub.loc.data[i,"X"],"Y"=sub.loc.data[i,"Y"],"x"=sub.loc.data[i,"x"],"y"=sub.loc.data[i,"y"],"Date"=date,"height.cm"=sub.loc.data[sub.loc.index,"height.cm"],"height.type"="observed"))
-            }
+            } else{sub.loc.index<-numeric(0)}
           }
         }
         ##### if plant height was not recorded
@@ -186,7 +186,7 @@ for (site in sites)
             if(!is.na(sub.epi.data$max.height[sub.epi.index]))
             {
               corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=NA,"X"=sub.epi.data[sub.epi.index,"X"],"Y"=sub.epi.data[sub.epi.index,"Y"],"x"=sub.epi.data[sub.epi.index,"x"],"y"=sub.epi.data[sub.epi.index,"y"],"Date"=date,"height.cm"=sub.epi.data[sub.epi.index,"max.height"],"height.type"="observed"))
-            }
+            } else {sub.epi.index<-numeric(0)}
           }
           ###### if plant height was recorded in location data (includes demog data)
           if(length(sub.loc.index)>0) 
@@ -194,7 +194,7 @@ for (site in sites)
             if(!is.na(sub.loc.data$height.cm[sub.loc.index]))
             {
               corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=NA,"X"=sub.loc.data[sub.loc.index,"X"],"Y"=sub.loc.data[sub.loc.index,"Y"],"x"=sub.loc.data[sub.loc.index,"x"],"y"=sub.loc.data[sub.loc.index,"y"],"Date"=date,"height.cm"=sub.loc.data[sub.loc.index,"height.cm"],"height.type"="observed"))
-            }
+            } else {sub.loc.index<-numeric(0)}
           }
         }
         ##### if plant height was not recorded
