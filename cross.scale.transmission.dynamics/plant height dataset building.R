@@ -141,14 +141,6 @@ for (site in sites)
             obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="corrected.locs","height"=height,"height.type"="obs","infection.intensity"=inf.intens,"infection.intensity.type"="infered.zero"))
           }
           
-          if(length(corrected.plant.heights[which(corrected.plant.heights$tag==tag),"Date"])>0)
-          {
-            record.dates<-as.Date(corrected.plant.heights[which(corrected.plant.heights$tag==tag),"Date"])
-            min.date<-record.dates[which.min(abs(difftime(record.dates,date)))]
-            height<-as.numeric(corrected.plant.heights[intersect(which(as.Date(corrected.plant.heights[,"Date"],)==min.date),which(corrected.plant.heights$tag==tag)),"height.cm"])
-            obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="corrected.plant.heights","height"=height,"type"="obs"))
-          }
-          
           ###### pinpoint observation to use for forecast/hindcast, with preference for forecast
           if(length(which(is.na(obs.dates$height)))>0) {obs.dates<-obs.dates[-which(is.na(obs.dates$height)),]}
           obs.dates.index<-which(abs(obs.dates$diff)==min(abs(obs.dates$diff)))
@@ -226,20 +218,6 @@ for (site in sites)
             height<-sub.loc.data[intersect(which(as.Date(sub.loc.data[,"Date"],tryFormats = "%m/%d/%Y")==min.date),which(loc.ID.strings==ID.string)),"height.cm"]
             inf.intens<-0
             obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="corrected.locs","height"=height,"height.type"="obs","infection.intensity"=inf.intens,"infection.intensity.type"="infered.zero"))
-          }
-          
-          corrected.plant.heights.ID.strings<-c()
-          for(j in 1:nrow(corrected.plant.heights)) 
-          {
-            corrected.plant.heights.ID.strings<-c(corrected.plant.heights.ID.strings,paste0("Tag"=NA,"X=",corrected.plant.heights[j,"X"],"Y=",corrected.plant.heights[j,"Y"],"x=",corrected.plant.heights[j,"x"],"y=",corrected.plant.heights[j,"y"]))
-          }
-          
-          if(length(corrected.plant.heights[which(corrected.plant.heights.ID.strings==ID.string),"Date"])>0)
-          {
-            record.dates<-as.Date(corrected.plant.heights[which(corrected.plant.heights.ID.strings==ID.string),"Date"])
-            min.date<-record.dates[which.min(abs(difftime(record.dates,date)))]
-            height<-as.numeric(corrected.plant.heights[intersect(which(as.Date(corrected.plant.heights[,"Date"],)==min.date),which(corrected.plant.heights.ID.strings==ID.string)),"height.cm"])
-            obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="corrected.plant.heights","height"=height,"type"="forecast/hindcast"))
           }
           
           ###### pinpoint observation to use for forecast/hindcast, with preference for forecast
