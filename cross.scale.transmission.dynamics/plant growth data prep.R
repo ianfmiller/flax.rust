@@ -101,7 +101,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   diseased.focal.plants<-data.frame("Year"=years,"Site"=sites,"Tag"=tags,"Date"=dates,"N.Stems"=n.stems,"N.D.Stems"=n.d.stems,"max.height"=max.heights,"picture"=reference.pictures,"inf.intens"=inf.intens)
   
   ## correct 0 intensities to .1, logic being that this is a measure of tot infection load, and it shouldn't be less than 1 pustule (coded as .1cm infected tissue, 1 pustule/leaf)
-  diseased.focal.plants$infection.intensity[which(diseased.focal.plants$infection.intensity<.1)]<-.1
+  diseased.focal.plants$inf.intens[which(diseased.focal.plants$inf.intens<.1)]<-.1
   
   ## correct date structure
   diseased.focal.plants$Date<-as.Date(diseased.focal.plants$Date,tryFormats = "%m/%d/%y")
