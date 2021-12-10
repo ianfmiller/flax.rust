@@ -31,7 +31,7 @@ x<-model.data$mids
 mod<-nls(y~c*exp(-c*x),start=list(c=.5))
 lambda<-summary(mod)$coefficients[1]
 
-mean.starting.plant.inf.intens<-mean(data.vec)
+mean.starting.inf.intens<-mean(data.vec)
 
 starting.inf.intens.mod<-function(x) {log(1-x)/-2.103}
 
