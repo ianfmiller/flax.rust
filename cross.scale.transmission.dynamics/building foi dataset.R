@@ -7,8 +7,9 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/spore deposition functions tilt.R")
   pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
   n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS")
-  plant.inf.intens<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plants.RDS")
+  diseased.focal.plants<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/diseased.focal.plants.RDS")
   corrected.heights<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/corrected.plant.heights.RDS")
+  corrected.epi<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/corrected.epi.RDS")
   # Time periods for fitting glm of infection~foi to data:
   #CC: 6/22(first data)->7/27(last prediction)
   #BT: 6/24(first data)->7/8(last prediction)
@@ -25,12 +26,15 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   foi.func<-function(site,date0,date1,epi.data=corrected.epi,xcord,ycord)
   {
     ## get wind data from site and dates
+    date0<-as.POSIXct(paste0(date0," 12:00:00"),tz="UTC")
+    date1<-as.POSIXct(paste0(date1," 12:00:00"),tz="UTC")
+    
     wind.data<-all.weath[which(all.weath$site==site),]
-    wind.data<-wind.data[which(wind.data$date>as.POSIXct(paste0(date0," 12:00:00"),tz="UTC")),]
-    wind.data<-wind.data[which(wind.data$date<=as.POSIXct(paste0(date1," 12:00:00"),tz="UTC")),]
+    wind.data<-wind.data[which(wind.data$date>date0),]
+    wind.data<-wind.data[which(wind.data$date<=date1),]
     
     ## get data about sources of spores
-    source.data<-epi.data[intersect(which(epi.data$Site==site),which(epi.data$Date.First.Observed.Diseased<=date0)),]
+    source.data<-epi.data[intersect(which(epi.data$Site==site),which(epi.data$Date.First.Observed.Diseased<=as.Date(date0))),]
     
     ## substitute in corrected heights as average of height at date0 and date1
     
@@ -41,15 +45,15 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       #### tagged source plants
       if(!is.na(source.data[k,"Tag"])) 
       {
-        height0<-as.numeric(corrected.heights[intersect(which(corrected.heights$tag==source.data[k,"Tag"]),which(corrected.heights$Date==date0)),"height.cm"])
-        height1<-as.numeric(corrected.heights[intersect(which(corrected.heights$tag==source.data[k,"Tag"]),which(corrected.heights$Date==date1)),"height.cm"])
+        height0<-as.numeric(corrected.heights[intersect(which(corrected.heights$tag==source.data[k,"Tag"]),which(corrected.heights$Date==as.Date(date0))),"height.cm"])
+        height1<-as.numeric(corrected.heights[intersect(which(corrected.heights$tag==source.data[k,"Tag"]),which(corrected.heights$Date==as.Date(date1))),"height.cm"])
         corrected.height<-mean(height0,height1)
       }
       #### untagged source plants
       if(is.na(source.data[k,"Tag"])) 
       {
-        index0<-Reduce(intersect,list(which(corrected.heights$X==source.data[k,"X"]),which(corrected.heights$Y==source.data[k,"Y"]),which(corrected.heights$x==source.data[k,"x"]),which(corrected.heights$y==source.data[k,"y"]),which(corrected.heights$Date==date0)))
-        index1<-Reduce(intersect,list(which(corrected.heights$X==source.data[k,"X"]),which(corrected.heights$Y==source.data[k,"Y"]),which(corrected.heights$x==source.data[k,"x"]),which(corrected.heights$y==source.data[k,"y"]),which(corrected.heights$Date==date1)))
+        index0<-Reduce(intersect,list(which(corrected.heights$X==source.data[k,"X"]),which(corrected.heights$Y==source.data[k,"Y"]),which(corrected.heights$x==source.data[k,"x"]),which(corrected.heights$y==source.data[k,"y"]),which(corrected.heights$Date==as.Date(date0))))
+        index1<-Reduce(intersect,list(which(corrected.heights$X==source.data[k,"X"]),which(corrected.heights$Y==source.data[k,"Y"]),which(corrected.heights$x==source.data[k,"x"]),which(corrected.heights$y==source.data[k,"y"]),which(corrected.heights$Date==as.Date(date1))))
         height0<-as.numeric(corrected.heights[index0,"height.cm"])
         height1<-as.numeric(corrected.heights[index1,"height.cm"])
         corrected.height<-mean(height0,height1)
@@ -75,31 +79,43 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         if(source.data[i,"Tag"]==15) {q<-0; half.height=10} #### set q = 0 for tag 15, half.height doesn't matter
         else{
           #### set q to 0.1 if the plant is a seedling
-          if(!source.data[i,"Tag"] %in% plant.inf.intens$Tag & (source.data[i,"corrected.height"]<=5 | grepl("seedling",source.data[i,"notes"]))) {q<-.1; if(is.na(source.data[i,"corrected.height"])) {half.height<-2.5} else {half.height<-source.data[i,"corrected.height"]*.5}}
+          if(!source.data[i,"Tag"] %in% diseased.focal.plants$Tag & (source.data[i,"corrected.height"]<=5 | grepl("seedling",source.data[i,"notes"]))) {q<-.1; if(is.na(source.data[i,"corrected.height"])) {half.height<-2.5} else {half.height<-source.data[i,"corrected.height"]*.5}}
           #### extract q from data
           else {
-            plant.inf.intens.index<-intersect(which(plant.inf.intens$Date==date0),which(plant.inf.intens$Tag==source.data[i,"Tag"]))
+            diseased.focal.plants.index<-intersect(which(diseased.focal.plants$Date==as.Date(date0)),which(diseased.focal.plants$Tag==source.data[i,"Tag"]))
             ##### if there's an actual measurment use that
-            if(length(plant.inf.intens.index)==1) {q<-plant.inf.intens[plant.inf.intens.index,"plant.inf.intens"]; half.height<-source.data[i,"corrected.height"]*.5}
+            if(length(diseased.focal.plants.index)==1) {q<-diseased.focal.plants[diseased.focal.plants.index,"plant.inf.intens"]; half.height<-source.data[i,"corrected.height"]*.5}
             ##### if not, forecast or hindcast from closest observation
-            if(length(plant.inf.intens.index)==0)
+            if(length(diseased.focal.plants.index)==0)
             {
-              obs.dates<-as.Date(plant.inf.intens[which(plant.inf.intens$Tag==source.data[i,"Tag"]),"Date"]) ###### get dates that have plant inf intens observations
+              obs.dates<-as.Date(diseased.focal.plants[which(diseased.focal.plants$Tag==source.data[i,"Tag"]),"Date"]) ###### get dates that have plant inf intens observations
               if(as.Date(date0) %in% obs.dates) {obs.dates<-obs.dates[-which(obs.dates==as.Date(date0))]}
-              date.diffs<-as.Date(date0)-obs.dates ### calculate time differences
+              
+              ###### make sure obs dates are included in temperature data
+              if(site=="CC" & any(obs.dates<=as.Date("2020-06-21"))) {obs.dates<-obs.dates[-which(obs.dates<=as.Date("2020-06-21"))]}
+              if(site=="BT" & any(obs.dates<=as.Date("2020-06-19"))) {obs.dates<-obs.dates[-which(obs.dates<=as.Date("2020-06-19"))]}
+              if(site=="GM" & any(obs.dates<=as.Date("2020-06-22"))) {obs.dates<-obs.dates[-which(obs.dates<=as.Date("2020-06-22"))]}
+              if(site=="HM" & any(obs.dates<=as.Date("2020-06-24"))) {obs.dates<-obs.dates[-which(obs.dates<=as.Date("2020-06-24"))]}
+              
+              if(site=="CC" & any(obs.dates>=as.Date("2020-07-28"))) {obs.dates<-obs.dates[-which(obs.dates>=as.Date("2020-07-28"))]}
+              if(site=="BT" & any(obs.dates>=as.Date("2020-07-30"))) {obs.dates<-obs.dates[-which(obs.dates>=as.Date("2020-07-30"))]}
+              if(site=="GM" & any(obs.dates>=as.Date("2020-07-29"))) {obs.dates<-obs.dates[-which(obs.dates>=as.Date("2020-07-29"))]}
+              if(site=="HM" & any(obs.dates>=as.Date("2020-07-11"))) {obs.dates<-obs.dates[-which(obs.dates>=as.Date("2020-07-11"))]}
+              
+              date.diffs<-obs.dates-as.Date(date0) ### calculate time differences
               closest.date.index<-which(abs(date.diffs)==min(abs(date.diffs))) ###### find closest observation
               if(length(closest.date.index)>1) {closest.date.index<-closest.date.index[which(date.diffs[closest.date.index]<0)]} ###### if there's a tie, default to future observation
               closest.date<-obs.dates[closest.date.index]
-              plant.inf.intens.index<-intersect(which(plant.inf.intens$Date==closest.date),which(plant.inf.intens$Tag==source.data[i,"Tag"]))
-              if(closest.date>date0) ###### hindcast
+              diseased.focal.plants.index<-intersect(which(diseased.focal.plants$Date==closest.date),which(diseased.focal.plants$Tag==source.data[i,"Tag"]))
+              if(closest.date>as.Date(date0)) ###### hindcast
               {
-                q<-predict.plant.inf.intens.last(plant.inf.intens.next=plant.inf.intens[plant.inf.intens.index,"plant.inf.intens"],max.height.last=source.data[i,"corrected.height"],site=site,date0=as.POSIXct(paste0(date0," 12:00:00")),date1=as.POSIXct(paste0(closest.date," 12:00:00")))
-                half.height<-plant.inf.intens[plant.inf.intens.index,"max.height"]*.5
+                q<-predict.inf.intens.last(inf.intens.next=diseased.focal.plants[diseased.focal.plants.index,"plant.inf.intens"],max.height.last=source.data[i,"corrected.height"],site=site,date0=date0,date1=as.POSIXct(paste0(closest.date," 12:00:00")))
+                half.height<-diseased.focal.plants[diseased.focal.plants.index,"max.height"]*.5
               }
-              if(closest.date<date0) ###### forecast
+              if(closest.date<as.Date(date0)) ###### forecast
               {
-                q<-predict.plant.inf.intens(plant.inf.intens.last=plant.inf.intens[plant.inf.intens.index,"plant.inf.intens"],max.height.last=source.data[i,"corrected.height"],site=site,date0=as.POSIXct(paste0(closest.date," 12:00:00")),date1=as.POSIXct(paste0(date0," 12:00:00")))
-                half.height<-plant.inf.intens[plant.inf.intens.index,"max.height"]*.5
+                q<-predict.inf.intens(inf.intens.last=diseased.focal.plants[diseased.focal.plants.index,"plant.inf.intens"],max.height.last=source.data[i,"corrected.height"],site=site,date0=as.POSIXct(paste0(closest.date," 12:00:00")),date1=date1)
+                half.height<-diseased.focal.plants[diseased.focal.plants.index,"max.height"]*.5
               }
             }
           } 
@@ -131,8 +147,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   
   foi.data<-data.frame("site"=character(),"date"=as.Date(character()),"status"=character(),"status.next"=character(),"tag"=character(),"X"=numeric(),"Y"=numeric(),"x"=numeric(),"y"=numeric(),"height.cm"=numeric(),"foi"=numeric(),
                        "mean.temp"=numeric(),"max.temp"=numeric(),"min.temp"=numeric(),"mean.abs.hum"=numeric(),"max.abs.hum"=numeric(),"min.abs.hum"=numeric(),
-                       #"mean.vpd"=numeric(),"max.vpd"=numeric(),"min.vpd"=numeric(),
-                       "tot.rain"=numeric(),"mean.solar"=numeric())
+                       "tot.rain"=numeric(),"mean.solar"=numeric(),"mean.wetness"=numeric())
 
   
   # fill data object
@@ -155,7 +170,10 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
     for(date.index in (1:length(data.dates[which(sites==site)][[1]])))
     {
       date0<-epi.obs.dates[which(sites==site)][[1]][date.index] ### date of current observation
+      date0<-as.POSIXct(paste0(date0," 12:00:00"),tz="UTC")
       date1<-epi.obs.dates[which(sites==site)][[1]][date.index+1] ### date of next observation
+      date1<-as.POSIXct(paste0(date1," 12:00:00"),tz="UTC")
+      
       delta.days<-as.numeric(as.Date(date1)-as.Date(date0))
       ## get weather/enviro predictors
       
@@ -177,22 +195,15 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
       new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
       
-      abs.hum<-6.112*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh*2.1674/(273.15+T)
-      new.mean.abs.hum<-mean(abs.hum,na.rm=T) #absolute humidity, see https://www.medrxiv.org/content/10.1101/2020.02.12.20022467v1.full.pdf
+      abs.hum<-0.1324732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+T)
+      new.mean.abs.hum<-mean(abs.hum,na.rm=T) 
       new.max.abs.hum<-max(abs.hum,na.rm=T)
       new.min.abs.hum<-min(abs.hum,na.rm=T)
       
-      #svps<- 0.6108 * exp(17.27 * temp.rh.sub$temp.c / (temp.rh.sub$temp.c + 237.3)) #saturation vapor pressures
-      #avps<- temp.rh.sub$rh / 100 * svps #actual vapor pressures 
-      #vpds<-avps-svps
-      
-      #new.mean.vpd<-mean(vpds,na.rm=T)
-      #new.max.vpd<-max(vpds,na.rm=T)
-      #new.min.vpd<-min(vpds,na.rm=T)
-      
-      new.tot.rain<-sum(weath.sub$rain,na.rm=T)
+      new.mean.daily.rain<-sum(weath.sub$rain,na.rm=T)
       new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
-      
+      new.mean.wetness<-mean(weath.sub$wetness,na.rm=T)
+
       sub.2.epi.data<-sub.1.epi.data[which(sub.1.epi.data$Date.First.Observed.Diseased<=date0),] ### epi data up until date0
       sub.3.epi.data<-sub.1.epi.data[which(sub.1.epi.data$Date.First.Observed.Diseased<=date1),] ### epi date up until date1
       
@@ -223,7 +234,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
               all(sub.loc.data[index,"Y"] %in% c(15,17),sub.loc.data[index,"X"] %in% 7:9)
             )
           )
-        ) {print(paste0("site = ",site," date = ",date0," ",index,"/",dim(sub.loc.data)[1]," complete"));next}
+        ) {print(paste0("site = ",site," date = ",as.Date(date0)," ",index,"/",dim(sub.loc.data)[1]," complete"));next}
         ### get ID string of plant
         if(!is.na(sub.loc.data[index,"tag"])) {ID.string<-sub.loc.data[index,"tag"]} else {ID.string<-paste0("X=",sub.loc.data[index,"X"],"Y=",sub.loc.data[index,"Y"],"x=",sub.loc.data[index,"x"],"y=",sub.loc.data[index,"y"])}
         ### if that ID string is unique
@@ -231,44 +242,42 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         {
           if(is.na(sub.loc.data[index,"tag"]))
           {
-            target.index<-Reduce(intersect,list(which(corrected.heights$X==sub.loc.data[index,"X"]),which(corrected.heights$Y==sub.loc.data[index,"Y"]),which(corrected.heights$x==sub.loc.data[index,"x"]),which(corrected.heights$y==sub.loc.data[index,"y"]),which(corrected.heights$Date==date0)))
+            target.index<-Reduce(intersect,list(which(corrected.heights$X==sub.loc.data[index,"X"]),which(corrected.heights$Y==sub.loc.data[index,"Y"]),which(corrected.heights$x==sub.loc.data[index,"x"]),which(corrected.heights$y==sub.loc.data[index,"y"]),which(corrected.heights$Date==as.Date(date0))))
             targt.height<-as.numeric(corrected.heights[target.index,"height.cm"])
           }
           if(!is.na(sub.loc.data[index,"tag"]))
           {
-            target.height<-as.numeric(corrected.heights[intersect(which(corrected.heights$tag==sub.loc.data[index,"tag"]),which(corrected.heights$Date==date0)),"height.cm"])
+            target.height<-as.numeric(corrected.heights[intersect(which(corrected.heights$tag==sub.loc.data[index,"tag"]),which(corrected.heights$Date==as.Date(date0))),"height.cm"])
           }
           status<-ifelse(ID.string %in% epi.ID.strings,1,0) #### count plant as currently infected if its ID string shows up in the set of plants that have been infected by date0
           new.status<-ifelse(ID.string %in% epi.ID.strings.next,1,0) #### count plant as becoming infected by next obs if its ID string shows up in the set of plants that have been infected by date1
           foi<-foi.func(site=site,date0=date0,date1=date1,epi.data=corrected.epi,xcord=sub.loc.data[index,"X"]+sub.loc.data[index,"x"],ycord=sub.loc.data[index,"Y"]+sub.loc.data[index,"y"]) #### calculate foi experienced
-          foi.data<-rbind(foi.data,data.frame("site"=site,"date"=date0,"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"height.cm"=target.height,"foi"=foi,
+          foi.data<-rbind(foi.data,data.frame("site"=site,"date"=as.Date(date0),"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"height.cm"=target.height,"foi"=foi,
                                               "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.mean.abs.hum,
-                                              #"mean.vpd"=new.mean.vpd,"max.vpd"=new.max.vpd,"min.vpd"=new.min.vpd,
-                                              "tot.rain"=new.tot.rain,"mean.solar"=new.mean.solar)) #### add new entry to data object
+                                              "mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.wetness"=new.mean.wetness)) #### add new entry to data object
         }
         ### if that ID string is not unique
         if(length(which(ID.strings==ID.string))>1)
         {
           if(is.na(sub.loc.data[index,"tag"]))
           {
-            target.index<-Reduce(intersect,list(which(corrected.heights$X==sub.loc.data[index,"X"]),which(corrected.heights$Y==sub.loc.data[index,"Y"]),which(corrected.heights$x==sub.loc.data[index,"x"]),which(corrected.heights$y==sub.loc.data[index,"y"]),which(corrected.heights$Date==date0)))
+            target.index<-Reduce(intersect,list(which(corrected.heights$X==sub.loc.data[index,"X"]),which(corrected.heights$Y==sub.loc.data[index,"Y"]),which(corrected.heights$x==sub.loc.data[index,"x"]),which(corrected.heights$y==sub.loc.data[index,"y"]),which(corrected.heights$Date==as.Date(date0))))
             targt.height<-as.numeric(corrected.heights[target.index,"height.cm"])
           }
           if(!is.na(sub.loc.data[index,"tag"]))
           {
-            target.height<-as.numeric(corrected.heights[intersect(which(corrected.heights$tag==sub.loc.data[index,"tag"]),which(corrected.heights$Date==date0)),"height.cm"])
+            target.height<-as.numeric(corrected.heights[intersect(which(corrected.heights$tag==sub.loc.data[index,"tag"]),which(corrected.heights$Date==as.Date(date0))),"height.cm"])
           }
           n.repeats<-length(which(ID.strings==ID.string)) #### how many times ID string is repeated
           order<-which(which(ID.strings==ID.string)==index) #### figure out which repeat (e.g. 2nd) this plant is
           status<-ifelse(length(which(epi.ID.strings==ID.string))>=order,1,0) #### for plant that is the nth repeat, count as currently infected if at least n matching ID strings show up in epi.ID.strings
           new.status<-ifelse(length(which(epi.ID.strings.next==ID.string))>=order,1,0) #### for plant that is the nth repeat, count as becoming infected by next obs if at least n matching ID strings show up in epi.ID.strings.next
           foi<-foi.func(site=site,date0=date0,date1=date1,epi.data=corrected.epi,xcord=sub.loc.data[index,"X"]+sub.loc.data[index,"x"],ycord=sub.loc.data[index,"Y"]+sub.loc.data[index,"y"]) #### calculate foi experienced
-          foi.data<-rbind(foi.data,data.frame("site"=site,"date"=date0,"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"height.cm"=targt.height,"foi"=foi,
+          foi.data<-rbind(foi.data,data.frame("site"=site,"date"=as.Date(date0),"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"height.cm"=targt.height,"foi"=foi,
                                               "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.mean.abs.hum,
-                                              #"mean.vpd"=new.mean.vpd,"max.vpd"=new.max.vpd,"min.vpd"=new.min.vpd,
-                                              "tot.rain"=new.tot.rain,"mean.solar"=new.mean.solar)) #### add new entry to data object
+                                              "mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.wetness"=new.mean.wetness)) #### add new entry to data object
         }
-        print(paste0("site = ",site," date = ",date0," ",index,"/",dim(sub.loc.data)[1]," complete"))
+        print(paste0("site = ",site," date = ",as.Date(date0)," ",index,"/",dim(sub.loc.data)[1]," complete"))
       }
     }
   }
