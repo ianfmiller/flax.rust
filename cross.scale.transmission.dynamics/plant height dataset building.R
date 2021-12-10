@@ -5,6 +5,7 @@
 ### load models and funcitons
 plant.growth.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS")
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/predict plant height change funcs.R")
+source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/starting plant inf intens model.R")
 ### convenience params
 data.dates<-list("CC"=c("2020-06-22","2020-06-29","2020-07-06","2020-07-13","2020-07-20","2020-07-27"),"BT"=c("2020-06-24","2020-07-01","2020-07-08"),"GM"=c("2020-06-23","2020-06-30","2020-07-02","2020-07-07","2020-07-09","2020-07-15"),"HM"=c("2020-06-25","2020-07-02","2020-07-07","2020-07-09","2020-07-15"))
 sites<-c("CC","BT","GM","HM")
@@ -18,13 +19,8 @@ corrected.locs$Date[which(corrected.locs$Date=="6/17/20")]<-"6/17/2020"
 corrected.locs$Date[which(corrected.locs$Date=="6/18/20")]<-"6/18/2020"
 corrected.locs$Date[which(corrected.locs$Date=="6/22/20")]<-"6/22/2020"
 
-within.host<-read.csv("~/Documents/GitHub/flax.rust/data/Withinhost.csv")
-#### subset to relevant records
-within.host<-within.host[which(within.host$Year==2020),]
-within.host<-unique(within.host[,c("Year","Site","Tag","Date","max.height")])
-healthyplants<-read.csv("~/Documents/GitHub/flax.rust/data/healthyplants.csv")
-#### subset to relevant records
-healthyplants<-unique(healthyplants[,c("Site","Date","Tag","max.height")])
+diseased.focal.plants<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/diseased.focal.plants.RDS")
+healthy.focal.plants<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/healthy.focal.plants.RDS")
 
  ## build data set 
 corrected.plant.heights<-data.frame("Site"=factor(),"tag"=factor(),"X"=numeric(),"Y"=numeric(),"x"=numeric(),"y"=numeric(),"Date"=character(),"height.cm"=numeric(),"height.type"=factor())
@@ -61,27 +57,27 @@ for (site in sites)
       {
         date<-as.Date(date)
         ##### get indicies of any existing records
-        healthyplants.index<-intersect(which(healthyplants$Tag==tag),which(as.Date(healthyplants$Date,tryFormats = "%m/%d/%Y")==as.Date(date)))
-        within.host.index<-intersect(which(within.host$Tag==tag),which(as.Date(within.host$Date,tryFormats = "%m/%d/%Y")==as.Date(date)))
+        healthy.focal.index<-intersect(which(healthy.focal.plants$Tag==tag),which(as.Date(healthy.focal.plants$Date,tryFormats = "%m/%d/%Y")==as.Date(date)))
+        diseased.focal.index<-intersect(which(diseased.focal.plants$Tag==tag),which(as.Date(diseased.focal.plants$Date,tryFormats = "%m/%d/%Y")==as.Date(date)))
         sub.epi.index<-intersect(which(sub.epi.data$Tag==tag),which(sub.epi.data$Date.First.Observed.Diseased==as.Date(date)))
         sub.loc.index<-intersect(which(sub.loc.data$tag==tag),which(as.Date(sub.loc.data$Date,tryFormats = "%m/%d/%Y")==as.Date(date)))
         ##### if plant height was recorded
-        if(length(healthyplants.index)>0 || length(within.host.index)>0 || length(sub.epi.index)>0 || length(sub.loc.index>0))
+        if(length(healthy.focal.index)>0 || length(diseased.focal.index)>0 || length(sub.epi.index)>0 || length(sub.loc.index>0))
         {
           ###### if plant height was recorded in healthy plants
-          if(length(healthyplants.index)>0)
+          if(length(healthy.focal.index)>0)
           {
-            if(!is.na(healthyplants$max.height[healthyplants.index]))
+            if(!is.na(diseased.focal.index$max.height[healthy.focal.index]))
             {
-              corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=tag,"X"=sub.loc.data[i,"X"],"Y"=sub.loc.data[i,"Y"],"x"=sub.loc.data[i,"x"],"y"=sub.loc.data[i,"y"],"Date"=date,"height.cm"=healthyplants[healthyplants.index,"max.height"],"height.type"="observed"))
+              corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=tag,"X"=sub.loc.data[i,"X"],"Y"=sub.loc.data[i,"Y"],"x"=sub.loc.data[i,"x"],"y"=sub.loc.data[i,"y"],"Date"=date,"height.cm"=diseased.focal.index[healthy.focal.index,"max.height"],"height.type"="observed"))
             }
           }
           ###### if plant height was recorded in within host
-          if(length(within.host.index)>0)
+          if(length(diseased.focal.index)>0)
           {
-            if(!is.na(within.host$max.height[within.host.index]))
+            if(!is.na(diseased.focal.plants$max.height[diseased.focal.index]))
             {
-              corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=tag,"X"=sub.loc.data[i,"X"],"Y"=sub.loc.data[i,"Y"],"x"=sub.loc.data[i,"x"],"y"=sub.loc.data[i,"y"],"Date"=date,"height.cm"=within.host[within.host.index,"max.height"],"height.type"="observed"))
+              corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=tag,"X"=sub.loc.data[i,"X"],"Y"=sub.loc.data[i,"Y"],"x"=sub.loc.data[i,"x"],"y"=sub.loc.data[i,"y"],"Date"=date,"height.cm"=diseased.focal.plants[diseased.focal.index,"max.height"],"height.type"="observed"))
             }
           }
           
@@ -104,25 +100,27 @@ for (site in sites)
         }
         ##### if plant height was not recorded
         
-        if(length(healthyplants.index)==0 &&  length(within.host.index)==0 && length(sub.epi.index)==0 && length(sub.loc.index)==0)
+        if(length(healthy.focal.index)==0 &&  length(diseased.focal.index)==0 && length(sub.epi.index)==0 && length(sub.loc.index)==0)
         {
           ###### look for closest observation or existing forecast/hindcast
-          obs.dates<-data.frame("Date"=character(),"diff"=numeric(),"source"=character(),"height"=numeric(),"type"=character())
+          obs.dates<-data.frame("Date"=character(),"diff"=numeric(),"source"=character(),"height"=numeric(),"height.type"=character(),"infection.intensity"=numeric(),"infection.intensity.type"=character())
           
-          if(length(within.host[which(within.host$Tag==tag),"Date"])>0)
+          if(length(diseased.focal.plants[which(diseased.focal.plants$Tag==tag),"Date"])>0)
           {
-            record.dates<-as.Date(within.host[which(within.host$Tag==tag),"Date"],tryFormats = "%m/%d/%Y")
+            record.dates<-as.Date(diseased.focal.plants[which(diseased.focal.plants$Tag==tag),"Date"],tryFormats = "%m/%d/%Y")
             min.date<-record.dates[which.min(abs(difftime(record.dates,date)))]
-            height<-within.host[intersect(which(as.Date(within.host[,"Date"],tryFormats = "%m/%d/%Y")==min.date),which(within.host$Tag==tag)),"max.height"]
-            obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="within.host","height"=height,"type"="obs"))
+            height<-diseased.focal.plants[intersect(which(as.Date(diseased.focal.plants[,"Date"],tryFormats = "%m/%d/%Y")==min.date),which(diseased.focal.plants$Tag==tag)),"max.height"]
+            inf.intens<-diseased.focal.plants[intersect(which(as.Date(diseased.focal.plants[,"Date"],tryFormats = "%m/%d/%Y")==min.date),which(diseased.focal.plants$Tag==tag)),"plant.inf.intens"]
+            obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="diseased.focal.plants","height"=height,"height.type"="obs","infection.intensity"=inf.intens,"infection.intensity.type"="obs"))
           }
           
-          if(length(healthyplants[which(healthyplants$Tag==tag),"Date"])>0)
+          if(length(healthy.focal.plants[which(healthy.focal.plants$Tag==tag),"Date"])>0)
           {
-            record.dates<-as.Date(healthyplants[which(healthyplants$Tag==tag),"Date"],tryFormats = "%m/%d/%Y")
+            record.dates<-as.Date(healthy.focal.plants[which(healthy.focal.plants$Tag==tag),"Date"],tryFormats = "%m/%d/%Y")
             min.date<-record.dates[which.min(abs(difftime(record.dates,date)))]
-            height<-healthyplants[intersect(which(as.Date(healthyplants[,"Date"],tryFormats = "%m/%d/%Y")==min.date),which(healthyplants$Tag==tag)),"max.height"]
-            obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="healthyplants","height"=height,"type"="obs"))
+            height<-healthy.focal.plants[intersect(which(as.Date(healthy.focal.plants[,"Date"],tryFormats = "%m/%d/%Y")==min.date),which(healthy.focal.plants$Tag==tag)),"max.height"]
+            inf.intens<-0
+            obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="healthy.focal.plants","height"=height,"height.type"="obs","infection.intensity"=inf.intens,"infection.intensity.type"="obs"))
           }
           
           if(length(sub.epi.data[which(sub.epi.data$Tag==tag),"Date.First.Observed.Diseased"])>0)
@@ -130,41 +128,35 @@ for (site in sites)
             record.dates<-as.Date(sub.epi.data[which(sub.epi.data$Tag==tag),"Date.First.Observed.Diseased"])
             min.date<-record.dates[which.min(abs(difftime(record.dates,date)))]
             height<-sub.epi.data[intersect(which(as.Date(sub.epi.data[,"Date.First.Observed.Diseased"])==min.date),which(sub.epi.data$Tag==tag)),"max.height"]
-            obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="corrected.epi","height"=height,"type"="obs"))
+            inf.intens<-mean.starting.plant.inf.intens
+            obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="corrected.epi","height"=height,"height.type"="obs","infection.intensity"=inf.intens,"infection.intensity.type"="mean.start"))
           }
           
-          if(length(sub.loc.data[which(sub.loc.data$tag==tag),"Date"])>0)
+          if(length(sub.loc.data[which(sub.loc.data$tag==tag),"Date"])>0 & length(sub.epi.data[which(sub.epi.data$Tag==tag),"Date.First.Observed.Diseased"])==0)
           {
             record.dates<-as.Date(sub.loc.data[which(sub.loc.data$tag==tag),"Date"],tryFormats = "%m/%d/%Y")
             min.date<-record.dates[which.min(abs(difftime(record.dates,date)))]
             height<-sub.loc.data[intersect(which(as.Date(sub.loc.data[,"Date"],tryFormats = "%m/%d/%Y")==min.date),which(sub.loc.data$tag==tag)),"height.cm"]
-            obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="corrected.locs","height"=height,"type"="obs"))
-          }
-          
-          if(length(corrected.plant.heights[which(corrected.plant.heights$tag==tag),"Date"])>0)
-          {
-            record.dates<-as.Date(corrected.plant.heights[which(corrected.plant.heights$tag==tag),"Date"])
-            min.date<-record.dates[which.min(abs(difftime(record.dates,date)))]
-            height<-as.numeric(corrected.plant.heights[intersect(which(as.Date(corrected.plant.heights[,"Date"],)==min.date),which(corrected.plant.heights$tag==tag)),"height.cm"])
-            obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="corrected.plant.heights","height"=height,"type"="obs"))
+            inf.intens<-0
+            obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="corrected.locs","height"=height,"height.type"="obs","infection.intensity"=inf.intens,"infection.intensity.type"="infered.zero"))
           }
           
           ###### pinpoint observation to use for forecast/hindcast, with preference for forecast
           if(length(which(is.na(obs.dates$height)))>0) {obs.dates<-obs.dates[-which(is.na(obs.dates$height)),]}
           obs.dates.index<-which(abs(obs.dates$diff)==min(abs(obs.dates$diff)))
-          if(length(obs.dates.index)>1) {obs.dates.index<-obs.dates.index[which.min(obs.dates$diff[obs.dates.index])]}
+          if(length(obs.dates.index)>1) {obs.dates.index<-obs.dates.index[which.min(obs.dates$diff[obs.dates.index])]} ######## preference for forecast is set here--note absence of abs() and use of min()
           
           ###### forecast
           if(obs.dates$diff[obs.dates.index]<0)
           {
-            forecast.height<-predict.plant.growth(obs.dates[obs.dates.index,"height"],site,obs.dates[obs.dates.index,"Date"],date,exclude.site = F)
+            forecast.height<-predict.plant.growth(obs.dates[obs.dates.index,"height"],obs.dates[obs.dates.index,"infection.intensity"],site,obs.dates[obs.dates.index,"Date"],date,exclude.site = F)
             corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=tag,"X"=sub.loc.data[i,"X"],"Y"=sub.loc.data[i,"Y"],"x"=sub.loc.data[i,"x"],"y"=sub.loc.data[i,"y"],"Date"=date,"height.cm"=forecast.height,"height.type"="forecast"))
           }
           
           ###### hindcast
           if(obs.dates$diff[obs.dates.index]>0)
           {
-            hindcast.height<-predict.plant.growth.last(obs.dates[obs.dates.index,"height"],site,date,obs.dates[obs.dates.index,"Date"],exclude.site = F)
+            hindcast.height<-predict.plant.growth.last(obs.dates[obs.dates.index,"height"],obs.dates[obs.dates.index,"infection.intensity"],site,date,obs.dates[obs.dates.index,"Date"],exclude.site = F)
             corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=tag,"X"=sub.loc.data[i,"X"],"Y"=sub.loc.data[i,"Y"],"x"=sub.loc.data[i,"x"],"y"=sub.loc.data[i,"y"],"Date"=date,"height.cm"=hindcast.height,"height.type"="hindcast"))
           }
         }
@@ -208,38 +200,25 @@ for (site in sites)
         if(length(sub.epi.index)==0 && length(sub.loc.index)==0)
         {
           ###### look for closest observation or existing forecast/hindcast
-          obs.dates<-data.frame("Date"=character(),"diff"=numeric(),"source"=character(),"height"=numeric(),"type"=character())
+          obs.dates<-data.frame("Date"=character(),"diff"=numeric(),"source"=character(),"height"=numeric(),"height.type"=character(),"infection.intensity"=numeric(),"infection.intensity.type"=character())
           
           if(length(sub.epi.data[which(epi.ID.strings==ID.string),"Date.First.Observed.Diseased"])>0)
           {
             record.dates<-as.Date(sub.epi.data[which(epi.ID.strings==ID.string),"Date.First.Observed.Diseased"])
             min.date<-record.dates[which.min(abs(difftime(record.dates,date)))]
             height<-sub.epi.data[intersect(which(as.Date(sub.epi.data[,"Date.First.Observed.Diseased"])==min.date),which(epi.ID.strings==ID.string)),"max.height"]
-            obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="corrected.epi","height"=height,"type"="obs"))
+            inf.intens<-mean.starting.plant.inf.intens
+            obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="corrected.epi","height"=height,"height.type"="obs","infection.intensity"=inf.intens,"infection.intensity.type"="mean.start"))
           }
           
-          if(length(sub.loc.data[which(loc.ID.strings==ID.string),"Date"])>0)
+          if(length(sub.loc.data[which(loc.ID.strings==ID.string),"Date"])>0 & length(sub.epi.data[which(epi.ID.strings==ID.string),"Date.First.Observed.Diseased"])==0)
           {
             record.dates<-as.Date(sub.loc.data[which(loc.ID.strings==ID.string),"Date"],tryFormats = "%m/%d/%Y")
             min.date<-record.dates[which.min(abs(difftime(record.dates,date)))]
             height<-sub.loc.data[intersect(which(as.Date(sub.loc.data[,"Date"],tryFormats = "%m/%d/%Y")==min.date),which(loc.ID.strings==ID.string)),"height.cm"]
-            obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="corrected.locs","height"=height,"type"="obs"))
+            inf.intens<-0
+            obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="corrected.locs","height"=height,"height.type"="obs","infection.intensity"=inf.intens,"infection.intensity.type"="infered.zero"))
           }
-          
-          corrected.plant.heights.ID.strings<-c()
-          for(j in 1:nrow(corrected.plant.heights)) 
-          {
-            corrected.plant.heights.ID.strings<-c(corrected.plant.heights.ID.strings,paste0("Tag"=NA,"X=",corrected.plant.heights[j,"X"],"Y=",corrected.plant.heights[j,"Y"],"x=",corrected.plant.heights[j,"x"],"y=",corrected.plant.heights[j,"y"]))
-          }
-          
-          if(length(corrected.plant.heights[which(corrected.plant.heights.ID.strings==ID.string),"Date"])>0)
-          {
-            record.dates<-as.Date(corrected.plant.heights[which(corrected.plant.heights.ID.strings==ID.string),"Date"])
-            min.date<-record.dates[which.min(abs(difftime(record.dates,date)))]
-            height<-as.numeric(corrected.plant.heights[intersect(which(as.Date(corrected.plant.heights[,"Date"],)==min.date),which(corrected.plant.heights.ID.strings==ID.string)),"height.cm"])
-            obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="corrected.plant.heights","height"=height,"type"="forecast/hindcast"))
-          }
-          
           
           ###### pinpoint observation to use for forecast/hindcast, with preference for forecast
           if(any(!is.na(obs.dates$height)))
@@ -250,13 +229,13 @@ for (site in sites)
             ###### forecast
             if(obs.dates$diff[obs.dates.index]<0)
             {
-              forecast.height<-predict.plant.growth(obs.dates[obs.dates.index,"height"],site,obs.dates[obs.dates.index,"Date"],date,exclude.site = F)
+              forecast.height<-predict.plant.growth(obs.dates[obs.dates.index,"height"],obs.dates[obs.dates.index,"infection.intensity"],site,obs.dates[obs.dates.index,"Date"],date,exclude.site = F)
               corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=NA,"X"=sub.loc.data[i,"X"],"Y"=sub.loc.data[i,"Y"],"x"=sub.loc.data[i,"x"],"y"=sub.loc.data[i,"y"],"Date"=date,"height.cm"=forecast.height,"height.type"="forecast"))
             }
             ###### hindcast
             if(obs.dates$diff[obs.dates.index]>0)
             {
-              hindcast.height<-predict.plant.growth.last(obs.dates[obs.dates.index,"height"],site,date,obs.dates[obs.dates.index,"Date"],exclude.site = F)
+              hindcast.height<-predict.plant.growth.last(obs.dates[obs.dates.index,"height"],obs.dates[obs.dates.index,"infection.intensity"],site,date,obs.dates[obs.dates.index,"Date"],exclude.site = F)
               corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=NA,"X"=sub.loc.data[i,"X"],"Y"=sub.loc.data[i,"Y"],"x"=sub.loc.data[i,"x"],"y"=sub.loc.data[i,"y"],"Date"=date,"height.cm"=hindcast.height,"height.type"="hindcast"))
             }
           } else {corrected.plant.heights<-rbind(corrected.plant.heights,data.frame("Site"=site,"tag"=NA,"X"=sub.loc.data[i,"X"],"Y"=sub.loc.data[i,"Y"],"x"=sub.loc.data[i,"x"],"y"=sub.loc.data[i,"y"],"Date"=date,"height.cm"=NA,"height.type"="observed"))}
