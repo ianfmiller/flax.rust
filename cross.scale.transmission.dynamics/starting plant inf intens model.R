@@ -33,7 +33,7 @@ lambda<-summary(mod)$coefficients[1]
 
 mean.starting.plant.inf.intens<-mean(data.vec)
 
-starting.plant.inf.intens.mod<-function(x) {log(1-x)/-2.103}
+starting.inf.intens.mod<-function(x) {log(1-x)/-2.103}
 
 start.inf.intens.mod<-function(x) {1-exp(-2.103*x)}
 

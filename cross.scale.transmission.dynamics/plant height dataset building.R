@@ -110,7 +110,7 @@ for (site in sites)
             record.dates<-as.Date(diseased.focal.plants[which(diseased.focal.plants$Tag==tag),"Date"],tryFormats = "%m/%d/%Y")
             min.date<-record.dates[which.min(abs(difftime(record.dates,date)))]
             height<-diseased.focal.plants[intersect(which(as.Date(diseased.focal.plants[,"Date"],tryFormats = "%m/%d/%Y")==min.date),which(diseased.focal.plants$Tag==tag)),"max.height"]
-            inf.intens<-diseased.focal.plants[intersect(which(as.Date(diseased.focal.plants[,"Date"],tryFormats = "%m/%d/%Y")==min.date),which(diseased.focal.plants$Tag==tag)),"plant.inf.intens"]
+            inf.intens<-diseased.focal.plants[intersect(which(as.Date(diseased.focal.plants[,"Date"],tryFormats = "%m/%d/%Y")==min.date),which(diseased.focal.plants$Tag==tag)),"inf.intens"]
             obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="diseased.focal.plants","height"=height,"height.type"="obs","infection.intensity"=inf.intens,"infection.intensity.type"="obs"))
           }
           
@@ -128,7 +128,7 @@ for (site in sites)
             record.dates<-as.Date(sub.epi.data[which(sub.epi.data$Tag==tag),"Date.First.Observed.Diseased"])
             min.date<-record.dates[which.min(abs(difftime(record.dates,date)))]
             height<-sub.epi.data[intersect(which(as.Date(sub.epi.data[,"Date.First.Observed.Diseased"])==min.date),which(sub.epi.data$Tag==tag)),"max.height"]
-            inf.intens<-mean.starting.plant.inf.intens
+            inf.intens<-mean.starting.inf.intens
             obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="corrected.epi","height"=height,"height.type"="obs","infection.intensity"=inf.intens,"infection.intensity.type"="mean.start"))
           }
           
@@ -208,7 +208,7 @@ for (site in sites)
             record.dates<-as.Date(sub.epi.data[which(epi.ID.strings==ID.string),"Date.First.Observed.Diseased"])
             min.date<-record.dates[which.min(abs(difftime(record.dates,date)))]
             height<-sub.epi.data[intersect(which(as.Date(sub.epi.data[,"Date.First.Observed.Diseased"])==min.date),which(epi.ID.strings==ID.string)),"max.height"]
-            inf.intens<-mean.starting.plant.inf.intens
+            inf.intens<-mean.starting.inf.intens
             obs.dates<-rbind(obs.dates,data.frame("Date"=min.date,"diff"=as.numeric(difftime(min.date,date,units = "days")),"source"="corrected.epi","height"=height,"height.type"="obs","infection.intensity"=inf.intens,"infection.intensity.type"="mean.start"))
           }
           

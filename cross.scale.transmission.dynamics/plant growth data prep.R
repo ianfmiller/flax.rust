@@ -25,6 +25,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   healthy.focal.plants$Date <- mdy(healthy.focal.plants$Date)
   healthy.focal.plants$plant.inf.intens <- 0
   healthy.focal.plants<-healthy.focal.plants[,c("Year","Site","Date","Tag","max.height","plant.inf.intens")]
+  colnames(healthy.focal.plants)[which(colnames(healthy.focal.plants)=="plant.inf.intens")]<-"inf.intens"
   
   ## save data object
   if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/healthy.focal.plants.RDS")) {saveRDS(healthy.focal.plants,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/healthy.focal.plants.RDS")}
@@ -57,7 +58,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   n.d.stems<-c()
   max.heights<-c()
   reference.pictures<-c()
-  plant.inf.intens<-c()
+  inf.intens<-c()
   
   for (tag in unique(diseased.focal.plants.raw$Tag))
   {
@@ -80,7 +81,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         new.reference.picture<-sub.diseased.focal.plants.2[1,"picture"]
         
         ## calculate plant infection intensity
-        new.plant.inf.intens<-new.n.d.stems*mean(as.numeric(sub.diseased.focal.plants.2$length.tissue.infected)*as.numeric(sub.diseased.focal.plants.2$N.pustules.middle))
+        new.inf.intens<-new.n.d.stems*mean(as.numeric(sub.diseased.focal.plants.2$length.tissue.infected)*as.numeric(sub.diseased.focal.plants.2$N.pustules.middle))
         
         ## store new values
         years<-c(years,new.year)
@@ -91,16 +92,16 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         n.d.stems<-c(n.d.stems,new.n.d.stems)
         max.heights<-c(max.heights,new.max.height)
         reference.pictures<-c(reference.pictures,new.reference.picture)
-        plant.inf.intens<-c(plant.inf.intens,new.plant.inf.intens)
+        inf.intens<-c(inf.intens,new.inf.intens)
         
       }
     }
   }
   
-  diseased.focal.plants<-data.frame("Year"=years,"Site"=sites,"Tag"=tags,"Date"=dates,"N.Stems"=n.stems,"N.D.Stems"=n.d.stems,"max.height"=max.heights,"picture"=reference.pictures,"plant.inf.intens"=plant.inf.intens)
+  diseased.focal.plants<-data.frame("Year"=years,"Site"=sites,"Tag"=tags,"Date"=dates,"N.Stems"=n.stems,"N.D.Stems"=n.d.stems,"max.height"=max.heights,"picture"=reference.pictures,"inf.intens"=inf.intens)
   
   ## correct 0 intensities to .1, logic being that this is a measure of tot infection load, and it shouldn't be less than 1 pustule (coded as .1cm infected tissue, 1 pustule/leaf)
-  diseased.focal.plants$plant.inf.intens[which(diseased.focal.plants$plant.inf.intens<.1)]<-.1
+  diseased.focal.plants$infection.intensity[which(diseased.focal.plants$infection.intensity<.1)]<-.1
   
   ## correct date structure
   diseased.focal.plants$Date<-as.Date(diseased.focal.plants$Date,tryFormats = "%m/%d/%y")
@@ -111,9 +112,9 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   diseased.focal.plants <- diseased.focal.plants[!is.na(diseased.focal.plants$max.height),]
   
   ## merge height data from healthy and diseased focal plants
-  subs <- c("Year", "Site", "Tag", "Date", "max.height", "plant.inf.intens")
+  subs <- c("Year", "Site", "Tag", "Date", "max.height", "inf.intens")
   plant.heights <- rbind(healthy.focal.plants[subs], diseased.focal.plants[subs])
-  colnames(plant.heights) <- c("year", "site", "tag", "date", "max.height", "plant.inf.intens")
+  colnames(plant.heights) <- c("year", "site", "tag", "date", "max.height", "inf.intens")
   
   ## cut out incomplete records
   plant.heights<-plant.heights[-intersect(which(plant.heights$site=="HM"),which(plant.heights$date>"2020-07-10 00:00:00 UTC")),]
@@ -194,7 +195,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       
       start.vals<-c(start.vals,start.val)
       end.vals<-c(end.vals,end.val)
-      inf.intens.vals<-c(inf.intens.vals,sub.plant.heights[i,"plant.inf.intens"])
+      inf.intens.vals<-c(inf.intens.vals,sub.plant.heights[i,"inf.intens"])
       days<-c(days,delta.days)
       
       mean.temp<-c(mean.temp,new.mean.temp)

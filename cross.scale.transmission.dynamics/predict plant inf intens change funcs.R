@@ -156,7 +156,7 @@ predict.inf.intens.last<-function(inf.intens.next,max.height.last,site,date0,dat
     abs(inf.intens.next.pred-inf.intens.next)
   }
   inf.intens.last<-optim(c(inf.intens.next),pred.func,method = "Brent",lower=0,upper=10e6)$par
-  if(plant.inf.intens.last<0.1) {inf.intens.last<-.1}
+  if(inf.intens.last<0.1) {inf.intens.last<-.1}
   inf.intens.last
 }
 
