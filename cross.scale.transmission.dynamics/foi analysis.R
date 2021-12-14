@@ -1,5 +1,6 @@
 library(mgcv)
-
+library(RColorBrewer)
+library(viridis)
 # load data
 
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/building foi dataset.R")
@@ -8,49 +9,28 @@ foi.data$site<-as.factor(foi.data$site)
 
 # visualize data
 
-## histograms
-par(mfrow=c(1,1))
-hist(foi.data$foi,main="all sites",breaks=100,xlab="force of infection")
-par(mfrow=c(2,2))
-hist(foi.data[which(foi.data$site=="CC"),"foi"],breaks=100,xlab="force of infection",xlim=c(0,max(foi.data$foi)),col="yellow",main="CC")
-hist(foi.data[which(foi.data$site=="BT"),"foi"],breaks=100,xlab="force of infection",xlim=c(0,max(foi.data$foi)),col="orange",main="BT")
-hist(foi.data[which(foi.data$site=="GM"),"foi"],breaks=100,xlab="force of infection",xlim=c(0,max(foi.data$foi)),col="red",main="GM")
-hist(foi.data[which(foi.data$site=="HM"),"foi"],breaks=100,xlab="force of infection",xlim=c(0,max(foi.data$foi)),col="purple",main="HM")
-
-## outcome ~ foi
-
-layout(matrix(c(1,6,2,7,3,8,4,9,5,10),5,2,byrow = T))
-par(mar=c(2,3,2,3))
-plot(jitter(foi.data$foi),jitter(foi.data$status.next),xlab="foi",ylab="outcome",axes=F,main="foi vs outcome")
-axis(2,at=c(0,1),labels = c("healthy","infected"))
-plot(jitter(foi.data[which(foi.data$site=="CC"),"foi"]),jitter(foi.data[which(foi.data$site=="CC"),"status.next"]),xlab="foi",ylab="outcome",axes=F,col="yellow",xlim=c(0,max(foi.data$foi)),main="CC")
-axis(2,at=c(0,1),labels = c("healthy","infected"))
-plot(jitter(foi.data[which(foi.data$site=="BT"),"foi"]),jitter(foi.data[which(foi.data$site=="BT"),"status.next"]),xlab="foi",ylab="outcome",axes=F,col="orange",xlim=c(0,max(foi.data$foi)),main="BT")
-axis(2,at=c(0,1),labels = c("healthy","infected"))
-plot(jitter(foi.data[which(foi.data$site=="GM"),"foi"]),jitter(foi.data[which(foi.data$site=="GM"),"status.next"]),xlab="foi",ylab="outcome",axes=F,col="red",xlim=c(0,max(foi.data$foi)),main="GM")
-axis(2,at=c(0,1),labels = c("healthy","infected"))
-plot(jitter(foi.data[which(foi.data$site=="HM"),"foi"]),jitter(foi.data[which(foi.data$site=="HM"),"status.next"]),xlab="foi",ylab="outcome",axes=F,col="purple",xlim=c(0,max(foi.data$foi)),main="HM")
-axis(2,at=c(0,1),labels = c("healthy","infected"))
-
-plot(jitter(log10(foi.data$foi)+1e-10),jitter(foi.data$status.next),xlab="log10 foi",ylab="outcome",axes=F,main="log10 foi vs outcome")
-axis(2,at=c(0,1),labels = c("healthy","infected"))
-plot(jitter(log10(foi.data[which(foi.data$site=="CC"),"foi"]+1e-10)),jitter(foi.data[which(foi.data$site=="CC"),"status.next"]),xlab="log10 foi",ylab="outcome",axes=F,col="yellow",xlim=c(min(log10(foi.data$foi+1e-10)),max(log10(foi.data$foi+1e-10))),main="CC")
-axis(2,at=c(0,1),labels = c("healthy","infected"))
-plot(jitter(log10(foi.data[which(foi.data$site=="BT"),"foi"]+1e-10)),jitter(foi.data[which(foi.data$site=="BT"),"status.next"]),xlab="log10 foi",ylab="outcome",axes=F,col="orange",xlim=c(min(log10(foi.data$foi+1e-10)),max(log10(foi.data$foi+1e-10))),main="BT")
-axis(2,at=c(0,1),labels = c("healthy","infected"))
-plot(jitter(log10(foi.data[which(foi.data$site=="GM"),"foi"]+1e-10)),jitter(foi.data[which(foi.data$site=="GM"),"status.next"]),xlab="log10 foi",ylab="outcome",axes=F,col="red",xlim=c(min(log10(foi.data$foi+1e-10)),max(log10(foi.data$foi+1e-10))),main="GM")
-axis(2,at=c(0,1),labels = c("healthy","infected"))
-plot(jitter(log10(foi.data[which(foi.data$site=="HM"),"foi"]+1e-10)),jitter(foi.data[which(foi.data$site=="HM"),"status.next"]),xlab="log10 foi",ylab="outcome",axes=F,col="purple",xlim=c(min(log10(foi.data$foi+1e-10)),max(log10(foi.data$foi+1e-10))),main="HM")
-axis(2,at=c(0,1),labels = c("healthy","infected"))
-
-par(mfrow=c(2,1),mar=c(5,5,2,2))
-plot(jitter(foi.data$foi),jitter(foi.data$status.next),xlab="predicted spore deposition",ylab="",axes=F,cex.lab=2)
+layout(matrix(c(1,1,2,3,4,5),3,2,byrow = T))
+par(mar=c(6,6,6,6))
+plot(jitter(log10(foi.data$foi)),jitter(foi.data$status.next),xlab=expression('predicted '*log[10]*'spore deposition'),ylab="outcome",main="all",axes=F,cex.lab=2)
 axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=2)
 axis(1,cex.axis=2)
-
-plot(jitter(log10(foi.data$foi)),jitter(foi.data$status.next),xlab=expression('predicted '*log[10]*'spore deposition'),ylab="",axes=F,cex.lab=2)
+box()
+plot(jitter(log10(foi.data[which(foi.data$site=="CC"),"foi"]+1e-10)),jitter(foi.data[which(foi.data$site=="CC"),"status.next"]),xlab="log10 foi",ylab="outcome",axes=F,col=magma(6)[2],xlim=c(min(log10(foi.data$foi+1e-10)),max(log10(foi.data$foi+1e-10))),main="CC",cex.lab=2,cex.main=2)
 axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=2)
 axis(1,cex.axis=2)
+box()
+plot(jitter(log10(foi.data[which(foi.data$site=="BT"),"foi"]+1e-10)),jitter(foi.data[which(foi.data$site=="BT"),"status.next"]),xlab="log10 foi",ylab="outcome",axes=F,col=magma(6)[3],xlim=c(min(log10(foi.data$foi+1e-10)),max(log10(foi.data$foi+1e-10))),main="BT",cex.lab=2,cex.main=2)
+axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=2)
+axis(1,cex.axis=2)
+box()
+plot(jitter(log10(foi.data[which(foi.data$site=="GM"),"foi"]+1e-10)),jitter(foi.data[which(foi.data$site=="GM"),"status.next"]),xlab="log10 foi",ylab="outcome",axes=F,col=magma(6)[4],xlim=c(min(log10(foi.data$foi+1e-10)),max(log10(foi.data$foi+1e-10))),main="GM",cex.lab=2,cex.main=2)
+axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=2)
+axis(1,cex.axis=2)
+box()
+plot(jitter(log10(foi.data[which(foi.data$site=="HM"),"foi"]+1e-10)),jitter(foi.data[which(foi.data$site=="HM"),"status.next"]),xlab="log10 foi",ylab="outcome",axes=F,col=magma(6)[5],xlim=c(min(log10(foi.data$foi+1e-10)),max(log10(foi.data$foi+1e-10))),main="HM",cex.lab=2,cex.main=2)
+axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=2)
+axis(1,cex.axis=2)
+box()
 
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS"))
@@ -70,10 +50,10 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
              +offset(log(time))+
              s(tag,bs="re")+
              s(site,bs="re"),
-           family=binomial(link="cloglog")
+           family=binomial(link="cloglog"),
            select = T,
            method="REML",
-           data=delta.pustules,
+           data=foi.data,
            control = list(nthreads=4))
   
   saveRDS(mod1,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
