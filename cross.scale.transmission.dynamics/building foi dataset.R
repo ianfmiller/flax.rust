@@ -84,7 +84,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
           else {
             diseased.focal.plants.index<-intersect(which(diseased.focal.plants$Date==as.Date(date0)),which(diseased.focal.plants$Tag==source.data[i,"Tag"]))
             ##### if there's an actual measurment use that
-            if(length(diseased.focal.plants.index)==1) {q<-diseased.focal.plants[diseased.focal.plants.index,"plant.inf.intens"]; half.height<-source.data[i,"corrected.height"]*.5}
+            if(length(diseased.focal.plants.index)==1) {q<-diseased.focal.plants[diseased.focal.plants.index,"inf.intens"]; half.height<-source.data[i,"corrected.height"]*.5}
             ##### if not, forecast or hindcast from closest observation
             if(length(diseased.focal.plants.index)==0)
             {
@@ -107,15 +107,21 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
               if(length(closest.date.index)>1) {closest.date.index<-closest.date.index[which(date.diffs[closest.date.index]<0)]} ###### if there's a tie, default to future observation
               closest.date<-obs.dates[closest.date.index]
               diseased.focal.plants.index<-intersect(which(diseased.focal.plants$Date==closest.date),which(diseased.focal.plants$Tag==source.data[i,"Tag"]))
-              if(closest.date>as.Date(date0)) ###### hindcast
-              {
-                q<-predict.inf.intens.last(inf.intens.next=diseased.focal.plants[diseased.focal.plants.index,"plant.inf.intens"],max.height.last=source.data[i,"corrected.height"],site=site,date0=date0,date1=as.POSIXct(paste0(closest.date," 12:00:00")))
-                half.height<-diseased.focal.plants[diseased.focal.plants.index,"max.height"]*.5
-              }
-              if(closest.date<as.Date(date0)) ###### forecast
-              {
-                q<-predict.inf.intens(inf.intens.last=diseased.focal.plants[diseased.focal.plants.index,"plant.inf.intens"],max.height.last=source.data[i,"corrected.height"],site=site,date0=as.POSIXct(paste0(closest.date," 12:00:00")),date1=date1)
-                half.height<-diseased.focal.plants[diseased.focal.plants.index,"max.height"]*.5
+              
+              model.inf.intens<-diseased.focal.plants[diseased.focal.plants.index,"inf.intens"]
+              
+              if (!length(model.inf.intens)>1 & source.data[i,"Tag"]==928) {q<-0; half.height<-0} #### plant #928 was suspected to be diseased but no pustuels were actually observed until 7/21
+              if (!(!length(model.inf.intens)>1 & source.data[i,"Tag"]==928)) {
+                if(closest.date>as.Date(date0)) ###### hindcast
+                {
+                  q<-predict.inf.intens.last(inf.intens.next=model.inf.intens,max.height.last=source.data[i,"corrected.height"],site=site,date0=date0,date1=as.POSIXct(paste0(closest.date," 12:00:00"),tz="UTC"))
+                  half.height<-diseased.focal.plants[diseased.focal.plants.index,"max.height"]*.5
+                }
+                if(closest.date<as.Date(date0)) ###### forecast
+                {
+                  q<-predict.inf.intens(inf.intens.last=model.inf.intens,max.height.last=source.data[i,"corrected.height"],site=site,date0=as.POSIXct(paste0(closest.date," 12:00:00"),tz="UTC"),date1=date1)
+                  half.height<-diseased.focal.plants[diseased.focal.plants.index,"max.height"]*.5
+                }
               }
             }
           } 
@@ -147,7 +153,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   
   foi.data<-data.frame("site"=character(),"date"=as.Date(character()),"status"=character(),"status.next"=character(),"tag"=character(),"X"=numeric(),"Y"=numeric(),"x"=numeric(),"y"=numeric(),"height.cm"=numeric(),"foi"=numeric(),
                        "mean.temp"=numeric(),"max.temp"=numeric(),"min.temp"=numeric(),"mean.abs.hum"=numeric(),"max.abs.hum"=numeric(),"min.abs.hum"=numeric(),
-                       "tot.rain"=numeric(),"mean.solar"=numeric(),"mean.wetness"=numeric())
+                       "mean.daily.rain"=numeric(),"mean.solar"=numeric(),"mean.wetness"=numeric())
 
   
   # fill data object
@@ -295,9 +301,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
     foi.data[i,"delta.days"]<-delta.days
   }
   
-  foi.data[,c("tot.rain")]<-foi.data[,c("tot.rain")]/foi.data[,"delta.days"]
-
   saveRDS(foi.data,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/foi.data.RDS")
 }
 
 foi.data<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/foi.data.RDS")
+
