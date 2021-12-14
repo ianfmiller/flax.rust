@@ -1,6 +1,4 @@
 library(mgcv)
-library(lme4)
-library(progress)
 
 # load data
 
@@ -58,33 +56,25 @@ axis(1,cex.axis=2)
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS"))
 {
 
-  mod0<-gam(status.next~
-            log10(foi)+
-            s(height.cm,bs="cs",k=4) +
-            s(site,bs="re",k=4),
-            data = foi.data,
-            family = binomial()
-  )
-  summary(mod0) # height not significant
-  
-  mod1<-gam(status.next~
-              log10(foi)+
-              height.cm +
-              s(site,bs="re",k=4),
-            data = foi.data,
-            family = binomial()
-  )
-  summary(mod1)
-  
-  mod2<-gam(status.next~
-              log10(foi)+
-              s(site,bs="re",k=4),
-            data = foi.data,
-            family = binomial()
-  )
-  summary(mod2)
-  
-  AIC(mod1,mod2)
+  mod<-gam(~0+
+             foi+
+             s(mean.temp)+
+             s(max.temp)+
+             s(min.temp)+
+             s(mean.abs.hum)+
+             s(max.abs.hum)+
+             s(min.abs.hum)+
+             s(mean.solar)+
+             s(mean.daily.rain)+
+             s(mean.wetness)+
+             +offset(log(time))+
+             s(tag,bs="re")+
+             s(site,bs="re"),
+           family=binomial(link="cloglog")
+           select = T,
+           method="REML",
+           data=delta.pustules,
+           control = list(nthreads=4))
   
   saveRDS(mod1,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
 }
