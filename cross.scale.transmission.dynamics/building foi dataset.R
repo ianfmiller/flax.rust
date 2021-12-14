@@ -5,6 +5,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   corrected.locs<-corrected.locs[-which(corrected.locs$tag %in% c(911, 912, 913, 943, 934, 935, 942, 944, 945, 984, 985, 986)),] # Trim out plants in unsurveyed region of CC. They will still be included as sources of transmission, but should not be analyzed as targets of transmission.
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/predict plant inf intens change funcs.R")
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/spore deposition functions tilt.R")
+  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/starting plant inf intens model.R")
+  
   pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
   n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS")
   diseased.focal.plants<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/diseased.focal.plants.RDS")
@@ -26,8 +28,6 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   foi.func<-function(site,date0,date1,epi.data=corrected.epi,xcord,ycord)
   {
     ## get wind data from site and dates
-    date0<-as.POSIXct(paste0(date0," 12:00:00"),tz="UTC")
-    date1<-as.POSIXct(paste0(date1," 12:00:00"),tz="UTC")
     
     wind.data<-all.weath[which(all.weath$site==site),]
     wind.data<-wind.data[which(wind.data$date>date0),]
@@ -89,8 +89,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
             if(length(diseased.focal.plants.index)==0)
             {
               obs.dates<-as.Date(diseased.focal.plants[which(diseased.focal.plants$Tag==source.data[i,"Tag"]),"Date"]) ###### get dates that have plant inf intens observations
-              if(as.Date(date0) %in% obs.dates) {obs.dates<-obs.dates[-which(obs.dates==as.Date(date0))]}
-              
+
               ###### make sure obs dates are included in temperature data
               if(site=="CC" & any(obs.dates<=as.Date("2020-06-21"))) {obs.dates<-obs.dates[-which(obs.dates<=as.Date("2020-06-21"))]}
               if(site=="BT" & any(obs.dates<=as.Date("2020-06-19"))) {obs.dates<-obs.dates[-which(obs.dates<=as.Date("2020-06-19"))]}
@@ -111,7 +110,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
               model.inf.intens<-diseased.focal.plants[diseased.focal.plants.index,"inf.intens"]
               
               if (!length(model.inf.intens)>1 & source.data[i,"Tag"]==928) {q<-0; half.height<-0} #### plant #928 was suspected to be diseased but no pustuels were actually observed until 7/21
-              if (!(!length(model.inf.intens)>1 & source.data[i,"Tag"]==928)) {
+              if (length(model.inf.intens)<1 & source.data[i,"Tag"]!=928) {predict.inf.intens(mean.starting.inf.intens,source.data[i,"corrected.height"],site,as.POSIXct(paste0(source.data[i,"Date.First.Observed.Diseased"]," 12:00:00"),tz="UTC"),date0)}
+              if (length(model.inf.intens)>1) {
                 if(closest.date>as.Date(date0)) ###### hindcast
                 {
                   q<-predict.inf.intens.last(inf.intens.next=model.inf.intens,max.height.last=source.data[i,"corrected.height"],site=site,date0=date0,date1=as.POSIXct(paste0(closest.date," 12:00:00"),tz="UTC"))
