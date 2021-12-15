@@ -8,7 +8,7 @@ source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/building 
 foi.data<-foi.data[which(foi.data$status==0),]
 foi.data$site<-as.factor(foi.data$site)
 
-# visualize data
+## visualize data
 
 ## histograms
 par(mfrow=c(1,1))
