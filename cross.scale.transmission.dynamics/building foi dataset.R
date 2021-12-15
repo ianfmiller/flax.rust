@@ -151,7 +151,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   
   # build empty data object for foi vs outcome data
   
-  foi.data<-data.frame("site"=character(),"date"=as.Date(character()),"status"=character(),"status.next"=character(),"tag"=character(),"X"=numeric(),"Y"=numeric(),"x"=numeric(),"y"=numeric(),"height.cm"=numeric(),"foi"=numeric(),
+  foi.data<-data.frame("site"=character(),"date"=as.Date(character()),"status"=character(),"status.next"=character(),"tag"=character(),"X"=numeric(),"Y"=numeric(),"x"=numeric(),"y"=numeric(),"time"=numeric(),"height.cm"=numeric(),"foi"=numeric(),
                        "mean.temp"=numeric(),"max.temp"=numeric(),"min.temp"=numeric(),"mean.abs.hum"=numeric(),"max.abs.hum"=numeric(),"min.abs.hum"=numeric(),
                        "mean.daily.rain"=numeric(),"mean.solar"=numeric(),"mean.wetness"=numeric())
 
@@ -258,7 +258,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
           status<-ifelse(ID.string %in% epi.ID.strings,1,0) #### count plant as currently infected if its ID string shows up in the set of plants that have been infected by date0
           new.status<-ifelse(ID.string %in% epi.ID.strings.next,1,0) #### count plant as becoming infected by next obs if its ID string shows up in the set of plants that have been infected by date1
           foi<-foi.func(site=site,date0=date0,date1=date1,epi.data=corrected.epi,xcord=sub.loc.data[index,"X"]+sub.loc.data[index,"x"],ycord=sub.loc.data[index,"Y"]+sub.loc.data[index,"y"]) #### calculate foi experienced
-          foi.data<-rbind(foi.data,data.frame("site"=site,"date"=as.Date(date0),"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"height.cm"=target.height,"foi"=foi,
+          foi.data<-rbind(foi.data,data.frame("site"=site,"date"=as.Date(date0),"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"time"=delta.days,"height.cm"=target.height,"foi"=foi,
                                               "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.mean.abs.hum,
                                               "mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.wetness"=new.mean.wetness)) #### add new entry to data object
         }
@@ -279,7 +279,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
           status<-ifelse(length(which(epi.ID.strings==ID.string))>=order,1,0) #### for plant that is the nth repeat, count as currently infected if at least n matching ID strings show up in epi.ID.strings
           new.status<-ifelse(length(which(epi.ID.strings.next==ID.string))>=order,1,0) #### for plant that is the nth repeat, count as becoming infected by next obs if at least n matching ID strings show up in epi.ID.strings.next
           foi<-foi.func(site=site,date0=date0,date1=date1,epi.data=corrected.epi,xcord=sub.loc.data[index,"X"]+sub.loc.data[index,"x"],ycord=sub.loc.data[index,"Y"]+sub.loc.data[index,"y"]) #### calculate foi experienced
-          foi.data<-rbind(foi.data,data.frame("site"=site,"date"=as.Date(date0),"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"height.cm"=targt.height,"foi"=foi,
+          foi.data<-rbind(foi.data,data.frame("site"=site,"date"=as.Date(date0),"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"time"=delta.days,"height.cm"=targt.height,"foi"=foi,
                                               "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.mean.abs.hum,
                                               "mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.wetness"=new.mean.wetness)) #### add new entry to data object
         }
@@ -287,19 +287,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       }
     }
   }
-  
-  ## rescale predictors to be time independent
-  foi.data<-data.frame(foi.data,"delta.days"=NA)
-  
-  for (i in 1:dim(foi.data)[1])
-  {
-    date0<-foi.data[i,"date"]
-    site<-foi.data[i,"site"]
-    site.date.set<-epi.obs.dates[which(sites==site)][[1]]
-    date1<-site.date.set[which(site.date.set==date0)+1]
-    delta.days<-as.numeric(as.Date(date1)-as.Date(date0))
-    foi.data[i,"delta.days"]<-delta.days
-  }
+
   
   saveRDS(foi.data,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/foi.data.RDS")
 }
