@@ -7,7 +7,7 @@ source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/building 
 foi.data<-foi.data[which(foi.data$status==0),]
 foi.data$site<-as.factor(foi.data$site)
 
-# visualize data
+## visualize data
 
 layout(matrix(c(1,1,2,3,4,5),3,2,byrow = T))
 par(mar=c(6,6,6,6))
