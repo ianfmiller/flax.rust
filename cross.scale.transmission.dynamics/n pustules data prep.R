@@ -16,8 +16,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   # subset to data of suitable quality
   n.pustules<-subset(n.pustules,N.pustule.count.confidence=="Yes")
   
-  # get rid of 0 counts
-  n.pustules<-subset(n.pustules,N.pustules>0)
+  # remove NA values
+  n.pustules<-n.pustules[-which(is.na(n.pustules$N.pustules)),]
   
   # subset to unique data (duplicates exist because a separate row was entered for each measurment of an individual pustule)
   n.pustules<-unique(n.pustules)
