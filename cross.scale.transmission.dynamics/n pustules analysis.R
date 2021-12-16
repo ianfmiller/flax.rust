@@ -1,5 +1,5 @@
 library(mgcv)
-
+library(MASS)
 
 # load data
 
@@ -245,16 +245,17 @@ predict.n.pustules.trajectory<-function(site,temp.addition,color,pred.window=1,p
     i<-start.n.pustules
     xcords.new<-c(1)
     ycords.new<-c(i)
-    beta <- coef(n.pustules.model) ## posterior mean of coefs
-    Vb   <- vcov(n.pustules.model) ## posterior  cov of coefs
-    mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
     for(k in 1:(length(dates)-1)) #date index
     {
       date0<-as.POSIXct(dates[k])
       date1<-as.POSIXct(dates[k+1])
       pred.data<-get.pred.data(site,date0,date1,i,temp.addition = temp.addition)
-      Xp <- predict(n.pustules.model, newdata = pred.data, exclude=c("s(site)","s(tag)"),type="lpmatrix")
+      pred.data<-cbind(pred.data,"tag"=86) # add in tag to pred data. This term is ignored when simulating the model. It is included only to suppress warning messages that "tag" is missing in data
+      beta <- coef(n.pustules.model) ## posterior mean of coefs
+      Vb   <- vcov(n.pustules.model) ## posterior  cov of coefs
       n <-2
+      mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
+      Xp <- predict(n.pustules.model, newdata = pred.data, exclude=c("s(site)","s(tag)"),type="lpmatrix")
       ilink <- family(n.pustules.model)$linkinv
       preds <- rep(NA,n)
       for (l in seq_len(n)) { 
@@ -302,8 +303,29 @@ plot.orange<-t_col("orange",80)
 
 
 ### one day ahead projection
-par(mar=c(6,6,2,2),mfrow=c(1,1))
-plot(0,0,type="n",xlim=c(1,36),ylim=c(0,100),ylab='N.pustules',xlab="day",cex.lab=1.5,cex.axis=1.5,main="1 day ahead")
+par(mar=c(6,6,2,2),mfrow=c(2,2))
+
+plot(0,0,type="n",xlim=c(1,36),ylim=c(0,40),ylab='N pustules',xlab="day",cex.lab=1.5,cex.axis=1.5,main="CC")
+dat<-predict.n.pustules.trajectory("CC",0,pred.window=1,plot.orange,T,T) 
+points(1:36,colMeans(dat),type="l",col="orange",lwd=4,lty=2)
+
+dat<-predict.n.pustules.trajectory("CC",1.8,pred.window=1,plot.red,T,T) 
+points(1:36,colMeans(dat),type="l",col="red",lwd=4,lty=2)
+
+dat<-predict.n.pustules.trajectory("CC",3.7,pred.window=1,plot.purple,T,T) 
+points(1:36,colMeans(dat),type="l",col="purple",lwd=4,lty=2)
+
+plot(0,0,type="n",xlim=c(1,41),ylim=c(0,40),ylab='N pustules',xlab="day",cex.lab=1.5,cex.axis=1.5,main="BT")
+dat<-predict.n.pustules.trajectory("BT",0,pred.window=1,plot.orange,T,T) 
+points(1:41,colMeans(dat),type="l",col="orange",lwd=4,lty=2)
+
+dat<-predict.n.pustules.trajectory("BT",1.8,pred.window=1,plot.red,T,T) 
+points(1:41,colMeans(dat),type="l",col="red",lwd=4,lty=2)
+
+dat<-predict.n.pustules.trajectory("BT",3.7,pred.window=1,plot.purple,T,T) 
+points(1:41,colMeans(dat),type="l",col="purple",lwd=4,lty=2)
+
+plot(0,0,type="n",xlim=c(1,41),ylim=c(0,40),ylab='N pustules',xlab="day",cex.lab=1.5,cex.axis=1.5,main="GM")
 dat<-predict.n.pustules.trajectory("GM",0,pred.window=1,plot.orange,T,T) 
 points(1:36,colMeans(dat),type="l",col="orange",lwd=4,lty=2)
 
@@ -312,6 +334,16 @@ points(1:36,colMeans(dat),type="l",col="red",lwd=4,lty=2)
 
 dat<-predict.n.pustules.trajectory("GM",3.7,pred.window=1,plot.purple,T,T) 
 points(1:36,colMeans(dat),type="l",col="purple",lwd=4,lty=2)
+
+plot(0,0,type="n",xlim=c(1,41),ylim=c(0,40),ylab='N pustules',xlab="day",cex.lab=1.5,cex.axis=1.5,main="HM")
+dat<-predict.n.pustules.trajectory("HM",0,pred.window=1,plot.orange,T,T) 
+points(1:16,colMeans(dat),type="l",col="orange",lwd=4,lty=2)
+
+dat<-predict.n.pustules.trajectory("HM",1.8,pred.window=1,plot.red,T,T) 
+points(1:16,colMeans(dat),type="l",col="red",lwd=4,lty=2)
+
+dat<-predict.n.pustules.trajectory("HM",3.7,pred.window=1,plot.purple,T,T) 
+points(1:16,colMeans(dat),type="l",col="purple",lwd=4,lty=2)
 
 legend("topright",legend = c("+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col = c("orange","red","purple"),lty=2,lwd=2,cex=1.5)
 
