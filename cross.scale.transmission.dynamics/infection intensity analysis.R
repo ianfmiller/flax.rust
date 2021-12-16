@@ -240,7 +240,6 @@ predict.infection.intensity.trajectory<-function(site,temp.addition,plant.height
       beta <- coef(infection.intensity.model) ## posterior mean of coefs
       Vb   <- vcov(infection.intensity.model) ## posterior  cov of coefs
       n <-2
-      n <-2
       mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
       ilink <- family(infection.intensity.model)$linkinv
       preds <- rep(NA,n)
