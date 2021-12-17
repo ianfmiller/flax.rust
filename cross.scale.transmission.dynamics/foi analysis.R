@@ -1,11 +1,15 @@
 library(mgcv)
 library(RColorBrewer)
-library(viridis)
 # load data
 
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/building foi dataset.R")
 foi.data<-foi.data[which(foi.data$status==0),]
 foi.data$site<-as.factor(foi.data$site)
+for(i in 1:nrow(foi.data))
+{
+  if(is.na(foi.data[i,"tag"])) {foi.data[i,"tag"]<-paste0(foi.data[i,"site"],"X",foi.data[i,"X"]+foi.data[i,"x"],"Y",foi.data[i,"Y"]+foi.data[i,"y"])}
+}
+foi.data$tag<-as.factor(foi.data$tag)
 
 ## visualize data
 
@@ -36,8 +40,8 @@ box()
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS"))
 {
 
-  mod<-gam(~0+
-             foi+
+  mod<-gam(status.next~
+             s(foi)+
              s(mean.temp)+
              s(max.temp)+
              s(min.temp)+
@@ -48,13 +52,39 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
              s(mean.daily.rain)+
              s(mean.wetness)+
              +offset(log(time))+
-             s(tag,bs="re")+
-             s(site,bs="re"),
+             s(foi,tag,bs="re")+
+             s(foi,site,bs="re"),
            family=binomial(link="cloglog"),
            select = T,
            method="REML",
            data=foi.data,
            control = list(nthreads=4))
+  
+  mod<-gam(status.next~s(foi)+s(foi,tag,bs="re")+s(foi,site,bs="re"),family=binomial(link="cloglog"),select=T,method="REML",data=foi.data)
+  
+  mod1<-gam(status.next~
+             s(foi)+
+             s(mean.temp)+
+             s(max.temp)+
+             s(min.temp)+
+             s(mean.abs.hum)+
+             s(max.abs.hum)+
+             s(min.abs.hum)+
+             s(mean.solar)+
+             s(mean.daily.rain)+
+             s(mean.wetness)+
+             +offset(log(time))+
+             s(tag,foi,bs="re")+
+             s(site,foi,bs="re"),
+           family=binomial(link="cloglog"),
+           select = T,
+           method="REML",
+           data=foi.data,
+           control = list(nthreads=6))
+  
+  mod1<-glm(status.next~foi,data=foi.data,family = binomial("cloglog"))
+  
+  mod<-glm()
   
   saveRDS(mod1,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
 }
