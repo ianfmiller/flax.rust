@@ -19,9 +19,12 @@ library(parallel)
 
 tilted.plume<-function(I,H,k,Ws,A,s,x,y)
 {
-  if(s==0) {s<-.33/2}
-  sigma<-2*A*x/s
-  out<-((I*k*Ws)/(2*pi*s*sigma^2))*exp(((-y^2)/(2*sigma^2))-((H-Ws*x/s)^2/(2*sigma^2)))
+  if(x>0) #
+  {
+    if(s==0) {s<-.33/2}
+    sigma<-2*(.5*H+A)*x/s
+    out<-((I*k*Ws)/(2*pi*s*sigma^2))*exp(((-y^2)/(2*sigma^2))-((H-Ws*x/s)^2/(2*sigma^2)))
+  } else {out<-0}
   out
 }
 
