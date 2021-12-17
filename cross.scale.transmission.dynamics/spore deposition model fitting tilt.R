@@ -14,21 +14,15 @@ demog<-demog[which(demog$year==2020),] #subset to 2020
 
 ## optimize
 
-opt<-optim(par=c(4.828517e-07,1.687830e-06,9.299220e-01),fn=param.search.optim.tilted.plume,control=list(trace=1))
+### optimizaiton
+opt<-optim(par=c(5.514312e-07,7.658422e-01,.5),fn=param.search.optim.tilted.plume,control=list(trace=1))
 
-## NEED TO REFIT ALL--FIX k or get rid of k--three params making liklihood ridge
-## results for model fitting
-### sum squared obs = 14991.02
-### total sum of squares = 14764.22 (total sum of squares = sum((spores/squares - mean(spores/squares))^2) )
-### x<-c(4.828517e-07,1.687830e-06,9.299220e-01) # output value = 13106.09 for one day
-### x<-c(2.630990e-07 , 4.236233e-07 , 9.278380e-01) # output value = 13271.89 for two days
-### x<-c(7.165041e-08,-2.265877e-06,7.736455e-01) # output value = 14013.743799 for full period
 
-opt<-list(par=c(4.828517e-07,1.687830e-06,9.299220e-01))
+opt<-list(par=c(5.514312e-07,7.658422e-01))
 
 ## visualize kernel
 test.mat<-data.frame(x=rep(seq(-2,2,.01),each=401),y=rep(seq(-2,2,.01),times=401))
-out<-mapply(tilted.plume, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(q=4224.733,H=.18,s=2.5,k=opt$par[1],alphaz=opt$par[2],Ws=opt$par[3]))
+out<-mapply(tilted.plume, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(I=4224.733,H=.18,s=10,k=opt$par[1],Ws=opt$par[2],A=opt$par[3]))
 res.mat<-matrix(out,401,401,byrow = T)
 contour(x=seq(-2,2,.01),y=seq(-2,2,.01),z=res.mat)
 points(c(.05,.25,.5,1),c(0,0,0,0),col="red")

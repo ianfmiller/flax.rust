@@ -5,31 +5,23 @@ library(parallel)
 
 ## parameters
 
-### q is quantity of spores--need to change to function of wind speed and tot. infection intensity
+### I is quantity of spores--need to change to function of wind speed and tot. infection intensity
 ### k is constant realting infection intensity to spore availibility at source
 ### H is height from which spores are disperesed--assume 0.5*plant height
 ### s is wind speed
 ### x is distance in direction of wind
 ### y is distance orthoganal to direction of wind
-### alphay is sd of dispersal in y direction
-### c is coefficient used to calculate decay constant along x as a function of s
+### sigma is sd of dispersal in y and z directions
 
 
 ## tilted gaussian plume
 
 
-tilted.plume<-function(I,H,k,Ws,s,x,y)
+tilted.plume<-function(I,H,k,Ws,A,s,x,y)
 {
   if(s==0) {s<-.33/2}
-  a=.2 #assuming neutral atomospheric stability (Pasquill class D), from https://www.sciencedirect.com/science/article/pii/S0168192308001068#bib13
-  b=.76 #assuming neutral atomospheric stability (Pasquill class D), from https://www.sciencedirect.com/science/article/pii/S0168192308001068#bib13
-  p=-0.89279 #assuming neutral atomospheric stability (Pasquill class D), from https://www.sciencedirect.com/science/article/pii/S0168192308001068#bib13
-  q=0.905 #assuming neutral atomospheric stability (Pasquill class D), from https://www.sciencedirect.com/science/article/pii/S0168192308001068#bib13
-  z0<-0.03 #assuming terrain is open grass, flat. from https://library.wmo.int/doc_num.php?explnum_id=10616
-  Kz0<-(10*z0)^(.53*(x^-0.22))
-  alphaz<-Kz0*a*x^b
-  alphay<-Kz0*(10^p)*x^q
-  out<-((I*k*Ws)/(2*pi*s*alphay*alphaz))*exp(((-y^2)/(2*alphay^2))-((H-Ws*x/s)^2/(2*alphaz^2)))
+  sigma<-2*A*x/s
+  out<-((I*k*Ws)/(2*pi*s*sigma^2))*exp(((-y^2)/(2*sigma^2))-((H-Ws*x/s)^2/(2*sigma^2)))
   out
 }
 
@@ -141,28 +133,28 @@ correct.wind.degree<-function(x,site="blank")
 #arrows(0,0,wind.data$wind.speed*cos(2*pi*correct.wind.degree(wind.data$wind.direction,site=site)/360),wind.data$wind.speed*sin(2*pi*correct.wind.degree(wind.data$wind.direction,site=site)/360),col="blue")
 #points(0,0,col="red",pch=15)
 
-predict.kernel.tilted.plume.inst<-function(i,I,H,k,Ws,xtarget,ytarget,wind.data,site)
+predict.kernel.tilted.plume.inst<-function(i,I,H,k,Ws,A,xtarget,ytarget,wind.data,site)
 {
   delta.t<-wind.data[i+1,"date"]-wind.data[i,"date"]
   cords<-mapply(get.plume.xy,2*pi*correct.wind.degree(wind.data[i,"wind.direction"],site = site)/360,MoreArgs=list(xorigin=0,yorigin=0,xtarget=xtarget,ytarget=ytarget))
-  tilted.plume(I=I,H=H,k=k,Ws=Ws,s=wind.data[i,"wind.speed"],x=cords[1,],y=cords[2,])
+  tilted.plume(I=I,H=H,k=k,Ws=Ws,A=A,s=wind.data[i,"wind.speed"],x=cords[1,],y=cords[2,])
 }
 
-predict.kernel.tilted.plume<-function(I,H,k,Ws,xtarget,ytarget,wind.data)
+predict.kernel.tilted.plume<-function(I,H,k,Ws,A,xtarget,ytarget,wind.data)
 {
-  suppressWarnings(predict.kernel.tilted.plume.inst(1:(dim(wind.data)[1]-1),I=I,H=H,k=k,Ws=Ws,xtarget=xtarget,ytarget=ytarget,wind.data=wind.data,site=wind.data[1,"site"]))->tot.dep
+  suppressWarnings(predict.kernel.tilted.plume.inst(1:(dim(wind.data)[1]-1),I=I,H=H,k=k,Ws=Ws,A=A,xtarget=xtarget,ytarget=ytarget,wind.data=wind.data,site=wind.data[1,"site"]))->tot.dep
   sum(tot.dep,na.rm = T)
 }
 
 param.search.optim.tilted.plume<-function(x,return.out=F)
 {
   
-  out<-list.rbind(mcmapply(param.search.optim.tilted.plume.tag,unique(spore.deposition$Tag),MoreArgs = list(kval=x[1],Wsval=x[2]),SIMPLIFY=F,mc.cores = 6))
+  out<-list.rbind(mcmapply(param.search.optim.tilted.plume.tag,unique(spore.deposition$Tag),MoreArgs = list(kval=x[1],Wsval=x[2],Aval=x[3]),SIMPLIFY=F,mc.cores = 6))
   if(return.out==T) {out} else {sum(out$val)}
   
 }
 
-param.search.optim.tilted.plume.tag<-function(tag,kval,Wsval)
+param.search.optim.tilted.plume.tag<-function(tag,kval,Wsval,Aval)
 {
   tags<-c()
   dists<-c()
@@ -202,7 +194,7 @@ param.search.optim.tilted.plume.tag<-function(tag,kval,Wsval)
       if(sub.2.spore.deposition[j,"Direction"]=="D") {ytarget<-(-1)*as.numeric(sub.2.spore.deposition[j,"Distance.cm"])/100}
       if(sub.2.spore.deposition[j,"Direction"]=="L") {xtarget<-(-1)*as.numeric(sub.2.spore.deposition[j,"Distance.cm"])/100}
       
-      new.pred<-predict.kernel.tilted.plume(I=I,H=H,k=kval,Ws=Wsval,xtarget=xtarget,ytarget=ytarget,wind.data=wind.data)
+      new.pred<-predict.kernel.tilted.plume(I=I,H=H,k=kval,Ws=Wsval,A=Aval,xtarget=xtarget,ytarget=ytarget,wind.data=wind.data)
       if(Wsval>5) {new.pred<- -888}
       new.obs<-sub.2.spore.deposition[j,"spores.per.square.mm"]
       tags<-c(tags,tag)
