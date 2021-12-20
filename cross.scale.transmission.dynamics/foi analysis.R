@@ -41,7 +41,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 {
 
   mod<-gam(status.next~
-             s(foi)+
+             s(foi,max_height)+
              s(mean.temp)+
              s(max.temp)+
              s(min.temp)+
