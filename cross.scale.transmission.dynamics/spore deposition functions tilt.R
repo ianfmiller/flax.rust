@@ -29,66 +29,74 @@ tilted.plume<-function(I,H,k,Ws,A,s,x,y)
 }
 
 ## function to find x and y coordinates to plug into gaussian plume for a given wind direction and direction and distance of spore trap (assuming N/S/E/W cord system), assume counterclockwise is positive
-get.plume.xy<-function(degree,xorigin,yorigin,xtarget,ytarget,plot=F)
+get.plume.xy<-function(degree,xorigin,yorigin,xtarget,ytarget)
 {
   # find point on wind vector that when connected with x,y forms a right angle with wind vector
   # https://stackoverflow.com/questions/6630596/find-a-line-intersecting-a-known-line-at-right-angle-given-a-point
-  x1<-xorigin
-  x2<-x1+sin(degree)
-  y1<-yorigin
-  y2<-y1+cos(degree)
-  t<-((xtarget-x1)*(x2-x1)+(ytarget-y1)*(y2-y1))/((x2-x1)^2+(y2-y1)^2)
-  xp<-x1+t*(x2-x1)
-  yp<-y1+t*(y2-y1)
+  xt<-xtarget
+  yt<-ytarget
+  xs<-xorigin
+  xw<-xs+sin(degree)
+  ys<-yorigin
+  yw<-ys+cos(degree)
+  c<-((xtarget-xs)*(xw-xs)+(ytarget-ys)*(yw-ys))/((xw-xs)^2+(yw-ys)^2)
+  xp<-xs+c*(xw-xs)
+  yp<-ys+c*(yw-ys)
   
-  # line connecting x1,y1 and x2,y2 is y=((y2-y1)/(x2-x1))*x-((y2-y1)/(x2-x1))*x1+y1
-  # line passing throughh x1,y1 and perpendicular to line connecting x1,y1 and x2,y2 is s=-1*((y2-y1)/(x2-x1))^-1; y=s*x+y1+s*x1
+  absX<-((xp-xs)^2+(yp-ys)^2)^.5
+  absY<-((xp-xt)^2+(yp-yt)^2)^.5
   
-  s=-1*((y2-y1)/(x2-x1))^-1 #slope of perpendicular line
+  sign<-0
   
-  
-  if(y2>s*x2+y1+s*x1)
+  if (xw > xs) 
   {
-    if(yp<(s*xp+y1+s*x1))
+    if (xp > xs)
     {
-      newx<--1*((xp-x1)^2+(yp-y1)^2)^.5
-      c<-((xtarget-x1)^2+(ytarget-y1)^2)^.5
-      newy<-((c^2-newx^2))^.5
-    } else
-    {
-      newx<-((xp-x1)^2+(yp-y1)^2)^.5
-      c<-((xtarget-x1)^2+(ytarget-y1)^2)^.5
-      newy<-((c^2-newx^2))^.5
+      sign<- 1
     }
-  } else {
-    if(yp>(s*xp+y1+s*x1))
-    {
-      newx<--1*((xp-x1)^2+(yp-y1)^2)^.5
-      c<-((xtarget-x1)^2+(ytarget-y1)^2)^.5
-      newy<-((c^2-newx^2))^.5
-    } else
-    {
-      newx<-((xp-x1)^2+(yp-y1)^2)^.5
-      c<-((xtarget-x1)^2+(ytarget-y1)^2)^.5
-      newy<-((c^2-newx^2))^.5
+    else {
+      sign<- -1
     }
   }
   
-  
-  if(plot)
+  if (xw < xs)
   {
-    plot(0,0,type="n",xlim=c(min(x1,x2,xp,xtarget)-.5,max(x1,x2,xp,xtarget)+.5),ylim=c(min(y1,y2,yp,ytarget,-1.5),max(y1,y2,yp,ytarget,1.5)),asp=1,xlab="plot X-axis",ylab="plot Y-axis")
-    points(x1,y1,col="darkgreen",pch=16,cex=4)
-    arrows(x1,y1,x2,y2)
-    curve(((y2-y1)/(x2-x1))*x-((y2-y1)/(x2-x1))*x1+y1,add=T,lty=2)
-    curve(s*x+y1+s*x1,col="red",lty=2,add=T)
-    points(xtarget,ytarget,col="lightgreen",pch=16,cex=4)
-    #points(xp,yp,col="lightgreen",cex=4)
-    arrows(x1,y1,xp,yp,col="lightblue")
-    arrows(xp,yp,xtarget,ytarget,col="darkblue")
-    legend("topright",legend=c("source plant","target plant","wind","perpendicular","x","y"),pch=c(16,16,NA,NA,NA,NA),lty=c(NA,NA,1,2,1,1),col=c("darkgreen","lightgreen","black","red","lightblue","darkblue"))
+    if (xp < xs)
+    {
+      sign <- 1
+    }
+    else {
+      sign <- -1
+    }
   }
-  return(c(newx,newy))
+  
+  if(xw == xs)
+  {
+    if (yw > ys)
+    {
+      if(yp > ys)
+      {
+        sign <- 1
+      }
+      else {
+        sign <- -1
+      }
+    }
+    if (yw <= ys) {
+      if (yp < ys)
+      {
+        sign <- 1
+      }
+      else {
+        sign <- -1
+      }
+    }
+  }
+  
+  X<-sign*absX
+  Y<-absY
+  
+  return(c(X,Y))
 }
 
 ## function to correct wind direction to flip from direction of origin to direction of flow; correct for transect direction
