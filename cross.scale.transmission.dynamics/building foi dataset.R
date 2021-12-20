@@ -72,19 +72,19 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       ### get cords of source
       sourceX<-source.data[i,"X"]+source.data[i,"x"]
       sourceY<-source.data[i,"Y"]+source.data[i,"y"]
-      ### get q val
+      ### get I val
       #### if the source plant is tagged
       if(!is.na(source.data[i,"Tag"]))
       {
-        if(source.data[i,"Tag"]==15) {q<-0; half.height=10} #### set q = 0 for tag 15, half.height doesn't matter
+        if(source.data[i,"Tag"]==15) {I<-0; half.height=10} #### set  I = 0 for tag 15, half.height doesn't matter
         else{
-          #### set q to 0.1 if the plant is a seedling
-          if(!source.data[i,"Tag"] %in% diseased.focal.plants$Tag & (source.data[i,"corrected.height"]<=5 | grepl("seedling",source.data[i,"notes"]))) {q<-.1; if(is.na(source.data[i,"corrected.height"])) {half.height<-2.5} else {half.height<-source.data[i,"corrected.height"]*.5}}
-          #### extract q from data
+          #### set I to 0.1 if the plant is a seedling
+          if(!source.data[i,"Tag"] %in% diseased.focal.plants$Tag & (source.data[i,"corrected.height"]<=5 | grepl("seedling",source.data[i,"notes"]))) {I<-.1; if(is.na(source.data[i,"corrected.height"])) {half.height<-2.5} else {half.height<-source.data[i,"corrected.height"]*.5}}
+          #### extract I from data
           else {
             diseased.focal.plants.index<-intersect(which(diseased.focal.plants$Date==as.Date(date0)),which(diseased.focal.plants$Tag==source.data[i,"Tag"]))
             ##### if there's an actual measurment use that
-            if(length(diseased.focal.plants.index)==1) {q<-diseased.focal.plants[diseased.focal.plants.index,"inf.intens"]; half.height<-source.data[i,"corrected.height"]*.5}
+            if(length(diseased.focal.plants.index)==1) {I<-diseased.focal.plants[diseased.focal.plants.index,"inf.intens"]; half.height<-source.data[i,"corrected.height"]*.5}
             ##### if not, forecast or hindcast from closest observation
             if(length(diseased.focal.plants.index)==0)
             {
@@ -109,17 +109,17 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
               
               model.inf.intens<-diseased.focal.plants[diseased.focal.plants.index,"inf.intens"]
               
-              if (!length(model.inf.intens)>1 & source.data[i,"Tag"]==928) {q<-0; half.height<-0} #### plant #928 was suspected to be diseased but no pustuels were actually observed until 7/21
+              if (!length(model.inf.intens)>1 & source.data[i,"Tag"]==928) {I<-0; half.height<-0} #### plant #928 was suspected to be diseased but no pustuels were actually observed until 7/21
               if (length(model.inf.intens)<1 & source.data[i,"Tag"]!=928) {predict.inf.intens(mean.starting.inf.intens,source.data[i,"corrected.height"],site,as.POSIXct(paste0(source.data[i,"Date.First.Observed.Diseased"]," 12:00:00"),tz="UTC"),date0)}
               if (length(model.inf.intens)>1) {
                 if(closest.date>as.Date(date0)) ###### hindcast
                 {
-                  q<-predict.inf.intens.last(inf.intens.next=model.inf.intens,max.height.last=source.data[i,"corrected.height"],site=site,date0=date0,date1=as.POSIXct(paste0(closest.date," 12:00:00"),tz="UTC"))
+                  I<-predict.inf.intens.last(inf.intens.next=model.inf.intens,max.height.last=source.data[i,"corrected.height"],site=site,date0=date0,date1=as.POSIXct(paste0(closest.date," 12:00:00"),tz="UTC"))
                   half.height<-diseased.focal.plants[diseased.focal.plants.index,"max.height"]*.5
                 }
                 if(closest.date<as.Date(date0)) ###### forecast
                 {
-                  q<-predict.inf.intens(inf.intens.last=model.inf.intens,max.height.last=source.data[i,"corrected.height"],site=site,date0=as.POSIXct(paste0(closest.date," 12:00:00"),tz="UTC"),date1=date1)
+                  I<-predict.inf.intens(inf.intens.last=model.inf.intens,max.height.last=source.data[i,"corrected.height"],site=site,date0=as.POSIXct(paste0(closest.date," 12:00:00"),tz="UTC"),date1=date1)
                   half.height<-diseased.focal.plants[diseased.focal.plants.index,"max.height"]*.5
                 }
               }
@@ -130,16 +130,16 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       #### if the source plant is not tagged
       if(is.na(source.data[i,"Tag"]))
       {
-        #### set q to 0.1 if the plant is a seedling
+        #### set I to 0.1 if the plant is a seedling
         if(source.data[i,"corrected.height"]<=5 | source.data[i,"notes"]=="seedling")
         {
-          q<-.1
+          I<-.1
           half.height<-2.5
         } else {print('error--missing plant inf intens data'); print(i)}
       }
       
       ### calculate foi from source plant
-      tot.dep<-c(tot.dep,predict.kernel.tilted.plume(q=q,H=half.height,k=4.828517e-07,alphaz=1.687830e-06,Ws=9.299220e-01,xtarget=xcord-sourceX,ytarget=ycord-sourceY,wind.data=wind.data)) 
+      tot.dep<-c(tot.dep,predict.kernel.tilted.plume(I=I,H=half.height,k=1.506668e-06,Ws=1.016603e+00,A=1.488799e-01,xtarget=xcord-sourceX,ytarget=ycord-sourceY,wind.data=wind.data)) 
     }
     sum(tot.dep)
   }
