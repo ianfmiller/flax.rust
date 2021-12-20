@@ -11,7 +11,7 @@ library(parallel)
 ### s is wind speed
 ### x is distance in direction of wind
 ### y is distance orthoganal to direction of wind
-### sigma is sd of dispersal in y and z directions
+### sigmasq is sd of dispersal in y and z directions
 
 
 ## tilted gaussian plume
@@ -22,8 +22,8 @@ tilted.plume<-function(I,H,k,Ws,A,s,x,y)
   if(x>0)
   {
     if(s==0) {s<-.33/2}
-    sigma<-2*(.5*H+A)*x/s
-    out<-((I*k*Ws)/(2*pi*s*sigma^2))*exp(((-y^2)/(2*sigma^2))-((H-Ws*x/s)^2/(2*sigma^2)))
+    sigmasq<-2*(A)*x/s
+    out<-((I*k*Ws)/(2*pi*s*sigmasq))*exp(((-y^2)/(2*sigmasq))-((H-Ws*x/s)^2/(2*sigmasq)))
   } else {out<-0}
   out
 }
