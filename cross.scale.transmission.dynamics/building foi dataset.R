@@ -139,7 +139,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       }
       
       ### calculate foi from source plant
-      tot.dep<-c(tot.dep,predict.kernel.tilted.plume(I=I,H=half.height,k=1.506668e-06,Ws=1.016603e+00,A=1.488799e-01,xtarget=xcord-sourceX,ytarget=ycord-sourceY,wind.data=wind.data)) 
+      tot.dep<-c(tot.dep,predict.kernel.tilted.plume(I=I,H=half.height,k=5.739690e-07,Ws=4.451030e-02,A=7.777373e-02,xtarget=xcord-sourceX,ytarget=ycord-sourceY,wind.data=wind.data)) 
     }
     sum(tot.dep)
   }
@@ -210,8 +210,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
       new.mean.wetness<-mean(weath.sub$wetness,na.rm=T)
 
-      sub.2.epi.data<-sub.1.epi.data[which(sub.1.epi.data$Date.First.Observed.Diseased<=date0),] ### epi data up until date0
-      sub.3.epi.data<-sub.1.epi.data[which(sub.1.epi.data$Date.First.Observed.Diseased<=date1),] ### epi date up until date1
+      sub.2.epi.data<-sub.1.epi.data[which(sub.1.epi.data$Date.First.Observed.Diseased<=as.Date(date0)),] ### epi data up until date0
+      sub.3.epi.data<-sub.1.epi.data[which(sub.1.epi.data$Date.First.Observed.Diseased<=as.Date(date1)),] ### epi date up until date1
       
       ## build set of ID strings for plants that have become infected by date0
       epi.ID.strings<-c()
@@ -249,7 +249,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
           if(is.na(sub.loc.data[index,"tag"]))
           {
             target.index<-Reduce(intersect,list(which(corrected.heights$X==sub.loc.data[index,"X"]),which(corrected.heights$Y==sub.loc.data[index,"Y"]),which(corrected.heights$x==sub.loc.data[index,"x"]),which(corrected.heights$y==sub.loc.data[index,"y"]),which(corrected.heights$Date==as.Date(date0))))
-            targt.height<-as.numeric(corrected.heights[target.index,"height.cm"])
+            target.height<-as.numeric(corrected.heights[target.index,"height.cm"])
           }
           if(!is.na(sub.loc.data[index,"tag"]))
           {
