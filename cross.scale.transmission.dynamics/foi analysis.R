@@ -1,5 +1,5 @@
 library(mgcv)
-library(RColorBrewer)
+library(viridis)
 # load data
 
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/building foi dataset.R")
@@ -15,23 +15,23 @@ foi.data$tag<-as.factor(foi.data$tag)
 
 layout(matrix(c(1,1,2,3,4,5),3,2,byrow = T))
 par(mar=c(6,6,6,6))
-plot(jitter(log10(foi.data$foi)),jitter(foi.data$status.next),xlab=expression('predicted '*log[10]*'spore deposition'),ylab="outcome",main="all",axes=F,cex.lab=2)
+plot(jitter(log10(foi.data$foi)),jitter(foi.data$status.next),xlab=expression('predicted '*log[10]*' spore deposition'),ylab="outcome",main="all",axes=F,cex.lab=2)
 axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=2)
 axis(1,cex.axis=2)
 box()
-plot(jitter(log10(foi.data[which(foi.data$site=="CC"),"foi"]+1e-10)),jitter(foi.data[which(foi.data$site=="CC"),"status.next"]),xlab="log10 foi",ylab="outcome",axes=F,col=magma(6)[2],xlim=c(min(log10(foi.data$foi+1e-10)),max(log10(foi.data$foi+1e-10))),main="CC",cex.lab=2,cex.main=2)
+plot(jitter(log10(foi.data[which(foi.data$site=="CC"),"foi"]+1e-10)),jitter(foi.data[which(foi.data$site=="CC"),"status.next"]),xlab=expression('predicted '*log[10]*' spore deposition'),ylab="outcome",axes=F,col=magma(6)[2],xlim=c(min(log10(foi.data$foi+1e-10)),max(log10(foi.data$foi+1e-10))),main="CC",cex.lab=2,cex.main=2)
 axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=2)
 axis(1,cex.axis=2)
 box()
-plot(jitter(log10(foi.data[which(foi.data$site=="BT"),"foi"]+1e-10)),jitter(foi.data[which(foi.data$site=="BT"),"status.next"]),xlab="log10 foi",ylab="outcome",axes=F,col=magma(6)[3],xlim=c(min(log10(foi.data$foi+1e-10)),max(log10(foi.data$foi+1e-10))),main="BT",cex.lab=2,cex.main=2)
+plot(jitter(log10(foi.data[which(foi.data$site=="BT"),"foi"]+1e-10)),jitter(foi.data[which(foi.data$site=="BT"),"status.next"]),xlab=expression('predicted '*log[10]*' spore deposition'),ylab="outcome",axes=F,col=magma(6)[3],xlim=c(min(log10(foi.data$foi+1e-10)),max(log10(foi.data$foi+1e-10))),main="BT",cex.lab=2,cex.main=2)
 axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=2)
 axis(1,cex.axis=2)
 box()
-plot(jitter(log10(foi.data[which(foi.data$site=="GM"),"foi"]+1e-10)),jitter(foi.data[which(foi.data$site=="GM"),"status.next"]),xlab="log10 foi",ylab="outcome",axes=F,col=magma(6)[4],xlim=c(min(log10(foi.data$foi+1e-10)),max(log10(foi.data$foi+1e-10))),main="GM",cex.lab=2,cex.main=2)
+plot(jitter(log10(foi.data[which(foi.data$site=="GM"),"foi"]+1e-10)),jitter(foi.data[which(foi.data$site=="GM"),"status.next"]),xlab=expression('predicted '*log[10]*' spore deposition'),ylab="outcome",axes=F,col=magma(6)[4],xlim=c(min(log10(foi.data$foi+1e-10)),max(log10(foi.data$foi+1e-10))),main="GM",cex.lab=2,cex.main=2)
 axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=2)
 axis(1,cex.axis=2)
 box()
-plot(jitter(log10(foi.data[which(foi.data$site=="HM"),"foi"]+1e-10)),jitter(foi.data[which(foi.data$site=="HM"),"status.next"]),xlab="log10 foi",ylab="outcome",axes=F,col=magma(6)[5],xlim=c(min(log10(foi.data$foi+1e-10)),max(log10(foi.data$foi+1e-10))),main="HM",cex.lab=2,cex.main=2)
+plot(jitter(log10(foi.data[which(foi.data$site=="HM"),"foi"]+1e-10)),jitter(foi.data[which(foi.data$site=="HM"),"status.next"]),xlab=expression('predicted '*log[10]*' spore deposition'),ylab="outcome",axes=F,col=magma(6)[5],xlim=c(min(log10(foi.data$foi+1e-10)),max(log10(foi.data$foi+1e-10))),main="HM",cex.lab=2,cex.main=2)
 axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=2)
 axis(1,cex.axis=2)
 box()
@@ -61,6 +61,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
            control = list(nthreads=4))
   
   mod<-gam(status.next~s(foi)+s(foi,tag,bs="re")+s(foi,site,bs="re"),family=binomial(link="cloglog"),select=T,method="REML",data=foi.data)
+  mod<-gam(status.next~foi+s(foi,site,bs="re"),family=binomial(link="cloglog"),select=T,method="REML",data=foi.data)
   
   mod1<-gam(status.next~
              s(foi)+
