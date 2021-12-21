@@ -140,7 +140,6 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       
       ### calculate foi from source plant
       tot.dep<-c(tot.dep,predict.kernel.tilted.plume(I=I,H=half.height,k=5.739690e-07,Ws=4.451030e-02,A=7.777373e-02,xtarget=xcord-sourceX,ytarget=ycord-sourceY,wind.data=wind.data)) 
-      print(i)
     }
     sum(tot.dep)
   }
