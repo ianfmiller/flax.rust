@@ -15,10 +15,11 @@ demog<-demog[which(demog$year==2020),] #subset to 2020
 ## optimize
 
 ### optimizaiton
-opt<-optim(par=c(1.506668e-06,1.016603e+00,1.488799e-01),fn=param.search.optim.tilted.plume,control=list(trace=1))
+### will return silightly different result due to presence of a likelihood ridge
+opt<-optim(par=c(5.739690e-07 ,4.451030e-02,7.777373e-02),fn=param.search.optim.tilted.plume,control=list(trace=1))
 
 
-opt<-list(par=c(1.506668e-06,1.016603e+00,1.488799e-01))
+opt<-list(par=c(5.739690e-07,4.451030e-02, 7.777373e-02))
 
 ## visualize kernel
 test.mat<-data.frame(x=rep(seq(-2,2,.01),each=401),y=rep(seq(-2,2,.01),times=401))
@@ -31,9 +32,24 @@ filled.contour(x=seq(-2,2,.01),y=seq(-2,2,.01),z=res.mat,xlim=c(-2,2),ylim=c(-2,
 
 ## visualize fit
 pred.mat<-param.search.optim.tilted.plume(opt$par,return.out=T)
-plot(pred.mat$obs,pred.mat$pred)
+plot(pred.mat$obs,pred.mat$pred,asp=1)
 plot(log10(pred.mat$obs),log10(pred.mat$pred))
 plot(pred.mat$obs,pred.mat$pred-pred.mat$obs)
 plot(pred.mat$dist,pred.mat$pred-pred.mat$obs)
+
+## visually check optimality
+param.search.tilted.plume<-function(kval,Wsval,Aval)
+{
+  param.search.optim.tilted.plume(c(kval,Wsval,Aval))
+}
+
+Aset=7.777373e-02
+kset<-seq(5e-7,6e-7,length.out = 11)
+Wsset= seq(4e-2,5e-02,length.out = 11)
+test.mat<-expand.grid(kval=kset,Aval=Aset,Wsval=Wsset) 
+out<-mcmapply(param.search.tilted.plume,  kval = test.mat[,1],A=test.mat[,2],Wsval=test.mat[,3],mc.cores = 6)
+res.mat<-matrix(out[which(test.mat$k==kset)],length(kset),length(Wsset))
+contour(kset,Wsset,res.mat,xlab="k",ylab="Ws",nlevels = 100)
+points(opt$par[1],opt$par[2])
 
 

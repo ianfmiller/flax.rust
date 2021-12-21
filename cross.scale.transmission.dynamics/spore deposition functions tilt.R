@@ -22,8 +22,9 @@ tilted.plume<-function(I,H,k,Ws,A,s,x,y)
   if(x>0)
   {
     if(s==0) {s<-.33/2}
-    sigmasq<-2*(A)*x/s
-    out<-((I*k*Ws)/(2*pi*s*sigmasq))*exp(((-y^2)/(2*sigmasq))-((H-Ws*x/s)^2/(2*sigmasq)))
+    sigmasq<-2*(abs(A))*x/s
+    Ws<-abs(Ws)
+    out<-((I*k*Ws)/(2*pi*s*sigmasq*sigmasq))*exp((-y^2)/(2*sigmasq)-((H-Ws*x/s)^2)/(2*sigmasq))
   } else {out<-0}
   out
 }
@@ -146,9 +147,10 @@ correct.wind.degree<-function(x,site="blank")
 
 predict.kernel.tilted.plume.inst<-function(i,I,H,k,Ws,A,xtarget,ytarget,wind.data,site)
 {
-  delta.t<-wind.data[i+1,"date"]-wind.data[i,"date"]
-  cords<-mapply(get.plume.xy,2*pi*correct.wind.degree(wind.data[i,"wind.direction"],site = site)/360,MoreArgs=list(xorigin=0,yorigin=0,xtarget=xtarget,ytarget=ytarget))
-  tilted.plume(I=I,H=H,k=k,Ws=Ws,A=A,s=wind.data[i,"wind.speed"],x=cords[1,],y=cords[2,])
+    delta.t<-wind.data[i+1,"date"]-wind.data[i,"date"]
+    cords<-mapply(get.plume.xy,2*pi*correct.wind.degree(wind.data[i,"wind.direction"],site = site)/360,MoreArgs=list(xorigin=0,yorigin=0,xtarget=xtarget,ytarget=ytarget))
+    pred.data<-data.frame(s=wind.data[i,"wind.speed"],x=cords[1,],y=cords[2,])
+    out<-mapply(tilted.plume,pred.data[,1],pred.data[,2],pred.data[,3],MoreArgs = list(I=I,H=H,k=k,Ws=Ws,A=A))
 }
 
 predict.kernel.tilted.plume<-function(I,H,k,Ws,A,xtarget,ytarget,wind.data)
