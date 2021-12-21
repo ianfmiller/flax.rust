@@ -76,7 +76,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       #### if the source plant is tagged
       if(!is.na(source.data[i,"Tag"]))
       {
-        if(source.data[i,"Tag"]==15) {I<-0; half.height=10} #### set  I = 0 for tag 15, half.height doesn't matter
+        if(source.data[i,"Tag"]==15 | (source.data[i,"Tag"]==928)) {I<-0; half.height=10} #### set  I = 0 for tags 15, 928, half.height doesn't matter. 928 was marked as diseased, but no pustules were observed until 7/21/20, which is outside of date range for this dataset
         else{
           #### set I to 0.1 if the plant is a seedling
           if(!source.data[i,"Tag"] %in% diseased.focal.plants$Tag & (source.data[i,"corrected.height"]<=5 | grepl("seedling",source.data[i,"notes"]))) {I<-.1; if(is.na(source.data[i,"corrected.height"])) {half.height<-2.5} else {half.height<-source.data[i,"corrected.height"]*.5}}
@@ -140,6 +140,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       
       ### calculate foi from source plant
       tot.dep<-c(tot.dep,predict.kernel.tilted.plume(I=I,H=half.height,k=5.739690e-07,Ws=4.451030e-02,A=7.777373e-02,xtarget=xcord-sourceX,ytarget=ycord-sourceY,wind.data=wind.data)) 
+      print(i)
     }
     sum(tot.dep)
   }
