@@ -39,9 +39,8 @@ box()
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS"))
 {
-
   mod<-gam(status.next~
-             s(foi,max_height)+
+             s(log10(foi),height.cm)+
              s(mean.temp)+
              s(max.temp)+
              s(min.temp)+
@@ -52,42 +51,15 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
              s(mean.daily.rain)+
              s(mean.wetness)+
              +offset(log(time))+
-             s(foi,tag,bs="re")+
-             s(foi,site,bs="re"),
+             s(tag,bs="re")+
+             s(site,bs="re")+
            family=binomial(link="cloglog"),
            select = T,
            method="REML",
            data=foi.data,
            control = list(nthreads=4))
   
-  mod<-gam(status.next~s(foi)+s(foi,tag,bs="re")+s(foi,site,bs="re"),family=binomial(link="cloglog"),select=T,method="REML",data=foi.data)
-  mod<-gam(status.next~foi+s(foi,site,bs="re"),family=binomial(link="cloglog"),select=T,method="REML",data=foi.data)
-  
-  mod1<-gam(status.next~
-             s(foi)+
-             s(mean.temp)+
-             s(max.temp)+
-             s(min.temp)+
-             s(mean.abs.hum)+
-             s(max.abs.hum)+
-             s(min.abs.hum)+
-             s(mean.solar)+
-             s(mean.daily.rain)+
-             s(mean.wetness)+
-             +offset(log(time))+
-             s(tag,foi,bs="re")+
-             s(site,foi,bs="re"),
-           family=binomial(link="cloglog"),
-           select = T,
-           method="REML",
-           data=foi.data,
-           control = list(nthreads=6))
-  
-  mod1<-glm(status.next~foi,data=foi.data,family = binomial("cloglog"))
-  
-  mod<-glm()
-  
-  saveRDS(mod1,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
+  saveRDS(mod,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
 }
 
 foi.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
