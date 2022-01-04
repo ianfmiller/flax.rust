@@ -115,7 +115,7 @@ simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
     new.min.abs.hum<-min(abs.hum,na.rm=T)
     
     new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
-    new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)/(12*24)
+    new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)*(12*24)
     new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
     
     ### compare weather data coverage to make sure foi is not being underestimated

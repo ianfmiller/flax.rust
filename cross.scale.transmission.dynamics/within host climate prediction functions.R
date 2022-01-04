@@ -60,7 +60,7 @@ get.pred.data.temp.mean.quantile.pustule.model<-function(day.set,dummy.data,temp
   new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
   
   new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
-  new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)/(12*24)
+  new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)*(12*24)
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
 
   out.data<-data.frame(area=dummy.data,time=rep(delta.days,times=dim),site=rep(site,times=dim),
@@ -111,7 +111,7 @@ get.pred.data.temp.mean.quantile.n.pustules.model<-function(day.set,dummy.data,t
   new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
   
   new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
-  new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)/(12*24)
+  new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)*(12*24)
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
   
   out.data<-data.frame(n.pustules=dummy.data,time=rep(delta.days,times=dim),site=rep(site,times=dim),
@@ -162,7 +162,7 @@ get.pred.data.temp.mean.quantile.infection.intensity.model<-function(day.set,dum
   new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
   
   new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
-  new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)/(12*24)
+  new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)*(12*24)
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
   
   
@@ -214,7 +214,7 @@ get.pred.data.temp.mean.quantile.plant.growth.model<-function(day.set,dummy.data
   new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
   
   new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
-  new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)/(12*24)
+  new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)*(12*24)
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
   new.mean.soil.moisture<-mean(weath.sub$soil.moisture,na.rm=T)
   

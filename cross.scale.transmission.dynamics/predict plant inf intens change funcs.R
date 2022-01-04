@@ -34,7 +34,7 @@ predict.inf.intens<-function(inf.intens.last,max.height.last,site,date0,date1)
   new.min.abs.hum<-min(abs.hum,na.rm=T)
   
   new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
-  new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)/(12*24)
+  new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)*(12*24)
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
   new.mean.soil.moisture<-mean(weath.sub$soil.moisture,na.rm=T)
   
@@ -80,7 +80,7 @@ predict.inf.intens.boot<-function(inf.intens.last,max.height.last,site,date0,dat
   new.min.abs.hum<-min(abs.hum,na.rm=T)
   
   new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
-  new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)/(12*24)
+  new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)*(12*24)
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
   new.mean.soil.moisture<-mean(weath.sub$soil.moisture,na.rm=T)
   
@@ -136,7 +136,7 @@ predict.inf.intens.last<-function(inf.intens.next,max.height.last,site,date0,dat
   new.min.abs.hum<-min(abs.hum,na.rm=T)
   
   new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
-  new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)/(12*24)
+  new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)*(12*24)
   new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
   new.mean.soil.moisture<-mean(weath.sub$soil.moisture,na.rm=T)
   
