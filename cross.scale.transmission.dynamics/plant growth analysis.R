@@ -93,7 +93,7 @@ for(i in 1:101)
 }
 rect(0,-0.75-0.0075,1,0.75+0.0075)
 mtext("A",cex=1.25,font=2)
-mtext("te(plant height, infection intensity)",side=4,line=.5)
+#mtext("te(plant height, infection intensity)",side=4,line=.5)
 axis(2,cex.axis=1.5)
 
 par(mar=c(4,4.5,3,4))
