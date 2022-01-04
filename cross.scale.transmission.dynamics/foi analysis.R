@@ -125,6 +125,7 @@ grid()
 mtext("L",adj=1,cex=1.25,font=2)
 
 
+
 par(mar=c(6,8,6,0))
 layout(matrix(c(1,1,1,1,2),1,5))
 plot(log10(foi.data$foi),jitter(foi.data$status.next*1,factor=.5),xlab=expression('predicted '*log[10]*' spore depositin'),ylab="",axes=F,cex.lab=2,ylim=c(-0.1,1.1),xlim=c(-6,3))
