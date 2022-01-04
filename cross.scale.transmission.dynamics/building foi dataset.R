@@ -161,7 +161,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   {
     ## subset data by site
     sub.loc.data<-corrected.locs[which(corrected.locs$Site==site),]
-    #sub.loc.data<-sub.loc.data[which(sub.loc.data$added==F),] ### restrict analysis to plants who's location was recorded at beginning of field season so as to not introduce bias towards infection
+    sub.loc.data<-sub.loc.data[which(sub.loc.data$added==F),] ### restrict analysis to plants who's location was recorded at beginning of field season so as to not introduce bias towards infection
     sub.1.epi.data<-corrected.epi[which(corrected.epi$Site==site),]
     
     ## get ID strings for each plant in sub.loc.data
