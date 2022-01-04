@@ -63,7 +63,67 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
   saveRDS(mod,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
 }
 
+## load model
+
 foi.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
+
+## model checking
+#par(mfrow=c(2,2))
+#gam.check(foi.model) #Indicates that k should be higher all smooths aside from the tensor. Increasing k to significantly higher values is extremelly computationally expensive and leads to overfitting
+#concurvity(foi.model,full=F) #Concurvity is expected between all weather variables. The non-pessimistic estimations of concurvity (under $estimate and $observed) indicate that it is not a serious issue in the model fit.
+
+layout(matrix(c(1,1,1,1,2,3,3,3,3,4,4,4,4,5,5,5,5,18,14,6,6,6,6,7,7,7,7,8,8,8,8,9,9,9,9,15,16,10,10,10,10,11,11,11,11,12,12,12,12,13,13,13,13,17),3,18,byrow = T))
+
+par(mar=c(4,7,3,1.5))
+plot(foi.model,select = 1,scheme = 2,zlim=c(-8,8),too.far=.5,hcolors=rev(heat.colors(101)),contour.col="black",labcex=.75,cex.lab=1.5,cex.axis=1.5,xlab=expression(log[10]*' predicted spore deposition'),ylab="plant height (cm)",main="",rug=F)
+points(log10(foi.data$foi),foi.data$height.cm,pch=".")
+par(mar=c(4,1,3,4))
+plot(0,0,type="n",xlim=c(0,1),ylim=c(-8-0.08,8+0.08),axes=F,xlab="",ylab="")
+for(i in 1:101)
+{
+  ii<-seq(-8,8,length.out=101)[i]
+  rect(0,ii-0.08,1,ii+0.08,col=rev(heat.colors(101))[i],border = NA)
+}
+rect(0,-8-0.08,1,8+0.08)
+mtext("A",cex=1.25,font=2)
+#mtext(expression('te('*log[10]*' predicted spore deposition, plant height)'),side=4,line=.5)
+axis(2,cex.axis=1.5)
+
+par(mar=c(4,4.5,3,4))
+plot(foi.model,select = 2,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="mean temperature (°C)",ylab="s(mean temperature)")
+grid()
+mtext("B",adj=1,cex=1.25,font=2)
+plot(foi.model,select = 3,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="max. temperature (°C)",ylab="s(max. temperature)")
+grid()
+mtext("C",adj=1,cex=1.25,font=2)
+plot(foi.model,select = 4,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="min. temperature (°C)",ylab="s(min. temperature)")
+grid()
+mtext("D",adj=1,cex=1.25,font=2)
+plot(foi.model,select = 5,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('mean abs. humidity ('*g/m^3*')'),ylab="s(mean abs. humidity)")
+grid()
+mtext("E",adj=1,cex=1.25,font=2)
+plot(foi.model,select = 6,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('max. abs. humidity ('*g/m^3*')'),ylab="s(max. abs. humidity)")
+grid()
+mtext("F",adj=1,cex=1.25,font=2)
+plot(foi.model,select = 7,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('min abs. humidity ('*g/m^3*')'),ylab="s(min. abs. humidity)")
+grid()
+mtext("G",adj=1,cex=1.25,font=2)
+plot(foi.model,select = 8,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('mean solar radiation ('*W/m^2*')'),ylab="s(mean solalr radiation")
+grid()
+mtext("H",adj=1,cex=1.25,font=2)
+plot(foi.model,select = 9,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="total rainfall (mm)",ylab="s(total rainfall)")
+grid()
+mtext("I",adj=1,cex=1.25,font=2)
+plot(plant.growth.model,select = 10,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="mean leaf wetness (%)",ylab="s(mean leaf wetness)")
+grid()
+mtext("J",adj=1,cex=1.25,font=2)
+plot(foi.model,select = 11,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(tag)")
+grid()
+mtext("L",adj=1,cex=1.25,font=2)
+plot(foi.model,select = 12,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(site)")
+grid()
+mtext("M",adj=1,cex=1.25,font=2)
+
 
 par(mar=c(6,8,6,0))
 layout(matrix(c(1,1,1,1,2),1,5))
