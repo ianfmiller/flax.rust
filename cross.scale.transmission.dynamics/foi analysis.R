@@ -39,7 +39,7 @@ box()
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS"))
 {
-  mod<-gam(status.next~
+  mod<-bam(status.next~
              s(log10(foi),height.cm)+
              s(mean.temp)+
              s(max.temp)+
@@ -52,12 +52,13 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
              s(mean.wetness)+
              +offset(log(time))+
              s(tag,bs="re")+
-             s(site,bs="re")+
+             s(site,bs="re"),
            family=binomial(link="cloglog"),
            select = T,
-           method="REML",
+           method="fREML",
            data=foi.data,
-           control = list(nthreads=4))
+           control = list(nthreads=4),
+           discrete = T)
   
   saveRDS(mod,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
 }
