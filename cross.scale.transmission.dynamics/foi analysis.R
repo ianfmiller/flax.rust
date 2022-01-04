@@ -122,7 +122,11 @@ grid()
 mtext("K",adj=1,cex=1.25,font=2)
 plot(foi.model,select = 12,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(site)")
 grid()
+<<<<<<< HEAD
 mtext("L",adj=1,cex=1.25,font=2)
+=======
+mtext("M",adj=1,cex=1.25,font=2)
+>>>>>>> 63ea98f57ef1fdf48d2d0503b434e30ebb76afc6
 
 par(mar=c(6,8,6,0))
 layout(matrix(c(1,1,1,1,2),1,5))
@@ -137,6 +141,7 @@ fois<-10^seq(-6,2.3,.1)
 new.data.1<-foi.data[1:length(fois),]
 new.data.1$foi<-fois
 new.data.1$height.cm<-5
+<<<<<<< HEAD
 
 new.data.2<-foi.data[1:length(fois),]
 new.data.2$foi<-fois
@@ -146,6 +151,17 @@ new.data.3<-foi.data[1:length(fois),]
 new.data.3$foi<-fois
 new.data.3$height.cm<-25
 
+=======
+
+new.data.2<-foi.data[1:length(fois),]
+new.data.2$foi<-fois
+new.data.2$height.cm<-10
+
+new.data.3<-foi.data[1:length(fois),]
+new.data.3$foi<-fois
+new.data.3$height.cm<-25
+
+>>>>>>> 63ea98f57ef1fdf48d2d0503b434e30ebb76afc6
 new.data.4<-foi.data[1:length(fois),]
 new.data.4$foi<-fois
 new.data.4$height.cm<-50
