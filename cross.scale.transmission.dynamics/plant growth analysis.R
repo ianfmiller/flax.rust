@@ -45,6 +45,7 @@ abline(0,1,lty=2)
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS"))
 {
+  set.seed(23094867)
   mod<-gam((height.next-height)/time~0+
              te(height,inf.intens)+
              s(mean.temp)+
