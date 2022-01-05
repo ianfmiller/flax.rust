@@ -1,4 +1,4 @@
-if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/foi.data.RDS")))
+if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/transmission.data.RDS")))
 {
   # load datasets and functions
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant loc dataset building.R")
@@ -12,7 +12,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   diseased.focal.plants<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/diseased.focal.plants.RDS")
   corrected.heights<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/corrected.plant.heights.RDS")
   corrected.epi<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/corrected.epi.RDS")
-  # Time periods for fitting glm of infection~foi to data:
+  # Time periods for fitting glm of infection~transmission to data:
   #CC: 6/22(first data)->7/27(last prediction)
   #BT: 6/24(first data)->7/8(last prediction)
   #GM: 6/16(first data)->7/15(last prediction)
@@ -23,9 +23,9 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   ### Miissing plant inf intensity measurments that could be fore/hindcasted from existing observations using using plant inf intens model. THe window for fore/hindcasting was limited to +/- 1 week frpm existing data
   ### Tag #15 in "CC" which was assumed to have 0 inf intensity as indicated by an observation on 6/22
   
-  # function for calculating foi
+  # function for calculating transmission
   
-  foi.func<-function(site,date0,date1,epi.data=corrected.epi,xcord,ycord)
+  total.spore.deposition.func<-function(site,date0,date1,epi.data=corrected.epi,xcord,ycord)
   {
     ## get wind data from site and dates
     
@@ -65,7 +65,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
     ### add in courrected hieght data
     source.data<-data.frame(source.data,"corrected.height"=corrected.heights.vec)
     
-    ## loop to calculate summed foi from all sources
+    ## loop to calculate summed transmission from all sources
     tot.dep<-c()
     for(i in 1:dim(source.data)[1])
     {
@@ -138,7 +138,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
         } else {print('error--missing plant inf intens data'); print(i)}
       }
       
-      ### calculate foi from source plant
+      ### calculate transmission from source plant
       tot.dep<-c(tot.dep,predict.kernel.tilted.plume(I=I,H=half.height/100,k=5.739690e-07,Ws=4.451030e-02,A=7.777373e-02,xtarget=xcord-sourceX,ytarget=ycord-sourceY,wind.data=wind.data)) 
     }
     sum(tot.dep)
@@ -149,9 +149,9 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   epi.obs.dates<-list("CC"=c("2020-06-22","2020-06-29","2020-07-06","2020-07-13","2020-07-20","2020-07-27"),"BT"=c("2020-06-24","2020-07-01","2020-07-08"),"GM"=c("2020-06-23","2020-06-30","2020-07-02","2020-07-07","2020-07-09","2020-07-15"),"HM"=c("2020-06-25","2020-07-02","2020-07-07","2020-07-09","2020-07-15"))    
   data.dates<-list("CC"=c("2020-06-22","2020-06-29","2020-07-06","2020-07-13","2020-07-20"),"BT"=c("2020-06-24","2020-07-01"),"GM"=c("2020-06-23","2020-06-30","2020-07-02","2020-07-07","2020-07-09"),"HM"=c("2020-06-25","2020-07-02","2020-07-07","2020-07-09"))
   
-  # build empty data object for foi vs outcome data
+  # build empty data object for transmission vs outcome data
   
-  foi.data<-data.frame("site"=character(),"date"=as.Date(character()),"status"=character(),"status.next"=character(),"tag"=character(),"X"=numeric(),"Y"=numeric(),"x"=numeric(),"y"=numeric(),"time"=numeric(),"height.cm"=numeric(),"foi"=numeric(),
+  transmission.data<-data.frame("site"=character(),"date"=as.Date(character()),"status"=character(),"status.next"=character(),"tag"=character(),"X"=numeric(),"Y"=numeric(),"x"=numeric(),"y"=numeric(),"time"=numeric(),"height.cm"=numeric(),"tot.spore.deposition"=numeric(),
                        "mean.temp"=numeric(),"max.temp"=numeric(),"min.temp"=numeric(),"mean.abs.hum"=numeric(),"max.abs.hum"=numeric(),"min.abs.hum"=numeric(),
                        "mean.daily.rain"=numeric(),"mean.solar"=numeric(),"mean.wetness"=numeric())
 
@@ -172,7 +172,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       if(!is.na(sub.loc.data[i,"tag"])) {ID.strings<-c(ID.strings,sub.loc.data[i,"tag"])}
     }
     
-    ## for each date for which we will be able to calculate foi:
+    ## for each date for which we will be able to calculate total spore deposition:
     for(date.index in (1:length(data.dates[which(sites==site)][[1]])))
     {
       date0<-epi.obs.dates[which(sites==site)][[1]][date.index] ### date of current observation
@@ -257,8 +257,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
           }
           status<-ifelse(ID.string %in% epi.ID.strings,1,0) #### count plant as currently infected if its ID string shows up in the set of plants that have been infected by date0
           new.status<-ifelse(ID.string %in% epi.ID.strings.next,1,0) #### count plant as becoming infected by next obs if its ID string shows up in the set of plants that have been infected by date1
-          foi<-foi.func(site=site,date0=date0,date1=date1,epi.data=corrected.epi,xcord=sub.loc.data[index,"X"]+sub.loc.data[index,"x"],ycord=sub.loc.data[index,"Y"]+sub.loc.data[index,"y"]) #### calculate foi experienced
-          foi.data<-rbind(foi.data,data.frame("site"=site,"date"=as.Date(date0),"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"time"=delta.days,"height.cm"=target.height,"foi"=foi,
+          tot.spore.deposition<-total.spore.deposition.func(site=site,date0=date0,date1=date1,epi.data=corrected.epi,xcord=sub.loc.data[index,"X"]+sub.loc.data[index,"x"],ycord=sub.loc.data[index,"Y"]+sub.loc.data[index,"y"]) #### calculate spore deposition experienced
+          transmission.data<-rbind(transmission.data,data.frame("site"=site,"date"=as.Date(date0),"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"time"=delta.days,"height.cm"=target.height,"tot.spore.deposition"=tot.spore.deposition,
                                               "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.mean.abs.hum,
                                               "mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.wetness"=new.mean.wetness)) #### add new entry to data object
         }
@@ -278,8 +278,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
           order<-which(which(ID.strings==ID.string)==index) #### figure out which repeat (e.g. 2nd) this plant is
           status<-ifelse(length(which(epi.ID.strings==ID.string))>=order,1,0) #### for plant that is the nth repeat, count as currently infected if at least n matching ID strings show up in epi.ID.strings
           new.status<-ifelse(length(which(epi.ID.strings.next==ID.string))>=order,1,0) #### for plant that is the nth repeat, count as becoming infected by next obs if at least n matching ID strings show up in epi.ID.strings.next
-          foi<-foi.func(site=site,date0=date0,date1=date1,epi.data=corrected.epi,xcord=sub.loc.data[index,"X"]+sub.loc.data[index,"x"],ycord=sub.loc.data[index,"Y"]+sub.loc.data[index,"y"]) #### calculate foi experienced
-          foi.data<-rbind(foi.data,data.frame("site"=site,"date"=as.Date(date0),"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"time"=delta.days,"height.cm"=targt.height,"foi"=foi,
+          tot.spore.deposition<-total.spore.deposition.func(site=site,date0=date0,date1=date1,epi.data=corrected.epi,xcord=sub.loc.data[index,"X"]+sub.loc.data[index,"x"],ycord=sub.loc.data[index,"Y"]+sub.loc.data[index,"y"]) #### calculate spore deposition experienced
+          transmission.data<-rbind(transmission.data,data.frame("site"=site,"date"=as.Date(date0),"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"time"=delta.days,"height.cm"=targt.height,"tot.spore.deposition"=tot.spore.deposition,
                                               "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.mean.abs.hum,
                                               "mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.wetness"=new.mean.wetness)) #### add new entry to data object
         }
@@ -289,8 +289,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   }
 
   
-  saveRDS(foi.data,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/foi.data.RDS")
+  saveRDS(transmission.data,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/transmission.data.RDS")
 }
 
-foi.data<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/foi.data.RDS")
+transmission.data<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/transmission.data.RDS")
 
