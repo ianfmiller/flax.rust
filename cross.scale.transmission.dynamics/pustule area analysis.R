@@ -1,4 +1,3 @@
-set.seed(34020968)
 library(mgcv)
 
 
@@ -89,6 +88,7 @@ abline(0,1,lty=2)
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS"))
 {
+  set.seed(34020968)
   mod<-gam((area.next-area)/time~0+
               s(area)+
               s(mean.temp)+
