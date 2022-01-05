@@ -19,19 +19,19 @@ plot(jitter(log10(transmission.data$tot.spore.deposition)),jitter(transmission.d
 axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=2)
 axis(1,cex.axis=2)
 box()
-plot(jitter(log10(transmission.data[which(transmission.data$site=="CC"),"spore deposition"]+1e-10)),jitter(transmission.data[which(transmission.data$site=="CC"),"status.next"]),xlab=expression('predicted '*log[10]*' spore deposition'),ylab="outcome",axes=F,col=magma(6)[2],xlim=c(min(log10(transmission.data$tot.spore.deposition+1e-10)),max(log10(transmission.data$tot.spore.deposition+1e-10))),main="CC",cex.lab=2,cex.main=2)
+plot(jitter(log10(transmission.data[which(transmission.data$site=="CC"),"tot.spore.deposition"]+1e-10)),jitter(transmission.data[which(transmission.data$site=="CC"),"status.next"]),xlab=expression('predicted '*log[10]*' spore deposition'),ylab="outcome",axes=F,col=magma(6)[2],xlim=c(min(log10(transmission.data$tot.spore.deposition+1e-10)),max(log10(transmission.data$tot.spore.deposition+1e-10))),main="CC",cex.lab=2,cex.main=2)
 axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=2)
 axis(1,cex.axis=2)
 box()
-plot(jitter(log10(transmission.data[which(transmission.data$site=="BT"),"spore deposition"]+1e-10)),jitter(transmission.data[which(transmission.data$site=="BT"),"status.next"]),xlab=expression('predicted '*log[10]*' spore deposition'),ylab="outcome",axes=F,col=magma(6)[3],xlim=c(min(log10(transmission.data$tot.spore.deposition+1e-10)),max(log10(transmission.data$tot.spore.deposition+1e-10))),main="BT",cex.lab=2,cex.main=2)
+plot(jitter(log10(transmission.data[which(transmission.data$site=="BT"),"tot.spore.deposition"]+1e-10)),jitter(transmission.data[which(transmission.data$site=="BT"),"status.next"]),xlab=expression('predicted '*log[10]*' spore deposition'),ylab="outcome",axes=F,col=magma(6)[3],xlim=c(min(log10(transmission.data$tot.spore.deposition+1e-10)),max(log10(transmission.data$tot.spore.deposition+1e-10))),main="BT",cex.lab=2,cex.main=2)
 axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=2)
 axis(1,cex.axis=2)
 box()
-plot(jitter(log10(transmission.data[which(transmission.data$site=="GM"),"spore deposition"]+1e-10)),jitter(transmission.data[which(transmission.data$site=="GM"),"status.next"]),xlab=expression('predicted '*log[10]*' spore deposition'),ylab="outcome",axes=F,col=magma(6)[4],xlim=c(min(log10(transmission.data$tot.spore.deposition+1e-10)),max(log10(transmission.data$tot.spore.deposition+1e-10))),main="GM",cex.lab=2,cex.main=2)
+plot(jitter(log10(transmission.data[which(transmission.data$site=="GM"),"tot.spore.deposition"]+1e-10)),jitter(transmission.data[which(transmission.data$site=="GM"),"status.next"]),xlab=expression('predicted '*log[10]*' spore deposition'),ylab="outcome",axes=F,col=magma(6)[4],xlim=c(min(log10(transmission.data$tot.spore.deposition+1e-10)),max(log10(transmission.data$tot.spore.deposition+1e-10))),main="GM",cex.lab=2,cex.main=2)
 axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=2)
 axis(1,cex.axis=2)
 box()
-plot(jitter(log10(transmission.data[which(transmission.data$site=="HM"),"spore deposition"]+1e-10)),jitter(transmission.data[which(transmission.data$site=="HM"),"status.next"]),xlab=expression('predicted '*log[10]*' spore deposition'),ylab="outcome",axes=F,col=magma(6)[5],xlim=c(min(log10(transmission.data$tot.spore.deposition+1e-10)),max(log10(transmission.data$tot.spore.deposition+1e-10))),main="HM",cex.lab=2,cex.main=2)
+plot(jitter(log10(transmission.data[which(transmission.data$site=="HM"),"tot.spore.deposition"]+1e-10)),jitter(transmission.data[which(transmission.data$site=="HM"),"status.next"]),xlab=expression('predicted '*log[10]*' spore deposition'),ylab="outcome",axes=F,col=magma(6)[5],xlim=c(min(log10(transmission.data$tot.spore.deposition+1e-10)),max(log10(transmission.data$tot.spore.deposition+1e-10))),main="HM",cex.lab=2,cex.main=2)
 axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=2)
 axis(1,cex.axis=2)
 box()
@@ -39,6 +39,7 @@ box()
 
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/transmission.model.RDS"))
 {
+  set.seed(9843525)
   mod<-bam(status.next~
              s(log10(tot.spore.deposition),height.cm)+
              s(mean.temp)+
