@@ -1,10 +1,10 @@
 if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/transmission.data.RDS")))
 {
   set.seed(569087)
-  # load datasets and functions
-  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant loc dataset building.R")
+  # load data sets and functions
+  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant loc data set building.R")
   corrected.locs<-corrected.locs[-which(corrected.locs$tag %in% c(911, 912, 913, 943, 934, 935, 942, 944, 945, 984, 985, 986)),] # Trim out plants in unsurveyed region of CC. They will still be included as sources of transmission, but should not be analyzed as targets of transmission.
-  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant height dataset building.R")
+  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant height data set building.R")
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/predict plant inf intens change funcs.R")
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/spore deposition functions tilt.R")
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/starting plant inf intens model.R")
@@ -78,7 +78,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       #### if the source plant is tagged
       if(!is.na(source.data[i,"Tag"]))
       {
-        if(source.data[i,"Tag"]==15 | (source.data[i,"Tag"]==928)) {I<-0; half.height=10} #### set  I = 0 for tags 15, 928, half.height doesn't matter. 928 was marked as diseased, but no pustules were observed until 7/21/20, which is outside of date range for this dataset
+        if(source.data[i,"Tag"]==15 | (source.data[i,"Tag"]==928)) {I<-0; half.height=10} #### set  I = 0 for tags 15, 928, half.height doesn't matter. 928 was marked as diseased, but no pustules were observed until 7/21/20, which is outside of date range for this data set
         else{
           #### set I to 0.1 if the plant is a seedling
           if(!source.data[i,"Tag"] %in% diseased.focal.plants$Tag & (source.data[i,"corrected.height"]<=5 | grepl("seedling",source.data[i,"notes"]))) {I<-.1; if(is.na(source.data[i,"corrected.height"])) {half.height<-2.5} else {half.height<-source.data[i,"corrected.height"]*.5}}
