@@ -1,8 +1,10 @@
 if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/transmission.data.RDS")))
 {
+  set.seed(569087)
   # load datasets and functions
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant loc dataset building.R")
   corrected.locs<-corrected.locs[-which(corrected.locs$tag %in% c(911, 912, 913, 943, 934, 935, 942, 944, 945, 984, 985, 986)),] # Trim out plants in unsurveyed region of CC. They will still be included as sources of transmission, but should not be analyzed as targets of transmission.
+  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant height dataset building.R")
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/predict plant inf intens change funcs.R")
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/spore deposition functions tilt.R")
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/starting plant inf intens model.R")
