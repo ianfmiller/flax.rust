@@ -7,7 +7,7 @@ infection.intensity.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.tra
 temp.rh.sub.func<-function(x,lower.bound,upper.bound) {out<-subset(x,temp.c>=lower.bound); out<-subset(out,temp.c<=upper.bound); out}
 
 #function for predicting plant inf intens change
-predict.inf.intens<-function(inf.intens.last,max.height.last,site,date0,date1)
+predict.inf.intens<-function(inf.intens.last,max.height.last,site,date0,date1,exclude.site=F)
 {
   # load weather data
   ## subst temp rh data to relevant window
@@ -47,12 +47,17 @@ predict.inf.intens<-function(inf.intens.last,max.height.last,site,date0,date1)
                         "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
                         "mean.wetness"=new.mean.wetness,"mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.soil.moisture"=new.mean.soil.moisture)
   
-  inf.intens.next<-inf.intens.last+delta.days*predict(infection.intensity.model,newdata = pred.data,type="response",exclude = c('s(site)','s(tag)'))
+  if(exclude.site) {
+    inf.intens.next<-inf.intens.last+delta.days*predict(infection.intensity.model,newdata = pred.data,type="response",exclude = c('s(site)','s(tag)'))
+  } else {
+    inf.intens.next<-inf.intens.last+delta.days*predict(infection.intensity.model,newdata = pred.data,type="response",exclude = 's(tag)')
+    
+  }
   if(inf.intens.next<.1) {inf.intens.next<-0}
   inf.intens.next
 }
 
-predict.inf.intens.boot<-function(inf.intens.last,max.height.last,site,date0,date1,temp.addition=0)
+predict.inf.intens.boot<-function(inf.intens.last,max.height.last,site,date0,date1,temp.addition=0,exclude.site=F)
 {
   # load weather data
   ## subst temp rh data to relevant window
@@ -93,7 +98,12 @@ predict.inf.intens.boot<-function(inf.intens.last,max.height.last,site,date0,dat
                         "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
                         "mean.wetness"=new.mean.wetness,"mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.soil.moisture"=new.mean.soil.moisture)
   
-  Xp <- predict(infection.intensity.model, newdata = pred.data, exclude=c("s(site)","s(tag)"),type="lpmatrix")
+  if(exclude.site)
+  {
+    Xp <- predict(infection.intensity.model, newdata = pred.data, exclude=c("s(site)","s(tag)"),type="lpmatrix")
+  } else {
+    Xp <- predict(infection.intensity.model, newdata = pred.data, exclude="s(tag)",type="lpmatrix")
+  }
   beta <- coef(infection.intensity.model) ## posterior mean of coefs
   Vb   <- vcov(infection.intensity.model) ## posterior  cov of coefs
   n <- 2
@@ -109,7 +119,7 @@ predict.inf.intens.boot<-function(inf.intens.last,max.height.last,site,date0,dat
 }
 
 #function for predicting plant inf intens change
-predict.inf.intens.last<-function(inf.intens.next,max.height.last,site,date0,date1)
+predict.inf.intens.last<-function(inf.intens.next,max.height.last,site,date0,date1,exclude.site=F)
 {
   # load weather data
   ## subst temp rh data to relevant window
@@ -152,7 +162,12 @@ predict.inf.intens.last<-function(inf.intens.next,max.height.last,site,date0,dat
                           "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                           "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
                           "mean.wetness"=new.mean.wetness,"mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.soil.moisture"=new.mean.soil.moisture)
-    inf.intens.next.pred<-inf.intens.last.test+delta.days*predict(infection.intensity.model,newdata=pred.data,exclude = c('s(site)','s(tag)'))
+    if(exclude.site)
+    {
+      inf.intens.next.pred<-inf.intens.last.test+delta.days*predict(infection.intensity.model,newdata=pred.data,exclude = c('s(site)','s(tag)'))
+    } else {
+      inf.intens.next.pred<-inf.intens.last.test+delta.days*predict(infection.intensity.model,newdata=pred.data,exclude = 's(tag)')
+    }
     abs(inf.intens.next.pred-inf.intens.next)
   }
   inf.intens.last<-optim(c(inf.intens.next),pred.func,method = "Brent",lower=0,upper=10e6)$par
