@@ -42,9 +42,9 @@ simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
       new.max.height<-max(sub.locs[i,"height.cm"],5,na.rm = T)
     } else 
     {
-      if((as.Date(sub.locs[i,"Date"],tryFormats = "%m/%d/%y") >= as.Date(date0) ) & is.na(sub.locs[i,"height.cm"])) {new.max.height<-5} else 
+      if((as.Date(sub.locs[i,"Date"],tryFormats = "%m/%d/%y") >= as.Date(date0) ) & is.na(sub.locs[i,"height.cm"])) {new.max.height<-5} else  #set max height to 5 for seedlings w/o max height recorded
         {
-          new.max.height<-predict.plant.growth(height.last=max(sub.locs[i,"height.cm"],5,na.rm = T),inf.intens.last=0,site=site,date0=as.Date(sub.locs[i,"Date"],tryFormats = "%m/%d/%y"),date1=as.Date(date0),exclude.site = F) #set max height to 5 for seedlings w/o max height recorded  
+          new.max.height<-predict.plant.growth(height.last=max(sub.locs[i,"height.cm"],5,na.rm = T),inf.intens.last=0,site=site,date0=as.Date(sub.locs[i,"Date"],tryFormats = "%m/%d/%y"),date1=as.Date(date0)) #otherwise, predict
         }
     }
     
