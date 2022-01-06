@@ -1,12 +1,13 @@
 # load + prep data
 library(mgcv)
 library(MASS)
-source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant loc dataset building.R")
+source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant loc data set building.R")
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/predict plant inf intens change funcs.R")
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/spore deposition functions tilt.R")
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/predict plant height change funcs.R")
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/starting plant inf intens model.R")
-foi.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/foi.model.RDS")
+transmission.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/transmission.model.RDS")
+transmission.data<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/transmission.data.RDS")
 heights<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plant.heights.RDS")
 diseased.focal.plants<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/diseased.focal.plants.RDS")
 rm(site)
@@ -118,12 +119,12 @@ simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
     new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)*(12*24)
     new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
     
-    ### compare weather data coverage to make sure foi is not being underestimated
+    ### compare weather data coverage to make sure spore deposition is not being underestimated
     time.diff.weather.data<-weath.sub$date[nrow(weath.sub)]-weath.sub$date[1]
     units(time.diff.weather.data)<-"days"
     time.diff.epi.data<-date1-date0
     units(time.diff.epi.data)<-"days"
-    if(time.diff.epi.data-time.diff.weather.data) {foi.mod<-(as.numeric(time.diff.weather.data)/as.numeric(time.diff.epi.data))^-1} else{foi.mod<-1}
+    if(time.diff.epi.data-time.diff.weather.data) {transmission.mod<-(as.numeric(time.diff.weather.data)/as.numeric(time.diff.epi.data))^-1} else{transmission.mod<-1}
     
     ### get data from previous date
     last.epi<-pred.epi[which(pred.epi$date==as.Date(date0)),]
@@ -135,7 +136,7 @@ simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
       ### if plant is healthy calulate odds of becoming infected. If infected, set p.inf.intens to 0.1
       if(last.epi[i,"status"]==0)
       {
-        foi<-0
+        spore.deposition<-0
         xcord<-sub.locs[i,"X"]+sub.locs[i,"x"]
         ycord<-sub.locs[i,"Y"]+sub.locs[i,"y"]
         target.tag<-ifelse(is.na(last.epi[i,"tag"]),paste0(site,"X",xcord,"Y",ycord),last.epi[i,"tag"])
@@ -145,11 +146,27 @@ simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
           sourceY<-last.epi.dis.set[j,"Y"]+last.epi.dis.set[j,"y"]
           half.height<-last.epi.dis.set[j,"max.height"]/2
           I<-last.epi.dis.set[j,"inf.intens"]
-          foi<-foi+predict.kernel.tilted.plume(I=I,H=half.height/100,k=5.739690e-07,Ws=4.451030e-02,A=7.777373e-02,xtarget=xcord-sourceX,ytarget=ycord-sourceY,wind.data=weath.sub)
+          spore.deposition<-spore.deposition+predict.kernel.tilted.plume(I=I,H=half.height/100,k=5.739690e-07,Ws=4.451030e-02,A=7.777373e-02,xtarget=xcord-sourceX,ytarget=ycord-sourceY,wind.data=weath.sub)
         }
-        foi<-foi*foi.mod ### correct for any gaps in weath data
-        if(foi==0) foi<-10e-10
-        pred.inf.odds<-predict(foi.model,newdata = data.frame("site"=site,"tag"=target.tag,"foi"=foi,"height.cm"=last.epi[i,"max.height"],"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.mean.abs.hum,"min.abs.hum"=new.min.abs.hum,"mean.solar"=new.mean.solar,"mean.daily.rain"=new.mean.daily.rain,"mean.wetness"=new.mean.wetness,"time"=delta.days),type="response") ### predict odds of becoming infected
+        spore.deposition<-spore.deposition*transmission.mod ### correct for any gaps in weath data
+        if(spore.deposition==0) spore.deposition<-10e-10
+        #newdata = transmission.data[1,c("site","tag","tot.spore.deposition","height.cm","mean.temp","max.temp","min.temp","mean.abs.hum","max.abs.hum","min.abs.hum","mean.solar","mean.daily.rain","mean.wetness","time")]
+        #newdata[1,c("site","tag","tot.spore.deposition","height.cm","mean.temp","max.temp","min.temp","mean.abs.hum","max.abs.hum","min.abs.hum","mean.solar","mean.daily.rain","mean.wetness","time")]<-c(site,as.character(target.tag),spore.deposition,last.epi[i,"max.height"],new.mean.temp,new.max.temp,new.min.temp,new.mean.abs.hum,new.max.abs.hum,new.min.abs.hum,new.mean.solar,new.mean.daily.rain,new.mean.wetness,delta.days)
+        #class(newdata[,3:14])<-"numeric"
+        if(target.tag %in% unique(transmission.data$tag))
+        {
+          pred.inf.odds<-predict(transmission.model,
+                                 newdata = data.frame("site"=site,"tag"=target.tag,"tot.spore.deposition"=spore.deposition,"height.cm"=last.epi[i,"max.height"],"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,"mean.solar"=new.mean.solar,"mean.daily.rain"=new.mean.daily.rain,"mean.wetness"=new.mean.wetness,"time"=delta.days),
+                                 type="response",
+                                 newdata.guaranteed=T,discrete = T) ### predict odds of becoming infected
+        } else 
+        {
+          pred.inf.odds<-predict(transmission.model,
+                                 newdata = data.frame("site"=site,"tag"=1,"tot.spore.deposition"=spore.deposition,"height.cm"=last.epi[i,"max.height"],"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,"mean.solar"=new.mean.solar,"mean.daily.rain"=new.mean.daily.rain,"mean.wetness"=new.mean.wetness,"time"=delta.days),
+                                 type="response",exclude = "s(tag)",
+                                 newdata.guaranteed=T,discrete = T) ### predict odds of becoming infected
+          
+        }
         draw<-runif(1) ### draw random number between 0 and 1
         
         if(draw<=pred.inf.odds) ### if draw <= odds make plant infected
