@@ -22,7 +22,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   ## These periods were selected such that the plant infection intensity metric was recorded for every infected plant in the transect for the observation prior to the observed changes in infection status
   ## Exceptions wer emade for:
   ### Infected seedling, which were assumed to have 0.1 starting inf intensity
-  ### Miissing plant inf intensity measurments that could be fore/hindcasted from existing observations using using plant inf intens model. THe window for fore/hindcasting was limited to +/- 1 week frpm existing data
+  ### Miissing plant inf intensity measurments that could be fore/hindcasted from existing observations using using plant inf intens model. The window for fore/hindcasting was limited to +/- 1 week frpm existing data
   ### Tag #15 in "CC" which was assumed to have 0 inf intensity as indicated by an observation on 6/22
   
   # function for calculating transmission
