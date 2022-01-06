@@ -41,7 +41,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 {
   set.seed(9843525)
   mod<-bam(status.next~
-             s(log10(tot.spore.deposition),height.cm)+
+             s(log10(tot.spore.deposition),height.cm,k=15)+
              s(mean.temp)+
              s(max.temp)+
              s(min.temp)+
@@ -69,9 +69,9 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 transmission.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/transmission.model.RDS")
 
 ## model checking
-#par(mfrow=c(2,2))
-#gam.check(transmission.model) #Indicates that k should be higher all smooths aside from the tensor. Increasing k to significantly higher values is extremelly computationally expensive and leads to overfitting
-#concurvity(transmission.model,full=F) #Concurvity is expected between all weather variables. The non-pessimistic estimations of concurvity (under $estimate and $observed) indicate that it is not a serious issue in the model fit.
+par(mfrow=c(2,2))
+gam.check(transmission.model) #We increased k for the tensor after the default value returned a low p value. Even with k=15, k check indicates that k should be higher for the tensor. Increasing k to significantly higher values is extremelly computationally expensive and does not resolve this issue.
+concurvity(transmission.model,full=F) #Concurvity is expected between all weather variables. The non-pessimistic estimations of concurvity (under $estimate and $observed) indicate that it is not a serious issue in the model fit.
 
 layout(matrix(c(1,1,1,1,2,3,3,3,3,4,4,4,4,5,5,5,5,18,14,6,6,6,6,7,7,7,7,8,8,8,8,9,9,9,9,15,16,10,10,10,10,11,11,11,11,12,12,12,12,13,13,13,13,17),3,18,byrow = T))
 
@@ -112,7 +112,7 @@ mtext("G",adj=1,cex=1.25,font=2)
 plot(transmission.model,select = 8,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('mean solar radiation ('*W/m^2*')'),ylab="s(mean solalr radiation")
 grid()
 mtext("H",adj=1,cex=1.25,font=2)
-plot(transmission.model,select = 9,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="total rainfall (mm)",ylab="s(total rainfall)")
+plot(transmission.model,select = 9,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="mean daily rainfall (mm)",ylab="s(mean daily rainfall)")
 grid()
 mtext("I",adj=1,cex=1.25,font=2)
 plot(transmission.model,select = 10,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="mean leaf wetness (%)",ylab="s(mean leaf wetness)")
