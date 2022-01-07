@@ -14,10 +14,10 @@ rm(site)
 
 # simulate epi function
 
-simulate.epi<-function(site,temp.addition,seed,step.size=7,print.progress=T)
+simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
 {
   ## setup
-  set.seed(seed)
+  
   ### subset data
   sub.locs<-corrected.locs[which(corrected.locs$Site==site),]
   sub.epi<-corrected.epi[which(corrected.epi$Site==site),]
@@ -215,13 +215,16 @@ if(any((!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmissi
   
   n.cores<-4
   registerDoParallel(n.cores)
-  pred.epi.all.0<-foreach(k = 1:10, .multicombine = T, .options.RNG=2389572) %dorng% simulate.epi(site,0,seed=249685,step.size=step.size,print.progress = F)
+  rm(.Random.seed, envir=globalenv())
+  pred.epi.all.0<-foreach(k = 1:10, .multicombine = T, .options.RNG=2389572) %dorng% simulate.epi(site,0,step.size=step.size,print.progress = F)
   saveRDS(pred.epi.all.0,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.site.",site,".step.size.",step.size,".RDS"))
   
-  pred.epi.all.1.8<-foreach(k = 1:10, .multicombine = T, .options.RNG=2389572) %dorng% simulate.epi(site,1.8,seed=875345,step.size=step.size,print.progress = F)
+  rm(.Random.seed, envir=globalenv())
+  pred.epi.all.1.8<-foreach(k = 1:10, .multicombine = T, .options.RNG=2389572) %dorng% simulate.epi(site,1.8,step.size=step.size,print.progress = F)
   saveRDS(pred.epi.all.1.8,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.site.",site,".step.size.",step.size,".RDS"))
   
-  pred.epi.all.3.7<-foreach(k = 1:10, .multicombine = T, .options.RNG=2389572) %dorng% simulate.epi(site,3.7,seed=7465932,step.size=step.size,print.progress = F)
+  rm(.Random.seed, envir=globalenv())
+  pred.epi.all.3.7<-foreach(k = 1:10, .multicombine = T, .options.RNG=2389572) %dorng% simulate.epi(site,3.7,step.size=step.size,print.progress = F)
   saveRDS(pred.epi.all.3.7,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.site.",site,".step.size.",step.size,".RDS"))
 }
 
@@ -249,6 +252,11 @@ plot.func<-function(site,step.size)
   
   sub.epi<-corrected.epi[which(corrected.epi$Site==site),]
   sub.locs<-corrected.locs[which(corrected.locs$Site==site),]
+  
+  if(site=="CC")
+  {
+    plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,.4),xlab="date",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
+  }
   
   if(site=="GM")
   {
