@@ -14,7 +14,7 @@ rm(site)
 
 # simulate epi function
 
-simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
+simulate.epi<-function(site,step.size=7,print.progress=T,day.start="12:00:00",alt.data=F)
 {
   ## setup
   
@@ -86,22 +86,27 @@ simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
   for(date.index in 1:(length(sim.dates)-1)) 
   {
     date0<-sim.dates[date.index] ### last date
-    date0<-as.POSIXct(paste0(date0," 12:00:00")) ### convert format
+    date0<-as.POSIXct(paste0(date0," ",day.start)) ### convert format
     date1<-sim.dates[date.index+1] ### next date
-    date1<-as.POSIXct(paste0(date1," 12:00:00")) ### convert format
+    date1<-as.POSIXct(paste0(date1," ",day.start)) ### convert format
     delta.days<-as.numeric(as.Date(date1)-as.Date(date0))
     
     ### load weather data
+    
+    if(!alt.data)
+    {
+      weath.sub<-all.weath[which(all.weath$site==site),] #pull out weath data for site
+      temp.rh.sub<-all.temp.rh[which(all.temp.rh$site==site),] #### pull out temp data for site
+    }
+    
     #### subst temp rh data to relevant window
-    temp.rh.sub<-all.temp.rh[which(all.temp.rh$site==site),] #### pull out temp data for site
     temp.rh.sub<-subset(temp.rh.sub,date.time<=date1) #### pull out relevant data
     temp.rh.sub<-subset(temp.rh.sub,date.time>=date0) #### pull out relevant data
     temp.rh.sub<-subset(temp.rh.sub,!is.na(temp.c)) #### throw out NAs
     temp.rh.sub<-cbind(temp.rh.sub,interval.length=c(diff(as.numeric(temp.rh.sub$date.time))/(60*60*24),NA)) #add interval length in days
     
-    temp.rh.sub$temp.c<-temp.rh.sub$temp.c+temp.addition ### shift temperature
+    temp.rh.sub$temp.c<-temp.rh.sub$temp.c ### shift temperature
     #### subset weather data to relevant window
-    weath.sub<-all.weath[which(all.weath$site==site),] #pull out weath data for site
     weath.sub<-subset(weath.sub,date<=date1) #### pull out relevant data
     weath.sub<-subset(weath.sub,date>=date0) #### pull out relevant data
     weath.sub<-cbind(weath.sub,interval.length=c(diff(as.numeric(weath.sub$date))/(60*60*24),NA))
@@ -185,7 +190,7 @@ simulate.epi<-function(site,temp.addition,step.size=7,print.progress=T)
       {
         new.status<-1
         
-        new.inf.intens<-predict.inf.intens.boot(inf.intens.last = last.epi[i,"inf.intens"], max.height.last = last.epi[i,"max.height"], site = site,date0 = date0,date1 = date1,temp.addition=temp.addition)
+        new.inf.intens<-predict.inf.intens.boot(inf.intens.last = last.epi[i,"inf.intens"], max.height.last = last.epi[i,"max.height"], site = site,date0 = date0,date1 = date1)
       }
       
       ### plant growth
