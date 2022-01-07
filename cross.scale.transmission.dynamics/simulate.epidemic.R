@@ -5,7 +5,6 @@ source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant loc
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/predict plant inf intens change funcs.R")
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/spore deposition functions tilt.R")
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/predict plant height change funcs.R")
-source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/starting plant inf intens model.R")
 transmission.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/transmission.model.RDS")
 transmission.data<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/transmission.data.RDS")
 heights<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plant.heights.RDS")
@@ -26,6 +25,8 @@ simulate.epi<-function(site,temp.addition,seed,step.size=7,print.progress=T)
   if(site=="GM") {start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased<=as.Date("2020-06-23")),]}
   if(site=="HM") {start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased<=as.Date("2020-06-25")),]}
   if(site=="BT") {start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased<=as.Date("2020-06-24")),]}
+  if(site=="CC") {start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased<=as.Date("2020-06-22")),]}
+  if(site=="CC") {sub.epi<-sub.epi[-which(sub.epi$Y %in% c(0:8,18,19)),]; sub.epi<-sub.epi[-which((sub.epi$Y %in% c(15:17)) & (sub.epi$X %in% 7:9)),]}
   
   ### data frame to fill
   pred.epi<-data.frame("site"=factor(),"tag"=factor(),"X"=numeric(),"Y"=numeric(),"x"=numeric(),"y"=numeric(),"date"=character(),"tot.stems"=numeric(),"status"=numeric(),"max.height"=numeric(),"inf.intens"=numeric())
@@ -172,7 +173,7 @@ simulate.epi<-function(site,temp.addition,seed,step.size=7,print.progress=T)
         if(draw<=pred.inf.odds) ### if draw <= odds make plant infected
         {
           new.status<-1
-          new.inf.intens<-starting.inf.intens.mod(runif(1)) # starting infection intensity draw from distribution fitted to empirical data
+          new.inf.intens<-1
         } else { ### else plant stays healthy
           new.status<-0
           new.inf.intens<-NA
