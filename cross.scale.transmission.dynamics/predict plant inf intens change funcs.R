@@ -28,7 +28,7 @@ predict.inf.intens<-function(inf.intens.last,max.height.last,site,date0,date1,ex
   new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
   new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
   
-  abs.hum<-0.1324732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+T)
+  abs.hum<-13.24732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+temp.rh.sub$temp.c)
   new.mean.abs.hum<-mean(abs.hum,na.rm=T)
   new.max.abs.hum<-max(abs.hum,na.rm=T)
   new.min.abs.hum<-min(abs.hum,na.rm=T)
@@ -79,7 +79,7 @@ predict.inf.intens.boot<-function(inf.intens.last,max.height.last,site,date0,dat
   new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
   new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
   
-  abs.hum<-0.1324732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+T)
+  abs.hum<-13.24732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+temp.rh.sub$temp.c)
   new.mean.abs.hum<-mean(abs.hum,na.rm=T)
   new.max.abs.hum<-max(abs.hum,na.rm=T)
   new.min.abs.hum<-min(abs.hum,na.rm=T)
@@ -140,7 +140,7 @@ predict.inf.intens.last<-function(inf.intens.next,max.height.last,site,date0,dat
   new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
   new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
   
-  abs.hum<-0.1324732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+T)
+  abs.hum<-13.24732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+temp.rh.sub$temp.c)
   new.mean.abs.hum<-mean(abs.hum,na.rm=T)
   new.max.abs.hum<-max(abs.hum,na.rm=T)
   new.min.abs.hum<-min(abs.hum,na.rm=T)

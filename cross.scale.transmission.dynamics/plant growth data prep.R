@@ -174,7 +174,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
       new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
       
-      abs.hum<-0.1324732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+T)
+      abs.hum<-13.24732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+temp.rh.sub$temp.c)
       new.mean.abs.hum<-mean(abs.hum,na.rm=T)
       new.max.abs.hum<-max(abs.hum,na.rm=T)
       new.min.abs.hum<-min(abs.hum,na.rm=T)
