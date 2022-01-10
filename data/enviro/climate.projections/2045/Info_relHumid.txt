@@ -1,0 +1,6 @@
+Period: 2045Jun through 2045Sep
+Latitude bounds: (38.93775, 39.00025)
+Longitude bounds: (-107.00025, -106.93775)
+
+Rows: [122] time
+Cols: [2] projection

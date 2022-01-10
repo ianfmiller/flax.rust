@@ -1,0 +1,22 @@
+Product:               LOCA daily surface water projections hydrologic data
+Variables:             rainfall  Tair      relHumid  
+Period:                2070Jun through 2070Sep
+Resolution:            1/16 degree
+Latitude bounds:       (38.9375, 39.0)
+Longitude bounds:      (-107.0, -106.9375)
+Area within bounds:    37 km^2 (approx)
+Dimensions:         
+ Times:                122
+ Latitudes:            1
+ Longitudes:           1
+ Projections:          2
+
+Location:             (38.971139, -106.996172)
+
+Global attributes
+-----------------
+Conventions:           CF-1.4
+authors:               David W Pierce
+description:           LOCA daily hydrology projections 
+creation_date:         July, 2016
+institution:           Scripps Institution of Oceanography
