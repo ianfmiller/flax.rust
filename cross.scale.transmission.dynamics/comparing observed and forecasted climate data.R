@@ -34,34 +34,6 @@ for(site in c("BT"))
   points(as.Date(mean.temps[,1],origin="1970-01-01"),mean.temps[,2],type="l",lwd=2)
 }
 
-min.temp.2020<-read.csv("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/2020/tasmin.csv",header = F)
-min.temp.2045<-read.csv("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/2045/tasmin.csv",header = F)
-min.temp.2070<-read.csv("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/2070/tasmin.csv",header = F)
-colnames(min.temp.2020)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
-colnames(min.temp.2045)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
-colnames(min.temp.2070)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
-plot(dates,min.temp.2020$cesm1.cam5.1.rcp45,type="l",col="orange",ylim=c(-10,10),xlim=c(min(plot.dates),max(plot.dates)),xlab="date",ylab="min temp",lty=1,lwd=2)        
-axis.Date(1,plot.dates)
-points(dates,min.temp.2045$cesm1.cam5.1.rcp45,type="l",col="orange",lty=2,lwd=2)
-points(dates,min.temp.2070$cesm1.cam5.1.rcp45,type="l",col="orange",lty=3,lwd=2)
-points(dates,min.temp.2020$cesm1.cam5.1.rcp85,type="l",col="red",lty=1,lwd=2)
-points(dates,min.temp.2045$cesm1.cam5.1.rcp85,type="l",col="red",lty=2,lwd=2)
-points(dates,min.temp.2070$cesm1.cam5.1.rcp85,type="l",col="red",lty=3,lwd=2)
-
-for(site in c("BT"))
-{
-  min.temps<-c()
-  sub.temp.rh.1<-all.temp.rh[which(all.temp.rh$site==site),]
-  for(date in plot.dates)
-  {
-    if(date %in% as.Date(sub.temp.rh.1$date.time))
-    {
-      sub.temp.rh.2<-sub.temp.rh.1[which(as.Date(sub.temp.rh.1$date)==date),]
-      min.temps<-rbind(min.temps,data.frame(date,min(sub.temp.rh.2$temp.c,na.rm = T)))
-    }
-  }
-  points(as.Date(min.temps[,1],origin="1970-01-01"),min.temps[,2],type="l",lwd=2)
-}
 
 max.temp.2020<-read.csv("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/2020/tasmax.csv",header = F)
 max.temp.2045<-read.csv("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/2045/tasmax.csv",header = F)
@@ -90,6 +62,35 @@ for(site in c("BT"))
     }
   }
   points(as.Date(max.temps[,1],origin="1970-01-01"),max.temps[,2],type="l",lwd=2)
+}
+
+min.temp.2020<-read.csv("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/2020/tasmin.csv",header = F)
+min.temp.2045<-read.csv("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/2045/tasmin.csv",header = F)
+min.temp.2070<-read.csv("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/2070/tasmin.csv",header = F)
+colnames(min.temp.2020)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
+colnames(min.temp.2045)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
+colnames(min.temp.2070)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
+plot(dates,min.temp.2020$cesm1.cam5.1.rcp45,type="l",col="orange",ylim=c(-10,10),xlim=c(min(plot.dates),max(plot.dates)),xlab="date",ylab="min temp",lty=1,lwd=2)        
+axis.Date(1,plot.dates)
+points(dates,min.temp.2045$cesm1.cam5.1.rcp45,type="l",col="orange",lty=2,lwd=2)
+points(dates,min.temp.2070$cesm1.cam5.1.rcp45,type="l",col="orange",lty=3,lwd=2)
+points(dates,min.temp.2020$cesm1.cam5.1.rcp85,type="l",col="red",lty=1,lwd=2)
+points(dates,min.temp.2045$cesm1.cam5.1.rcp85,type="l",col="red",lty=2,lwd=2)
+points(dates,min.temp.2070$cesm1.cam5.1.rcp85,type="l",col="red",lty=3,lwd=2)
+
+for(site in c("BT"))
+{
+  min.temps<-c()
+  sub.temp.rh.1<-all.temp.rh[which(all.temp.rh$site==site),]
+  for(date in plot.dates)
+  {
+    if(date %in% as.Date(sub.temp.rh.1$date.time))
+    {
+      sub.temp.rh.2<-sub.temp.rh.1[which(as.Date(sub.temp.rh.1$date)==date),]
+      min.temps<-rbind(min.temps,data.frame(date,min(sub.temp.rh.2$temp.c,na.rm = T)))
+    }
+  }
+  points(as.Date(min.temps[,1],origin="1970-01-01"),min.temps[,2],type="l",lwd=2)
 }
 
 
