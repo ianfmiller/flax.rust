@@ -14,8 +14,12 @@ rm(site)
 
 # simulate epi function
 
-simulate.epi<-function(site,step.size=7,print.progress=T,day.start="12:00:00",alt.data=F)
+simulate.epi<-function(site,step.size=7,print.progress=T,day.start="12:00:00",weath.data=NA,weath.data.scenario=NA)
 {
+  if(!(weath.data %in% c(NA,"2020","2045","2070"))) {warning('weath.data must be either NA, "2020", "2045",or "2070"')}
+  if(!(weath.data %in% c(NA,"rcp45","rcp85"))) {warning('weath.data must be either NA, "rcp45", or "rcp85"')}
+  if(!is.na(weath.data) & is.na(weath.data.scenario)) {warning('weath.data.scenario must be either "rcp45", or "rcp85" if using non-observed weather data')}
+  
   ## setup
   
   ### subset data
@@ -83,6 +87,23 @@ simulate.epi<-function(site,step.size=7,print.progress=T,day.start="12:00:00",al
   sim.dates<-seq(start.date,end.date,step.size)
   if(site=="HM") {sim.dates<-sim.dates[which(sim.dates<as.Date("2020-07-10"))]}
   
+  ### load weather data
+  
+  if(!(weath.data=="observed"))
+  {
+    mean.temp.data<-read.csv(paste0("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/",weath.data,"/Tair.csv"),header = F)
+    max.temp.data<-read.csv(paste0("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/",weath.data,"/tasmax.csv"),header = F)
+    min.temp.data<-read.csv(paste0("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/",weath.data,"/tasmin.csv"),header = F)
+    rh.data<-read.csv(paste0("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/",weath.data,"/relHumid.csv"),header = F)
+    rainfall.data<-read.csv(paste0("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/",weath.data,"/rainfall.csv"),header = F)
+    colnames(mean.temp.data)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
+    colnames(max.temp.data)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
+    colnames(min.temp.data)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
+    colnames(rh.data)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
+    colnames(rainfall.data)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
+    
+  }
+  
   for(date.index in 1:(length(sim.dates)-1)) 
   {
     date0<-sim.dates[date.index] ### last date
@@ -90,40 +111,70 @@ simulate.epi<-function(site,step.size=7,print.progress=T,day.start="12:00:00",al
     date1<-sim.dates[date.index+1] ### next date
     date1<-as.POSIXct(paste0(date1," ",day.start)) ### convert format
     delta.days<-as.numeric(as.Date(date1)-as.Date(date0))
-    
-    ### load weather data
-    
-    if(!alt.data)
+  
+    if(!(weath.data=="observed"))
     {
+      mean.temp.data.sub.1<-mean.temp.data[which(as.Date(paste0(mean.temp.data$year,"-",mean.temp.data$month,"-",mean.temp.data$day))>=as.Date(date0)),]
+      mean.temp.data.sub.2<-mean.temp.data.sub.1[which(as.Date(paste0(mean.temp.data.sub.1$year,"-",mean.temp.data.sub.1$month,"-",mean.temp.data.sub.1$day))<as.Date(date1)),]
+      
+      max.temp.data.sub.1<-max.temp.data[which(as.Date(paste0(max.temp.data$year,"-",max.temp.data$month,"-",max.temp.data$day))>=as.Date(date0)),]
+      max.temp.data.sub.2<-max.temp.data.sub.1[which(as.Date(paste0(max.temp.data.sub.1$year,"-",max.temp.data.sub.1$month,"-",max.temp.data.sub.1$day))<as.Date(date1)),]
+     
+      min.temp.data.sub.1<-min.temp.data[which(as.Date(paste0(min.temp.data$year,"-",min.temp.data$month,"-",min.temp.data$day))>=as.Date(date0)),]
+      min.temp.data.sub.2<-min.temp.data.sub.1[which(as.Date(paste0(min.temp.data.sub.1$year,"-",min.temp.data.sub.1$month,"-",min.temp.data.sub.1$day))<as.Date(date1)),]
+      
+      rh.data.sub.1<-rh.data[which(as.Date(paste0(rh.data$year,"-",rh.data$month,"-",rh.data$day))>=as.Date(date0)),]
+      rh.data.sub.2<-rh.data.sub.1[which(as.Date(paste0(rh.data.sub.1$year,"-",rh.data.sub.1$month,"-",rh.data.sub.1$day))<as.Date(date1)),]
+      
+      rainfall.data.sub.1<-rainfall.data[which(as.Date(paste0(rainfall.data$year,"-",rainfall.data$month,"-",rainfall.data$day))>=as.Date(date0)),]
+      rainfall.data.sub.2<-rainfall.data.sub.1[which(as.Date(paste0(rainfall.data.sub.1$year,"-",rainfall.data.sub.1$month,"-",rainfall.data.sub.1$day))<as.Date(date1)),]
+      
+      new.mean.temp<-mean(mean.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
+      new.max.temp<-mean(max.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
+      new.min.temp<-mean(min.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
+      new.mean.abs.hum<-mean(rh.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
+      new.mean.daily.rain<-mean(rainfall.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
+      
       weath.sub<-all.weath[which(all.weath$site==site),] #pull out weath data for site
-      temp.rh.sub<-all.temp.rh[which(all.temp.rh$site==site),] #### pull out temp data for site
+      #### subset weather data to relevant window
+      weath.sub<-subset(weath.sub,date<=date1) #### pull out relevant data
+      weath.sub<-subset(weath.sub,date>=date0) #### pull out relevant data
+      weath.sub<-cbind(weath.sub,interval.length=c(diff(as.numeric(weath.sub$date))/(60*60*24),NA))
+      
     }
     
-    #### subst temp rh data to relevant window
-    temp.rh.sub<-subset(temp.rh.sub,date.time<=date1) #### pull out relevant data
-    temp.rh.sub<-subset(temp.rh.sub,date.time>=date0) #### pull out relevant data
-    temp.rh.sub<-subset(temp.rh.sub,!is.na(temp.c)) #### throw out NAs
-    temp.rh.sub<-cbind(temp.rh.sub,interval.length=c(diff(as.numeric(temp.rh.sub$date.time))/(60*60*24),NA)) #add interval length in days
-    
-    temp.rh.sub$temp.c<-temp.rh.sub$temp.c ### shift temperature
-    #### subset weather data to relevant window
-    weath.sub<-subset(weath.sub,date<=date1) #### pull out relevant data
-    weath.sub<-subset(weath.sub,date>=date0) #### pull out relevant data
-    weath.sub<-cbind(weath.sub,interval.length=c(diff(as.numeric(weath.sub$date))/(60*60*24),NA))
-    
-    #### calculate environmental variable metrics
-    new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
-    new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
-    new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
-    
-    abs.hum<-13.24732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+temp.rh.sub$temp.c)
-    new.mean.abs.hum<-mean(abs.hum,na.rm=T)
-    new.max.abs.hum<-max(abs.hum,na.rm=T)
-    new.min.abs.hum<-min(abs.hum,na.rm=T)
-    
-    new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
-    new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)*(12*24)
-    new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
+    if(weath.data="observed")
+    {
+
+      weath.sub<-all.weath[which(all.weath$site==site),] #pull out weath data for site
+      temp.rh.sub<-all.temp.rh[which(all.temp.rh$site==site),] #### pull out temp data for site
+      
+      #### subst temp rh data to relevant window
+      temp.rh.sub<-subset(temp.rh.sub,date.time<=date1) #### pull out relevant data
+      temp.rh.sub<-subset(temp.rh.sub,date.time>=date0) #### pull out relevant data
+      temp.rh.sub<-subset(temp.rh.sub,!is.na(temp.c)) #### throw out NAs
+      temp.rh.sub<-cbind(temp.rh.sub,interval.length=c(diff(as.numeric(temp.rh.sub$date.time))/(60*60*24),NA)) #add interval length in days
+      
+      temp.rh.sub$temp.c<-temp.rh.sub$temp.c ### shift temperature
+      #### subset weather data to relevant window
+      weath.sub<-subset(weath.sub,date<=date1) #### pull out relevant data
+      weath.sub<-subset(weath.sub,date>=date0) #### pull out relevant data
+      weath.sub<-cbind(weath.sub,interval.length=c(diff(as.numeric(weath.sub$date))/(60*60*24),NA))
+      
+      #### calculate environmental variable metrics
+      new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
+      new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
+      new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
+      
+      abs.hum<-13.24732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+temp.rh.sub$temp.c)
+      new.mean.abs.hum<-mean(abs.hum,na.rm=T)
+      new.max.abs.hum<-max(abs.hum,na.rm=T)
+      new.min.abs.hum<-min(abs.hum,na.rm=T)
+      
+      new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
+      new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)*(12*24)
+      new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
+    }
     
     ### compare weather data coverage to make sure spore deposition is not being underestimated
     time.diff.weather.data<-weath.sub$date[nrow(weath.sub)]-weath.sub$date[1]
