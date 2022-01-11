@@ -30,13 +30,8 @@ predict.inf.intens<-function(inf.intens.last,max.height.last,site,date0,date1,ex
   
   abs.hum<-13.24732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+temp.rh.sub$temp.c)
   new.mean.abs.hum<-mean(abs.hum,na.rm=T)
-  new.max.abs.hum<-max(abs.hum,na.rm=T)
-  new.min.abs.hum<-min(abs.hum,na.rm=T)
   
-  new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)*(12*24)
-  new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
-  new.mean.soil.moisture<-mean(weath.sub$soil.moisture,na.rm=T)
   
   delta.days<-as.numeric(date1-date0)
   
@@ -44,8 +39,7 @@ predict.inf.intens<-function(inf.intens.last,max.height.last,site,date0,date1,ex
   pred.data<-data.frame("infection.intensity"=inf.intens.last,"max.height"=max.height.last,
                         "time"=delta.days,"site"=site,"tag"="NA",
                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                        "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                        "mean.wetness"=new.mean.wetness,"mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.soil.moisture"=new.mean.soil.moisture)
+                        "mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain)
   
   if(exclude.site) {
     inf.intens.next<-inf.intens.last+delta.days*predict(infection.intensity.model,newdata = pred.data,type="response",exclude = c('s(site)','s(tag)'))
@@ -57,7 +51,7 @@ predict.inf.intens<-function(inf.intens.last,max.height.last,site,date0,date1,ex
   inf.intens.next
 }
 
-predict.inf.intens.boot<-function(inf.intens.last,max.height.last,site,date0,date1,temp.addition=0,exclude.site=F)
+predict.inf.intens.boot<-function(inf.intens.last,max.height.last,site,date0,date1)
 {
   # load weather data
   ## subst temp rh data to relevant window
@@ -66,8 +60,7 @@ predict.inf.intens.boot<-function(inf.intens.last,max.height.last,site,date0,dat
   temp.rh.sub<-subset(temp.rh.sub,date.time>=date0) #### pull out relevant data
   temp.rh.sub<-subset(temp.rh.sub,!is.na(temp.c)) #### throw out NAs
   temp.rh.sub<-cbind(temp.rh.sub,interval.length=c(diff(as.numeric(temp.rh.sub$date.time))/(60*60*24),NA)) #add interval length in days
-  temp.rh.sub$temp.c<-temp.rh.sub$temp.c+temp.addition ### shift temperature
-  
+
   ## subset weather data to relevant window
   weath.sub<-all.weath[which(all.weath$site==site),] #pull out weath data for site
   weath.sub<-subset(weath.sub,date<=date1) #### pull out relevant data
@@ -81,29 +74,49 @@ predict.inf.intens.boot<-function(inf.intens.last,max.height.last,site,date0,dat
   
   abs.hum<-13.24732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+temp.rh.sub$temp.c)
   new.mean.abs.hum<-mean(abs.hum,na.rm=T)
-  new.max.abs.hum<-max(abs.hum,na.rm=T)
-  new.min.abs.hum<-min(abs.hum,na.rm=T)
   
-  new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)*(12*24)
-  new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
-  new.mean.soil.moisture<-mean(weath.sub$soil.moisture,na.rm=T)
-  
+
   delta.days<-as.numeric(date1-date0)
   
   # make forward prediction
   pred.data<-data.frame("infection.intensity"=inf.intens.last,"max.height"=max.height.last,
                         "time"=delta.days,"site"=site,"tag"="NA",
                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                        "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                        "mean.wetness"=new.mean.wetness,"mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.soil.moisture"=new.mean.soil.moisture)
+                        "mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain)
   
-  if(exclude.site)
-  {
-    Xp <- predict(infection.intensity.model, newdata = pred.data, exclude=c("s(site)","s(tag)"),type="lpmatrix")
-  } else {
-    Xp <- predict(infection.intensity.model, newdata = pred.data, exclude="s(tag)",type="lpmatrix")
+  Xp <- predict(infection.intensity.model, newdata = pred.data, exclude="s(tag)",type="lpmatrix")
+  beta <- coef(infection.intensity.model) ## posterior mean of coefs
+  Vb   <- vcov(infection.intensity.model) ## posterior  cov of coefs
+  n <- 2
+  mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
+  preds <- rep(NA, n)
+  ilink <- family(infection.intensity.model)$linkinv
+  for (j in seq_len(n)) { 
+    preds[j]   <- ilink(Xp %*% mrand[j, ])
   }
+  inf.intens.next<-inf.intens.last+delta.days*preds[1]
+  if(inf.intens.next<.1) {inf.intens.next<-0}
+  inf.intens.next
+}
+
+predict.inf.intens.boot.alt<-function(inf.intens.last,max.height.last,mean.temp.dat,max.temp.dat,min.temp.dat,mean.abs.hum.dat,mean.daily.rain.dat,time.dat)
+{
+  new.mean.temp<-mean.temp.dat
+  new.max.temp<-max.temp.dat
+  new.min.temp<-min.temp.dat
+  new.mean.abs.hum<-mean.abs.hum.dat
+  new.mean.daily.rain<-mean.daily.rain.dat
+  delta.days<-time.dat
+  
+  # make forward prediction
+  pred.data<-data.frame("infection.intensity"=inf.intens.last,"max.height"=max.height.last,
+                        "time"=delta.days,"site"="NA","tag"="NA",
+                        "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
+                        "mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain)
+  
+
+  Xp <- predict(infection.intensity.model, newdata = pred.data, exclude=c("s(tag)","s(site)"),type="lpmatrix")
   beta <- coef(infection.intensity.model) ## posterior mean of coefs
   Vb   <- vcov(infection.intensity.model) ## posterior  cov of coefs
   n <- 2
@@ -142,13 +155,8 @@ predict.inf.intens.last<-function(inf.intens.next,max.height.last,site,date0,dat
   
   abs.hum<-13.24732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+temp.rh.sub$temp.c)
   new.mean.abs.hum<-mean(abs.hum,na.rm=T)
-  new.max.abs.hum<-max(abs.hum,na.rm=T)
-  new.min.abs.hum<-min(abs.hum,na.rm=T)
   
-  new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)*(12*24)
-  new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
-  new.mean.soil.moisture<-mean(weath.sub$soil.moisture,na.rm=T)
   
   delta.days<-as.numeric(date1-date0)
   
@@ -160,8 +168,7 @@ predict.inf.intens.last<-function(inf.intens.next,max.height.last,site,date0,dat
     pred.data<-data.frame("infection.intensity"=inf.intens.last.test,"max.height"=max.height.last,
                           "time"=delta.days,"site"=site,"tag"="NA",
                           "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                          "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                          "mean.wetness"=new.mean.wetness,"mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.soil.moisture"=new.mean.soil.moisture)
+                          "mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain)
     if(exclude.site)
     {
       inf.intens.next.pred<-inf.intens.last.test+delta.days*predict(infection.intensity.model,newdata=pred.data,exclude = c('s(site)','s(tag)'))

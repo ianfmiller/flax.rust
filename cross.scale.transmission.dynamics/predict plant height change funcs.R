@@ -31,21 +31,15 @@ predict.plant.growth<-function(height.last,inf.intens.last,site,date0,date1,excl
   
   abs.hum<-13.24732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+temp.rh.sub$temp.c)
   new.mean.abs.hum<-mean(abs.hum,na.rm=T)
-  new.max.abs.hum<-max(abs.hum,na.rm=T)
-  new.min.abs.hum<-min(abs.hum,na.rm=T)
   
-  new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)*(12*24)
-  new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
-  new.mean.soil.moisture<-mean(weath.sub$soil.moisture,na.rm=T)
 
   delta.days<-as.numeric(date1-date0)
   
   # make forward prediction
   pred.data<-data.frame("time"=delta.days,"height"=height.last,"inf.intens"=inf.intens.last,
                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                        "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                        "mean.wetness"=new.mean.wetness,"mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.soil.moisture"=new.mean.soil.moisture,
+                        "mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,
                         "site"=site,"tag"="NA")
   
   if(exclude.site) {height.next<-height.last+(date1-date0)*predict(plant.growth.model,newdata=pred.data,exclude = c('s(site)','s(tag)'))} else {height.next<-height.last+predict(plant.growth.model,newdata=pred.data,exclude='s(tag)')}
@@ -79,23 +73,17 @@ predict.plant.growth.boot<-function(height.last,inf.intens.last,site,date0,date1
   
   abs.hum<-13.24732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+temp.rh.sub$temp.c)
   new.mean.abs.hum<-mean(abs.hum,na.rm=T) 
-  new.max.abs.hum<-max(abs.hum,na.rm=T)
-  new.min.abs.hum<-min(abs.hum,na.rm=T)
 
-  new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)*(12*24)
-  new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
-  new.mean.soil.moisture<-mean(weath.sub$soil.moisture,na.rm=T)
   
   delta.days<-as.numeric(date1-date0)
   
   # make forward prediction
   pred.data<-data.frame("time"=delta.days,"height"=height.last,"inf.intens"=inf.intens.last,
                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                        "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                        "mean.wetness"=new.mean.wetness,"mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.soil.moisture"=new.mean.soil.moisture,
+                        "mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,
                         "site"=site,"tag"="NA")
-  Xp <- predict(plant.growth.model, newdata = pred.data, exlude=c('s(site)','s(tag)'),type="lpmatrix")
+  Xp <- predict(plant.growth.model, newdata = pred.data, exlude='s(tag)',type="lpmatrix")
   beta <- coef(plant.growth.model) ## posterior mean of coefs
   Vb   <- vcov(plant.growth.model) ## posterior  cov of coefs
   n <- 2
@@ -106,6 +94,35 @@ predict.plant.growth.boot<-function(height.last,inf.intens.last,site,date0,date1
     preds[j]   <- ilink(Xp %*% mrand[j, ])
   }
   height.next<-height.last+(date1-date0)*preds[1]
+  if(height.next<1) {height.next<-1}
+  height.next
+}
+
+predict.plant.growth.boot.alt<-function(height.last,inf.intens.last,mean.temp.dat,max.temp.dat,min.temp.dat,mean.abs.hum.dat,mean.daily.rain.dat,time.dat)
+{
+  new.mean.temp<-mean.temp.dat
+  new.max.temp<-max.temp.dat
+  new.min.temp<-min.temp.dat
+  new.mean.abs.hum<-mean.abs.hum.dat
+  new.mean.daily.rain<-mean.daily.rain.dat
+  delta.days<-time.dat
+  
+  # make forward prediction
+  pred.data<-data.frame("time"=delta.days,"height"=height.last,"inf.intens"=inf.intens.last,
+                        "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
+                        "mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,
+                        "site"="NA","tag"="NA")
+  Xp <- predict(plant.growth.model, newdata = pred.data, exlude=c('s(site)','s(tag)'),type="lpmatrix")
+  beta <- coef(plant.growth.model) ## posterior mean of coefs
+  Vb   <- vcov(plant.growth.model) ## posterior  cov of coefs
+  n <- 2
+  mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
+  preds <- rep(NA, n)
+  ilink <- family(plant.growth.model)$linkinv
+  for (j in seq_len(n)) { 
+    preds[j]   <- ilink(Xp %*% mrand[j, ])
+  }
+  height.next<-height.last+delta.days*preds[1]
   if(height.next<1) {height.next<-1}
   height.next
 }
@@ -136,14 +153,9 @@ predict.plant.growth.last<-function(height.next,inf.intens.last,site,date0,date1
   
   abs.hum<-13.24732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+temp.rh.sub$temp.c)
   new.mean.abs.hum<-mean(abs.hum,na.rm=T)
-  new.max.abs.hum<-max(abs.hum,na.rm=T)
-  new.min.abs.hum<-min(abs.hum,na.rm=T)
   
-  new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
   new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)*(12*24)
-  new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
-  new.mean.soil.moisture<-mean(weath.sub$soil.moisture,na.rm=T)
-  
+
   delta.days<-as.numeric(date1-date0)
   
   # make backwards prediction
@@ -152,8 +164,7 @@ predict.plant.growth.last<-function(height.next,inf.intens.last,site,date0,date1
     plant.height.last.test<-x
     pred.data<-data.frame("time"=delta.days,"height"=plant.height.last.test,"inf.intens"=inf.intens.last, ## assume infection intensity did not change--for simplicity, and because tyring to simultaneously back-cast 
                            "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
-                           "mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,
-                          "mean.wetness"=new.mean.wetness,"mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.soil.moisture"=new.mean.soil.moisture,
+                           "mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,
                           "site"=site,"tag"="NA")
     if(exclude.site) {plant.height.next.pred<-plant.height.last.test+(date1-date0)*predict(plant.growth.model,newdata=pred.data,exclude = c('s(site)','s(tag)'))} else {plant.height.next.pred<-plant.height.last.test+(date1-date0)*predict(plant.growth.model,newdata=pred.data,exclude='s(tag)')}
     abs(plant.height.next.pred-height.next)

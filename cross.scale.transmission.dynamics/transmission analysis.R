@@ -46,12 +46,8 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
              s(max.temp)+
              s(min.temp)+
              s(mean.abs.hum)+
-             s(max.abs.hum)+
-             s(min.abs.hum)+
-             s(mean.solar)+
              s(mean.daily.rain)+
-             s(mean.wetness)+
-             +offset(log(time))+
+             offset(log(time))+
              s(tag,bs="re")+
              s(site,bs="re"),
            family=binomial(link="cloglog"),
@@ -73,19 +69,19 @@ par(mfrow=c(2,2))
 gam.check(transmission.model) #We increased k for the tensor after the default value returned a low p value. Even with k=15, k check indicates that k should be higher for the tensor. Increasing k to significantly higher values is extremelly computationally expensive and does not resolve this issue.
 concurvity(transmission.model,full=F) #Concurvity is expected between all weather variables. The non-pessimistic estimations of concurvity (under $estimate and $observed) indicate that it is not a serious issue in the model fit.
 
-layout(matrix(c(1,1,1,1,2,3,3,3,3,4,4,4,4,5,5,5,5,18,14,6,6,6,6,7,7,7,7,8,8,8,8,9,9,9,9,15,16,10,10,10,10,11,11,11,11,12,12,12,12,13,13,13,13,17),3,18,byrow = T))
+layout(matrix(c(1,1,1,1,2,3,3,3,3,4,4,4,4,10,11,5,5,5,5,6,6,6,6,7,7,7,7,12,13,13,13,8,8,8,8,9,9,9,9,14,14,14),3,14,byrow = T))
 
 par(mar=c(4,7,3,1.5))
-plot(transmission.model,select = 1,scheme = 2,zlim=c(-8,8),too.far=.5,hcolors=rev(heat.colors(101)),contour.col="black",cex.lab=1.5,cex.axis=1.5,xlab=expression(log[10]*' predicted spore deposition'),ylab="plant height (cm)",main="",rug=F)
+plot(transmission.model,select = 1,scheme = 2,zlim=c(-10,10),too.far=1,hcolors=rev(heat.colors(101)),contour.col="black",cex.lab=1.5,cex.axis=1.5,xlab=expression(log[10]*' predicted spore deposition'),ylab="plant height (cm)",main="",rug=F)
 points(log10(transmission.data$tot.spore.deposition),transmission.data$height.cm,pch=".")
 par(mar=c(4,1,3,4))
-plot(0,0,type="n",xlim=c(0,1),ylim=c(-8-0.08,8+0.08),axes=F,xlab="",ylab="")
+plot(0,0,type="n",xlim=c(0,1),ylim=c(-10-0.1,10+0.1),axes=F,xlab="",ylab="")
 for(i in 1:101)
 {
-  ii<-seq(-8,8,length.out=101)[i]
-  rect(0,ii-0.08,1,ii+0.08,col=rev(heat.colors(101))[i],border = NA)
+  ii<-seq(-10,10,length.out=101)[i]
+  rect(0,ii-0.1,1,ii+0.1,col=rev(heat.colors(101))[i],border = NA)
 }
-rect(0,-8-0.08,1,8+0.08)
+rect(0,-10-0.1,1,10+0.1)
 mtext("A",cex=1.25,font=2)
 #mtext(expression('te('*log[10]*' predicted spore deposition, plant height)'),side=4,line=.5)
 axis(2,cex.axis=1.5)
@@ -103,27 +99,15 @@ mtext("D",adj=1,cex=1.25,font=2)
 plot(transmission.model,select = 5,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('mean abs. humidity ('*g/m^3*')'),ylab="s(mean abs. humidity)")
 grid()
 mtext("E",adj=1,cex=1.25,font=2)
-plot(transmission.model,select = 6,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('max. abs. humidity ('*g/m^3*')'),ylab="s(max. abs. humidity)")
+plot(transmission.model,select = 6,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="mean daily rainfall (mm)",ylab="s(mean daily rainfall)")
 grid()
 mtext("F",adj=1,cex=1.25,font=2)
-plot(transmission.model,select = 7,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('min abs. humidity ('*g/m^3*')'),ylab="s(min. abs. humidity)")
+plot(transmission.model,select = 7,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(tag)")
 grid()
 mtext("G",adj=1,cex=1.25,font=2)
-plot(transmission.model,select = 8,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('mean solar radiation ('*W/m^2*')'),ylab="s(mean solalr radiation")
+plot(transmission.model,select = 8,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(site)")
 grid()
 mtext("H",adj=1,cex=1.25,font=2)
-plot(transmission.model,select = 9,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="mean daily rainfall (mm)",ylab="s(mean daily rainfall)")
-grid()
-mtext("I",adj=1,cex=1.25,font=2)
-plot(transmission.model,select = 10,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="mean leaf wetness (%)",ylab="s(mean leaf wetness)")
-grid()
-mtext("J",adj=1,cex=1.25,font=2)
-plot(transmission.model,select = 11,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(tag)")
-grid()
-mtext("K",adj=1,cex=1.25,font=2)
-plot(transmission.model,select = 12,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(site)")
-grid()
-mtext("L",adj=1,cex=1.25,font=2)
 
 
 
@@ -153,10 +137,10 @@ new.data.4<-transmission.data[1:length(dummy.tot.spore.deposition.levels),]
 new.data.4$tot.spore.deposition<-dummy.tot.spore.deposition.levels
 new.data.4$height.cm<-50
 
-points(log10(new.data.1$tot.spore.deposition),predict(transmission.model,newdata = new.data.1,type = "response",exclude = c("s(site)","s(tag)","s(mean.temp)","s(max.temp)","s(min.temp)","s(mean.abs.hum)","s(max.abs.hum)","s(min.abs.hum)","s(mean.solar)","s(mean.daily.rain)","s(mean.wetness)")),type="l",col="red",lwd=4,lty=1)
-points(log10(new.data.2$tot.spore.deposition),predict(transmission.model,newdata = new.data.2,type = "response",exclude = c("s(site)","s(tag)","s(mean.temp)","s(max.temp)","s(min.temp)","s(mean.abs.hum)","s(max.abs.hum)","s(min.abs.hum)","s(mean.solar)","s(mean.daily.rain)","s(mean.wetness)")),type="l",col="red",lwd=4,lty=2)
-points(log10(new.data.3$tot.spore.deposition),predict(transmission.model,newdata = new.data.3,type = "response",exclude = c("s(site)","s(tag)","s(mean.temp)","s(max.temp)","s(min.temp)","s(mean.abs.hum)","s(max.abs.hum)","s(min.abs.hum)","s(mean.solar)","s(mean.daily.rain)","s(mean.wetness)")),type="l",col="red",lwd=4,lty=3)
-points(log10(new.data.4$tot.spore.deposition),predict(transmission.model,newdata = new.data.4,type = "response",exclude = c("s(site)","s(tag)","s(mean.temp)","s(max.temp)","s(min.temp)","s(mean.abs.hum)","s(max.abs.hum)","s(min.abs.hum)","s(mean.solar)","s(mean.daily.rain)","s(mean.wetness)")),type="l",col="red",lwd=4,lty=4)
+points(log10(new.data.1$tot.spore.deposition),predict(transmission.model,newdata = new.data.1,type = "response",exclude = c("s(site)","s(tag)","s(mean.temp)","s(max.temp)","s(min.temp)","s(mean.abs.hum)","s(mean.daily.rain)")),type="l",col="red",lwd=4,lty=1)
+points(log10(new.data.2$tot.spore.deposition),predict(transmission.model,newdata = new.data.2,type = "response",exclude = c("s(site)","s(tag)","s(mean.temp)","s(max.temp)","s(min.temp)","s(mean.abs.hum)","s(mean.daily.rain)")),type="l",col="red",lwd=4,lty=2)
+points(log10(new.data.3$tot.spore.deposition),predict(transmission.model,newdata = new.data.3,type = "response",exclude = c("s(site)","s(tag)","s(mean.temp)","s(max.temp)","s(min.temp)","s(mean.abs.hum)","s(mean.daily.rain)")),type="l",col="red",lwd=4,lty=3)
+points(log10(new.data.4$tot.spore.deposition),predict(transmission.model,newdata = new.data.4,type = "response",exclude = c("s(site)","s(tag)","s(mean.temp)","s(max.temp)","s(min.temp)","s(mean.abs.hum)","s(mean.daily.rain)")),type="l",col="red",lwd=4,lty=4)
 par(mar=c(0,0,0,0))
 plot(0,0,type="n",axes=F,xlab = "",ylab="")
 legend("left",legend=c("50cm","25cm","10cm","5cm"),col="red",lty=c(4,3,2,1),bty="n",cex=2,lwd=4)

@@ -7,13 +7,13 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant height data set building.R")
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/predict plant inf intens change funcs.R")
   source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/spore deposition functions tilt.R")
-  source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/starting plant inf intens model.R")
   
   pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
   n.pustules.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/n.pustules.model.RDS")
   diseased.focal.plants<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/diseased.focal.plants.RDS")
   corrected.heights<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/corrected.plant.heights.RDS")
   corrected.epi<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/corrected.epi.RDS")
+  mean.starting.inf.intens<-1
   # Time periods for fitting glm of infection~transmission to data:
   #CC: 6/22(first data)->7/27(last prediction)
   #BT: 6/24(first data)->7/8(last prediction)
@@ -205,12 +205,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       
       abs.hum<-13.24732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+temp.rh.sub$temp.c)
       new.mean.abs.hum<-mean(abs.hum,na.rm=T) 
-      new.max.abs.hum<-max(abs.hum,na.rm=T)
-      new.min.abs.hum<-min(abs.hum,na.rm=T)
       
       new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)*(12*24)
-      new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
-      new.mean.wetness<-mean(weath.sub$wetness,na.rm=T)
 
       sub.2.epi.data<-sub.1.epi.data[which(sub.1.epi.data$Date.First.Observed.Diseased<=as.Date(date0)),] ### epi data up until date0
       sub.3.epi.data<-sub.1.epi.data[which(sub.1.epi.data$Date.First.Observed.Diseased<=as.Date(date1)),] ### epi date up until date1
@@ -261,8 +257,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
           new.status<-ifelse(ID.string %in% epi.ID.strings.next,1,0) #### count plant as becoming infected by next obs if its ID string shows up in the set of plants that have been infected by date1
           tot.spore.deposition<-total.spore.deposition.func(site=site,date0=date0,date1=date1,epi.data=corrected.epi,xcord=sub.loc.data[index,"X"]+sub.loc.data[index,"x"],ycord=sub.loc.data[index,"Y"]+sub.loc.data[index,"y"]) #### calculate spore deposition experienced
           transmission.data<-rbind(transmission.data,data.frame("site"=site,"date"=as.Date(date0),"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"time"=delta.days,"height.cm"=target.height,"tot.spore.deposition"=tot.spore.deposition,
-                                              "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.mean.abs.hum,
-                                              "mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.wetness"=new.mean.wetness)) #### add new entry to data object
+                                              "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain)) #### add new entry to data object
         }
         ### if that ID string is not unique
         if(length(which(ID.strings==ID.string))>1)
@@ -282,8 +277,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
           new.status<-ifelse(length(which(epi.ID.strings.next==ID.string))>=order,1,0) #### for plant that is the nth repeat, count as becoming infected by next obs if at least n matching ID strings show up in epi.ID.strings.next
           tot.spore.deposition<-total.spore.deposition.func(site=site,date0=date0,date1=date1,epi.data=corrected.epi,xcord=sub.loc.data[index,"X"]+sub.loc.data[index,"x"],ycord=sub.loc.data[index,"Y"]+sub.loc.data[index,"y"]) #### calculate spore deposition experienced
           transmission.data<-rbind(transmission.data,data.frame("site"=site,"date"=as.Date(date0),"status"=status,"status.next"=new.status,"tag"=sub.loc.data[index,"tag"],"X"=sub.loc.data[index,"X"],"Y"=sub.loc.data[index,"Y"],"x"=sub.loc.data[index,"x"],"y"=sub.loc.data[index,"y"],"time"=delta.days,"height.cm"=targt.height,"tot.spore.deposition"=tot.spore.deposition,
-                                              "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.mean.abs.hum,
-                                              "mean.daily.rain"=new.mean.daily.rain,"mean.solar"=new.mean.solar,"mean.wetness"=new.mean.wetness)) #### add new entry to data object
+                                              "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain)) #### add new entry to data object
         }
         print(paste0("site = ",site," date = ",as.Date(date0)," ",index,"/",dim(sub.loc.data)[1]," complete"))
       }

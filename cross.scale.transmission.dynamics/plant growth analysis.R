@@ -52,12 +52,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
              s(max.temp)+
              s(min.temp)+
              s(mean.abs.hum)+
-             s(max.abs.hum)+
-             s(min.abs.hum)+
-             s(mean.solar)+
              s(mean.daily.rain)+
-             s(mean.wetness)+
-             s(mean.soil.moisture)+
              s(tag,bs="re")+
              s(site,bs="re"),
            select = T,
@@ -74,12 +69,12 @@ plant.growth.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmissi
 
 ## model checking
 par(mfrow=c(2,2))
-gam.check(plant.growth.model) #indicates that basis dimension is sufficient
-concurvity(plant.growth.model,full=F) #no obvious issues
+gam.check(plant.growth.model) #Indicates that basis dimension is sufficient
+concurvity(plant.growth.model,full=F) #No obvious issues
 
 ## visualize model
 
-layout(matrix(c(15,15,15,1,1,1,1,2,3,3,3,3,4,4,4,4,16,16,16,16,5,5,5,5,6,6,6,6,7,7,7,7,8,8,8,8,9,9,9,9,10,10,10,10,11,11,11,11,12,12,12,12,13,13,13,13,14,14,14,14),3,20,byrow = T))
+layout(matrix(c(1,1,1,1,2,3,3,3,3,4,4,4,4,10,11,5,5,5,5,6,6,6,6,7,7,7,7,12,13,13,13,8,8,8,8,9,9,9,9,14,14,14),3,14,byrow = T))
 
 par(mar=c(4,7,3,1.5))
 options(warn=-1) ## suppress warnings due to passing levels to vis.gam
@@ -110,28 +105,13 @@ mtext("D",adj=1,cex=1.25,font=2)
 plot(plant.growth.model,select = 5,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('mean abs. humidity ('*g/m^3*')'),ylab="s(mean abs. humidity)")
 grid()
 mtext("E",adj=1,cex=1.25,font=2)
-plot(plant.growth.model,select = 6,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('max. abs. humidity ('*g/m^3*')'),ylab="s(max. abs. humidity)")
-grid()
-mtext("F",adj=1,cex=1.25,font=2)
-plot(plant.growth.model,select = 7,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('min abs. humidity ('*g/m^3*')'),ylab="s(min. abs. humidity)")
-grid()
-mtext("G",adj=1,cex=1.25,font=2)
-plot(plant.growth.model,select = 8,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('mean solar radiation ('*W/m^2*')'),ylab="s(mean solalr radiation")
-grid()
-mtext("H",adj=1,cex=1.25,font=2)
-plot(plant.growth.model,select = 9,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="total rainfall (mm)",ylab="s(total rainfall)")
+plot(plant.growth.model,select = 6,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="total rainfall (mm)",ylab="s(total rainfall)")
 grid()
 mtext("I",adj=1,cex=1.25,font=2)
-plot(plant.growth.model,select = 10,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="mean leaf wetness (%)",ylab="s(mean leaf wetness)")
-grid()
-mtext("J",adj=1,cex=1.25,font=2)
-plot(plant.growth.model,select = 11,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('mean soil moisture ('*m^3*' '*H[2]*0/m^3*' soil)'),ylab="s(mean soil moisture)")
-grid()
-mtext("K",adj=1,cex=1.25,font=2)
-plot(plant.growth.model,select = 12,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(tag)")
+plot(plant.growth.model,select = 7,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(tag)")
 grid()
 mtext("L",adj=1,cex=1.25,font=2)
-plot(plant.growth.model,select = 13,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(site)")
+plot(plant.growth.model,select = 8,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(site)")
 grid()
 mtext("M",adj=1,cex=1.25,font=2)
 

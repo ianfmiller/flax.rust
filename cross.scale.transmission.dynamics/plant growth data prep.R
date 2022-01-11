@@ -131,12 +131,7 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
   max.temp<-c()
   min.temp<-c()
   mean.abs.hum<-c()
-  max.abs.hum<-c()
-  min.abs.hum<-c()
-  mean.wetness<-c()
   mean.daily.rain<-c()
-  mean.solar<-c()
-  mean.soil.moisture<-c()
 
   for (tag in unique(plant.heights$tag))
   {
@@ -176,13 +171,8 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       
       abs.hum<-13.24732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+temp.rh.sub$temp.c)
       new.mean.abs.hum<-mean(abs.hum,na.rm=T)
-      new.max.abs.hum<-max(abs.hum,na.rm=T)
-      new.min.abs.hum<-min(abs.hum,na.rm=T)
       
-      new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
       new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)*(12*24)
-      new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
-      new.mean.soil.moisture<-mean(weath.sub$soil.moisture,na.rm=T)
       
       #pull out core predictors
       start.val<-sub.plant.heights[i,"max.height"]
@@ -202,19 +192,12 @@ if(!(file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics
       max.temp<-c(max.temp,new.max.temp)
       min.temp<-c(min.temp,new.min.temp)
       mean.abs.hum<-c(mean.abs.hum,new.mean.abs.hum)
-      max.abs.hum<-c(max.abs.hum,new.max.abs.hum)
-      min.abs.hum<-c(min.abs.hum,new.min.abs.hum)
-
-      mean.wetness<-c(mean.wetness,new.mean.wetness)
       mean.daily.rain<-c(new.mean.daily.rain,mean.daily.rain)
-      mean.solar<-c(mean.solar,new.mean.solar)
-      mean.soil.moisture<-c(mean.soil.moisture,new.mean.soil.moisture)
     }
   }
   delta.plant.heights<-data.frame(tag=factor(tags),site=factor(sites), height=start.vals, height.next=end.vals,inf.intens=inf.intens.vals,time=days,
                            mean.temp=mean.temp,max.temp=max.temp,min.temp=min.temp,
-                           mean.abs.hum=mean.abs.hum,max.abs.hum=max.abs.hum,min.abs.hum=min.abs.hum,
-                           mean.wetness=mean.wetness,mean.daily.rain=mean.daily.rain,mean.solar=mean.solar,mean.soil.moisture=mean.soil.moisture)
+                           mean.abs.hum=mean.abs.hum,mean.daily.rain=mean.daily.rain)
   
   saveRDS(plant.heights,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/plant.heights.RDS")
   saveRDS(delta.plant.heights,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/delta.plant.heights.RDS")

@@ -95,11 +95,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
               s(max.temp)+
               s(min.temp)+
               s(mean.abs.hum)+
-              s(max.abs.hum)+
-              s(min.abs.hum)+
-              s(mean.solar)+
               s(mean.daily.rain)+
-              s(mean.wetness)+
               s(tag,bs="re")+
               s(site,bs="re"),
             select = T,
@@ -116,11 +112,11 @@ pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dy
 
 ## model checking
 par(mfrow=c(2,2))
-gam.check(pustule.model) #Indicates that k should be higher all smooths aside from the tensor. Increasing k to significantly higher values is not possible due to terms having fewer unique covariate combinations than specified maximum degrees of freedom. 
-concurvity(pustule.model,full=F) #Concurvity is expected between all weather variables. The non-pessimistic estimations of concurvity (under $estimate and $observed) indicate that it is not a serious issue in the model fit.
+gam.check(pustule.model) #Indicates that k should be higher all smooths aside from area. Increasing k to significantly higher values is not possible due to terms having fewer unique covariate combinations than specified maximum degrees of freedom. 
+concurvity(pustule.model,full=F) #No obvious issues.
 
 ## visualize model
-par(mfrow=c(3,4),mar=c(4,4.5,3,4))
+par(mfrow=c(2,4),mar=c(4,4.5,3,4))
 plot(pustule.model,select = 1,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('pustule area ('*cm^2*')'),ylab="s(pustule area)")
 grid()
 mtext("B",adj=1,cex=1.25,font=2)
@@ -136,27 +132,15 @@ mtext("D",adj=1,cex=1.25,font=2)
 plot(pustule.model,select = 5,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('mean abs. humidity ('*g/m^3*')'),ylab="s(mean abs. humidity)")
 grid()
 mtext("E",adj=1,cex=1.25,font=2)
-plot(pustule.model,select = 6,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('max. abs. humidity ('*g/m^3*')'),ylab="s(max. abs. humidity)")
+plot(pustule.model,select = 6,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="total rainfall (mm)",ylab="s(total rainfall)")
 grid()
 mtext("F",adj=1,cex=1.25,font=2)
-plot(pustule.model,select = 7,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('min abs. humidity ('*g/m^3*')'),ylab="s(min. abs. humidity)")
+plot(pustule.model,select = 6,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(tag)")
 grid()
 mtext("G",adj=1,cex=1.25,font=2)
-plot(pustule.model,select = 8,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab=expression('mean solar radiation ('*W/m^2*')'),ylab="s(mean solalr radiation")
+plot(pustule.model,select = 8,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(site)")
 grid()
 mtext("H",adj=1,cex=1.25,font=2)
-plot(pustule.model,select = 9,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="total rainfall (mm)",ylab="s(total rainfall)")
-grid()
-mtext("I",adj=1,cex=1.25,font=2)
-plot(pustule.model,select = 10,shade=T,main="",cex.lab=1.5,cex.axis=1.5,xlab="mean leaf wetness (%)",ylab="s(mean leaf wetness)")
-grid()
-mtext("J",adj=1,cex=1.25,font=2)
-plot(pustule.model,select = 11,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(tag)")
-grid()
-mtext("K",adj=1,cex=1.25,font=2)
-plot(pustule.model,select = 12,shade=T,main="",cex.lab=1.5,cex.axis=1.5,ylab="s(site)")
-grid()
-mtext("L",adj=1,cex=1.25,font=2)
 
 
 # predict climate change effect
