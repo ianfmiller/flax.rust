@@ -1,4 +1,5 @@
 # load + prep data
+#test
 library(mgcv)
 library(MASS)
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant loc data set building.R")
