@@ -14,9 +14,9 @@ rm(site)
 
 # simulate epi function
 
-simulate.epi<-function(site,step.size=7,print.progress=T,day.start="12:00:00",weath.data=NA,weath.data.scenario=NA)
+simulate.epi<-function(site,step.size=7,print.progress=T,day.start="12:00:00",weath.data="observed",weath.data.scenario=NA)
 {
-  if(!(weath.data %in% c(NA,"2020","2045","2070"))) {warning('weath.data must be either NA, "2020", "2045",or "2070"')}
+  if(!(weath.data %in% c(NA,"2020","2045","2070"))) {warning('weath.data must be either "observed", "2020", "2045",or "2070"')}
   if(!(weath.data %in% c(NA,"rcp45","rcp85"))) {warning('weath.data must be either NA, "rcp45", or "rcp85"')}
   if(!is.na(weath.data) & is.na(weath.data.scenario)) {warning('weath.data.scenario must be either "rcp45", or "rcp85" if using non-observed weather data')}
   
@@ -135,15 +135,15 @@ simulate.epi<-function(site,step.size=7,print.progress=T,day.start="12:00:00",we
       new.mean.abs.hum<-mean(rh.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
       new.mean.daily.rain<-mean(rainfall.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
       
+      ## this weatheer data is used for wind speed and  direction only
       weath.sub<-all.weath[which(all.weath$site==site),] #pull out weath data for site
-      #### subset weather data to relevant window
       weath.sub<-subset(weath.sub,date<=date1) #### pull out relevant data
       weath.sub<-subset(weath.sub,date>=date0) #### pull out relevant data
       weath.sub<-cbind(weath.sub,interval.length=c(diff(as.numeric(weath.sub$date))/(60*60*24),NA))
       
     }
     
-    if(weath.data="observed")
+    if(weath.data=="observed")
     {
 
       weath.sub<-all.weath[which(all.weath$site==site),] #pull out weath data for site
@@ -168,20 +168,9 @@ simulate.epi<-function(site,step.size=7,print.progress=T,day.start="12:00:00",we
       
       abs.hum<-13.24732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+temp.rh.sub$temp.c)
       new.mean.abs.hum<-mean(abs.hum,na.rm=T)
-      new.max.abs.hum<-max(abs.hum,na.rm=T)
-      new.min.abs.hum<-min(abs.hum,na.rm=T)
       
-      new.mean.wetness<-mean(weath.sub$wetness,na.rm = T)
       new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)*(12*24)
-      new.mean.solar<-mean(weath.sub$solar.radiation,na.rm=T)
     }
-    
-    ### compare weather data coverage to make sure spore deposition is not being underestimated
-    time.diff.weather.data<-weath.sub$date[nrow(weath.sub)]-weath.sub$date[1]
-    units(time.diff.weather.data)<-"days"
-    time.diff.epi.data<-date1-date0
-    units(time.diff.epi.data)<-"days"
-    if(time.diff.epi.data-time.diff.weather.data) {transmission.mod<-(as.numeric(time.diff.weather.data)/as.numeric(time.diff.epi.data))^-1} else{transmission.mod<-1}
     
     ### get data from previous date
     last.epi<-pred.epi[which(pred.epi$date==as.Date(date0)),]
@@ -205,7 +194,7 @@ simulate.epi<-function(site,step.size=7,print.progress=T,day.start="12:00:00",we
           I<-last.epi.dis.set[j,"inf.intens"]
           spore.deposition<-spore.deposition+predict.kernel.tilted.plume(I=I,H=half.height/100,k=5.739690e-07,Ws=4.451030e-02,A=7.777373e-02,xtarget=xcord-sourceX,ytarget=ycord-sourceY,wind.data=weath.sub)
         }
-        spore.deposition<-spore.deposition*transmission.mod ### correct for any gaps in weath data
+        
         if(spore.deposition==0) spore.deposition<-10e-10
         #newdata = transmission.data[1,c("site","tag","tot.spore.deposition","height.cm","mean.temp","max.temp","min.temp","mean.abs.hum","max.abs.hum","min.abs.hum","mean.solar","mean.daily.rain","mean.wetness","time")]
         #newdata[1,c("site","tag","tot.spore.deposition","height.cm","mean.temp","max.temp","min.temp","mean.abs.hum","max.abs.hum","min.abs.hum","mean.solar","mean.daily.rain","mean.wetness","time")]<-c(site,as.character(target.tag),spore.deposition,last.epi[i,"max.height"],new.mean.temp,new.max.temp,new.min.temp,new.mean.abs.hum,new.max.abs.hum,new.min.abs.hum,new.mean.solar,new.mean.daily.rain,new.mean.wetness,delta.days)
@@ -213,13 +202,13 @@ simulate.epi<-function(site,step.size=7,print.progress=T,day.start="12:00:00",we
         if(target.tag %in% unique(transmission.data$tag))
         {
           pred.inf.odds<-predict(transmission.model,
-                                 newdata = data.frame("site"=site,"tag"=target.tag,"tot.spore.deposition"=spore.deposition,"height.cm"=last.epi[i,"max.height"],"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,"mean.solar"=new.mean.solar,"mean.daily.rain"=new.mean.daily.rain,"mean.wetness"=new.mean.wetness,"time"=delta.days),
+                                 newdata = data.frame("site"=site,"tag"=target.tag,"tot.spore.deposition"=spore.deposition,"height.cm"=last.epi[i,"max.height"],"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,"time"=delta.days),
                                  type="response",
                                  newdata.guaranteed=T,discrete = T) ### predict odds of becoming infected
         } else 
         {
           pred.inf.odds<-predict(transmission.model,
-                                 newdata = data.frame("site"=site,"tag"=1,"tot.spore.deposition"=spore.deposition,"height.cm"=last.epi[i,"max.height"],"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"max.abs.hum"=new.max.abs.hum,"min.abs.hum"=new.min.abs.hum,"mean.solar"=new.mean.solar,"mean.daily.rain"=new.mean.daily.rain,"mean.wetness"=new.mean.wetness,"time"=delta.days),
+                                 newdata = data.frame("site"=site,"tag"=1,"tot.spore.deposition"=spore.deposition,"height.cm"=last.epi[i,"max.height"],"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,"time"=delta.days),
                                  type="response",exclude = "s(tag)",
                                  newdata.guaranteed=T,discrete = T) ### predict odds of becoming infected
           
@@ -240,12 +229,25 @@ simulate.epi<-function(site,step.size=7,print.progress=T,day.start="12:00:00",we
       if(last.epi[i,"status"]==1)
       {
         new.status<-1
-        
-        new.inf.intens<-predict.inf.intens.boot(inf.intens.last = last.epi[i,"inf.intens"], max.height.last = last.epi[i,"max.height"], site = site,date0 = date0,date1 = date1)
+        if(weath.data=="observed")
+        {
+          new.inf.intens<-predict.inf.intens.boot(inf.intens.last = last.epi[i,"inf.intens"], max.height.last = last.epi[i,"max.height"], site = site,date0 = date0,date1 = date1)
+        }
+        if(!(weath.data=="observed"))
+        {
+          new.inf.intens<-predict.inf.intens.boot.alt(last.epi[i,"inf.intens"], last.epi[i,"max.height"],new.mean.temp,new.max.temp,new.min.temp,new.mean.abs.hum,new.mean.daily.rain,delta.days)
+        }
       }
       
       ### plant growth
-      new.height<-predict.plant.growth.boot(last.epi[i,"max.height"],ifelse(is.na(last.epi[i,"inf.intens"]),0,last.epi[i,"max.height"]),site,date0,date1)
+      if(weath.data=="observed")
+      {
+        new.height<-predict.plant.growth.boot(last.epi[i,"max.height"],ifelse(is.na(last.epi[i,"inf.intens"]),0,last.epi[i,"inf.intens"]),site,date0,date1)
+      }
+      if(!(weath.data=="observed"))
+      {
+        new.height<-predict.plant.growth.boot.alt(last.epi[i,"max.height"],ifelse(is.na(last.epi[i,"inf.intens"]),0,last.epi[i,"inf.intens"]),new.mean.temp,new.max.temp,new.min.temp,new.mean.abs.hum,new.mean.daily.rain,delta.days)
+      }
       
       new.row<-data.frame("site"=site,"tag"=sub.locs[i,"tag"],"X"=sub.locs[i,"X"],"Y"=sub.locs[i,"Y"],"x"=sub.locs[i,"x"],"y"=sub.locs[i,"y"],"date"= as.Date(date1),"status"=new.status,"max.height"=new.height,"inf.intens"=new.inf.intens) ### new data row
       pred.epi<-rbind(pred.epi,new.row) ### join data
@@ -257,32 +259,78 @@ simulate.epi<-function(site,step.size=7,print.progress=T,day.start="12:00:00",we
 
 # run simulations
 step.size<-7
-site<-"GM"
+library(parallel)
+library(doParallel)
+library(foreach)
+library(doRNG)
 
-
-if(any((!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.site.",site,".step.size.",step.size,".RDS"))),
-        (!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.site.",site,".step.size.",step.size,".RDS"))),
-         (!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.site.",site,".step.size.",step.size,".RDS")))
-)) {
-  library(parallel)
-  library(doParallel)
-  library(foreach)
-  library(doRNG)
-  
-  n.cores<-4
-  registerDoParallel(n.cores)
-  rm(.Random.seed, envir=globalenv())
-  pred.epi.all.0<-foreach(k = 1:10, .multicombine = T, .options.RNG=2389572) %dorng% simulate.epi(site,0,step.size=step.size,print.progress = F)
-  saveRDS(pred.epi.all.0,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.site.",site,".step.size.",step.size,".RDS"))
-  
-  rm(.Random.seed, envir=globalenv())
-  pred.epi.all.1.8<-foreach(k = 1:10, .multicombine = T, .options.RNG=2389572) %dorng% simulate.epi(site,1.8,step.size=step.size,print.progress = F)
-  saveRDS(pred.epi.all.1.8,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.site.",site,".step.size.",step.size,".RDS"))
-  
-  rm(.Random.seed, envir=globalenv())
-  pred.epi.all.3.7<-foreach(k = 1:10, .multicombine = T, .options.RNG=2389572) %dorng% simulate.epi(site,3.7,step.size=step.size,print.progress = F)
-  saveRDS(pred.epi.all.3.7,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.site.",site,".step.size.",step.size,".RDS"))
+set.seed(31623)
+random.seeds<-sample(1:10000,28)
+sites<-c("CC","BT","GM","HM")
+n.cores<-4
+for (site in c("CC","BT","GM","HM"))
+{
+  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.obs.",site,".step.size.",step.size,".RDS")))
+  {
+    registerDoParallel(n.cores)
+    rm(.Random.seed, envir=globalenv())
+    pred.epi<-foreach(k = 1:10, .multicombine = T, .options.RNG=random.seeds[which(sites==site)+0]) %dorng% simulate.epi(site=site,step.size=7,print.progress=F,day.start="12:00:00",weath.data="observed",weath.data.scenario=NA)
+    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.obs.",site,".step.size.",step.size,".RDS"))
+  }
 }
+
+for (site in c("CC","BT","GM","HM"))
+{
+  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2020.rcp45",site,".step.size.",step.size,".RDS")))
+  {
+    registerDoParallel(n.cores)
+    rm(.Random.seed, envir=globalenv())
+    pred.epi<-foreach(k = 1:10, .multicombine = T, .options.RNG=random.seeds[which(sites==site)+0]) %dorng% simulate.epi(site=site,step.size=7,print.progress=F,day.start="00:00:00",weath.data="2020",weath.data.scenario="rcp45")
+    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2020.rcp45",site,".step.size.",step.size,".RDS"))
+  }
+  
+  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2020.rcp85",site,".step.size.",step.size,".RDS")))
+  {
+    registerDoParallel(n.cores)
+    rm(.Random.seed, envir=globalenv())
+    pred.epi<-foreach(k = 1:10, .multicombine = T, .options.RNG=random.seeds[which(sites==site)+0]) %dorng% simulate.epi(site=site,step.size=7,print.progress=F,day.start="00:00:00",weath.data="2020",weath.data.scenario="rcp85")
+    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2020.rcp85",site,".step.size.",step.size,".RDS"))
+  }
+  
+  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2045.rcp45",site,".step.size.",step.size,".RDS")))
+  {
+    registerDoParallel(n.cores)
+    rm(.Random.seed, envir=globalenv())
+    pred.epi<-foreach(k = 1:10, .multicombine = T, .options.RNG=random.seeds[which(sites==site)+0]) %dorng% simulate.epi(site=site,step.size=7,print.progress=F,day.start="00:00:00",weath.data="2045",weath.data.scenario="rcp45")
+    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2045.rcp45",site,".step.size.",step.size,".RDS"))
+  }
+  
+  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2045.rcp85",site,".step.size.",step.size,".RDS")))
+  {
+    registerDoParallel(n.cores)
+    rm(.Random.seed, envir=globalenv())
+    pred.epi<-foreach(k = 1:10, .multicombine = T, .options.RNG=random.seeds[which(sites==site)+0]) %dorng% simulate.epi(site=site,step.size=7,print.progress=F,day.start="00:00:00",weath.data="2045",weath.data.scenario="rcp85")
+    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2045.rcp85",site,".step.size.",step.size,".RDS"))
+  }
+  
+  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2070.rcp45",site,".step.size.",step.size,".RDS")))
+  {
+    registerDoParallel(n.cores)
+    rm(.Random.seed, envir=globalenv())
+    pred.epi<-foreach(k = 1:10, .multicombine = T, .options.RNG=random.seeds[which(sites==site)+0]) %dorng% simulate.epi(site=site,step.size=7,print.progress=F,day.start="00:00:00",weath.data="2070",weath.data.scenario="rcp45")
+    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2070.rcp45",site,".step.size.",step.size,".RDS"))
+  }
+  
+  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2070.rcp85",site,".step.size.",step.size,".RDS")))
+  {
+    registerDoParallel(n.cores)
+    rm(.Random.seed, envir=globalenv())
+    pred.epi<-foreach(k = 1:10, .multicombine = T, .options.RNG=random.seeds[which(sites==site)+0]) %dorng% simulate.epi(site=site,step.size=7,print.progress=F,day.start="00:00:00",weath.data="2070",weath.data.scenario="rcp85")
+    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2070.rcp85",site,".step.size.",step.size,".RDS"))
+  }
+}
+
+
 
 # plot simulations
 
