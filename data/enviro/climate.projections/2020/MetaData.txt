@@ -1,5 +1,5 @@
-Product:               LOCA daily surface water projections hydrologic data
-Variables:             rainfall  Tair      relHumid  
+Product:               Local constructed-analogs downscaled GCM data
+Variables:             pr        tasmin    tasmax    
 Period:                2020Jun through 2020Sep
 Resolution:            1/16 degree
 Latitude bounds:       (38.9375, 39.0)
@@ -17,6 +17,6 @@ Global attributes
 -----------------
 Conventions:           CF-1.4
 authors:               David W Pierce
-description:           LOCA daily hydrology projections 
-creation_date:         July, 2016
+description:           LOCA (LOcal Constructed Analogs) downscaling
+creation_date:         April, 2016
 institution:           Scripps Institution of Oceanography
