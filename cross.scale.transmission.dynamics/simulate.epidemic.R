@@ -17,7 +17,7 @@ rm(site)
 simulate.epi<-function(site,step.size=7,print.progress=T,day.start="12:00:00",weath.data="observed",weath.data.scenario=NA)
 {
   if(!(weath.data %in% c(NA,"2020","2045","2070"))) {warning('weath.data must be either "observed", "2020", "2045",or "2070"')}
-  if(!(weath.data %in% c(NA,"rcp45","rcp85"))) {warning('weath.data must be either NA, "rcp45", or "rcp85"')}
+  if(!(weath.data.scenario %in% c(NA,"rcp45","rcp85"))) {warning('weath.data must be either NA, "rcp45", or "rcp85"')}
   if(!is.na(weath.data) & is.na(weath.data.scenario)) {warning('weath.data.scenario must be either "rcp45", or "rcp85" if using non-observed weather data')}
   
   ## setup
@@ -114,24 +114,24 @@ simulate.epi<-function(site,step.size=7,print.progress=T,day.start="12:00:00",we
   
     if(!(weath.data=="observed"))
     {
-      mean.temp.data.sub.1<-mean.temp.data[which(as.Date(paste0(mean.temp.data$year,"-",mean.temp.data$month,"-",mean.temp.data$day))>=as.Date(date0)),]
-      mean.temp.data.sub.2<-mean.temp.data.sub.1[which(as.Date(paste0(mean.temp.data.sub.1$year,"-",mean.temp.data.sub.1$month,"-",mean.temp.data.sub.1$day))<as.Date(date1)),]
+      mean.temp.data.sub.1<-mean.temp.data[which(format(as.Date(paste0(mean.temp.data$year,"-",mean.temp.data$month,"-",mean.temp.data$day)),"%m-%d")>=format(as.Date(date0),"%m-%d")),]
+      mean.temp.data.sub.2<-mean.temp.data.sub.1[format(which(as.Date(paste0(mean.temp.data.sub.1$year,"-",mean.temp.data.sub.1$month,"-",mean.temp.data.sub.1$day)),"%m-%d")<format(as.Date(date1),"%m-%d")),]
       
-      max.temp.data.sub.1<-max.temp.data[which(as.Date(paste0(max.temp.data$year,"-",max.temp.data$month,"-",max.temp.data$day))>=as.Date(date0)),]
-      max.temp.data.sub.2<-max.temp.data.sub.1[which(as.Date(paste0(max.temp.data.sub.1$year,"-",max.temp.data.sub.1$month,"-",max.temp.data.sub.1$day))<as.Date(date1)),]
+      max.temp.data.sub.1<-max.temp.data[which(format(as.Date(paste0(max.temp.data$year,"-",max.temp.data$month,"-",max.temp.data$day)),"%m-%d")>=format(as.Date(date0),"%m-%d")),]
+      max.temp.data.sub.2<-max.temp.data.sub.1[which(format(as.Date(paste0(max.temp.data.sub.1$year,"-",max.temp.data.sub.1$month,"-",max.temp.data.sub.1$day)),"%m-%d")<format(as.Date(date1),"%m-%d")),]
      
-      min.temp.data.sub.1<-min.temp.data[which(as.Date(paste0(min.temp.data$year,"-",min.temp.data$month,"-",min.temp.data$day))>=as.Date(date0)),]
-      min.temp.data.sub.2<-min.temp.data.sub.1[which(as.Date(paste0(min.temp.data.sub.1$year,"-",min.temp.data.sub.1$month,"-",min.temp.data.sub.1$day))<as.Date(date1)),]
+      min.temp.data.sub.1<-min.temp.data[which(format(as.Date(paste0(min.temp.data$year,"-",min.temp.data$month,"-",min.temp.data$day)),"%m-%d")>=format(as.Date(date0),"%m-%d")),]
+      min.temp.data.sub.2<-min.temp.data.sub.1[which(format(as.Date(paste0(min.temp.data.sub.1$year,"-",min.temp.data.sub.1$month,"-",min.temp.data.sub.1$day)),"%m-%d")<format(as.Date(date1),"%m-%d")),]
       
-      rh.data.sub.1<-rh.data[which(as.Date(paste0(rh.data$year,"-",rh.data$month,"-",rh.data$day))>=as.Date(date0)),]
-      rh.data.sub.2<-rh.data.sub.1[which(as.Date(paste0(rh.data.sub.1$year,"-",rh.data.sub.1$month,"-",rh.data.sub.1$day))<as.Date(date1)),]
+      rh.data.sub.1<-rh.data[which(format(as.Date(paste0(rh.data$year,"-",rh.data$month,"-",rh.data$day)),"%m-%d")>=format(as.Date(date0),"%m-%d")),]
+      rh.data.sub.2<-rh.data.sub.1[which(format(as.Date(paste0(rh.data.sub.1$year,"-",rh.data.sub.1$month,"-",rh.data.sub.1$day)),"%m-%d")<format(as.Date(date1),"%m-%d")),]
       
-      rainfall.data.sub.1<-rainfall.data[which(as.Date(paste0(rainfall.data$year,"-",rainfall.data$month,"-",rainfall.data$day))>=as.Date(date0)),]
-      rainfall.data.sub.2<-rainfall.data.sub.1[which(as.Date(paste0(rainfall.data.sub.1$year,"-",rainfall.data.sub.1$month,"-",rainfall.data.sub.1$day))<as.Date(date1)),]
+      rainfall.data.sub.1<-rainfall.data[which(format(as.Date(paste0(rainfall.data$year,"-",rainfall.data$month,"-",rainfall.data$day)),"%m-%d")>=format(as.Date(date0),"%m-%d")),]
+      rainfall.data.sub.2<-rainfall.data.sub.1[which(format(as.Date(paste0(rainfall.data.sub.1$year,"-",rainfall.data.sub.1$month,"-",rainfall.data.sub.1$day)),"%m-%d")<format(as.Date(date1),"%m-%d")),]
       
       new.mean.temp<-mean(mean.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
-      new.max.temp<-mean(max.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
-      new.min.temp<-mean(min.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
+      new.max.temp<-max(max.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
+      new.min.temp<-min(min.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
       new.mean.abs.hum<-mean(rh.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
       new.mean.daily.rain<-mean(rainfall.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
       
