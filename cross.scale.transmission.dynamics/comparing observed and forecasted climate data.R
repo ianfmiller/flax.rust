@@ -133,7 +133,6 @@ mean.rainfall.2070<-read.csv("~/Documents/GitHub/flax.rust/data/enviro/climate.p
 colnames(mean.rainfall.2020)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
 colnames(mean.rainfall.2045)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
 colnames(mean.rainfall.2070)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
-colnames(mean.rain)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
 plot(dates,mean.rainfall.2020$cesm1.cam5.1.rcp45,type="l",col="orange",ylim=c(0,27),xlim=c(min(plot.dates),max(plot.dates)),xlab="date",ylab="mean rainfall",lty=1,lwd=2)        
 axis.Date(1,plot.dates)
 points(dates,mean.rainfall.2045$cesm1.cam5.1.rcp45,type="l",col="orange",lty=2,lwd=2)
