@@ -46,7 +46,7 @@ abline(0,1,lty=2)
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS"))
 {
   set.seed(23094867)
-  mod<-gam((height.next-height)/time~0+
+  mod<-gam((height.next-height)/time~
              te(height,inf.intens)+
              s(mean.temp)+
              s(max.temp)+
@@ -131,7 +131,7 @@ source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within ho
 library("MASS")
 library("viridis")
 par(mfrow=c(1,1))
-start.height<-20
+start.height<-10
 site<-"CC"
 start.date<-c(as.POSIXct("2020-06-23 00:00:00",tz="UTC"),as.POSIXct("2020-06-20 00:00:00",tz="UTC"),as.POSIXct("2020-06-24 00:00:00",tz="UTC"),as.POSIXct("2020-06-26 00:00:00",tz="UTC"))[which(c("CC","BT","GM","HM")==site)]
 end.date<-c(as.POSIXct("2020-07-27 00:00:00",tz="UTC"),as.POSIXct("2020-07-29 00:00:00",tz="UTC"),as.POSIXct("2020-07-28 00:00:00",tz="UTC"),as.POSIXct("2020-07-10 00:00:00",tz="UTC"))[which(c("CC","BT","GM","HM")==site)]
@@ -153,7 +153,7 @@ for(i in 1:7)
   xcords<-rep(NA,length(sim.dates)) #time values
   ycords<-rep(NA,length(sim.dates)) #height values
   
-  for(j in 1:3)
+  for(j in 1:10)
   {
     height<-start.height
     xcords.new<-c(sim.dates[1])
@@ -231,7 +231,6 @@ for(i in 1:7)
       mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
       pred.data<-data.frame("height"=height,"inf.intens"=0,"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.mean.temp,"mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,tag="NA",site=site)
       Xp <- predict(plant.growth.model, newdata = pred.data, exclude=c("s(site)","s(tag)"),type="lpmatrix")
-
       ilink <- family(plant.growth.model)$linkinv
       preds <- rep(NA,n)
       for (l in seq_len(n)) { 
