@@ -89,7 +89,7 @@ abline(0,1,lty=2)
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS"))
 {
   set.seed(34020968)
-  mod<-gam((area.next-area)/time~0+
+  mod<-gam((area.next-area)/time~
               s(area)+
               s(mean.temp)+
               s(max.temp)+

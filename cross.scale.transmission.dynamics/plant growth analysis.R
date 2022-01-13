@@ -116,7 +116,7 @@ grid()
 mtext("M",adj=1,cex=1.25,font=2)
 
 
-# model vis
+# predict climate change effects
 t_col <- function(color, percent = 50, name = NULL) {
   rgb.val <- col2rgb(color)
   t.col <- rgb(rgb.val[1], rgb.val[2], rgb.val[3],
@@ -131,8 +131,8 @@ source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within ho
 library("MASS")
 library("viridis")
 par(mfrow=c(1,1))
-start.height<-10
-site<-"GM"
+start.height<-20
+site<-"CC"
 start.date<-c(as.POSIXct("2020-06-23 00:00:00",tz="UTC"),as.POSIXct("2020-06-20 00:00:00",tz="UTC"),as.POSIXct("2020-06-24 00:00:00",tz="UTC"),as.POSIXct("2020-06-26 00:00:00",tz="UTC"))[which(c("CC","BT","GM","HM")==site)]
 end.date<-c(as.POSIXct("2020-07-27 00:00:00",tz="UTC"),as.POSIXct("2020-07-29 00:00:00",tz="UTC"),as.POSIXct("2020-07-28 00:00:00",tz="UTC"),as.POSIXct("2020-07-10 00:00:00",tz="UTC"))[which(c("CC","BT","GM","HM")==site)]
 sim.dates<-seq.POSIXt(start.date,end.date,"3 day")
@@ -153,7 +153,7 @@ for(i in 1:7)
   xcords<-rep(NA,length(sim.dates)) #time values
   ycords<-rep(NA,length(sim.dates)) #height values
   
-  for(j in 1:10)
+  for(j in 1:3)
   {
     height<-start.height
     xcords.new<-c(sim.dates[1])
@@ -231,6 +231,7 @@ for(i in 1:7)
       mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
       pred.data<-data.frame("height"=height,"inf.intens"=0,"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.mean.temp,"mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,tag="NA",site=site)
       Xp <- predict(plant.growth.model, newdata = pred.data, exclude=c("s(site)","s(tag)"),type="lpmatrix")
+
       ilink <- family(plant.growth.model)$linkinv
       preds <- rep(NA,n)
       for (l in seq_len(n)) { 

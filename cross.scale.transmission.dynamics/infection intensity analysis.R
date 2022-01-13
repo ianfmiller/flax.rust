@@ -52,7 +52,7 @@ abline(0,1,lty=2)
 if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/infection.intensity.model.RDS"))
 {
   set.seed(5708389)
-  mod<-gam((infection.intensity.next-infection.intensity)/time~0+
+  mod<-gam((infection.intensity.next-infection.intensity)/time~
              te(max.height,infection.intensity)+
              s(mean.temp)+
              s(max.temp)+
