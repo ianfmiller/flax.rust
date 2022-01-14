@@ -269,7 +269,8 @@ set.seed(31623)
 random.seeds<-sample(1:10000,28)
 sites<-c("BT","GM")
 n.cores<-4
-for (site in c("CC","BT","GM","HM"))
+
+for (site in c("BT","GM"))
 {
   if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.obs.",site,".step.size.",step.size,".RDS")))
   {
@@ -280,7 +281,7 @@ for (site in c("CC","BT","GM","HM"))
   }
 }
 
-for (site in c("CC","BT","GM","HM"))
+for (site in c("BT","GM"))
 {
   if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2020.rcp45",site,".step.size.",step.size,".RDS")))
   {
