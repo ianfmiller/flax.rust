@@ -100,7 +100,7 @@ predict.inf.intens.boot<-function(inf.intens.last,max.height.last,site,date0,dat
   inf.intens.next
 }
 
-predict.inf.intens.boot.alt<-function(inf.intens.last,max.height.last,mean.temp.dat,max.temp.dat,min.temp.dat,mean.abs.hum.dat,mean.daily.rain.dat,time.dat)
+predict.inf.intens.boot.alt<-function(inf.intens.last,max.height.last,mean.temp.dat,max.temp.dat,min.temp.dat,mean.abs.hum.dat,mean.daily.rain.dat,time.dat,site)
 {
   new.mean.temp<-mean.temp.dat
   new.max.temp<-max.temp.dat
@@ -111,12 +111,12 @@ predict.inf.intens.boot.alt<-function(inf.intens.last,max.height.last,mean.temp.
   
   # make forward prediction
   pred.data<-data.frame("infection.intensity"=inf.intens.last,"max.height"=max.height.last,
-                        "time"=delta.days,"site"="NA","tag"="NA",
+                        "time"=delta.days,"site"=site,"tag"="NA",
                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                         "mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain)
   
 
-  Xp <- predict(infection.intensity.model, newdata = pred.data, exclude=c("s(tag)","s(site)"),type="lpmatrix")
+  Xp <- predict(infection.intensity.model, newdata = pred.data, exclude=c("s(tag)"),type="lpmatrix")
   beta <- coef(infection.intensity.model) ## posterior mean of coefs
   Vb   <- vcov(infection.intensity.model) ## posterior  cov of coefs
   n <- 2

@@ -98,7 +98,7 @@ predict.plant.growth.boot<-function(height.last,inf.intens.last,site,date0,date1
   height.next
 }
 
-predict.plant.growth.boot.alt<-function(height.last,inf.intens.last,mean.temp.dat,max.temp.dat,min.temp.dat,mean.abs.hum.dat,mean.daily.rain.dat,time.dat)
+predict.plant.growth.boot.alt<-function(height.last,inf.intens.last,mean.temp.dat,max.temp.dat,min.temp.dat,mean.abs.hum.dat,mean.daily.rain.dat,time.dat,site)
 {
   new.mean.temp<-mean.temp.dat
   new.max.temp<-max.temp.dat
@@ -111,7 +111,7 @@ predict.plant.growth.boot.alt<-function(height.last,inf.intens.last,mean.temp.da
   pred.data<-data.frame("time"=delta.days,"height"=height.last,"inf.intens"=inf.intens.last,
                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                         "mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,
-                        "site"="NA","tag"="NA")
+                        "site"=site,"tag"="NA")
   Xp <- predict(plant.growth.model, newdata = pred.data, exlude=c('s(site)','s(tag)'),type="lpmatrix")
   beta <- coef(plant.growth.model) ## posterior mean of coefs
   Vb   <- vcov(plant.growth.model) ## posterior  cov of coefs
