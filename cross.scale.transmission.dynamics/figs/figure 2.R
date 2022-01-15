@@ -3,15 +3,6 @@ source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant gro
 delta.plant.heights<-subset(delta.plant.heights,time<=8)
 plant.growth.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS")
 
-t_col <- function(color, percent = 50, name = NULL) {
-  rgb.val <- col2rgb(color)
-  t.col <- rgb(rgb.val[1], rgb.val[2], rgb.val[3],
-               max = 255,
-               alpha = (100 - percent) * 255 / 100,
-               names = name)
-  invisible(t.col)
-}
-
 site.cols<-viridis_pal(alpha=.5)(20)[c(20,15,6,1)]
 weather.colors<-c("black",viridis_pal(option = "C")(5)[c(4,4,3,3,2,2,1,1)])
 
@@ -92,11 +83,11 @@ sim.dates<-seq.POSIXt(start.date,end.date,"3 day")
 weath.data.vec<-c("observed","2020","2020","2045","2045","2070","2070")
 weath.data.scenario.vec<-c(NA,"rcp45","rcp85","rcp45","rcp85","rcp45","rcp85")
 
-plot(0,0,xlim=c(start.date,end.date),ylim=c(10,18),type="n",xlab="date",ylab="plant height",cex.axis=1,cex.lab=1.2,axes=F)
+plot(0,0,xlim=c(start.date,end.date),ylim=c(10,18),type="n",xlab="date",ylab="plant height",cex.lab=2,axes=F)
 grid()
 mtext("J",side=3,adj=1,cex=2)
-axis.POSIXct(1,sim.dates)
-axis(2)
+axis.POSIXct(1,sim.dates,cex.axis=2)
+axis(2,cex.axis=2)
 box()
 
 site<-"GM"
@@ -203,11 +194,6 @@ for(i in 1:7)
     xcords<-rbind(xcords,xcords.new)
     ycords<-rbind(ycords,ycords.new)  
   }
-  
-  for(m in 2:dim(xcords)[1])
-  {
-    points(xcords[m,],ycords[m,],col=t_col(weather.colors[i],50),type="l",lwd=.75,lty=c(1,3,1,3,1,3,1,3,1)[i]) 
-  } 
   points(xcords[2,],colMeans(ycords[-1,]),col=weather.colors[i],type="l",lwd=5,lty=c(1,3,1,3,1,3,1,3,1)[i])
 }
 legend("topleft",
