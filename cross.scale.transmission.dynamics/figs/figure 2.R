@@ -2,7 +2,18 @@ library(mgcv)
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant growth data prep.R")
 delta.plant.heights<-subset(delta.plant.heights,time<=8)
 plant.growth.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS")
+
+t_col <- function(color, percent = 50, name = NULL) {
+  rgb.val <- col2rgb(color)
+  t.col <- rgb(rgb.val[1], rgb.val[2], rgb.val[3],
+               max = 255,
+               alpha = (100 - percent) * 255 / 100,
+               names = name)
+  invisible(t.col)
+}
+
 site.cols<-viridis_pal(alpha=.5)(20)[c(20,15,6,1)]
+weather.colors<-c("black",viridis_pal(option = "C")(5)[c(4,4,3,3,2,2,1,1)])
 
 layout(matrix(c(rep(16,10),1,1,1,1,2,3,3,3,3,4,4,4,4,rep(17,10),rep(10,10),1,1,1,1,2,3,3,3,3,4,4,4,4,rep(11,10),rep(10,10),12,5,5,5,5,6,6,6,6,7,7,7,7,rep(11,10),rep(10,10),12,5,5,5,5,6,6,6,6,7,7,7,7,rep(11,10),rep(10,10),13,14,14,8,8,8,8,9,9,9,9,15,15,rep(11,10),rep(18,10),13,14,14,8,8,8,8,9,9,9,9,15,15,rep(19,10)),6,33,byrow=T))
 
@@ -55,7 +66,7 @@ mtext("Gaussian quantiles",1,line = 2.25,cex=1)
 mtext("s(tag)",2,line=2.25,cex=1)
 grid()
 mtext("H",adj=1,cex=1.25,font=2)
-plot(plant.growth.model,select = 8,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="",col=site.cols[c(2,1,3,4)],cex=2)
+plot(plant.growth.model,select = 8,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="",col=site.cols[c(2,1,3,4)],cex=2,pch=16)
 mtext("Gaussian quantiles",1,line = 2.25,cex=1)
 mtext("s(site)",2,line=2.25,cex=1)
 grid()
@@ -80,7 +91,7 @@ end.date<-c(as.POSIXct("2020-07-27 00:00:00",tz="UTC"),as.POSIXct("2020-07-29 00
 sim.dates<-seq.POSIXt(start.date,end.date,"3 day")
 weath.data.vec<-c("observed","2020","2020","2045","2045","2070","2070")
 weath.data.scenario.vec<-c(NA,"rcp45","rcp85","rcp45","rcp85","rcp45","rcp85")
-colors<-c("black","darkorange","darkorange3","red1","darkred","purple1","purple4")
+
 plot(0,0,xlim=c(start.date,end.date),ylim=c(10,18),type="n",xlab="date",ylab="plant height",cex.axis=1,cex.lab=1.2,axes=F)
 grid()
 mtext("J",side=3,adj=1,cex=2)
@@ -195,12 +206,15 @@ for(i in 1:7)
   
   for(m in 2:dim(xcords)[1])
   {
-    #points(xcords[m,],ycords[m,],col=t_col(colors[i],50),type="l",lwd=.5) 
+    points(xcords[m,],ycords[m,],col=t_col(weather.colors[i],50),type="l",lwd=.75,lty=c(1,3,1,3,1,3,1,3,1)[i]) 
   } 
-  points(xcords[2,],colMeans(ycords[-1,]),col=colors[i],type="l",lwd=2)
+  points(xcords[2,],colMeans(ycords[-1,]),col=weather.colors[i],type="l",lwd=5,lty=c(1,3,1,3,1,3,1,3,1)[i])
 }
 legend("topleft",
        legend=c("observed weather","2020 RCP4.5", "2020 RCP8.5", "2045 RCP4.5","2024 RCP8.5","2070 RCP4.5","2070 RCP8.5"),
-       lwd=1,
-       col=colors
+       lwd=4,
+       seg.len = 4,
+       lty=c(1,3,1,3,1,3,1,3),
+       col=weather.colors,
+       bty="n"
        )
