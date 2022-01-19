@@ -8,7 +8,7 @@ delta.plant.heights<-subset(delta.plant.heights,time<=8)
 # visualize data
 
 layout(matrix(c(1,2,3,3),2,2,byrow = T))
-par(mar=c(5,5,3,0.5))
+par(mar=c(5,5,5,5))
 
 ## histograms
 hist(delta.plant.heights$height,main="",breaks=100,xlab="plant height (cm)",cex.lab=2,cex.axis=2,cex.main=2)
