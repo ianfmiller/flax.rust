@@ -66,7 +66,7 @@ legend("topleft",legend=c("CC","BT","GM","HM"),pch=16,col=site.cols,cex=1,bty="n
 
 site.indicies<-c(2,1,3,4)[as.numeric(delta.plant.heights$site)]
 par(mar=c(5,5,5,3))
-plot(delta.plant.heights$height,delta.plant.heights$height.next,xlab = "observed height",ylab="next observed height",cex.lab=2,cex.axis=2,col=site.cols[site.indicies],pch=16,cex=delta.plant.heights$time/4,panel.first = abline(0,1,lty=2))
+plot(delta.plant.heights$height,delta.plant.heights$height.next,xlab = "observed height (cm)",ylab="next observed height (cm)",cex.lab=2,cex.axis=2,col=site.cols[site.indicies],pch=16,cex=delta.plant.heights$time/4,panel.first = abline(0,1,lty=2))
 grid()
 mtext("A",side=3,adj=1,cex=2)
 legend("topleft",legend=c("CC","BT","GM","HM"," ","2 days","4 days","6 days"),col=c(site.cols,NA,"grey","grey","grey"),pt.cex=c(2,2,2,2,2,2/4,4/4,6/4),pch=16,cex=1,bty="n")
@@ -83,7 +83,7 @@ sim.dates<-seq.POSIXt(start.date,end.date,"3 day")
 weath.data.vec<-c("observed","2020","2020","2045","2045","2070","2070")
 weath.data.scenario.vec<-c(NA,"rcp45","rcp85","rcp45","rcp85","rcp45","rcp85")
 
-plot(0,0,xlim=c(start.date,end.date),ylim=c(10,18),type="n",xlab="date",ylab="plant height",cex.lab=2,axes=F)
+plot(0,0,xlim=c(start.date,end.date),ylim=c(10,18),type="n",xlab="date",ylab="plant height (cm)",cex.lab=2,axes=F)
 grid()
 mtext("J",side=3,adj=1,cex=2)
 axis.POSIXct(1,sim.dates,cex.axis=2)
