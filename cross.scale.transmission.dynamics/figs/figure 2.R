@@ -65,7 +65,7 @@ mtext("I",adj=1,cex=1.25,font=2)
 legend("topleft",legend=c("CC","BT","GM","HM"),pch=16,col=site.cols,cex=1,bty="n",pt.cex = 2)
 
 site.indicies<-c(2,1,3,4)[as.numeric(delta.plant.heights$site)]
-par(mar=c(5,5,5,3))
+par(mar=c(5,6,5,2))
 plot(delta.plant.heights$height,delta.plant.heights$height.next,xlab = "observed height (cm)",ylab="next observed height (cm)",cex.lab=2,cex.axis=2,col=site.cols[site.indicies],pch=16,cex=delta.plant.heights$time/4,panel.first = abline(0,1,lty=2))
 grid()
 mtext("A",side=3,adj=1,cex=2)
