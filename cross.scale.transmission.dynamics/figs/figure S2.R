@@ -20,7 +20,7 @@ start.height<-10
 weath.data.vec<-c("observed","2020","2020","2045","2045","2070","2070")
 weath.data.scenario.vec<-c(NA,"rcp45","rcp85","rcp45","rcp85","rcp45","rcp85")
 
-par(mfrow=c(2,2),mar=c(5,5,5,5))
+par(mfrow=c(2,2),mar=c(5,6,5,5))
 
 for(site in c("CC","BT","GM","HM"))
 {
@@ -28,7 +28,7 @@ for(site in c("CC","BT","GM","HM"))
   end.date<-c(as.POSIXct("2020-07-27 00:00:00",tz="UTC"),as.POSIXct("2020-07-29 00:00:00",tz="UTC"),as.POSIXct("2020-07-28 00:00:00",tz="UTC"),as.POSIXct("2020-07-10 00:00:00",tz="UTC"))[which(c("CC","BT","GM","HM")==site)]
   sim.dates<-seq.POSIXt(start.date,end.date,"3 day")
   
-  plot(0,0,xlim=c(start.date,end.date),ylim=c(10,32),type="n",xlab="date",ylab="plant height",cex.lab=2,axes=F,main=site,cex.main=2)
+  plot(0,0,xlim=c(start.date,end.date),ylim=c(10,32),type="n",xlab="date",ylab="plant height (cm)",cex.lab=2,axes=F,main=site,cex.main=2)
   grid()
   mtext(c("A","B","C","D")[which(sites==site)],side=3,adj=1,cex=2)
   axis.POSIXct(1,sim.dates,cex.axis=2)
