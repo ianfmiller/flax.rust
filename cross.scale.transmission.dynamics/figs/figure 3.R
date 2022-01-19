@@ -58,8 +58,7 @@ grid()
 mtext("A",side=3,adj=1,cex=2)
 legend("topleft",legend=c("CC","BT","GM","HM"," ","2 days","4 days","6 days"),col=c(site.cols,NA,"grey","grey","grey"),pt.cex=c(2,2,2,2,2,2/4,4/4,6/4),pch=16,cex=1,bty="n")
 
-set.seed(874627)
-source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
+set.seed(289988)
 library("MASS")
 library("viridis")
 start.area<-0.1
@@ -84,7 +83,7 @@ for(i in 1:7)
   weath.data.scenario<-weath.data.scenario.vec[i]
   
   xcords<-rep(NA,length(sim.dates)) #time values
-  ycords<-rep(NA,length(sim.dates)) #height values
+  ycords<-rep(NA,length(sim.dates)) #area values
   
   for(j in 1:10)
   {

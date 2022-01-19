@@ -72,7 +72,6 @@ mtext("A",side=3,adj=1,cex=2)
 legend("topleft",legend=c("CC","BT","GM","HM"," ","2 days","4 days","6 days"),col=c(site.cols,NA,"grey","grey","grey"),pt.cex=c(2,2,2,2,2,2/4,4/4,6/4),pch=16,cex=1,bty="n")
 
 set.seed(874627)
-source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
 library("MASS")
 library("viridis")
 start.height<-10
