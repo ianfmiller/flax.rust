@@ -53,7 +53,7 @@ legend("topleft",legend=c("CC","BT","GM","HM"),pch=16,col=site.cols,cex=1,bty="n
 
 site.indicies<-c(2,1,3,4)[as.numeric(delta.pustules$site)]
 par(mar=c(5,6,5,2))
-plot(delta.pustules$area,delta.pustules$area.next,xlab = expression('area '*(mm^2)),ylab=expression('next obs. area '*(mm^2)),cex.lab=2,cex.axis=2,col=site.cols[site.indicies],pch=16,cex=delta.pustules$time/4,panel.first = abline(0,1,lty=2))
+plot(delta.pustules$area,delta.pustules$area.next,xlab = expression('observed pustule area '*(mm^2)),ylab=expression('next observed pustule area '*(mm^2)),cex.lab=2,cex.axis=2,col=site.cols[site.indicies],pch=16,cex=delta.pustules$time/4,panel.first = abline(0,1,lty=2))
 grid()
 mtext("A",side=3,adj=1,cex=2)
 legend("topleft",legend=c("CC","BT","GM","HM"," ","2 days","4 days","6 days"),col=c(site.cols,NA,"grey","grey","grey"),pt.cex=c(2,2,2,2,2,2/4,4/4,6/4),pch=16,cex=1,bty="n")
