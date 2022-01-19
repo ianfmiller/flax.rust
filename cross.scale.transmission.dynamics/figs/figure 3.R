@@ -10,7 +10,7 @@ layout(matrix(c(rep(13,10),1,1,1,1,2,2,2,2,3,3,3,3,rep(14,10),rep(9,10),1,1,1,1,
 par(mar=c(4,4,3,1))
 
 plot(pustule.model,select = 1,scale=0,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
-mtext(expression('pustule area ('*cm^2*')'),1,line = 2.25,cex=1)
+mtext(expression('pustule area ('*mm^2*')'),1,line = 2.25,cex=1)
 mtext("s(pustule area)",2,line=2.25,cex=1)
 grid()
 mtext("B",adj=1,cex=1.25,font=2)
@@ -71,7 +71,7 @@ sim.dates<-seq.POSIXt(start.date,end.date,"3 day")
 weath.data.vec<-c("observed","2020","2020","2045","2045","2070","2070")
 weath.data.scenario.vec<-c(NA,"rcp45","rcp85","rcp45","rcp85","rcp45","rcp85")
 
-plot(0,0,xlim=c(start.date,end.date),ylim=c(0,.75),type="n",xlab="date",ylab=expression('pustule area ('*cm^2*')'),cex.lab=2,axes=F)
+plot(0,0,xlim=c(start.date,end.date),ylim=c(0,.75),type="n",xlab="date",ylab=expression('pustule area ('*mm^2*')'),cex.lab=2,axes=F)
 grid()
 mtext("J",side=3,adj=1,cex=2)
 axis.POSIXct(1,sim.dates,cex.axis=2)
