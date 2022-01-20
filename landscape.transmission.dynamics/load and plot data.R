@@ -1,23 +1,5 @@
 # load packages
-library(dplyr)
-library(mgcv) 
-library(tidyverse)
-library(ggplot2)
-library(rgdal)
-library(raster)
-library(ggspatial)
-library(rasterVis)
-library(gridExtra)
-library(geosphere)
-library(sf) 
-library(sp)
-library(leaflet)
-library(spatstat)
-library(plotKML)
-library(sampSurf)
-library(quickPlot)
-library(exactextractr)
-library(Rcpp)
+
 
 # load spatial data
 ## define area of interest
