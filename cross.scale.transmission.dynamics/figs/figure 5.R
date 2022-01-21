@@ -17,7 +17,7 @@ par(mar=c(4,4,3,1))
 plot(transmission.model,select = 1,scheme = 2,zlim=c(-10,10),too.far=1,hcolors=cm.colors(101),contour.col="black",cex.lab=1.5,cex.axis=1.5,xlab="",ylab="",main="",rug=F)
 mtext(expression(log[10]*' predicted spore deposition'),1,line = 2.25,cex=1)
 mtext("plant height (cm)",2,line=2.25,cex=1)
-points(log10(transmission.data$tot.spore.deposition),transmission.data$height.cm,pch=".")
+points(log10(transmission.data$tot.spore.deposition),transmission.data$height.cm,pch=16,cex=.1)
 
 par(mar=c(4,1,2.5,1.5))
 plot(0,0,type="n",xlim=c(0,1),ylim=c(-10-0.1,10+0.1),axes=F,xlab="",ylab="")
@@ -69,14 +69,15 @@ grid()
 mtext("I",adj=1,cex=1.25,font=2)
 legend("topleft",legend=c("CC","BT","GM","HM"),pch=16,col=site.cols,cex=1,bty="n",pt.cex = 2)
 
-site.indicies<-c(2,1,3,4)[as.numeric(transmission.data$site)]
+transmission.data.shuffled= transmission.data[sample(1:nrow(transmission.data)), ]
+site.indicies<-c(2,1,3,4)[as.numeric(transmission.data.shuffled$site)]
 par(mar=c(5,6,5,2))
-plot(jitter(log10(transmission.data$tot.spore.deposition)),jitter(transmission.data$status.next),xlab=expression('predicted '*log[10]*' spore deposition'),ylab="outcome",axes=F,cex.lab=2,col=site.cols[site.indicies],pch=16,cex=transmission.data$time/4,panel.first = grid())
+plot(jitter(log10(transmission.data.shuffled$tot.spore.deposition)),jitter(transmission.data.shuffled$status.next),xlab=expression('predicted '*log[10]*' spore deposition'),ylab="outcome",axes=F,cex.lab=2,col=site.cols[site.indicies],pch=16,cex=transmission.data.shuffled$time/4,panel.first = grid())
 axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=2)
 axis(1,cex.axis=2)
 box()
 mtext("A",side=3,adj=1,cex=2)
-legend("bottomright",legend=c("CC","BT","GM","HM"," ","2 days","4 days","6 days"),col=c(site.cols,NA,"grey","grey","grey"),pt.cex=c(2,2,2,2,2,2/4,4/4,6/4),pch=16,cex=1,bty="n")
+legend("topleft",legend=c("CC","BT","GM","HM"," ","2 days","4 days","6 days"),col=c(site.cols,NA,"grey","grey","grey"),pt.cex=c(2,2,2,2,2,2/4,4/4,6/4),pch=16,cex=1,bty="n")
 
 set.seed(73452749)
 library("MASS")
