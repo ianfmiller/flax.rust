@@ -1,1 +1,7 @@
 *transmission.model.RDS filter=lfs diff=lfs merge=lfs -text
+*B1.TIF filter=lfs diff=lfs merge=lfs -text
+*B2.TIF filter=lfs diff=lfs merge=lfs -text
+*B3.TIF filter=lfs diff=lfs merge=lfs -text
+*LC08_L1TP_034033_20210907_20210916_01_T1_B1.TIF filter=lfs diff=lfs merge=lfs -text
+LC08_L1TP_034033_20210907_20210916_01_T1_B2.TIF filter=lfs diff=lfs merge=lfs -text
+LC08_L1TP_034033_20210907_20210916_01_T1_B3.TIF filter=lfs diff=lfs merge=lfs -text
