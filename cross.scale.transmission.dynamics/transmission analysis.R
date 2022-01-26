@@ -41,13 +41,13 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 {
   set.seed(9843525)
   mod<-bam(status.next~
-             s(log10(tot.spore.deposition),height.cm)+
+             s(log10(tot.spore.deposition),by=height.cm)+
+             s(height.cm)+
              s(mean.temp)+
              s(max.temp)+
              s(min.temp)+
              s(mean.abs.hum)+
              s(mean.daily.rain)+
-             #offset(log(time))+
              s(tag,bs="re")+
              s(site,bs="re"),
            family=binomial(link="logit"),
@@ -56,7 +56,6 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
            data=transmission.data,
            control = list(nthreads=4),
            discrete = T)
-  
   saveRDS(mod,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/transmission.model.RDS")
 }
 
@@ -66,7 +65,7 @@ transmission.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmissi
 
 ## model checking
 par(mfrow=c(2,2))
-gam.check(transmission.model) #We increased k for the tensor after the default value returned a low p value. Even with k=15, k check indicates that k should be higher for the tensor. Increasing k to significantly higher values is extremelly computationally expensive and does not resolve this issue.
+gam.check(transmission.model) #Indicates that k is too low for the first two terms. Increasing k does not solve issue and is very computationally expensive.
 concurvity(transmission.model,full=F) #Concurvity is expected between all weather variables. The non-pessimistic estimations of concurvity (under $estimate and $observed) indicate that it is not a serious issue in the model fit.
 
 layout(matrix(c(1,1,1,1,2,3,3,3,3,4,4,4,4,10,11,5,5,5,5,6,6,6,6,7,7,7,7,12,13,13,13,8,8,8,8,9,9,9,9,14,14,14),3,14,byrow = T))
