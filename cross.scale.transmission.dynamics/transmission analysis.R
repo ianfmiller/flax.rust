@@ -41,16 +41,16 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 {
   set.seed(9843525)
   mod<-bam(status.next~
-             s(log10(tot.spore.deposition),height.cm,k=15)+
+             s(log10(tot.spore.deposition),height.cm)+
              s(mean.temp)+
              s(max.temp)+
              s(min.temp)+
              s(mean.abs.hum)+
              s(mean.daily.rain)+
-             offset(log(time))+
+             #offset(log(time))+
              s(tag,bs="re")+
              s(site,bs="re"),
-           family=binomial(link="cloglog"),
+           family=binomial(link="logit"),
            select = T,
            method="fREML",
            data=transmission.data,
