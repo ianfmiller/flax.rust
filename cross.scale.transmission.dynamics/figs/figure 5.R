@@ -10,7 +10,6 @@ for(i in 1:nrow(transmission.data))
 transmission.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/transmission.model.RDS")
 
 site.cols<-viridis_pal(alpha=.5)(20)[c(20,15,6,1)]
-weather.colors<-c("black",viridis_pal(option = "C")(5)[c(4,4,3,3,2,2,1,1)])
 
 layout(matrix(c(rep(16,10),1,1,1,1,2,3,3,3,3,4,4,4,4,rep(17,10),rep(10,10),1,1,1,1,2,3,3,3,3,4,4,4,4,rep(11,10),rep(10,10),12,5,5,5,5,6,6,6,6,7,7,7,7,rep(11,10),rep(10,10),12,5,5,5,5,6,6,6,6,7,7,7,7,rep(11,10),rep(10,10),13,14,14,8,8,8,8,9,9,9,9,15,15,rep(11,10),rep(18,10),13,14,14,8,8,8,8,9,9,9,9,15,15,rep(19,10)),6,33,byrow=T))
 
@@ -122,18 +121,26 @@ new.data.1$height.cm<-5
 new.data.2<-new.data
 new.data.2$height.cm<-10
 new.data.3<-new.data
-new.data.3$height.cm<-25
+new.data.3$height.cm<-20
 new.data.4<-new.data
-new.data.4$height.cm<-50
+new.data.4$height.cm<-30
+new.data.5<-new.data
+new.data.5$height.cm<-40
+new.data.6<-new.data
+new.data.6$height.cm<-50
 
 
 exclude.vec<-c("s(site)","s(tag)","s(mean.temp)","s(max.temp)","s(min.temp)","s(mean.abs.hum)","s(mean.daily.rain)")
 
+colors<-colorRampPalette(c('khaki1',"khaki4"))(6)
 plot(0,0,type="n",xlab=expression('predicted '*log[10]*' spore deposition'),ylab="odds of infection",cex.lab=2,cex.axis=2,ylim=c(0,.85),xlim=c(-6,2))
-points(log10(new.data.1$tot.spore.deposition),predict(transmission.model,newdata = new.data.1,type = "response",exclude = exclude.vec),type="l",col="khaki1",lwd=4,lty=1)
-points(log10(new.data.2$tot.spore.deposition),predict(transmission.model,newdata = new.data.2,type = "response",exclude = exclude.vec),type="l",col="khaki2",lwd=4,lty=1)
-points(log10(new.data.3$tot.spore.deposition),predict(transmission.model,newdata = new.data.3,type = "response",exclude = exclude.vec),type="l",col="khaki3",lwd=4,lty=1)
-points(log10(new.data.4$tot.spore.deposition),predict(transmission.model,newdata = new.data.4,type = "response",exclude = exclude.vec),type="l",col="khaki4",lwd=4,lty=1)
-legend("topleft",legend=c("50cm","25cm","10cm","5cm"),col=c("khaki4","khaki3","khaki2","khaki1"),lty=c(1),bty="n",cex=2,lwd=4,seg.len=5)
+points(log10(new.data.1$tot.spore.deposition),predict(transmission.model,newdata = new.data.1,type = "response",exclude = exclude.vec),type="l",col=colors[1],lwd=4,lty=1)
+points(log10(new.data.2$tot.spore.deposition),predict(transmission.model,newdata = new.data.2,type = "response",exclude = exclude.vec),type="l",col=colors[2],lwd=4,lty=1)
+points(log10(new.data.3$tot.spore.deposition),predict(transmission.model,newdata = new.data.3,type = "response",exclude = exclude.vec),type="l",col=colors[3],lwd=4,lty=1)
+points(log10(new.data.4$tot.spore.deposition),predict(transmission.model,newdata = new.data.4,type = "response",exclude = exclude.vec),type="l",col=colors[4],lwd=4,lty=1)
+points(log10(new.data.4$tot.spore.deposition),predict(transmission.model,newdata = new.data.5,type = "response",exclude = exclude.vec),type="l",col=colors[5],lwd=4,lty=1)
+points(log10(new.data.4$tot.spore.deposition),predict(transmission.model,newdata = new.data.6,type = "response",exclude = exclude.vec),type="l",col=colors[6],lwd=4,lty=1)
+
+legend("topleft",legend=c("50 cm","40 cm","30 cm","20 cm","10 cm","5 cm"),col=rev(colors),lty=c(1),bty="n",cex=2,lwd=4,seg.len=5)
 mtext("J",side=3,adj=1,cex=2)
 
