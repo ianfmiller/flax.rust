@@ -41,8 +41,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 {
   set.seed(9843525)
   mod<-bam(status.next~
-             s(log10(tot.spore.deposition),by=height.cm)+
-             s(height.cm)+
+             log10(tot.spore.deposition)*height.cm++ #can't use tensor because we want to assume a montonic,positive relationship between spore deposition and infection odds, and we want to assume that the size of a plant migth affect the odds of infection for a given level of spore.  
              s(mean.temp)+
              s(max.temp)+
              s(min.temp)+
@@ -65,7 +64,7 @@ transmission.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmissi
 
 ## model checking
 par(mfrow=c(2,2))
-gam.check(transmission.model) #Indicates that k is too low for the first two terms. Increasing k does not solve issue and is very computationally expensive.
+gam.check(transmission.model) #No issues
 concurvity(transmission.model,full=F) #Concurvity is expected between all weather variables. The non-pessimistic estimations of concurvity (under $estimate and $observed) indicate that it is not a serious issue in the model fit.
 
 layout(matrix(c(1,1,1,1,2,3,3,3,3,4,4,4,4,10,11,5,5,5,5,6,6,6,6,7,7,7,7,12,13,13,13,8,8,8,8,9,9,9,9,14,14,14),3,14,byrow = T))
