@@ -20,7 +20,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 {
   set.seed(9843525)
   mod<-bam(status.next~
-             te(log10(tot.spore.deposition),height.cm,sp=c(1,-1,-1))+ #When fitting the tensor, we fixed the smoothing parameter for the marginal smooth for log10 total spore deposition to 1e10. This effectively sets the shape of this marginal smooth to be linear, preventing any overfitting involving non-monotonic effects of spore deposition.
+             te(log10(tot.spore.deposition),height.cm,sp=c(1e10,-1,-1))+ #When fitting the tensor, we fixed the smoothing parameter for the marginal smooth for log10 total spore deposition to 1e10. This effectively sets the shape of this marginal smooth to be linear, preventing any overfitting involving non-monotonic effects of spore deposition.
              s(mean.temp)+
              s(max.temp)+
              s(min.temp)+
@@ -44,9 +44,10 @@ transmission.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmissi
 ## model checking
 par(mfrow=c(2,2))
 set.seed(9843525)
-transmission.data$log.10.tot.spore.deposition<-log10(transmission.data$tot.spore.deposition)
+dummy.transmission.data<-transmission.data
+dummy.transmission.data$log.10.tot.spore.deposition<-log10(transmission.data$tot.spore.deposition)
 dummy.mod<-bam(status.next~
-           te(log.10.tot.spore.deposition,height.cm,sp=c(1,-1,-1))+ #Fit dummy mod with hard coded log.10.tot.spore.deposition as predictor because the log10 function throws off gam.check
+           te(log.10.tot.spore.deposition,height.cm,sp=c(1e10,-1,-1))+ #Fit dummy mod with hard coded log.10.tot.spore.deposition as predictor because the log10 function throws off gam.check
            s(mean.temp)+
            s(max.temp)+
            s(min.temp)+
