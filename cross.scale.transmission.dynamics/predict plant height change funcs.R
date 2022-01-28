@@ -112,7 +112,7 @@ predict.plant.growth.boot.alt<-function(height.last,inf.intens.last,mean.temp.da
                         "mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,
                         "mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,
                         "site"=site,"tag"="NA")
-  Xp <- predict(plant.growth.model, newdata = pred.data, exlude=c('s(site)','s(tag)'),type="lpmatrix")
+  Xp <- predict(plant.growth.model, newdata = pred.data, exlude=c('s(tag)'),type="lpmatrix")
   beta <- coef(plant.growth.model) ## posterior mean of coefs
   Vb   <- vcov(plant.growth.model) ## posterior  cov of coefs
   n <- 2
