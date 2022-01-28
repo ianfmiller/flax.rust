@@ -225,7 +225,7 @@ colnames(rainfall.data.2045)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1
 colnames(rainfall.data.2070)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
 
 
-weather.colors<-c("black",viridis_pal(option = "C")(5)[c(4,4,3,3,2,2,1,1)])
+weather.colors<-c("black",viridis_pal(option = "C")(5)[c(4,4,3,3,2,2)])
 
 par(mar=c(4,4,3,3),xpd=F)
 
