@@ -15,12 +15,12 @@ weather.colors.trans<-unlist(lapply(weather.colors, t_col))
 weather.lty=c(1,2,1,2,1,2,1)
 weath.scenarios<-c("obs","2020.rcp45","2020.rcp85","2045.rcp45","2045.rcp85","2070.rcp45","2070.rcp85")
 
-par(mfrow=c(1,2),mar=c(5,5,5,5))
+par(mfrow=c(2,2),mar=c(2,5,5,2))
 
 for(site in c("BT","GM"))
 {
   pred.epi.obs<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.obs.",site,".step.size.7.RDS"))
-  plot(unique(pred.epi.obs[[1]]$date),rep(0,times=length(unique(pred.epi.obs[[1]]$date))),ylim=c(0,.6),xlab="date",ylab="prevalence",type="n",cex.axis=2,cex.lab=2,main=site,cex.main=2)
+  plot(unique(pred.epi.obs[[1]]$date),rep(0,times=length(unique(pred.epi.obs[[1]]$date))),ylim=c(0,.5),xlab="",ylab="prevalence",type="n",cex.axis=2,cex.lab=2,main=site,cex.main=2)
   grid()
   mtext(c("A","B")[which(c("BT","GM")==site)],adj=1,cex=2,font=2)
   
@@ -37,7 +37,7 @@ for(site in c("BT","GM"))
   }
   points(xvals,yvals,type="l",col="blue",lwd=4)
   
-  for(scenario in weath.scenarios)
+  for(scenario in weath.scenarios[1])
   {
     sim.data<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.",scenario,".",site,".step.size.7.RDS"))
     
@@ -74,13 +74,69 @@ for(site in c("BT","GM"))
   }
 }
 
-legend("topright",
-       legend=c("observed","predicted","predicted 2020 RCP 4.5", "2020 RCP 8.5 predicted", "2045 RCP 4.5 predicted","2024 RCP 8.5 predicted","2070 RCP 4.5 predicted","2070 RCP 8.5 predicted"),
+legend("top",
+       legend=c("observed","predicted"),
        lwd=4,
        cex=1.25,
        seg.len = 4,
-       lty=c(1,1,3,1,3,1,3,1,3),
-       col=c("blue",weather.colors),
+       lty=1,
+       col=c("blue",weather.colors[1]),
+       bty="n"
+)
+
+
+for(site in c("BT","GM"))
+{
+  pred.epi.obs<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2020.rcp45.",site,".step.size.7.RDS"))
+  plot(unique(pred.epi.obs[[1]]$date),rep(0,times=length(unique(pred.epi.obs[[1]]$date))),ylim=c(0,.5),xlab="",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
+  grid()
+  mtext(c("C","D")[which(c("BT","GM")==site)],adj=1,cex=2,font=2)
+
+  
+  for(scenario in weath.scenarios[-1])
+  {
+    sim.data<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.",scenario,".",site,".step.size.7.RDS"))
+    
+    for(k in 1:length(sim.data))
+    {
+      xvals<-c()
+      yvals<-c()
+      pred.epi<-sim.data[[k]]
+      for(i in 1:length(unique(sim.data[[1]]$date)))
+      {
+        date<-unique(pred.epi$date)[i]
+        xvals<-c(xvals,date)
+        yvals<-c(yvals,sum(pred.epi[which(pred.epi$date==date),"status"])/length(which(pred.epi$date==pred.epi$date[1])))
+      }
+      points(xvals,yvals,type="l",col=weather.colors.trans[which(weath.scenarios==scenario)])
+    }
+    
+    xvals<-c()
+    yvals<-c()
+    for(j in 1:length(unique(sim.data[[1]]$date)))
+    {
+      sub.prevs<-c()
+      date<-unique(sim.data[[1]]$date)[j]
+      for(k in 1:length(sim.data))
+      {
+        sub.dat<-sim.data[[k]]
+        sub.dat<-sub.dat[which(sub.dat$date==date),]
+        sub.prevs<-c(sub.prevs,sum(sub.dat$status)/dim(sub.dat)[1])
+      }
+      yvals<-c(yvals,mean(sub.prevs))
+      xvals<-c(xvals,date)
+    }
+    points(xvals,yvals,type="l",col=weather.colors[which(weath.scenarios==scenario)],lty=weather.lty[which(weath.scenarios==scenario)],lwd=4)
+  }
+}
+
+legend("top",
+       legend=c("2020 RCP 4.5 predicted", "2020 RCP 8.5 predicted", "2045 RCP 4.5 predicted","2024 RCP 8.5 predicted","2070 RCP 4.5 predicted","2070 RCP 8.5 predicted"),
+       lwd=4,
+       cex=1.25,
+       seg.len = 4,
+       lty=c(3,1,3,1,3,1,3),
+       col=c(weather.colors[-1]),
        bty="n"
 )
 
