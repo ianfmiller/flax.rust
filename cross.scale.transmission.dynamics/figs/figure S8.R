@@ -31,7 +31,7 @@ out.mat<-matrix(preds,length(xxvals),length(yyvals),byrow = T)
 image(xxvals,yyvals,log10(out.mat),zlim=c(-6,3),col=heat.colors(100,rev=T),xlab="X",ylab="Y",cex.lab=1.5,cex.axis=1.5,main="infection intensity = 10, plant height = 10 cm",cex.main=1.5)
 contour(xxvals,yyvals,log10(out.mat),add=T)
 points(0,0,pch=16,cex=3)
-mtext("A",adj=1.1,cex=1.25,font=2,line=1)
+mtext("A",adj=1,cex=1.25,font=2,line=1)
 
 I<-1000
 half.height<-5
@@ -48,7 +48,7 @@ out.mat<-matrix(preds,length(xxvals),length(yyvals),byrow = T)
 image(xxvals,yyvals,log10(out.mat),zlim=c(-6,3),col=heat.colors(100,rev=T),xlab="X",ylab="Y",cex.lab=1.5,cex.axis=1.5,main="infection intensity = 1000, plant height = 10 cm",cex.main=1.5)
 contour(xxvals,yyvals,log10(out.mat),add=T)
 points(0,0,pch=16,cex=3)
-mtext("B",adj=1.1,cex=1.25,font=2,line=1)
+mtext("B",adj=1,cex=1.25,font=2,line=1)
 
 I<-10
 half.height<-25
@@ -65,7 +65,7 @@ out.mat<-matrix(preds,length(xxvals),length(yyvals),byrow = T)
 image(xxvals,yyvals,log10(out.mat),zlim=c(-6,3),col=heat.colors(100,rev=T),xlab="X",ylab="Y",cex.lab=1.5,cex.axis=1.5,main="infection intensity = 10, plant height = 50 cm",cex.main=1.5)
 contour(xxvals,yyvals,log10(out.mat),add=T)
 points(0,0,pch=16,cex=3)
-mtext("C",adj=1.1,cex=1.25,font=2,line=1)
+mtext("C",adj=1,cex=1.25,font=2,line=1)
 
 I<-1000
 half.height<-25
@@ -82,7 +82,7 @@ out.mat<-matrix(preds,length(xxvals),length(yyvals),byrow = T)
 image(xxvals,yyvals,log10(out.mat),zlim=c(-6,3),col=heat.colors(100,rev=T),xlab="X",ylab="Y",cex.lab=1.5,cex.axis=1.5,main="infection intensity = 1000, plant height = 50 cm",cex.main=1.5)
 contour(xxvals,yyvals,log10(out.mat),add=T) 
 points(0,0,pch=16,cex=3)
-mtext("D",adj=1.1,cex=1.25,font=2,line=1)
+mtext("D",adj=1,cex=1.25,font=2,line=1)
 
 par(mar=c(0,1,0,7))
 adj<-diff(seq(-6,3,length.out = 100))[1]/2
