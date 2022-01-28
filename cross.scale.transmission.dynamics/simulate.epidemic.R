@@ -283,226 +283,52 @@ for (site in c("BT","GM"))
 
 for (site in c("BT","GM"))
 {
-  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2020.rcp45",site,".step.size.",step.size,".RDS")))
+  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2020.rcp45.",site,".step.size.",step.size,".RDS")))
   {
     registerDoParallel(n.cores)
     rm(.Random.seed, envir=globalenv())
     pred.epi<-foreach(k = 1:10, .multicombine = T, .options.RNG=random.seeds[which(sites==site)+2]) %dorng% simulate.epi(site=site,step.size=7,print.progress=F,day.start="00:00:00",weath.data="2020",weath.data.scenario="rcp45")
-    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2020.rcp45",site,".step.size.",step.size,".RDS"))
+    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2020.rcp45.",site,".step.size.",step.size,".RDS"))
   }
   
-  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2020.rcp85",site,".step.size.",step.size,".RDS")))
+  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2020.rcp85.",site,".step.size.",step.size,".RDS")))
   {
     registerDoParallel(n.cores)
     rm(.Random.seed, envir=globalenv())
     pred.epi<-foreach(k = 1:10, .multicombine = T, .options.RNG=random.seeds[which(sites==site)+4]) %dorng% simulate.epi(site=site,step.size=7,print.progress=F,day.start="00:00:00",weath.data="2020",weath.data.scenario="rcp85")
-    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2020.rcp85",site,".step.size.",step.size,".RDS"))
+    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2020.rcp85.",site,".step.size.",step.size,".RDS"))
   }
   
-  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2045.rcp45",site,".step.size.",step.size,".RDS")))
+  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2045.rcp45.",site,".step.size.",step.size,".RDS")))
   {
     registerDoParallel(n.cores)
     rm(.Random.seed, envir=globalenv())
     pred.epi<-foreach(k = 1:10, .multicombine = T, .options.RNG=random.seeds[which(sites==site)+6]) %dorng% simulate.epi(site=site,step.size=7,print.progress=F,day.start="00:00:00",weath.data="2045",weath.data.scenario="rcp45")
-    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2045.rcp45",site,".step.size.",step.size,".RDS"))
+    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2045.rcp45.",site,".step.size.",step.size,".RDS"))
   }
   
-  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2045.rcp85",site,".step.size.",step.size,".RDS")))
+  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2045.rcp85.",site,".step.size.",step.size,".RDS")))
   {
     registerDoParallel(n.cores)
     rm(.Random.seed, envir=globalenv())
     pred.epi<-foreach(k = 1:10, .multicombine = T, .options.RNG=random.seeds[which(sites==site)+8]) %dorng% simulate.epi(site=site,step.size=7,print.progress=F,day.start="00:00:00",weath.data="2045",weath.data.scenario="rcp85")
-    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2045.rcp85",site,".step.size.",step.size,".RDS"))
+    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2045.rcp85.",site,".step.size.",step.size,".RDS"))
   }
   
-  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2070.rcp45",site,".step.size.",step.size,".RDS")))
+  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2070.rcp45.",site,".step.size.",step.size,".RDS")))
   {
     registerDoParallel(n.cores)
     rm(.Random.seed, envir=globalenv())
     pred.epi<-foreach(k = 1:10, .multicombine = T, .options.RNG=random.seeds[which(sites==site)+10]) %dorng% simulate.epi(site=site,step.size=7,print.progress=F,day.start="00:00:00",weath.data="2070",weath.data.scenario="rcp45")
-    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2070.rcp45",site,".step.size.",step.size,".RDS"))
+    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2070.rcp45.",site,".step.size.",step.size,".RDS"))
   }
   
-  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2070.rcp85",site,".step.size.",step.size,".RDS")))
+  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2070.rcp85.",site,".step.size.",step.size,".RDS")))
   {
     registerDoParallel(n.cores)
     rm(.Random.seed, envir=globalenv())
     pred.epi<-foreach(k = 1:10, .multicombine = T, .options.RNG=random.seeds[which(sites==site)+12]) %dorng% simulate.epi(site=site,step.size=7,print.progress=F,day.start="00:00:00",weath.data="2070",weath.data.scenario="rcp85")
-    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2070.rcp85",site,".step.size.",step.size,".RDS"))
+    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2070.rcp85.",site,".step.size.",step.size,".RDS"))
   }
-}
-
-
-
-# plot simulations
-
-t_col <- function(color, percent = 50, name = NULL) {
-  rgb.val <- col2rgb(color)
-  t.col <- rgb(rgb.val[1], rgb.val[2], rgb.val[3],
-               max = 255,
-               alpha = (100 - percent) * 255 / 100,
-               names = name)
-  invisible(t.col)
-}
-
-plot.purple<-t_col("purple",75)
-plot.red<-t_col("red",75)
-plot.orange<-t_col("orange",75)
-
-plot.func<-function(site,step.size)
-{
-  
-  pred.epi.all.0<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.0.site.",site,".step.size.",step.size,".RDS"))
-  pred.epi.all.1.8<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.1.8.site.",site,".step.size.",step.size,".RDS"))
-  pred.epi.all.3.7<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.all.3.7.site.",site,".step.size.",step.size,".RDS"))
-  
-  sub.epi<-corrected.epi[which(corrected.epi$Site==site),]
-  sub.locs<-corrected.locs[which(corrected.locs$Site==site),]
-  
-  if(site=="CC")
-  {
-    plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,.4),xlab="date",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
-  }
-  
-  if(site=="GM")
-  {
-    plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,.4),xlab="date",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
-  }
-  
-  if(site=="HM")
-  {
-    plot(unique(pred.epi.all.0[[1]]$date),rep(0,times=length(unique(pred.epi.all.0[[1]]$date))),ylim=c(0,.05),xlab="date",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
-  }
-  
-  
-  xvals<-c()
-  yvals<-c()
-  for(i in 1:length(unique(sub.epi$Date.First.Observed.Diseased)))
-  {
-    date<-unique(sub.epi$Date.First.Observed.Diseased)[i]
-    xvals<-c(xvals,date)
-    yvals<-c(yvals,nrow(sub.epi[which(sub.epi$Date.First.Observed.Diseased<=date),])/nrow(sub.locs))
-  }
-  points(xvals,yvals,type="l",col="black",lwd=4)
-  
-  
-  for(k in 1:length(pred.epi.all.0))
-  {
-    xvals<-c()
-    yvals<-c()
-    pred.epi<-pred.epi.all.0[[k]]
-    for(i in 1:length(unique(pred.epi.all.0[[1]]$date)))
-    {
-      date<-unique(pred.epi$date)[i]
-      xvals<-c(xvals,date)
-      yvals<-c(yvals,sum(pred.epi[which(pred.epi$date==date),"status"])/dim(sub.locs)[1])
-    }
-    points(xvals,yvals,type="l",col=plot.orange)
-  }
-  
-  xvals<-c()
-  yvals<-c()
-  for(k in 1:length(unique(pred.epi.all.0[[1]]$date)))
-  {
-    sub.prevs<-c()
-    date<-unique(pred.epi.all.0[[1]]$date)[k]
-    for(j in 1:length(pred.epi.all.0))
-    {
-      sub.dat<-pred.epi.all.0[[j]]
-      sub.dat<-sub.dat[which(sub.dat$date==date),]
-      sub.prevs<-c(sub.prevs,sum(sub.dat$status)/dim(sub.dat)[1])
-    }
-    yvals<-c(yvals,mean(sub.prevs))
-    xvals<-c(xvals,date)
-  }
-  points(xvals,yvals,type="l",col="orange",lwd=4)
-  
-  
-  for(k in 1:length(pred.epi.all.1.8))
-  {
-    xvals<-c()
-    yvals<-c()
-    pred.epi<-pred.epi.all.1.8[[k]]
-    for(i in 1:length(unique(pred.epi.all.1.8[[1]]$date)))
-    {
-      date<-unique(pred.epi$date)[i]
-      xvals<-c(xvals,date)
-      yvals<-c(yvals,sum(pred.epi[which(pred.epi$date==date),"status"])/dim(sub.locs)[1])
-    }
-    points(xvals,yvals,type="l",col=plot.red)
-  }
-  
-  xvals<-c()
-  yvals<-c()
-  for(k in 1:length(unique(pred.epi.all.1.8[[1]]$date)))
-  {
-    sub.prevs<-c()
-    date<-unique(pred.epi.all.1.8[[1]]$date)[k]
-    for(j in 1:length(pred.epi.all.1.8))
-    {
-      sub.dat<-pred.epi.all.1.8[[j]]
-      sub.dat<-sub.dat[which(sub.dat$date==date),]
-      sub.prevs<-c(sub.prevs,sum(sub.dat$status)/dim(sub.dat)[1])
-    }
-    yvals<-c(yvals,mean(sub.prevs))
-    xvals<-c(xvals,date)
-  }
-  points(xvals,yvals,type="l",col="red",lwd=4)
-  
-  
-  for(k in 1:length(pred.epi.all.3.7))
-  {
-    xvals<-c()
-    yvals<-c()
-    pred.epi<-pred.epi.all.3.7[[k]]
-    for(i in 1:length(unique(pred.epi.all.3.7[[1]]$date)))
-    {
-      date<-unique(pred.epi$date)[i]
-      xvals<-c(xvals,date)
-      yvals<-c(yvals,sum(pred.epi[which(pred.epi$date==date),"status"])/dim(sub.locs)[1])
-    }
-    points(xvals,yvals,type="l",col=plot.purple)
-  }
-  
-  xvals<-c()
-  yvals<-c()
-  for(k in 1:length(unique(pred.epi.all.3.7[[1]]$date)))
-  {
-    sub.prevs<-c()
-    date<-unique(pred.epi.all.3.7[[1]]$date)[k]
-    for(j in 1:length(pred.epi.all.3.7))
-    {
-      sub.dat<-pred.epi.all.3.7[[j]]
-      sub.dat<-sub.dat[which(sub.dat$date==date),]
-      sub.prevs<-c(sub.prevs,sum(sub.dat$status)/dim(sub.dat)[1])
-    }
-    yvals<-c(yvals,mean(sub.prevs))
-    xvals<-c(xvals,date)
-  }
-  points(xvals,yvals,type="l",col="purple",lwd=4)
-  legend("topleft",legend=c("data","+0 degrees C","+1.8 degrees C","+3.7 degrees C"),col=c("black","orange","red","purple"),lwd=4,cex=2,bty="n")
-}
-
-par(mfrow=c(1,2),mar=c(5,5,3,3))
-plot.func("GM",2)
-mtext("GM",cex = 2)
-plot.func("HM",2)
-mtext("HM",cex=2)
-
-
-
-par(mfrow=c(2,4))
-
-library(viridis)
-#pred.epi<-pred.epi.all.3.7[[1]]
-#layout(matrix(c(1,1,2,2,3,3,6,4,4,5,5,7),2,6,byrow = T))
-#par(mar=c(6,6,6,6))
-data<-pred.epi.all.0[[1]]
-for(date in unique(data$date))
-{
-  dat<-data[which(data$date==date),]
-  sub.dat<-dat[which(dat$status==1),]
-  plot(dat$X+dat$x,dat$Y+dat$y,xlab="X",ylab="Y",main=as.Date(date,origin="1970-01-01"),pch=16,cex=.9,cex.lab=1.25,cex.axis=1.25,cex.main=1.5,asp=1)
-  points(sub.dat$X+sub.dat$x,sub.dat$Y+sub.dat$y,col="red",cex=2,lwd=2)
 }
 
