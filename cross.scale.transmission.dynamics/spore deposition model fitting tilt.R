@@ -12,30 +12,11 @@ demog<-demog[which(demog$year==2020),] #subset to 2020
 
 # optimize decay plume
 
-## optimize
-
-### optimizaiton
-### will return silightly different result due to presence of a likelihood ridge
+## will return silightly different result due to presence of a likelihood ridge
 opt<-optim(par=c(5.739690e-07 ,4.451030e-02,7.777373e-02),fn=param.search.optim.tilted.plume,control=list(trace=1))
 
-
+## fiitted values
 opt<-list(par=c(5.739690e-07,4.451030e-02, 7.777373e-02))
-
-## visualize kernel
-test.mat<-data.frame(x=rep(seq(-2,2,.01),each=401),y=rep(seq(-2,2,.01),times=401))
-out<-mapply(tilted.plume, x = test.mat[,1],y=test.mat[,2], MoreArgs = list(I=4224.733,H=.25,s=1,k=opt$par[1],Ws=opt$par[2],A=opt$par[3]))
-res.mat<-matrix(out,401,401,byrow = T)
-contour(x=seq(-2,2,.01),y=seq(-2,2,.01),z=res.mat)
-points(c(.05,.25,.5,1),c(0,0,0,0),col="red")
-points(0,0,col="blue")
-filled.contour(x=seq(-2,2,.01),y=seq(-2,2,.01),z=res.mat,xlim=c(-2,2),ylim=c(-2,2),key.title = mtext(expression(log[10]*'spores per mm'^2),cex=1.5),cex.lab=1.5,xlab="X (meters)",ylab="Y (meters)",)
-
-## visualize fit
-pred.mat<-param.search.optim.tilted.plume(opt$par,return.out=T)
-plot(pred.mat$obs,pred.mat$pred,asp=1)
-plot(log10(pred.mat$obs),log10(pred.mat$pred))
-plot(pred.mat$obs,pred.mat$pred-pred.mat$obs)
-plot(pred.mat$dist,pred.mat$pred-pred.mat$obs)
 
 ## visually check optimality
 param.search.tilted.plume<-function(kval,Wsval,Aval)
