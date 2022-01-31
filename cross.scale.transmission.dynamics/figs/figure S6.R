@@ -12,10 +12,9 @@ t_col <- function(color, percent = 50, name = NULL) {
   invisible(t.col)
 }
 
-set.seed(73452749)
 library("MASS")
 library("viridis")
-start.height<-35
+start.height<-25
 start.inf.intens<-1
 
 weath.data.vec<-c("observed","2020","2020","2045","2045","2070","2070")
@@ -29,8 +28,8 @@ for(site in sites)
   start.date<-c(as.POSIXct("2020-06-23 00:00:00",tz="UTC"),as.POSIXct("2020-06-20 00:00:00",tz="UTC"),as.POSIXct("2020-06-24 00:00:00",tz="UTC"),as.POSIXct("2020-06-26 00:00:00",tz="UTC"))[which(c("CC","BT","GM","HM")==site)]
   end.date<-c(as.POSIXct("2020-07-27 00:00:00",tz="UTC"),as.POSIXct("2020-07-29 00:00:00",tz="UTC"),as.POSIXct("2020-07-28 00:00:00",tz="UTC"),as.POSIXct("2020-07-10 00:00:00",tz="UTC"))[which(c("CC","BT","GM","HM")==site)]
   sim.dates<-seq.POSIXt(start.date,end.date,"7 day")
-  ylim.top.1<-c(300,300,300,300)[which(sites==site)]
-  ylim.top.2<-c(5000,5000,5000,5000)[which(sites==site)]
+  ylim.top.1<-c(1500,1500,1500,1500)[which(sites==site)]
+  ylim.top.2<-c(20000,20000,20000,20000)[which(sites==site)]
   
   par(mfg=c(which(sites==site),1))
   plot(0,0,xlim=c(start.date,end.date),ylim=c(0,ylim.top.1),type="n",xlab="date",ylab="infection intensity",cex.lab=2,axes=F,main=site,cex.main=2)
@@ -59,6 +58,8 @@ for(site in sites)
     xcords<-rep(NA,length(sim.dates)) #time values
     inf.intens.cords<-rep(NA,length(sim.dates)) #infection intensity values
     height.cords<-rep(NA,length(sim.dates)) #height values
+    
+    set.seed(73452749)
     
     for(j in 1:100)
     {

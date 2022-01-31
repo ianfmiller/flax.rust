@@ -1,7 +1,9 @@
 library(mgcv)
+library(viridis)
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/infection intensity data prep.R")
 delta.infection.intensity<-subset(delta.infection.intensity,time<=8)
 infection.intensity.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/infection.intensity.model.RDS")
+dummy.infection.intensity.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/dummy.infection.intensity.model.RDS")
 plant.growth.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS")
 
 site.cols<-viridis_pal(alpha=.5)(20)[c(20,15,6,1)]
@@ -10,21 +12,21 @@ weather.colors<-c("black",viridis_pal(option = "C")(5)[c(4,4,3,3,2,2,1,1)])
 layout(matrix(c(rep(16,10),1,1,1,1,2,3,3,3,3,4,4,4,4,rep(17,10),rep(10,10),1,1,1,1,2,3,3,3,3,4,4,4,4,rep(11,10),rep(10,10),12,5,5,5,5,6,6,6,6,7,7,7,7,rep(11,10),rep(10,10),12,5,5,5,5,6,6,6,6,7,7,7,7,rep(11,10),rep(10,10),13,14,14,8,8,8,8,9,9,9,9,15,15,rep(11,10),rep(18,10),13,14,14,8,8,8,8,9,9,9,9,15,15,rep(19,10)),6,33,byrow=T))
 
 par(mar=c(4,4,3,1))
-vis.gam(infection.intensity.model,view=c("max.height","infection.intensity"),plot.type = "contour",type="response",contour.col = "black",color="cm",zlim=c(-1750,1750),xlim=c(5,75),nCol = 100,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
+vis.gam(dummy.infection.intensity.model,view=c("max.height","log.10.infection.intensity"),plot.type = "contour",type="response",contour.col = "black",color="cm",zlim=c(-4000,4000),xlim=c(5,60),nCol = 100,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="",n.grid=100)
 mtext("plant height (cm)",1,line = 2.25,cex=1)
-mtext("infection intensity",2,line=2.25,cex=1)
-points(delta.infection.intensity$max.height,delta.infection.intensity$infection.intensity,pch=".")
+mtext(expression(log[10]*' infection intensity'),2,line=2.25,cex=1)
+points(delta.infection.intensity$max.height,log10(delta.infection.intensity$infection.intensity),pch=".")
 
 par(mar=c(4,1,2.5,1.5))
-plot(0,0,type="n",xlim=c(0,1),ylim=c(-1750-17.5,1750+17.5),axes=F,xlab="",ylab="")
+plot(0,0,type="n",xlim=c(0,1),ylim=c(-4000-40.40404,4000+40.40404),axes=F,xlab="",ylab="")
 for(i in 1:101)
 {
-  ii<-seq(-1750,1750,length.out=101)[i]
-  rect(0,ii-17.5,1,ii+17.5,col=cm.colors(101)[i],border = NA)
+  ii<-seq(-4000,4000,length.out=101)[i]
+  rect(0,ii-40.40404,1,ii+40.40404,col=cm.colors(101)[i],border = NA)
 }
-rect(0,-1750-17.5,1,1750+17.5)
+rect(0,-4000-40.40404,1,4000+40.40404)
 mtext("B",cex=1.25,font=2)
-mtext("te(plant height, infection intensity)",side=2,line=.5,cex = .8)
+mtext(expression('te(plant height, '*log[10]*' infection intensity)'),side=2,line=.5,cex = .8)
 axis(4,cex.axis=1,tck=-.5,padj=-1)
 
 par(mar=c(4,4,3,1))
@@ -72,10 +74,9 @@ grid()
 mtext("A",side=3,adj=1,cex=2)
 legend("bottomright",legend=c("CC","BT","GM","HM"," ","2 days","4 days","6 days"),col=c(site.cols,NA,"grey","grey","grey"),pt.cex=c(2,2,2,2,2,2/4,4/4,6/4),pch=16,cex=1,bty="n")
 
-set.seed(73452749)
 library("MASS")
 library("viridis")
-start.height<-35
+start.height<-25
 start.inf.intens<-1
 
 site<-"GM"
@@ -85,7 +86,7 @@ sim.dates<-seq.POSIXt(start.date,end.date,"7 day")
 weath.data.vec<-c("observed","2020","2020","2045","2045","2070","2070")
 weath.data.scenario.vec<-c(NA,"rcp45","rcp85","rcp45","rcp85","rcp45","rcp85")
 
-plot(0,0,xlim=c(start.date,end.date),ylim=c(0,300),type="n",xlab="date",ylab="infection intensity",cex.lab=2,axes=F)
+plot(0,0,xlim=c(start.date,end.date),ylim=c(0,1500),type="n",xlab="date",ylab="infection intensity",cex.lab=2,axes=F)
 grid()
 mtext("J",side=3,adj=1,cex=2)
 axis.POSIXct(1,sim.dates,cex.axis=2)
@@ -100,6 +101,8 @@ for(i in 1:7)
   xcords<-rep(NA,length(sim.dates)) #time values
   inf.intens.cords<-rep(NA,length(sim.dates)) #infection intensity values
   height.cords<-rep(NA,length(sim.dates)) #height values
+  
+  set.seed(73452749)
   
   for(j in 1:100)
   {
