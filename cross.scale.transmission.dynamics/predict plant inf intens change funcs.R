@@ -47,7 +47,7 @@ predict.inf.intens<-function(inf.intens.last,max.height.last,site,date0,date1,ex
     inf.intens.next<-inf.intens.last+delta.days*predict(infection.intensity.model,newdata = pred.data,type="response",exclude = 's(tag)')
     
   }
-  if(inf.intens.next<.1) {inf.intens.next<-0}
+  if(inf.intens.next<0.1) {inf.intens.next<-0.1}
   inf.intens.next
 }
 
@@ -96,7 +96,7 @@ predict.inf.intens.boot<-function(inf.intens.last,max.height.last,site,date0,dat
     preds[j]   <- ilink(Xp %*% mrand[j, ])
   }
   inf.intens.next<-inf.intens.last+delta.days*preds[1]
-  if(inf.intens.next<.1) {inf.intens.next<-0}
+  if(inf.intens.next<0.1) {inf.intens.next<-0.1}
   inf.intens.next
 }
 
@@ -127,7 +127,7 @@ predict.inf.intens.boot.alt<-function(inf.intens.last,max.height.last,mean.temp.
     preds[j]   <- ilink(Xp %*% mrand[j, ])
   }
   inf.intens.next<-inf.intens.last+delta.days*preds[1]
-  if(inf.intens.next<.1) {inf.intens.next<-0}
+  if(inf.intens.next<0.1) {inf.intens.next<-0.1}
   inf.intens.next
 }
 
