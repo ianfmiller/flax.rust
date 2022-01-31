@@ -36,7 +36,8 @@ infection.intensity.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.tra
 par(mfrow=c(2,2))
 dummy.delta.infection.intensity<-delta.infection.intensity
 dummy.delta.infection.intensity$log.10.infection.intensity<-log10(delta.infection.intensity$infection.intensity)
-dummy.mod<-gam((infection.intensity.next-infection.intensity)/time~
+set.seed(5708389)
+dummy.infection.intensity.model<-gam((infection.intensity.next-infection.intensity)/time~
            te(max.height,log.10.infection.intensity,k=c(10,15))+
            s(mean.temp)+
            s(max.temp)+
@@ -49,5 +50,7 @@ dummy.mod<-gam((infection.intensity.next-infection.intensity)/time~
          method="REML",
          data=dummy.delta.infection.intensity,
          control = list(nthreads=4))
-gam.check(dummy.mod) #Indicates that k values are sufficient.
-concurvity(infection.intensity.model,full=F) #no obvious issues.
+saveRDS(dummy.infection.intensity.model,file="~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/dummy.infection.intensity.model.RDS")
+
+gam.check(dummy.infection.intensity.model) #Indicates that k values are sufficient.
+concurvity(infection.intensity.model,full=F) #no obvious issues
