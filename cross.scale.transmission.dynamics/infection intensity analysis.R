@@ -12,7 +12,7 @@ if(!file.exists("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/
 {
   set.seed(5708389)
   mod<-gam((infection.intensity.next-infection.intensity)/time~
-             te(max.height,infection.intensity)+
+             te(max.height,log10(infection.intensity),k=c(10,15))+
              s(mean.temp)+
              s(max.temp)+
              s(min.temp)+
@@ -34,5 +34,20 @@ infection.intensity.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.tra
 
 ## model checking 
 par(mfrow=c(2,2))
-gam.check(infection.intensity.model) #Indicates that k should be higher in some smooths. Increasing k to higher value exacerbates the problem for the tensor. As such, we leave k at default values
-concurvity(infection.intensity.model,full=F) #no obvious issues
+dummy.delta.infection.intensity<-delta.infection.intensity
+dummy.delta.infection.intensity$log.10.infection.intensity<-log10(delta.infection.intensity$infection.intensity)
+dummy.mod<-gam((infection.intensity.next-infection.intensity)/time~
+           te(max.height,log.10.infection.intensity,k=c(10,15))+
+           s(mean.temp)+
+           s(max.temp)+
+           s(min.temp)+
+           s(mean.abs.hum)+
+           s(mean.daily.rain)+
+           s(tag,bs="re")+
+           s(site,bs="re"),
+         select = T,
+         method="REML",
+         data=dummy.delta.infection.intensity,
+         control = list(nthreads=4))
+gam.check(dummy.mod) #Indicates that k values are sufficient.
+concurvity(infection.intensity.model,full=F) #no obvious issues.
