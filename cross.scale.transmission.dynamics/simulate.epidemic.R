@@ -16,9 +16,9 @@ rm(site)
 
 simulate.epi<-function(site,step.size=7,print.progress=T,day.start="00:00:00",weath.data="observed",weath.data.scenario=NA)
 {
-  if(!(weath.data %in% c(NA,"2020","2045","2070"))) {warning('weath.data must be either "observed", "2020", "2045",or "2070"')}
+  if(!(weath.data %in% c("observed","2020","2045","2070"))) {warning('weath.data must be either "observed", "2020", "2045",or "2070"')}
   if(!(weath.data.scenario %in% c(NA,"rcp45","rcp85"))) {warning('weath.data must be either NA, "rcp45", or "rcp85"')}
-  if(!is.na(weath.data) & is.na(weath.data.scenario)) {warning('weath.data.scenario must be either "rcp45", or "rcp85" if using non-observed weather data')}
+  if(!(weath.data=="observed") & is.na(weath.data.scenario)) {warning('weath.data.scenario must be either "rcp45", or "rcp85" if using non-observed weather data')}
   
   ## setup
   
