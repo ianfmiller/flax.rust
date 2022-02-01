@@ -201,13 +201,13 @@ simulate.epi<-function(site,step.size=7,print.progress=T,day.start="00:00:00",we
         if(target.tag %in% unique(transmission.data$tag))
         {
           pred.inf.odds<-predict(transmission.model,
-                                 newdata = data.frame("site"=site,"tag"=target.tag,"log.10.spore.deposition.per.day"=log10(spore.deposition)/delta.days,"height.cm"=last.epi[i,"max.height"],"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,"time"=delta.days),
+                                 newdata = data.frame("site"=site,"tag"=target.tag,"log.10.spore.deposition.per.day"=log10(spore.deposition/delta.days),"height.cm"=last.epi[i,"max.height"],"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,"time"=delta.days),
                                  type="response",
                                  newdata.guaranteed=T,discrete = T) ### predict odds of becoming infected
         } else 
         {
           pred.inf.odds<-predict(transmission.model,
-                                 newdata = data.frame("site"=site,"tag"=1,"log.10.spore.deposition.per.day"=log10(spore.deposition)/delta.days,"height.cm"=last.epi[i,"max.height"],"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,"time"=delta.days),
+                                 newdata = data.frame("site"=site,"tag"=1,"log.10.spore.deposition.per.day"=log10(spore.deposition/delta.days),"height.cm"=last.epi[i,"max.height"],"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,"time"=delta.days),
                                  type="response",exclude = "s(tag)",
                                  newdata.guaranteed=T,discrete = T) ### predict odds of becoming infected
           

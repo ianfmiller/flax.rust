@@ -11,7 +11,7 @@ for(i in 1:nrow(transmission.data))
   if(is.na(transmission.data[i,"tag"])) {transmission.data[i,"tag"]<-paste0(transmission.data[i,"site"],"X",transmission.data[i,"X"]+transmission.data[i,"x"],"Y",transmission.data[i,"Y"]+transmission.data[i,"y"])}
 }
 transmission.data$tag<-as.factor(transmission.data$tag)
-transmission.data$log.10.spore.deposition.per.day<-log10(transmission.data$tot.spore.deposition)/transmission.data$time
+transmission.data$log.10.spore.deposition.per.day<-log10(transmission.data$tot.spore.deposition/transmission.data$time)
 
 # analyze data
 
