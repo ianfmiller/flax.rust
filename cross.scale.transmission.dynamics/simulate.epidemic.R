@@ -26,7 +26,7 @@ simulate.epi<-function(site,step.size=7,print.progress=T,day.start="00:00:00",we
   sub.locs<-corrected.locs[which(corrected.locs$Site==site),]
   sub.epi<-corrected.epi[which(corrected.epi$Site==site),]
   start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased==min(sub.epi$Date.First.Observed.Diseased)),]
-  if(site=="GM") {start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased<=as.Date("2020-06-30")),]}
+  if(site=="GM") {start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased<=as.Date("2020-07-02")),]}
   if(site=="HM") {start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased<=as.Date("2020-07-10")),]}
   if(site=="BT") {start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased<=as.Date("2020-06-24")),]}
   if(site=="CC") {start.epi<-sub.epi[which(sub.epi$Date.First.Observed.Diseased<=as.Date("2020-06-29")),]}
@@ -197,19 +197,17 @@ simulate.epi<-function(site,step.size=7,print.progress=T,day.start="00:00:00",we
         }
         
         if(spore.deposition==0) spore.deposition<-10e-10
-        #newdata = transmission.data[1,c("site","tag","tot.spore.deposition","height.cm","mean.temp","max.temp","min.temp","mean.abs.hum","max.abs.hum","min.abs.hum","mean.solar","mean.daily.rain","mean.wetness","time")]
-        #newdata[1,c("site","tag","tot.spore.deposition","height.cm","mean.temp","max.temp","min.temp","mean.abs.hum","max.abs.hum","min.abs.hum","mean.solar","mean.daily.rain","mean.wetness","time")]<-c(site,as.character(target.tag),spore.deposition,last.epi[i,"max.height"],new.mean.temp,new.max.temp,new.min.temp,new.mean.abs.hum,new.max.abs.hum,new.min.abs.hum,new.mean.solar,new.mean.daily.rain,new.mean.wetness,delta.days)
-        #class(newdata[,3:14])<-"numeric"
+        
         if(target.tag %in% unique(transmission.data$tag))
         {
           pred.inf.odds<-predict(transmission.model,
-                                 newdata = data.frame("site"=site,"tag"=target.tag,"tot.spore.deposition"=spore.deposition,"height.cm"=last.epi[i,"max.height"],"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,"time"=delta.days),
+                                 newdata = data.frame("site"=site,"tag"=target.tag,"log.10.spore.deposition.per.day"=log10(spore.deposition)/delta.days,"height.cm"=last.epi[i,"max.height"],"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,"time"=delta.days),
                                  type="response",
                                  newdata.guaranteed=T,discrete = T) ### predict odds of becoming infected
         } else 
         {
           pred.inf.odds<-predict(transmission.model,
-                                 newdata = data.frame("site"=site,"tag"=1,"tot.spore.deposition"=spore.deposition,"height.cm"=last.epi[i,"max.height"],"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,"time"=delta.days),
+                                 newdata = data.frame("site"=site,"tag"=1,"log.10.spore.deposition.per.day"=log10(spore.deposition)/delta.days,"height.cm"=last.epi[i,"max.height"],"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.min.temp,"mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,"time"=delta.days),
                                  type="response",exclude = "s(tag)",
                                  newdata.guaranteed=T,discrete = T) ### predict odds of becoming infected
           
