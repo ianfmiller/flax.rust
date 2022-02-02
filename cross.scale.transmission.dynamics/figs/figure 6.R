@@ -15,14 +15,14 @@ weather.colors.trans<-unlist(lapply(weather.colors, t_col))
 weather.lty=c(1,2,1,2,1,2,1)
 weath.scenarios<-c("obs","2020.rcp45","2020.rcp85","2045.rcp45","2045.rcp85","2070.rcp45","2070.rcp85")
 
-par(mfrow=c(2,2),mar=c(2,5,5,2))
+par(mfrow=c(2,2),mar=c(2,5,3,2))
 
 for(site in c("BT","GM"))
 {
   pred.epi.obs<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.obs.",site,".step.size.7.RDS"))
-  plot(unique(pred.epi.obs[[1]]$date),rep(0,times=length(unique(pred.epi.obs[[1]]$date))),ylim=c(0,c(.5,.3)[which(c("BT","GM")==site)]),xlab="",ylab="prevalence",type="n",cex.axis=2,cex.lab=2,main=site,cex.main=2)
+  plot(unique(pred.epi.obs[[1]]$date),rep(0,times=length(unique(pred.epi.obs[[1]]$date))),ylim=c(0,c(.35,.35)[which(c("BT","GM")==site)]),xlab="",ylab="prevalence",type="n",cex.axis=2,cex.lab=2,main=site,cex.main=2)
   grid()
-  mtext(c("A","B")[which(c("BT","GM")==site)],adj=1,cex=2,font=2)
+  mtext(c("A","B")[which(c("BT","GM")==site)],adj=1,cex=2)
   
   sub.epi<-corrected.epi[which(corrected.epi$Site==site),]
   sub.locs<-corrected.locs[which(corrected.locs$Site==site),]
@@ -75,10 +75,10 @@ for(site in c("BT","GM"))
 }
 
 legend("topleft",
-       legend=c("observed","predicted"),
+       legend=c("observed","predicted from observed weather"),
        lwd=4,
-       cex=1.25,
-       seg.len = 4,
+       cex=1.5,
+       seg.len = 2,
        lty=1,
        col=c("blue",weather.colors[1]),
        bty="n"
@@ -88,9 +88,9 @@ legend("topleft",
 for(site in c("BT","GM"))
 {
   pred.epi.obs<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2020.rcp45.",site,".step.size.7.RDS"))
-  plot(unique(pred.epi.obs[[1]]$date),rep(0,times=length(unique(pred.epi.obs[[1]]$date))),ylim=c(0,c(.5,.3)[which(c("BT","GM")==site)]),xlab="",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
+  plot(unique(pred.epi.obs[[1]]$date),rep(0,times=length(unique(pred.epi.obs[[1]]$date))),ylim=c(0,c(.9,.35)[which(c("BT","GM")==site)]),xlab="",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
   grid()
-  mtext(c("C","D")[which(c("BT","GM")==site)],adj=1,cex=2,font=2)
+  mtext(c("C","D")[which(c("BT","GM")==site)],adj=1,cex=2)
 
   
   for(scenario in weath.scenarios[-1])
@@ -131,12 +131,14 @@ for(site in c("BT","GM"))
 }
 
 legend("topleft",
-       legend=c("2020 RCP 4.5 predicted", "2020 RCP 8.5 predicted", "2045 RCP 4.5 predicted","2024 RCP 8.5 predicted","2070 RCP 4.5 predicted","2070 RCP 8.5 predicted"),
+       legend=c("2020 RCP 4.5", "2020 RCP 8.5", "2045 RCP 4.5","2024 RCP 8.5","2070 RCP 4.5","2070 RCP 8.5"),
+       title="predictions",
        lwd=4,
-       cex=1.25,
-       seg.len = 4,
+       cex=1.5,
+       seg.len = 2,
        lty=c(3,1,3,1,3,1,3),
        col=c(weather.colors[-1]),
        bty="n"
 )
 
+#save at 1221x838
