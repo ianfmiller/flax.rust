@@ -20,7 +20,7 @@ par(mfrow=c(2,2),mar=c(2,5,5,2))
 for(site in c("BT","GM"))
 {
   pred.epi.obs<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.obs.",site,".step.size.7.RDS"))
-  plot(unique(pred.epi.obs[[1]]$date),rep(0,times=length(unique(pred.epi.obs[[1]]$date))),ylim=c(0,.5),xlab="",ylab="prevalence",type="n",cex.axis=2,cex.lab=2,main=site,cex.main=2)
+  plot(unique(pred.epi.obs[[1]]$date),rep(0,times=length(unique(pred.epi.obs[[1]]$date))),ylim=c(0,c(.5,.3)[which(c("BT","GM")==site)]),xlab="",ylab="prevalence",type="n",cex.axis=2,cex.lab=2,main=site,cex.main=2)
   grid()
   mtext(c("A","B")[which(c("BT","GM")==site)],adj=1,cex=2,font=2)
   
@@ -74,7 +74,7 @@ for(site in c("BT","GM"))
   }
 }
 
-legend("top",
+legend("topleft",
        legend=c("observed","predicted"),
        lwd=4,
        cex=1.25,
@@ -88,7 +88,7 @@ legend("top",
 for(site in c("BT","GM"))
 {
   pred.epi.obs<-readRDS(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2020.rcp45.",site,".step.size.7.RDS"))
-  plot(unique(pred.epi.obs[[1]]$date),rep(0,times=length(unique(pred.epi.obs[[1]]$date))),ylim=c(0,.5),xlab="",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
+  plot(unique(pred.epi.obs[[1]]$date),rep(0,times=length(unique(pred.epi.obs[[1]]$date))),ylim=c(0,c(.5,.3)[which(c("BT","GM")==site)]),xlab="",ylab="prevalence",type="n",cex.axis=2,cex.lab=2)
   grid()
   mtext(c("C","D")[which(c("BT","GM")==site)],adj=1,cex=2,font=2)
 
@@ -108,7 +108,7 @@ for(site in c("BT","GM"))
         xvals<-c(xvals,date)
         yvals<-c(yvals,sum(pred.epi[which(pred.epi$date==date),"status"])/length(which(pred.epi$date==pred.epi$date[1])))
       }
-      points(xvals,yvals,type="l",col=weather.colors.trans[which(weath.scenarios==scenario)])
+      points(xvals,yvals,type="l",col=weather.colors.trans[which(weath.scenarios==scenario)],lty=weather.lty[which(weath.scenarios==scenario)])
     }
     
     xvals<-c()
@@ -130,7 +130,7 @@ for(site in c("BT","GM"))
   }
 }
 
-legend("top",
+legend("topleft",
        legend=c("2020 RCP 4.5 predicted", "2020 RCP 8.5 predicted", "2045 RCP 4.5 predicted","2024 RCP 8.5 predicted","2070 RCP 4.5 predicted","2070 RCP 8.5 predicted"),
        lwd=4,
        cex=1.25,
