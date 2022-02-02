@@ -8,56 +8,40 @@ par(mar=c(.5,.5,.5,.5))
 
 panel.A<-load.image("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/figs/figure.1.files/A.jpg")
 plot(panel.A,axes=F)
-text((par()$usr[2]-par()$usr[1])*.95+par()$usr[1],
-     (par()$usr[4]-par()$usr[3])*.975+par()$usr[3],
-     labels="A",
-     cex=2/par()$cex)
+mtext("A",side=3,adj=1.05,cex=2,line=-2)
 
 panel.B<-load.image("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/figs/figure.1.files/B.jpg")
 plot(panel.B,axes=F)
-text((par()$usr[2]-par()$usr[1])*.95+par()$usr[1],
-     (par()$usr[4]-par()$usr[3])*.975+par()$usr[3],
-     labels="B",
-     cex=2/par()$cex)
+mtext("B",side=3,adj=.95,cex=2,line=-2)
 
-
-
-par(mar=c(.5,.5,.5,3.25),xpd=T)
+par(mar=c(0,.25,0,3.25),xpd=T)
 
 panel.C<-load.image("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/figs/figure.1.files/C.jpg")
 plot(panel.C,axes=F)
 rect(0,dim(panel.C)[2],dim(panel.C)[1],0,border=site.cols[4],density = 0,lwd=5)
 text(250,200,"HM",cex=3,col="white")
-text((par()$usr[2]-par()$usr[1])*1.1+par()$usr[1],
-     (par()$usr[4]-par()$usr[3])*.975+par()$usr[3],
-     labels="C",
-     cex=2/par()$cex)
+mtext("C",side=3,adj=1.15,cex=2,line=-4.5)
+
 panel.D<-load.image("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/figs/figure.1.files/D.jpg")
 plot(panel.D,axes=F)
 rect(0,dim(panel.D)[2],dim(panel.D)[1],0,border=site.cols[3],density = 0,lwd=5)
 text(250,200,"GM",cex=3,col="white")
-text((par()$usr[2]-par()$usr[1])*1.1+par()$usr[1],
-     (par()$usr[4]-par()$usr[3])*.975+par()$usr[3],
-     labels="D",
-     cex=2/par()$cex)
+mtext("D",side=3,adj=1.15,cex=2,line=-4.5)
+
 panel.E<-load.image("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/figs/figure.1.files/E.jpg")
 plot(panel.E,axes=F)
 rect(0,dim(panel.E)[2],dim(panel.E)[1],0,border=site.cols[2],density = 0,lwd=5)
 text(250,200,"BT",cex=3,col="white")
-text((par()$usr[2]-par()$usr[1])*1.1+par()$usr[1],
-     (par()$usr[4]-par()$usr[3])*.975+par()$usr[3],
-     labels="E",
-     cex=2/par()$cex)
+mtext("E",side=3,adj=1.15,cex=2,line=-4.5)
+
 panel.F<-load.image("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/figs/figure.1.files/F.jpg")
 plot(panel.F,axes=F)
 rect(0,dim(panel.F)[2],dim(panel.F)[1],0,border=site.cols[1],density = 0,lwd=5)
 text(250,200,"CC",cex=3,col="white")
-text((par()$usr[2]-par()$usr[1])*1.1+par()$usr[1],
-     (par()$usr[4]-par()$usr[3])*.975+par()$usr[3],
-     labels="F",
-     cex=2/par()$cex)
+mtext("F",side=3,adj=1.15,cex=2,line=-4.5)
 
-par(mar=c(4,4,3,3),xpd=F)
+
+par(mar=c(4,4,1,3),xpd=F)
 site.cols<-viridis_pal(alpha=.75)(20)[c(20,15,6,1)]
 source("~/Documents/Github/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
 
@@ -138,7 +122,7 @@ points(cc.temp.rh.daily.means$date,cc.temp.rh.daily.means$mean.temp,type="l",col
 points(bt.temp.rh.daily.means$date,bt.temp.rh.daily.means$mean.temp,type="l",col=site.cols[2],lwd=2)
 points(gm.temp.rh.daily.means$date,gm.temp.rh.daily.means$mean.temp,type="l",col=site.cols[3],lwd=2)
 points(hm.temp.rh.daily.means$date,hm.temp.rh.daily.means$mean.temp,type="l",col=site.cols[4],lwd=2)
-mtext("G",side=3,adj=1,cex=2,line=.5)
+mtext("G",side=3,adj=1.2,cex=2,line=-2.25)
 
 plot(0,0,type="n",xlim=c(as.POSIXct("2020-06-12 00:00:00",tz="UTC"),as.POSIXct("2020-07-28 00:00:00",tz="UTC")),ylim=c(11,36),xlab="",ylab="",axes=F)
 mtext("max. temperature (°C)",2,line = 2.25,cex=1)
@@ -150,7 +134,7 @@ points(cc.temp.rh.daily.means$date,cc.temp.rh.daily.means$max.temp,type="l",col=
 points(bt.temp.rh.daily.means$date,bt.temp.rh.daily.means$max.temp,type="l",col=site.cols[2],lwd=2)
 points(gm.temp.rh.daily.means$date,gm.temp.rh.daily.means$max.temp,type="l",col=site.cols[3],lwd=2)
 points(hm.temp.rh.daily.means$date,hm.temp.rh.daily.means$max.temp,type="l",col=site.cols[4],lwd=2)
-mtext("H",side=3,adj=1,cex=2,line=.5)
+mtext("H",side=3,adj=1.2,cex=2,line=-2.25)
 
 plot(0,0,type="n",xlim=c(as.POSIXct("2020-06-12 00:00:00",tz="UTC"),as.POSIXct("2020-07-28 00:00:00",tz="UTC")),ylim=c(-6,12),xlab="",ylab="",axes=F)
 mtext("min. temperature (°C)",2,line = 2.25,cex=1)
@@ -162,7 +146,7 @@ points(cc.temp.rh.daily.means$date,cc.temp.rh.daily.means$min.temp,type="l",col=
 points(bt.temp.rh.daily.means$date,bt.temp.rh.daily.means$min.temp,type="l",col=site.cols[2],lwd=2)
 points(gm.temp.rh.daily.means$date,gm.temp.rh.daily.means$min.temp,type="l",col=site.cols[3],lwd=2)
 points(hm.temp.rh.daily.means$date,hm.temp.rh.daily.means$min.temp,type="l",col=site.cols[4],lwd=2)
-mtext("I",side=3,adj=1,cex=2,line=.5)
+mtext("I",side=3,adj=1.2,cex=2,line=-2.25)
 
 plot(0,0,type="n",xlim=c(as.POSIXct("2020-06-12 00:00:00",tz="UTC"),as.POSIXct("2020-07-28 00:00:00",tz="UTC")),ylim=c(3,10),xlab="",ylab="",axes=F)
 mtext(expression('mean abs. humidity ('*g/m^3*')'),2,line = 2.25,cex=1)
@@ -174,7 +158,7 @@ points(cc.temp.rh.daily.means$date,cc.temp.rh.daily.means$mean.abs.hum,type="l",
 points(bt.temp.rh.daily.means$date,bt.temp.rh.daily.means$mean.abs.hum,type="l",col=site.cols[2],lwd=2)
 points(gm.temp.rh.daily.means$date,gm.temp.rh.daily.means$mean.abs.hum,type="l",col=site.cols[3],lwd=2)
 points(hm.temp.rh.daily.means$date,hm.temp.rh.daily.means$mean.abs.hum,type="l",col=site.cols[4],lwd=2)
-mtext("J",side=3,adj=1,cex=2,line=.5)
+mtext("J",side=3,adj=1.2,cex=2,line=-2.25)
 
 plot(0,0,type="n",xlim=c(as.POSIXct("2020-06-20 00:00:00",tz="UTC"),as.POSIXct("2020-07-28 00:00:00",tz="UTC")),ylim=c(0,27),xlab="",ylab="",axes=F)
 mtext("mean daily rainfall (mm)",2,line = 2.25,cex=1)
@@ -186,7 +170,7 @@ points(cc.weath.daily.means$date,cc.weath.daily.means$mean.daily.rain,type="l",c
 points(bt.weath.daily.means$date,bt.weath.daily.means$mean.daily.rain,type="l",col=site.cols[2],lwd=2)
 points(gm.weath.daily.means$date,gm.weath.daily.means$mean.daily.rain,type="l",col=site.cols[3],lwd=2)
 points(hm.weath.daily.means$date,hm.weath.daily.means$mean.daily.rain,type="l",col=site.cols[4],lwd=2)
-mtext("K",side=3,adj=1,cex=2,line=.5)
+mtext("K",side=3,adj=1.2,cex=2,line=-2.25)
 
 par(mar=c(4,0,3,3),xpd=F)
 plot(0,0,type="n",axes=F,xlab="",ylab="",bty="n")
@@ -241,7 +225,7 @@ points(as.POSIXct(paste0(mean.temp.data.2020$year,"-",mean.temp.data.2020$month,
 points(as.POSIXct(paste0(mean.temp.data.2020$year,"-",mean.temp.data.2020$month,"-",mean.temp.data.2020$day," 00:00:00"),tz="utc"),mean.temp.data.2045$cesm1.cam5.1.rcp85,type="l",col=weather.colors[5],lwd=2,lty=1)
 points(as.POSIXct(paste0(mean.temp.data.2020$year,"-",mean.temp.data.2020$month,"-",mean.temp.data.2020$day," 00:00:00"),tz="utc"),mean.temp.data.2070$cesm1.cam5.1.rcp45,type="l",col=weather.colors[6],lwd=2,lty=3)
 points(as.POSIXct(paste0(mean.temp.data.2020$year,"-",mean.temp.data.2020$month,"-",mean.temp.data.2020$day," 00:00:00"),tz="utc"),mean.temp.data.2070$cesm1.cam5.1.rcp85,type="l",col=weather.colors[7],lwd=2,lty=1)
-mtext("L",side=3,adj=1,cex=2,line=.5)
+mtext("L",side=3,adj=1.2,cex=2,line=-2.25)
 
 plot(0,0,type="n",xlim=c(as.POSIXct("2020-06-12 00:00:00",tz="UTC"),as.POSIXct("2020-07-28 00:00:00",tz="UTC")),ylim=c(11,36),xlab="",ylab="",axes=F)
 mtext("max. temperature (°C)",2,line = 2.25,cex=1)
@@ -255,7 +239,7 @@ points(as.POSIXct(paste0(mean.temp.data.2020$year,"-",mean.temp.data.2020$month,
 points(as.POSIXct(paste0(mean.temp.data.2020$year,"-",mean.temp.data.2020$month,"-",mean.temp.data.2020$day," 00:00:00"),tz="utc"),max.temp.data.2045$cesm1.cam5.1.rcp85,type="l",col=weather.colors[5],lwd=2,lty=1)
 points(as.POSIXct(paste0(mean.temp.data.2020$year,"-",mean.temp.data.2020$month,"-",mean.temp.data.2020$day," 00:00:00"),tz="utc"),max.temp.data.2070$cesm1.cam5.1.rcp45,type="l",col=weather.colors[6],lwd=2,lty=3)
 points(as.POSIXct(paste0(mean.temp.data.2020$year,"-",mean.temp.data.2020$month,"-",mean.temp.data.2020$day," 00:00:00"),tz="utc"),max.temp.data.2070$cesm1.cam5.1.rcp85,type="l",col=weather.colors[7],lwd=2,lty=1)
-mtext("M",side=3,adj=1,cex=2,line=.5)
+mtext("M",side=3,adj=1.2,cex=2,line=-2.25)
 
 plot(0,0,type="n",xlim=c(as.POSIXct("2020-06-12 00:00:00",tz="UTC"),as.POSIXct("2020-07-28 00:00:00",tz="UTC")),ylim=c(-6,12),xlab="",ylab="",axes=F)
 mtext("min. temperature (°C)",2,line = 2.25,cex=1)
@@ -268,7 +252,7 @@ points(as.POSIXct(paste0(mean.temp.data.2020$year,"-",mean.temp.data.2020$month,
 points(as.POSIXct(paste0(mean.temp.data.2020$year,"-",mean.temp.data.2020$month,"-",mean.temp.data.2020$day," 00:00:00"),tz="utc"),min.temp.data.2045$cesm1.cam5.1.rcp85,type="l",col=weather.colors[5],lwd=2,lty=1)
 points(as.POSIXct(paste0(mean.temp.data.2020$year,"-",mean.temp.data.2020$month,"-",mean.temp.data.2020$day," 00:00:00"),tz="utc"),min.temp.data.2070$cesm1.cam5.1.rcp45,type="l",col=weather.colors[6],lwd=2,lty=3)
 points(as.POSIXct(paste0(mean.temp.data.2020$year,"-",mean.temp.data.2020$month,"-",mean.temp.data.2020$day," 00:00:00"),tz="utc"),min.temp.data.2070$cesm1.cam5.1.rcp85,type="l",col=weather.colors[7],lwd=2,lty=1)
-mtext("N",side=3,adj=1,cex=2,line=.5)
+mtext("N",side=3,adj=1.2,cex=2,line=-2.25)
 
 plot(0,0,type="n",xlim=c(as.POSIXct("2020-06-12 00:00:00",tz="UTC"),as.POSIXct("2020-07-28 00:00:00",tz="UTC")),ylim=c(2,10),xlab="",ylab="",axes=F)
 mtext(expression('mean abs. humidity ('*g/m^3*')'),2,line = 2.25,cex=1)
@@ -288,7 +272,7 @@ points(as.POSIXct(paste0(mean.temp.data.2020$year,"-",mean.temp.data.2020$month,
 points(as.POSIXct(paste0(mean.temp.data.2020$year,"-",mean.temp.data.2020$month,"-",mean.temp.data.2020$day," 00:00:00"),tz="utc"),mean.abs.hums.2045.rcp85,type="l",col=weather.colors[5],lwd=2,lty=1)
 points(as.POSIXct(paste0(mean.temp.data.2020$year,"-",mean.temp.data.2020$month,"-",mean.temp.data.2020$day," 00:00:00"),tz="utc"),mean.abs.hums.2070.rcp45,type="l",col=weather.colors[6],lwd=2,lty=3)
 points(as.POSIXct(paste0(mean.temp.data.2020$year,"-",mean.temp.data.2020$month,"-",mean.temp.data.2020$day," 00:00:00"),tz="utc"),mean.abs.hums.2070.rcp85,type="l",col=weather.colors[7],lwd=2,lty=1)
-mtext("O",side=3,adj=1,cex=2,line=.5)
+mtext("O",side=3,adj=1.2,cex=2,line=-2.25)
 
 plot(0,0,type="n",xlim=c(as.POSIXct("2020-06-20 00:00:00",tz="UTC"),as.POSIXct("2020-07-28 00:00:00",tz="UTC")),ylim=c(0,27),xlab="",ylab="",axes=F)
 mtext("mean daily rainfall (mm)",2,line = 2.25,cex=1)
@@ -302,7 +286,7 @@ points(as.POSIXct(paste0(mean.temp.data.2020$year,"-",mean.temp.data.2020$month,
 points(as.POSIXct(paste0(mean.temp.data.2020$year,"-",mean.temp.data.2020$month,"-",mean.temp.data.2020$day," 00:00:00"),tz="utc"),rainfall.data.2045$cesm1.cam5.1.rcp85,type="l",col=weather.colors[5],lwd=2,lty=1)
 points(as.POSIXct(paste0(mean.temp.data.2020$year,"-",mean.temp.data.2020$month,"-",mean.temp.data.2020$day," 00:00:00"),tz="utc"),rainfall.data.2070$cesm1.cam5.1.rcp45,type="l",col=weather.colors[6],lwd=2,lty=3)
 points(as.POSIXct(paste0(mean.temp.data.2020$year,"-",mean.temp.data.2020$month,"-",mean.temp.data.2020$day," 00:00:00"),tz="utc"),rainfall.data.2070$cesm1.cam5.1.rcp85,type="l",col=weather.colors[7],lwd=2,lty=1)
-mtext("P",side=3,adj=1,cex=2,line=.5)
+mtext("P",side=3,adj=1.2,cex=2,line=-2.25)
 
 par(mar=c(3.5,0,2.5,3),xpd=F)
 plot(0,0,type="n",axes=F,xlab="",ylab="",bty="n")
@@ -316,4 +300,4 @@ legend("center",
        bty="n"
 )
 
-# export at dimesions 1582x842
+# export at dimesions 1623x950
