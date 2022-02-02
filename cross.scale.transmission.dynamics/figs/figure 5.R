@@ -18,11 +18,11 @@ layout(matrix(c(rep(16,10),1,1,1,1,2,3,3,3,3,4,4,4,4,rep(17,10),rep(10,10),1,1,1
 # B-I
 par(mar=c(4,4,3,1))
 plot(transmission.model,select = 1,scheme = 2,zlim=c(-12,12),too.far=1,hcolors=rev(heat.colors(101)),contour.col="black",cex.lab=1.5,cex.axis=1.5,xlab="",ylab="",main="",rug=F)
-mtext(expression(log[10]*'(predicted spore deposition per day)'),1,line = 2.25,cex=1)
+mtext(expression(log[10]*'(predicted spore deposition per day)'),1,line = 2.25,cex=.9)
 mtext("plant height (cm)",2,line=2.25,cex=1)
 points(transmission.data$log.10.spore.deposition.per.day,transmission.data$height.cm,pch=16,cex=.1)
 
-par(mar=c(4,1,2.5,1.5))
+par(mar=c(4,0,2.5,2.5))
 plot(0,0,type="n",xlim=c(0,1),ylim=c(-12-.12,12+.12),axes=F,xlab="",ylab="")
 for(i in 1:101)
 {
@@ -30,8 +30,7 @@ for(i in 1:101)
   rect(0,ii-.12,1,ii+.12,col=rev(heat.colors(101))[i],border = NA)
 }
 rect(0,-12-.12,1,12+.12)
-mtext("B",cex=1.25,font=2)
-mtext('te(log10(predicted sporedeposition per day),\nplant height)',side=2,line=0,cex = .6)
+mtext("B",cex=2)
 axis(4,cex.axis=1,tck=-.5,padj=-1)
 
 par(mar=c(4,4,3,1))
@@ -39,50 +38,50 @@ plot(transmission.model,select = 2,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab=
 mtext("mean temperature (°C)",1,line = 2.25,cex=1)
 mtext("s(mean temperature)",2,line=2.25,cex=1)
 grid()
-mtext("C",adj=1,cex=1.25,font=2)
+mtext("C",adj=1,cex=2)
 plot(transmission.model,select = 3,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
 mtext("max. temperature (°C)",1,line = 2.25,cex=1)
 mtext("s(max. temperature)",2,line=2.25,cex=1)
 grid()
-mtext("D",adj=1,cex=1.25,font=2)
+mtext("D",adj=1,cex=2)
 plot(transmission.model,select = 4,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
 mtext("min. temperature (°C)",1,line = 2.25,cex=1)
 mtext("s(min. temperature)",2,line=2.25,cex=1)
 grid()
-mtext("E",adj=1,cex=1.25,font=2)
+mtext("E",adj=1,cex=2)
 plot(transmission.model,select = 5,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
 mtext(expression('mean abs. humidity ('*g/m^3*')'),1,line = 2.25,cex=1)
 mtext("s(mean abs. humidity)",2,line=2.25,cex=1)
 grid()
-mtext("F",adj=1,cex=1.25,font=2)
+mtext("F",adj=1,cex=2)
 plot(transmission.model,select = 6,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
 mtext("total rainfall (mm)",1,line = 2.25,cex=1)
 mtext("s(total rainfall)",2,line=2.25,cex=1)
 grid()
-mtext("G",adj=1,cex=1.25,font=2)
+mtext("G",adj=1,cex=2)
 plot(transmission.model,select = 7,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="",pch=16)
 mtext("Gaussian quantiles",1,line = 2.25,cex=1)
 mtext("s(tag)",2,line=2.25,cex=1)
 grid()
-mtext("H",adj=1,cex=1.25,font=2)
-plot(transmission.model,select = 8,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="",col=site.cols[c(2,1,3,4)],cex=2,pch=16)
+mtext("H",adj=1,cex=2)
+plot(transmission.model,select = 8,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="",col=site.cols[c(2,1,3,4)],cex=1.5/par()$cex,pch=16)
 mtext("Gaussian quantiles",1,line = 2.25,cex=1)
 mtext("s(site)",2,line=2.25,cex=1)
 grid()
-mtext("I",adj=1,cex=1.25,font=2)
-legend("topleft",legend=c("CC","BT","GM","HM"),pch=16,col=site.cols,cex=1,bty="n",pt.cex = 2)
+mtext("I",adj=1,cex=2)
+legend("topleft",legend=c("CC","BT","GM","HM"),pch=16,col=site.cols,cex=1.25,bty="n",pt.cex = 1.5/par()$cex)
 
 # A
 set.seed(98579835)
 transmission.data.shuffled= transmission.data[sample(1:nrow(transmission.data)), ]
 site.indicies<-c(2,1,3,4)[as.numeric(transmission.data.shuffled$site)]
 par(mar=c(5,6,5,2))
-plot(jitter(log10(transmission.data.shuffled$tot.spore.deposition)),jitter(transmission.data.shuffled$status.next),xlab=expression('predicted '*log[10]*' spore deposition'),ylab="outcome",axes=F,cex.lab=2,col=site.cols[site.indicies],pch=16,cex=transmission.data.shuffled$time/4,panel.first = grid())
+plot(jitter(log10(transmission.data.shuffled$tot.spore.deposition)),jitter(transmission.data.shuffled$status.next),xlab=expression('predicted '*log[10]*' spore deposition'),ylab="outcome",axes=F,cex.lab=2,col=site.cols[site.indicies],pch=16,cex=transmission.data.shuffled$time/2,panel.first = grid())
 axis(2,at=c(0,1),labels = c("healthy","infected"),cex.axis=2)
 axis(1,cex.axis=2)
 box()
 mtext("A",side=3,adj=1,cex=2)
-legend("topleft",legend=c("CC","BT","GM","HM"," ","2 days","4 days","6 days"),col=c(site.cols,NA,"grey","grey","grey"),pt.cex=c(2,2,2,2,2,2/4,4/4,6/4),pch=16,cex=1,bty="n")
+legend("topleft",legend=c("CC","BT","GM","HM","2 days","4 days","6 days"),col=c(site.cols,"grey","grey","grey"),pt.cex=c(3,3,3,3,2/2,4/2,6/2),pch=16,cex=1.75,bty="n")
 
 # J
 dummy.log.10.tot.spore.deposition.per.day<-seq(-6.5,1,.01)
@@ -101,12 +100,12 @@ plot.height<-25
 plot(0,0,type="n",xlab=expression('predicted '*log[10]*'(spore deposition per day)'),ylab="odds of infection",cex.lab=2,cex.axis=2,ylim=c(0,.9),xlim=c(-6.5,1),panel.first = grid())
 legend("topleft",
        legend=c("observed weather","2020 RCP4.5", "2020 RCP8.5", "2045 RCP4.5","2024 RCP8.5","2070 RCP4.5","2070 RCP8.5"),
+       cex=1.75,
        lwd=4,
-       seg.len = 4,
+       seg.len = 2,
        lty=c(1,3,1,3,1,3,1,3),
        col=weather.colors,
-       bty="n",
-       cex=1.25
+       bty="n"
 )
 
 mtext("J",adj=1,cex=2)
@@ -194,4 +193,6 @@ for(j in 1:7)
   
   points(new.data$log.10.spore.deposition.per.day,predict(transmission.model,newdata = new.data,type = "response"),type="l",col=weather.colors[j],lwd=4,lty=c(1,3,1,3,1,3,1,3,1)[j])
 }
+
+# export at 1564x719
 

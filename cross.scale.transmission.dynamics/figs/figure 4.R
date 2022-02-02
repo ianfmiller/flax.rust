@@ -17,7 +17,7 @@ mtext("plant height (cm)",1,line = 2.25,cex=1)
 mtext(expression(log[10]*' infection intensity'),2,line=2.25,cex=1)
 points(delta.infection.intensity$max.height,log10(delta.infection.intensity$infection.intensity),pch=".")
 
-par(mar=c(4,1,2.5,1.5))
+par(mar=c(4,0,2.5,2.5))
 plot(0,0,type="n",xlim=c(0,1),ylim=c(-4000-40.40404,4000+40.40404),axes=F,xlab="",ylab="")
 for(i in 1:101)
 {
@@ -25,8 +25,7 @@ for(i in 1:101)
   rect(0,ii-40.40404,1,ii+40.40404,col=cm.colors(101)[i],border = NA)
 }
 rect(0,-4000-40.40404,1,4000+40.40404)
-mtext("B",cex=1.25,font=2)
-mtext(expression('te(plant height, '*log[10]*' infection intensity)'),side=2,line=.5,cex = .8)
+mtext("B",cex=2)
 axis(4,cex.axis=1,tck=-.5,padj=-1)
 
 par(mar=c(4,4,3,1))
@@ -34,45 +33,45 @@ plot(infection.intensity.model,select = 2,shade=T,main="",cex.lab=1.25,cex.axis=
 mtext("mean temperature (°C)",1,line = 2.25,cex=1)
 mtext("s(mean temperature)",2,line=2.25,cex=1)
 grid()
-mtext("C",adj=1,cex=1.25,font=2)
+mtext("C",adj=1,cex=2)
 plot(infection.intensity.model,select = 3,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
 mtext("max. temperature (°C)",1,line = 2.25,cex=1)
 mtext("s(max. temperature)",2,line=2.25,cex=1)
 grid()
-mtext("D",adj=1,cex=1.25,font=2)
+mtext("D",adj=1,cex=2)
 plot(infection.intensity.model,select = 4,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
 mtext("min. temperature (°C)",1,line = 2.25,cex=1)
 mtext("s(min. temperature)",2,line=2.25,cex=1)
 grid()
-mtext("E",adj=1,cex=1.25,font=2)
+mtext("E",adj=1,cex=2)
 plot(infection.intensity.model,select = 5,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
 mtext(expression('mean abs. humidity ('*g/m^3*')'),1,line = 2.25,cex=1)
 mtext("s(mean abs. humidity)",2,line=2.25,cex=1)
 grid()
-mtext("F",adj=1,cex=1.25,font=2)
+mtext("F",adj=1,cex=2)
 plot(infection.intensity.model,select = 6,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
 mtext("total rainfall (mm)",1,line = 2.25,cex=1)
 mtext("s(total rainfall)",2,line=2.25,cex=1)
 grid()
-mtext("G",adj=1,cex=1.25,font=2)
+mtext("G",adj=1,cex=2)
 plot(infection.intensity.model,select = 7,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="",pch=16)
 mtext("Gaussian quantiles",1,line = 2.25,cex=1)
 mtext("s(tag)",2,line=2.25,cex=1)
 grid()
-mtext("H",adj=1,cex=1.25,font=2)
-plot(infection.intensity.model,select = 8,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="",col=site.cols[c(2,1,3,4)],cex=2,pch=16)
+mtext("H",adj=1,cex=2)
+plot(infection.intensity.model,select = 8,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="",col=site.cols[c(2,1,3,4)],cex=1.5/par()$cex,pch=16)
 mtext("Gaussian quantiles",1,line = 2.25,cex=1)
 mtext("s(site)",2,line=2.25,cex=1)
 grid()
-mtext("I",adj=1,cex=1.25,font=2)
-legend("topleft",legend=c("CC","BT","GM","HM"),pch=16,col=site.cols,cex=1,bty="n",pt.cex = 2)
+mtext("I",adj=1,cex=2)
+legend("bottomright",legend=c("CC","BT","GM","HM"),pch=16,col=site.cols,cex=1.25,bty="n",pt.cex = 1.5/par()$cex)
 
 site.indicies<-c(2,1,3,4)[as.numeric(delta.infection.intensity$site)]
 par(mar=c(5,6,5,2))
-plot(delta.infection.intensity$infection.intensity,delta.infection.intensity$infection.intensity.next,xlab = "observed infection intensity",ylab="next observed infection intensity",cex.lab=2,cex.axis=2,col=site.cols[site.indicies],pch=16,cex=delta.infection.intensity$time/4,panel.first = abline(0,1,lty=2))
+plot(delta.infection.intensity$infection.intensity,delta.infection.intensity$infection.intensity.next,xlab = "observed infection intensity",ylab="next observed infection intensity",cex.lab=2,cex.axis=2,col=site.cols[site.indicies],pch=16,cex=delta.infection.intensity$time/2,panel.first = abline(0,1,lty=2))
 grid()
 mtext("A",side=3,adj=1,cex=2)
-legend("bottomright",legend=c("CC","BT","GM","HM"," ","2 days","4 days","6 days"),col=c(site.cols,NA,"grey","grey","grey"),pt.cex=c(2,2,2,2,2,2/4,4/4,6/4),pch=16,cex=1,bty="n")
+legend("bottomright",legend=c("CC","BT","GM","HM","2 days","4 days","6 days"),col=c(site.cols,"grey","grey","grey"),pt.cex=c(3,3,3,3,2/2,4/2,6/2),pch=16,cex=1.75,bty="n")
 
 library("MASS")
 library("viridis")
@@ -222,9 +221,12 @@ for(i in 1:7)
 }
 legend("topleft",
        legend=c("observed weather","2020 RCP4.5", "2020 RCP8.5", "2045 RCP4.5","2024 RCP8.5","2070 RCP4.5","2070 RCP8.5"),
+       cex=1.75,
        lwd=4,
-       seg.len = 4,
+       seg.len = 2,
        lty=c(1,3,1,3,1,3,1,3),
        col=weather.colors,
        bty="n"
 )
+
+# export at 1564x719
