@@ -18,8 +18,8 @@ layout(matrix(c(rep(10,10),rep(16,13),
                 rep(11,10),13,14,14,8,8,8,8,9,9,9,9,15,15,
                 rep(11,10),13,14,14,8,8,8,8,9,9,9,9,15,15),
               10,23,byrow=T))
-
 par(mar=c(4,4,1,1))
+
 vis.gam(plant.growth.model,view=c("height","inf.intens"),plot.type = "contour",type="response",contour.col = "black",color="cm",zlim=c(-.75,.75),xlim=c(5,75),nCol = 100,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
 mtext("plant height (cm)",1,line = 2.25,cex=1)
 mtext("infection intensity",2,line=2.25,cex=1)
@@ -104,7 +104,7 @@ axis(2,cex.axis=2)
 box()
 mtext("projections",cex=2,line=1)
 
-for(i in 1:7)
+for(i in 2:7)
 {
   weath.data<-weath.data.vec[i]
   weath.data.scenario<-weath.data.scenario.vec[i]
@@ -209,12 +209,12 @@ for(i in 1:7)
   points(xcords[2,],colMeans(ycords[-1,]),col=weather.colors[i],type="l",lwd=5,lty=c(1,3,1,3,1,3,1,3,1)[i])
 }
 legend("topleft",
-       legend=c("observed weather","2020 RCP 4.5", "2020 RCP 8.5", "2045 RCP 4.5","2045 RCP 8.5","2070 RCP 4.5","2070 RCP 8.5"),
+       legend=c("2020 RCP 4.5", "2020 RCP 8.5", "2045 RCP 4.5","2045 RCP 8.5","2070 RCP 4.5","2070 RCP 8.5"),
        cex=1.75,
        lwd=4,
        seg.len = 2,
-       lty=c(1,3,1,3,1,3,1,3),
-       col=weather.colors,
+       lty=c(3,1,3,1,3,1,3),
+       col=weather.colors[-1],
        bty="n"
        )
 
