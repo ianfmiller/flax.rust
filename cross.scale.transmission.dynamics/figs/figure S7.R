@@ -1,5 +1,10 @@
-# load spore deposition functions
+# load spore deposition functions and data
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/spore deposition functions tilt.R")
+source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
+spore.deposition<-read.csv("~/Documents/GitHub/flax.rust/data/spore counts.csv")
+spore.deposition[which(spore.deposition$Distance.cm==0),"Distance.cm"]<-5 #set distance for "0" spore traps to 5cm
+demog<-read.csv("~/Documents/GitHub/flax.rust/data/Demography.csv")
+demog<-demog[which(demog$year==2020),] #subset to 2020
 
 # load fitted tilted gaussian plume model parameters
 opt<-list(par=c(5.739690e-07,4.451030e-02, 7.777373e-02))
@@ -34,3 +39,4 @@ plot(pred.mat$dist,pred.mat$pred-pred.mat$obs,xlab="distance",ylab="residual",ce
 grid()
 abline(h=0,lty=2,lwd=1)
 mtext("D",adj=1,cex=1.5,font=2,line=1)
+
