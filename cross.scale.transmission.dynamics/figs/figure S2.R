@@ -1,4 +1,4 @@
-plant.growth.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS")
+pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
 
 t_col <- function(color, percent = 50, name = NULL) {
   rgb.val <- col2rgb(color)
@@ -14,7 +14,7 @@ weather.colors<-c("black",viridis_pal(option = "C")(5)[c(4,4,3,3,2,2,1,1)])
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
 library("MASS")
 library("viridis")
-start.height<-10
+start.area<-0.1
 
 weath.data.vec<-c("observed","2020","2020","2045","2045","2070","2070")
 weath.data.scenario.vec<-c(NA,"rcp45","rcp85","rcp45","rcp85","rcp45","rcp85")
@@ -27,7 +27,7 @@ for(site in c("CC","BT","GM","HM"))
   end.date<-c(as.POSIXct("2020-07-27 00:00:00",tz="UTC"),as.POSIXct("2020-07-29 00:00:00",tz="UTC"),as.POSIXct("2020-07-28 00:00:00",tz="UTC"),as.POSIXct("2020-07-10 00:00:00",tz="UTC"))[which(c("CC","BT","GM","HM")==site)]
   sim.dates<-seq.POSIXt(start.date,end.date,"3 day")
   
-  plot(0,0,xlim=c(start.date,end.date),ylim=c(10,32),type="n",xlab="date",ylab="plant height (cm)",cex.lab=2,axes=F,main=site,cex.main=2)
+  plot(0,0,xlim=c(start.date,end.date),ylim=c(0,1),type="n",xlab="date",ylab=expression('pustule area ('*mm^2*')'),cex.lab=2,axes=F,main=site,cex.main=2)
   grid()
   mtext(c("A","B","C","D")[which(sites==site)],side=3,adj=1,cex=2)
   axis.POSIXct(1,sim.dates,cex.axis=2)
@@ -40,14 +40,14 @@ for(site in c("CC","BT","GM","HM"))
     weath.data.scenario<-weath.data.scenario.vec[i]
     
     xcords<-rep(NA,length(sim.dates)) #time values
-    ycords<-rep(NA,length(sim.dates)) #height values
+    ycords<-rep(NA,length(sim.dates)) #area values
     
     for(j in 1:100)
     {
-      set.seed(874627)
-      height<-start.height
+      set.seed(289988)
+      area<-start.area
       xcords.new<-c(sim.dates[1])
-      ycords.new<-c(height)
+      ycords.new<-c(area)
       
       for(k in 1:(length(sim.dates)-1))
       {
@@ -115,24 +115,24 @@ for(site in c("CC","BT","GM","HM"))
           new.mean.abs.hum<-mean(abs.hum,na.rm=T)
           new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)*(12*24)
         }
-        beta <- coef(plant.growth.model) ## posterior mean of coefs
-        Vb   <- vcov(plant.growth.model) ## posterior  cov of coefs
+        beta <- coef(pustule.model) ## posterior mean of coefs
+        Vb   <- vcov(pustule.model) ## posterior  cov of coefs
         n <-2
         mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
-        pred.data<-data.frame("height"=height,"inf.intens"=0,"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.mean.temp,"mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,tag="NA",site=site)
-        Xp <- predict(plant.growth.model, newdata = pred.data, exclude=c("s(tag)"),type="lpmatrix")
-        ilink <- family(plant.growth.model)$linkinv
+        pred.data<-data.frame("area"=area,"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.mean.temp,"mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,tag="NA",site=site)
+        Xp <- predict(pustule.model, newdata = pred.data, exclude=c("s(tag)"),type="lpmatrix")
+        ilink <- family(pustule.model)$linkinv
         preds <- rep(NA,n)
         for (l in seq_len(n)) { 
           preds[l]   <- ilink(Xp %*% mrand[l, ])[1]
         }
-        height.change<-preds[1]
-        height<-height+height.change*as.numeric(date1-date0)
-        if(height<5) {height<-5}
+        area.chage<-preds[1]
+        area<-area+area.chage*as.numeric(date1-date0)
+        if(area<0) {area<-0}
         
         #reps<-reps+pred.window
         xcords.new<-c(xcords.new,date1)
-        ycords.new<-c(ycords.new,height)
+        ycords.new<-c(ycords.new,area)
       }
       xcords<-rbind(xcords,xcords.new)
       ycords<-rbind(ycords,ycords.new)  
