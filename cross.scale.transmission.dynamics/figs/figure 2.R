@@ -1,4 +1,5 @@
 library(mgcv)
+library(viridis)
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant growth data prep.R")
 delta.plant.heights<-subset(delta.plant.heights,time<=8)
 plant.growth.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS")
@@ -65,8 +66,7 @@ legend("topleft",legend=c("CC","BT","GM","HM"),pch=16,col=site.cols,cex=1.25,bty
 
 site.indicies<-c(2,1,3,4)[as.numeric(delta.plant.heights$site)]
 par(mar=c(5,6,5,2))
-plot(delta.plant.heights$height,delta.plant.heights$height.next,xlab = "observed height (cm)",ylab="next observed height (cm)",cex.lab=2,cex.axis=2,col=site.cols[site.indicies],pch=16,cex=delta.plant.heights$time/2,panel.first = abline(0,1,lty=2))
-grid()
+plot(delta.plant.heights$height,delta.plant.heights$height.next,xlab = "observed height (cm)",ylab="next observed height (cm)",cex.lab=2,cex.axis=2,col=site.cols[site.indicies],pch=16,cex=delta.plant.heights$time/2,panel.first = {abline(0,1,lty=2);grid()})
 mtext("A",side=3,adj=1,cex=2)
 legend("topleft",legend=c("CC","BT","GM","HM","2 days","4 days","6 days"),col=c(site.cols,"grey","grey","grey"),pt.cex=c(3,3,3,3,2/2,4/2,6/2),pch=16,cex=1.75,bty="n")
 
@@ -204,3 +204,4 @@ legend("topleft",
        )
 
 # export at 1564x719
+
