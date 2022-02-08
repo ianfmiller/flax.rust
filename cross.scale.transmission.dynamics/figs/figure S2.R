@@ -11,7 +11,6 @@ t_col <- function(color, percent = 50, name = NULL) {
 
 weather.colors<-c("black",viridis_pal(option = "C")(5)[c(4,4,3,3,2,2,1,1)])
 
-set.seed(874627)
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
 library("MASS")
 library("viridis")
@@ -43,8 +42,9 @@ for(site in c("CC","BT","GM","HM"))
     xcords<-rep(NA,length(sim.dates)) #time values
     ycords<-rep(NA,length(sim.dates)) #height values
     
-    for(j in 1:3)
+    for(j in 1:100)
     {
+      set.seed(874627)
       height<-start.height
       xcords.new<-c(sim.dates[1])
       ycords.new<-c(height)

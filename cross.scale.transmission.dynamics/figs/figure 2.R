@@ -75,7 +75,7 @@ mtext("I",adj=1,cex=1.5)
 legend("topleft",legend=c("CC","BT","GM","HM"),pch=16,col=site.cols,cex=1.25,bty="n",pt.cex = 1.5/par()$cex)
 
 mtext("generalized additive model",outer=T,adj=19.5/23,cex=2,line=-2.5)
-mtext("change in plant height (cm per day)",outer=T,adj=20/23,cex=1.75,line=-5)
+mtext("change in plant height (cm per day)",outer=T,adj=20/23,cex=1.75,line=-5.5)
 
 site.indicies<-c(2,1,3,4)[as.numeric(delta.plant.heights$site)]
 par(mar=c(5,6,5,2))
@@ -84,7 +84,6 @@ mtext("A",side=3,adj=1,cex=1.5)
 legend("topleft",legend=c("CC","BT","GM","HM","2 days","4 days","6 days"),col=c(site.cols,"grey","grey","grey"),pt.cex=c(3,3,3,3,2/2,4/2,6/2),pch=16,cex=1.75,bty="n")
 mtext("data",cex=2,line=1)
 
-set.seed(874627)
 library("MASS")
 library("viridis")
 start.height<-10
@@ -112,8 +111,9 @@ for(i in 2:7)
   xcords<-rep(NA,length(sim.dates)) #time values
   ycords<-rep(NA,length(sim.dates)) #height values
   
-  for(j in 1:10)
+  for(j in 1:100)
   {
+    set.seed(874627)
     height<-start.height
     xcords.new<-c(sim.dates[1])
     ycords.new<-c(height)
