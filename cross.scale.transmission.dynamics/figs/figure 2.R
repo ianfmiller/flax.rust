@@ -7,6 +7,7 @@ plant.growth.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmissi
 site.cols<-viridis_pal(alpha=.5)(20)[c(20,15,6,1)]
 weather.colors<-c("black",viridis_pal(option = "C")(5)[c(4,4,3,3,2,2,1,1)])
 
+par(oma=c(0,0,5,0))
 layout(matrix(c(rep(16,10),1,1,1,1,2,3,3,3,3,4,4,4,4,rep(17,10),rep(10,10),1,1,1,1,2,3,3,3,3,4,4,4,4,rep(11,10),rep(10,10),12,5,5,5,5,6,6,6,6,7,7,7,7,rep(11,10),rep(10,10),12,5,5,5,5,6,6,6,6,7,7,7,7,rep(11,10),rep(10,10),13,14,14,8,8,8,8,9,9,9,9,15,15,rep(11,10),rep(18,10),13,14,14,8,8,8,8,9,9,9,9,15,15,rep(19,10)),6,33,byrow=T))
 
 par(mar=c(4,4,3,1))
@@ -202,6 +203,12 @@ legend("topleft",
        col=weather.colors,
        bty="n"
        )
+
+mtext("data",side=3,adj=5/33,outer=T,line=2.5,cex=2)
+mtext("generalized additive model",side=3,adj=17/33,outer=T,line=2.5,cex=2)
+mtext("change in plant height (cm) per day",side=3,adj=17/33,outer=T,line=0,cex=1.75)
+mtext("projections",side=3,adj=29.5/33,line=2.5,outer=T,cex=2)
+
 
 # export at 1564x719
 
