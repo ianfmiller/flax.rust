@@ -67,7 +67,8 @@ mtext(expression('change in pustule area ('*mm^2*' per day)'),outer=T,adj=20/23,
 
 site.indicies<-c(2,1,3,4)[as.numeric(delta.pustules$site)]
 par(mar=c(5,6,5,2))
-plot(delta.pustules$area,delta.pustules$area.next,xlab = expression('observed pustule area '*(mm^2)),ylab=expression('next observed pustule area '*(mm^2)),cex.lab=2,cex.axis=2,col=site.cols[site.indicies],pch=16,cex=delta.pustules$time/2,panel.first = {abline(0,1,lty=2);grid()})
+plot(delta.pustules$area,delta.pustules$area.next,xlab = "",ylab=expression('next observed pustule area '*(mm^2)),cex.lab=2,cex.axis=2,col=site.cols[site.indicies],pch=16,cex=delta.pustules$time/2,panel.first = {abline(0,1,lty=2);grid()})
+mtext(expression('observed pustule area '*(mm^2)),side=1,cex=2*par()$cex,line=3.5)
 mtext("A",side=3,adj=1,cex=1.5)
 legend("bottomright",legend=c("CC","BT","GM","HM","2 days","4 days","6 days"),col=c(site.cols,"grey","grey","grey"),pt.cex=c(3,3,3,3,2/2,4/2,6/2),pch=16,cex=1.75,bty="n")
 mtext("data",cex=2,line=1)
@@ -99,9 +100,10 @@ for(i in 2:7)
   xcords<-rep(NA,length(sim.dates)) #time values
   ycords<-rep(NA,length(sim.dates)) #area values
   
+  set.seed(289988)
+  
   for(j in 1:100)
   {
-    set.seed(289988)
     area<-start.area
     xcords.new<-c(sim.dates[1])
     ycords.new<-c(area)
@@ -206,4 +208,4 @@ legend("topleft",
        bty="n"
 )
 
-# export at 1564x719
+# export at 1291x812

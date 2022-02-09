@@ -42,9 +42,10 @@ for(site in c("CC","BT","GM","HM"))
     xcords<-rep(NA,length(sim.dates)) #time values
     ycords<-rep(NA,length(sim.dates)) #height values
     
+    set.seed(874627)
+    
     for(j in 1:100)
     {
-      set.seed(874627)
       height<-start.height
       xcords.new<-c(sim.dates[1])
       ycords.new<-c(height)
