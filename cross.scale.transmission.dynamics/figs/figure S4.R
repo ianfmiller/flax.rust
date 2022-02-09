@@ -58,10 +58,9 @@ for(site in sites)
     xcords<-rep(NA,length(sim.dates)) #time values
     inf.intens.cords<-rep(NA,length(sim.dates)) #infection intensity values
     height.cords<-rep(NA,length(sim.dates)) #height values
-    
     set.seed(73452749)
-    
-    for(j in 1:100)
+  
+    for(j in 1:3)
     {
       inf.intens<-start.inf.intens
       height<-start.height
@@ -188,7 +187,7 @@ for(site in sites)
   if(site=="HM")
   {
     legend("topleft",
-           legend=c("observed weather","2020 RCP4.5", "2020 RCP8.5", "2045 RCP4.5","2024 RCP8.5","2070 RCP4.5","2070 RCP8.5"),
+           legend=c("observed weather","2020 RCP 4.5", "2020 RCP 8.5", "2045 RCP 4.5","2045 RCP 8.5","2070 RCP 4.5","2070 RCP 8.5"),
            lwd=4,
            seg.len = 4,
            lty=c(1,3,1,3,1,3,1,3),
