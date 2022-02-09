@@ -9,15 +9,25 @@ plant.growth.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmissi
 site.cols<-viridis_pal(alpha=.5)(20)[c(20,15,6,1)]
 weather.colors<-c("black",viridis_pal(option = "C")(5)[c(4,4,3,3,2,2,1,1)])
 
-layout(matrix(c(rep(16,10),1,1,1,1,2,3,3,3,3,4,4,4,4,rep(17,10),rep(10,10),1,1,1,1,2,3,3,3,3,4,4,4,4,rep(11,10),rep(10,10),12,5,5,5,5,6,6,6,6,7,7,7,7,rep(11,10),rep(10,10),12,5,5,5,5,6,6,6,6,7,7,7,7,rep(11,10),rep(10,10),13,14,14,8,8,8,8,9,9,9,9,15,15,rep(11,10),rep(18,10),13,14,14,8,8,8,8,9,9,9,9,15,15,rep(19,10)),6,33,byrow=T))
+layout(matrix(c(rep(10,10),rep(16,13),
+                rep(10,10),1,1,1,1,2,3,3,3,3,4,4,4,4,
+                rep(10,10),1,1,1,1,2,3,3,3,3,4,4,4,4,
+                rep(10,10),1,1,1,1,2,3,3,3,3,4,4,4,4,
+                rep(10,10),12,5,5,5,5,6,6,6,6,7,7,7,7,
+                rep(11,10),12,5,5,5,5,6,6,6,6,7,7,7,7,
+                rep(11,10),12,5,5,5,5,6,6,6,6,7,7,7,7,
+                rep(11,10),13,14,14,8,8,8,8,9,9,9,9,15,15,
+                rep(11,10),13,14,14,8,8,8,8,9,9,9,9,15,15,
+                rep(11,10),13,14,14,8,8,8,8,9,9,9,9,15,15),
+              10,23,byrow=T))
+par(mar=c(4,4,1,1))
 
-par(mar=c(4,4,3,1))
 vis.gam(dummy.infection.intensity.model,view=c("max.height","log.10.infection.intensity"),plot.type = "contour",type="response",contour.col = "black",color="cm",zlim=c(-4000,4000),xlim=c(5,60),nCol = 100,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="",n.grid=100)
 mtext("plant height (cm)",1,line = 2.25,cex=1)
 mtext(expression(log[10]*' infection intensity'),2,line=2.25,cex=1)
 points(delta.infection.intensity$max.height,log10(delta.infection.intensity$infection.intensity),pch=".")
 
-par(mar=c(4,0,2.5,2.5))
+par(mar=c(4,0,1,2.5))
 plot(0,0,type="n",xlim=c(0,1),ylim=c(-4000-40.40404,4000+40.40404),axes=F,xlab="",ylab="")
 for(i in 1:101)
 {
@@ -28,50 +38,54 @@ rect(0,-4000-40.40404,1,4000+40.40404)
 mtext("B",cex=2)
 axis(4,cex.axis=1,tck=-.5,padj=-1)
 
-par(mar=c(4,4,3,1))
+par(mar=c(4,4,1,1))
 plot(infection.intensity.model,select = 2,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
 mtext("mean temperature (°C)",1,line = 2.25,cex=1)
 mtext("s(mean temperature)",2,line=2.25,cex=1)
 grid()
-mtext("C",adj=1,cex=2)
+mtext("C",adj=1,cex=1.5)
 plot(infection.intensity.model,select = 3,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
 mtext("max. temperature (°C)",1,line = 2.25,cex=1)
 mtext("s(max. temperature)",2,line=2.25,cex=1)
 grid()
-mtext("D",adj=1,cex=2)
+mtext("D",adj=1,cex=1.5)
 plot(infection.intensity.model,select = 4,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
 mtext("min. temperature (°C)",1,line = 2.25,cex=1)
 mtext("s(min. temperature)",2,line=2.25,cex=1)
 grid()
-mtext("E",adj=1,cex=2)
+mtext("E",adj=1,cex=1.5)
 plot(infection.intensity.model,select = 5,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
 mtext(expression('mean abs. humidity ('*g/m^3*')'),1,line = 2.25,cex=1)
 mtext("s(mean abs. humidity)",2,line=2.25,cex=1)
 grid()
-mtext("F",adj=1,cex=2)
+mtext("F",adj=1,cex=1.5)
 plot(infection.intensity.model,select = 6,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
 mtext("total rainfall (mm)",1,line = 2.25,cex=1)
 mtext("s(total rainfall)",2,line=2.25,cex=1)
 grid()
-mtext("G",adj=1,cex=2)
+mtext("G",adj=1,cex=1.5)
 plot(infection.intensity.model,select = 7,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="",pch=16)
 mtext("Gaussian quantiles",1,line = 2.25,cex=1)
-mtext("s(tag)",2,line=2.25,cex=1)
+mtext("s(plant ID)",2,line=2.25,cex=1)
 grid()
-mtext("H",adj=1,cex=2)
+mtext("H",adj=1,cex=1.5)
 plot(infection.intensity.model,select = 8,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="",col=site.cols[c(2,1,3,4)],cex=1.5/par()$cex,pch=16)
 mtext("Gaussian quantiles",1,line = 2.25,cex=1)
 mtext("s(site)",2,line=2.25,cex=1)
 grid()
-mtext("I",adj=1,cex=2)
+mtext("I",adj=1,cex=1.5)
 legend("bottomright",legend=c("CC","BT","GM","HM"),pch=16,col=site.cols,cex=1.25,bty="n",pt.cex = 1.5/par()$cex)
+
+mtext("generalized additive model",outer=T,adj=19.5/23,cex=2,line=-2.5)
+mtext("change in infection intensity per day",outer=T,adj=20/23,cex=1.75,line=-5.5)
 
 site.indicies<-c(2,1,3,4)[as.numeric(delta.infection.intensity$site)]
 par(mar=c(5,6,5,2))
 plot(delta.infection.intensity$infection.intensity,delta.infection.intensity$infection.intensity.next,xlab = "observed infection intensity",ylab="next observed infection intensity",cex.lab=2,cex.axis=2,col=site.cols[site.indicies],pch=16,cex=delta.infection.intensity$time/2,panel.first = abline(0,1,lty=2))
 grid()
-mtext("A",side=3,adj=1,cex=2)
+mtext("A",side=3,adj=1,cex=1.5)
 legend("bottomright",legend=c("CC","BT","GM","HM","2 days","4 days","6 days"),col=c(site.cols,"grey","grey","grey"),pt.cex=c(3,3,3,3,2/2,4/2,6/2),pch=16,cex=1.75,bty="n")
+mtext("data",cex=2,line=1)
 
 library("MASS")
 library("viridis")
@@ -91,8 +105,9 @@ mtext("J",side=3,adj=1,cex=2)
 axis.POSIXct(1,sim.dates,cex.axis=2)
 axis(2,cex.axis=2)
 box()
+mtext("projections",cex=2,line=1)
 
-for(i in 1:7)
+for(i in 2:7)
 {
   weath.data<-weath.data.vec[i]
   weath.data.scenario<-weath.data.scenario.vec[i]
@@ -220,13 +235,13 @@ for(i in 1:7)
   points(xcords[2,],colMeans(inf.intens.cords[-1,]),col=weather.colors[i],type="l",lwd=5,lty=c(1,3,1,3,1,3,1,3,1)[i])
 }
 legend("topleft",
-       legend=c("observed weather","2020 RCP4.5", "2020 RCP8.5", "2045 RCP4.5","2024 RCP8.5","2070 RCP4.5","2070 RCP8.5"),
+       legend=c("2020 RCP 4.5", "2020 RCP 8.5", "2045 RCP 4.5","2045 RCP 8.5","2070 RCP 4.5","2070 RCP 8.5"),
        cex=1.75,
        lwd=4,
        seg.len = 2,
        lty=c(1,3,1,3,1,3,1,3),
-       col=weather.colors,
+       col=weather.colors[-1],
        bty="n"
 )
 
-# export at 1564x719
+# export at 1291x812
