@@ -50,12 +50,18 @@ mtext("total rainfall (mm)",1,line = 2.25,cex=1)
 mtext("s(total rainfall)",2,line=2.25,cex=1)
 grid()
 mtext("G",adj=1,cex=1.5)
-plot(pustule.model,select = 7,shade=T,main="",cex.lab=1.25,cex.axis=1,ylab="",xlab="")
+par(col=NA) #hack to get rid of qqline
+plot(pustule.model,select = 7,shade=T,main="",cex.lab=1.25,cex.axis=1,ylab="",xlab="",col="black")
+par(col="black")
+box()
 mtext("Gaussian quantiles",1,line = 2.25,cex=1)
 mtext("s(plant ID)",2,line=2.25,cex=1)
 grid()
 mtext("H",adj=1,cex=1.5)
+par(col=NA) #hack to get rid of qqline
 plot(pustule.model,select = 8,shade=T,main="",cex.lab=1.25,cex.axis=1,ylab="",xlab="",col=site.cols[c(2,1,3,4)],cex=1.5/par()$cex,pch=16)
+par(col="black")
+box()
 mtext("Gaussian quantiles",1,line = 2.25,cex=1)
 mtext("s(site)",2,line=2.25,cex=1)
 grid()
@@ -84,7 +90,7 @@ sim.dates<-seq.POSIXt(start.date,end.date,"3 day")
 weath.data.vec<-c("observed","2020","2020","2045","2045","2070","2070")
 weath.data.scenario.vec<-c(NA,"rcp45","rcp85","rcp45","rcp85","rcp45","rcp85")
 
-plot(0,0,xlim=c(start.date,end.date),ylim=c(.1,.8),type="n",xlab="date",ylab=expression('pustule area ('*mm^2*')'),cex.lab=2,axes=F)
+plot(0,0,xlim=c(start.date,end.date),ylim=c(.1,.85),type="n",xlab="date",ylab=expression('pustule area ('*mm^2*')'),cex.lab=2,axes=F)
 grid()
 mtext("J",side=3,adj=1,cex=1.5)
 axis.POSIXct(1,sim.dates,cex.axis=2)
@@ -199,11 +205,11 @@ for(i in 2:7)
   points(xcords[2,],colMeans(ycords[-1,]),col=weather.colors[i],type="l",lwd=5,lty=c(1,3,1,3,1,3,1,3,1)[i])
 }
 legend("topleft",
-       legend=c("2020 RCP 4.5", "2020 RCP 8.5", "2045 RCP 4.5","2024 RCP 8.5","2070 RCP 4.5","2070 RCP 8.5"),
+       legend=c("2020 RCP4.5", "2020 RCP8.5", "2045 RCP4.5","2045 RCP8.5","2070 RCP4.5","2070 RCP8.5"),
        cex=1.75,
        lwd=4,
        seg.len = 2,
-       lty=c(1,3,1,3,1,3,1,3),
+       lty=c(1,3,1,3,1,3,1)[-1],
        col=weather.colors[-1],
        bty="n"
 )

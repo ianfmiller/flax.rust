@@ -35,8 +35,8 @@ for(i in 1:101)
   rect(0,ii-40.40404,1,ii+40.40404,col=cm.colors(101)[i],border = NA)
 }
 rect(0,-4000-40.40404,1,4000+40.40404)
-mtext("B",cex=2)
-axis(4,cex.axis=1,tck=-.5,padj=-1)
+mtext("B",cex=1.5)
+axis(4,cex.axis=1,tck=-.5,padj=-.5)
 
 par(mar=c(4,4,1,1))
 plot(infection.intensity.model,select = 2,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
@@ -64,12 +64,18 @@ mtext("total rainfall (mm)",1,line = 2.25,cex=1)
 mtext("s(total rainfall)",2,line=2.25,cex=1)
 grid()
 mtext("G",adj=1,cex=1.5)
-plot(infection.intensity.model,select = 7,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="",pch=16)
+par(col=NA) #hack to get rid of qqline
+plot(infection.intensity.model,select = 7,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="",col="black")
+par(col="black")
+box()
 mtext("Gaussian quantiles",1,line = 2.25,cex=1)
 mtext("s(plant ID)",2,line=2.25,cex=1)
 grid()
 mtext("H",adj=1,cex=1.5)
+par(col=NA) #hack to get rid of qqline
 plot(infection.intensity.model,select = 8,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="",col=site.cols[c(2,1,3,4)],cex=1.5/par()$cex,pch=16)
+par(col="black")
+box()
 mtext("Gaussian quantiles",1,line = 2.25,cex=1)
 mtext("s(site)",2,line=2.25,cex=1)
 grid()
@@ -235,11 +241,11 @@ for(i in 2:7)
   points(xcords[2,],colMeans(inf.intens.cords[-1,]),col=weather.colors[i],type="l",lwd=5,lty=c(1,3,1,3,1,3,1,3,1)[i])
 }
 legend("topleft",
-       legend=c("2020 RCP 4.5", "2020 RCP 8.5", "2045 RCP 4.5","2045 RCP 8.5","2070 RCP 4.5","2070 RCP 8.5"),
+       legend=c("2020 RCP4.5", "2020 RCP8.5", "2045 RCP4.5","2045 RCP8.5","2070 RCP4.5","2070 RCP8.5"),
        cex=1.75,
        lwd=4,
-       seg.len = 2,
-       lty=c(1,3,1,3,1,3,1,3),
+       seg.len = 3,
+       lty=c(1,3,1,3,1,3,1)[-1],
        col=weather.colors[-1],
        bty="n"
 )

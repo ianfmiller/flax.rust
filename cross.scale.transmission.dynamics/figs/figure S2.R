@@ -1,3 +1,6 @@
+library("MASS")
+library("viridis")
+
 pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
 
 t_col <- function(color, percent = 50, name = NULL) {
@@ -11,9 +14,6 @@ t_col <- function(color, percent = 50, name = NULL) {
 
 weather.colors<-c("black",viridis_pal(option = "C")(5)[c(4,4,3,3,2,2,1,1)])
 
-source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
-library("MASS")
-library("viridis")
 start.area<-0.1
 
 weath.data.vec<-c("observed","2020","2020","2045","2045","2070","2070")
@@ -21,7 +21,8 @@ weath.data.scenario.vec<-c(NA,"rcp45","rcp85","rcp45","rcp85","rcp45","rcp85")
 
 par(mfrow=c(2,2),mar=c(5,6,5,5))
 
-for(site in c("CC","BT","GM","HM"))
+sites<-c("CC","BT","GM","HM")
+for(site in sites)
 {
   start.date<-c(as.POSIXct("2020-06-23 00:00:00",tz="UTC"),as.POSIXct("2020-06-20 00:00:00",tz="UTC"),as.POSIXct("2020-06-24 00:00:00",tz="UTC"),as.POSIXct("2020-06-26 00:00:00",tz="UTC"))[which(c("CC","BT","GM","HM")==site)]
   end.date<-c(as.POSIXct("2020-07-27 00:00:00",tz="UTC"),as.POSIXct("2020-07-29 00:00:00",tz="UTC"),as.POSIXct("2020-07-28 00:00:00",tz="UTC"),as.POSIXct("2020-07-10 00:00:00",tz="UTC"))[which(c("CC","BT","GM","HM")==site)]
@@ -141,7 +142,7 @@ for(site in c("CC","BT","GM","HM"))
     
     for(m in 2:dim(xcords)[1])
     {
-      points(xcords[m,],ycords[m,],col=t_col(weather.colors[i],50),type="l",lwd=1,lty=c(1,3,1,3,1,3,1,3,1)[i]) 
+      points(xcords[m,],ycords[m,],col=t_col(weather.colors[i],75),type="l",lwd=1,lty=c(1,3,1,3,1,3,1,3,1)[i]) 
     } 
     points(xcords[2,],colMeans(ycords[-1,]),col=weather.colors[i],type="l",lwd=4,lty=c(1,3,1,3,1,3,1,3,1)[i])
   }
