@@ -121,7 +121,7 @@ legend("topleft",
        legend=c("2020 RCP4.5", "2020 RCP8.5", "2045 RCP4.5","2045 RCP8.5","2070 RCP4.5","2070 RCP8.5"),
        cex=1.75,
        lwd=4,
-       seg.len = 3,
+       seg.len = 2,
        lty=c(3,1,3,1,3,1),
        col=weather.colors[-1],
        bty="n"

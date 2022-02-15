@@ -19,7 +19,8 @@ start.area<-0.1
 weath.data.vec<-c("observed","2020","2020","2045","2045","2070","2070")
 weath.data.scenario.vec<-c(NA,"rcp45","rcp85","rcp45","rcp85","rcp45","rcp85")
 
-par(mfrow=c(2,2),mar=c(5,6,5,5))
+dev.off()
+par(mfrow=c(4,2),mar=c(2,5,2,2))
 
 sites<-c("CC","BT","GM","HM")
 for(site in sites)
@@ -28,13 +29,27 @@ for(site in sites)
   end.date<-c(as.POSIXct("2020-07-27 00:00:00",tz="UTC"),as.POSIXct("2020-07-29 00:00:00",tz="UTC"),as.POSIXct("2020-07-28 00:00:00",tz="UTC"),as.POSIXct("2020-07-10 00:00:00",tz="UTC"))[which(c("CC","BT","GM","HM")==site)]
   sim.dates<-seq.POSIXt(start.date,end.date,"3 day")
   
-  plot(0,0,xlim=c(start.date,end.date),ylim=c(0,1),type="n",xlab="date",ylab=expression('pustule area ('*mm^2*')'),cex.lab=2,axes=F,main=site,cex.main=2)
+  par(mfg=c(which(sites==site),1))
+  plot(0,0,xlim=c(start.date,end.date),ylim=c(.1,.8),type="n",xlab="date",ylab=expression('pustule area ('*mm^2*')'),cex.lab=1.75,axes=F,main=site,cex.main=2)
+  tmp1<-par('usr') 
   grid()
-  mtext(c("A","B","C","D")[which(sites==site)],side=3,adj=1,cex=2)
-  axis.POSIXct(1,sim.dates,cex.axis=2)
-  axis(2,cex.axis=2)
+  mtext(c("A","C","E","G")[which(sites==site)],side=3,adj=1,cex=1.5)
+  axis.POSIXct(1,sim.dates,cex.axis=1.75)
+  axis(2,cex.axis=1.75)
   box()
   
+  par(mfg=c(which(sites==site),2))
+  plot(0,0,xlim=c(start.date,end.date),ylim=c(.1,.8),type="n",xlab="date",ylab=expression('pustule area ('*mm^2*')'),cex.lab=1.75,axes=F,main=site,cex.main=2)
+  tmp2<-par('usr') 
+  grid()
+  mtext(c("B","D","F","H")[which(sites==site)],side=3,adj=1,cex=1.5)
+  axis.POSIXct(1,sim.dates,cex.axis=1.75)
+  axis(2,cex.axis=1.75)
+  box()
+  par(mfg=c(which(sites==site),1))
+  par(usr=tmp1)
+  
+  individual.simulations<-list()
   for(i in 1:7)
   {
     weath.data<-weath.data.vec[i]
@@ -138,23 +153,45 @@ for(site in sites)
       }
       xcords<-rbind(xcords,xcords.new)
       ycords<-rbind(ycords,ycords.new)  
+      individual.simulations<-append(individual.simulations,list(list(xcords.new,ycords.new,t_col(weather.colors[i],50),i)))
     }
     
-    for(m in 2:dim(xcords)[1])
-    {
-      points(xcords[m,],ycords[m,],col=t_col(weather.colors[i],75),type="l",lwd=1,lty=c(1,3,1,3,1,3,1,3,1)[i]) 
-    } 
+    par(mfg=c(which(sites==site),1))
+    par(usr=tmp1)
     points(xcords[2,],colMeans(ycords[-1,]),col=weather.colors[i],type="l",lwd=4,lty=c(1,3,1,3,1,3,1,3,1)[i])
   }
+  
+  par(mfg=c(which(sites==site),2))
+  par(usr=tmp2)
+  for(m in sample(1:length(individual.simulations),replace = F))
+  {
+    points(individual.simulations[[m]][[1]],individual.simulations[[m]][[2]],col=individual.simulations[[m]][[3]],type="l",lwd=1,lty=c(1,3,1,3,1,3,1,3,1)[individual.simulations[[m]][[4]]]) 
+  }
+  
   if(site=="HM")
   {
+    par(mfg=c(which(sites==site),1))
     legend("topleft",
-           legend=c("observed weather","2020 RCP4.5", "2020 RCP8.5", "2045 RCP4.5","2024 RCP8.5","2070 RCP4.5","2070 RCP8.5"),
+           legend=c("2020 RCP4.5", "2020 RCP8.5", "2045 RCP4.5","2045 RCP8.5","2070 RCP4.5","2070 RCP8.5"),
+           cex=1.25,
            lwd=4,
-           seg.len = 3,
-           lty=c(1,3,1,3,1,3,1,3),
-           col=weather.colors,
+           seg.len = 3.5,
+           lty=c(1,3,1,3,1,3,1)[-1],
+           col=weather.colors[-1],
            bty="n"
-    ) 
+    )
+    
+    par(mfg=c(which(sites==site),2))
+    legend("topleft",
+           legend=c("2020 RCP4.5", "2020 RCP8.5", "2045 RCP4.5","2045 RCP8.5","2070 RCP4.5","2070 RCP8.5"),
+           cex=1.25,
+           lwd=2,
+           seg.len = 3.5,
+           lty=c(1,3,1,3,1,3,1)[-1],
+           col=unlist(lapply(weather.colors[-1], t_col,percent=50)),
+           bty="n"
+    )
   }
 }
+
+#export at dimensions 1268 x 878

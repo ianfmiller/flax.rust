@@ -32,24 +32,23 @@ for(site in sites)
   ylim.top.2<-c(20000,20000,20000,20000)[which(sites==site)]
   
   par(mfg=c(which(sites==site),1))
-  plot(0,0,xlim=c(start.date,end.date),ylim=c(0,ylim.top.1),type="n",xlab="date",ylab="infection intensity",cex.lab=2,axes=F,main=site,cex.main=2)
+  plot(0,0,xlim=c(start.date,end.date),ylim=c(0,ylim.top.1),type="n",xlab="date",ylab="infection intensity",cex.lab=1.75,axes=F,main=site,cex.main=2)
   tmp1<-par('usr')
   grid()
   mtext(c("A","C","E","G")[which(sites==site)],side=3,adj=1,cex=1.5)
-  axis.POSIXct(1,sim.dates,cex.axis=1.25)
-  axis(2,cex.axis=1.25)
+  axis.POSIXct(1,sim.dates,cex.axis=1.75)
+  axis(2,cex.axis=1.75)
   box()
   par(mfg=c(which(sites==site),2))
-  plot(0,0,xlim=c(start.date,end.date),ylim=c(0,ylim.top.2),type="n",xlab="date",ylab="infection intensity",cex.lab=2,axes=F,main=site,cex.main=2)
+  plot(0,0,xlim=c(start.date,end.date),ylim=c(0,ylim.top.2),type="n",xlab="date",ylab="infection intensity",cex.lab=1.75,axes=F,main=site,cex.main=2)
   tmp2<-par('usr')
   grid()
   mtext(c("B","D","F","H")[which(sites==site)],side=3,adj=1,cex=1.5)
-  axis.POSIXct(1,sim.dates,cex.axis=2,cex.axis=1.25)
-  axis(2,cex.axis=2,cex.axis=1.25)
+  axis.POSIXct(1,sim.dates,cex.axis=2,cex.axis=1.75)
+  axis(2,cex.axis=2,cex.axis=1.75)
   box()
-  par(mfg=c(which(sites==site),1))
-  par(usr=tmp1)
   
+  individual.simulations<-list()
   for(i in 1:7)
   {
     weath.data<-weath.data.vec[i]
@@ -60,7 +59,7 @@ for(site in sites)
     height.cords<-rep(NA,length(sim.dates)) #height values
     set.seed(73452749)
   
-    for(j in 1:3)
+    for(j in 1:100)
     {
       inf.intens<-start.inf.intens
       height<-start.height
@@ -173,28 +172,45 @@ for(site in sites)
       xcords<-rbind(xcords,xcords.new)
       inf.intens.cords<-rbind(inf.intens.cords,inf.intens.cords.new)  
       height.cords<-rbind(height.cords,height.cords.new)
-    }
-    par(mfg=c(which(sites==site),2))
-    par(usr=tmp2)
-    for(m in 2:dim(xcords)[1])
-    {
-      points(xcords[m,],inf.intens.cords[m,],col=t_col(weather.colors[i],50),type="l",lwd=1,lty=c(1,3,1,3,1,3,1,3,1)[i]) 
+      individual.simulations<-append(individual.simulations,list(list(xcords.new,inf.intens.cords.new,t_col(weather.colors[i],50),i)))
     }
     par(mfg=c(which(sites==site),1))
     par(usr=tmp1)
     points(xcords[2,],colMeans(inf.intens.cords[-1,]),col=weather.colors[i],type="l",lwd=5,lty=c(1,3,1,3,1,3,1,3,1)[i])
   }
+  
+  par(mfg=c(which(sites==site),2))
+  par(usr=tmp2)
+  for(m in sample(1:length(individual.simulations),replace = F))
+  {
+    points(individual.simulations[[m]][[1]],individual.simulations[[m]][[2]],col=individual.simulations[[m]][[3]],type="l",lwd=1,lty=c(1,3,1,3,1,3,1,3,1)[individual.simulations[[m]][[4]]]) 
+  }
+  
   if(site=="HM")
   {
+    par(mfg=c(which(sites==site),1))
     legend("topleft",
-           legend=c("observed weather","2020 RCP 4.5", "2020 RCP 8.5", "2045 RCP 4.5","2045 RCP 8.5","2070 RCP 4.5","2070 RCP 8.5"),
+           legend=c("2020 RCP4.5", "2020 RCP8.5", "2045 RCP4.5","2045 RCP8.5","2070 RCP4.5","2070 RCP8.5"),
+           cex=1.25,
            lwd=4,
-           seg.len = 4,
-           lty=c(1,3,1,3,1,3,1,3),
-           col=weather.colors,
+           seg.len = 3.5,
+           lty=c(1,3,1,3,1,3,1)[-1],
+           col=weather.colors[-1],
+           bty="n"
+    )
+    
+    par(mfg=c(which(sites==site),2))
+    legend("topleft",
+           legend=c("2020 RCP4.5", "2020 RCP8.5", "2045 RCP4.5","2045 RCP8.5","2070 RCP4.5","2070 RCP8.5"),
+           cex=1.25,
+           lwd=2,
+           seg.len = 3.5,
+           lty=c(1,3,1,3,1,3,1)[-1],
+           col=unlist(lapply(weather.colors[-1], t_col,percent=50)),
            bty="n"
     )
   }
 }
 
 
+#export at dimensions 1268 x 878

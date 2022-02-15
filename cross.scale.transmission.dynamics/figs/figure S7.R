@@ -23,20 +23,21 @@ text(65,27,expression(R^2*' = 0.409'),pos=4,offset=0,cex=2)
 segments(65,23,77,23,lwd=1,lty=2)
 text(78,23,"y = x",pos=4,offset=0,cex=2)
 abline(0,1,lty=2,lwd=1)
-mtext("A",adj=1,cex=1.5,font=2,line=1)
+mtext("A",adj=1,cex=1.5,line=1)
 
 plot(log10(pred.mat$obs),log10(pred.mat$pred),xlab=expression(log[10]*" observed spore deposition"),ylab=expression(log[10]*" predicted spore deposition"),cex=2,cex.lab=2)
 grid()
 abline(0,1,lty=2,lwd=1)
-mtext("B",adj=1,cex=1.5,font=2,line=1)
+mtext("B",adj=1,cex=1.5,line=1)
 
 plot(pred.mat$obs,pred.mat$pred-pred.mat$obs,xlab="observed spore deposition",ylab="residual",cex=2,cex.lab=2)
 grid()
 abline(h=0,lty=2,lwd=1)
-mtext("C",adj=1,cex=1.5,font=2,line=1)
+mtext("C",adj=1,cex=1.5,line=1)
 
 plot(pred.mat$dist,pred.mat$pred-pred.mat$obs,xlab="distance",ylab="residual",cex=2,cex.lab=2)
 grid()
 abline(h=0,lty=2,lwd=1)
-mtext("D",adj=1,cex=1.5,font=2,line=1)
+mtext("D",adj=1,cex=1.5,line=1)
 
+#export at 1250 x 878

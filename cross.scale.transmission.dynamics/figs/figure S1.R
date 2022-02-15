@@ -11,20 +11,22 @@ layout(matrix(c(1,2,3,3),2,2,byrow = T))
 par(mar=c(5,6,2,5))
 
 ## histograms
-hist(delta.pustules$area,main="",breaks=100,xlab="",cex.lab=2,cex.axis=2,cex.main=2)
+hist(delta.pustules$area,main="",breaks=100,xlab="",cex.lab=2,cex.axis=2,cex.main=2,panel.first=grid())
+box()
 mtext(expression('pustule area ('*mm^2*')'),side=1,line = 3.5,cex=2*.83)
-mtext("A",side=3,adj=1,line=-3,cex=2)
-hist((delta.pustules$area.next-delta.pustules$area)/delta.pustules$time,main="",breaks=100,xlab="",cex.lab=2,cex.axis=2,cex.main=2)
+mtext("A",side=3,adj=.95,line=-3,cex=2)
+hist((delta.pustules$area.next-delta.pustules$area)/delta.pustules$time,main="",breaks=100,xlab="",cex.lab=2,cex.axis=2,cex.main=2,panel.first=grid())
+box()
 mtext(expression('change in pustule area per day ('*mm^2*')'),side=1,line = 3.5,cex=2*.83)
-
-mtext("B",side=3,adj=1,line=-3,cex=2)
+mtext("B",side=3,adj=.95,line=-3,cex=2)
 
 ## plot trajectories
-par(mar=c(2,6,0,0.5))
-plot(c(min(pustules$date),max(pustules$date)),c(0,max(pustules$area)),type="n",xlab="",ylab=expression('pustule area ('*mm^2*')'),cex.lab=2,cex.axis=2)
-mtext("C",side=3,adj=1,line=-3,cex=2)
+par(mar=c(3,6,0,5))
+plot(c(min(pustules$date),max(pustules$date)),c(0,max(pustules$area)),type="n",xlab="",ylab=expression('pustule area ('*mm^2*')'),cex.lab=2,cex.axis=2,panel.first = grid())
+mtext("C",side=3,adj=.975,line=-3,cex=2)
 i<-0
 
+set.seed(8427602)
 plot.cols<-sample(rainbow(2007))
 
 for (tag in unique(pustules$tag))
@@ -49,3 +51,5 @@ for (tag in unique(pustules$tag))
     }
   }
 }
+
+#export at 1156 x 738
