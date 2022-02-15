@@ -1,55 +1,64 @@
-library(mgcv)
+par(mfrow=c(1,2),mar=c(2,2,2,2))
 
-# load data
-source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/pustule area data prep.R")
+plot(0,0,xlim=c(-2.5,2),ylim=c(-2.5,2),type="n",asp=1,xlab="",ylab="",main="X < 0",cex.main=2)
+mtext("A",adj=1,font=2)
+xorigin<-0
+yorigin<-0
+degree<-2*pi*(45/360)
+xs<-xorigin
+xw<-xs+sin(degree)
+ys<-yorigin
+yw<-ys+cos(degree)
+xt<--1.5
+yt<--3
+c<-((xt-xs)*(xw-xs)+(yt-ys)*(yw-ys))/((xw-xs)^2+(yw-ys)^2)
+xp<-xs+c*(xw-xs)
+yp<-ys+c*(yw-ys)
 
-delta.pustules<-subset(delta.pustules,time<=8)
+arrows(xs,ys,xs+2*(xw-xs),ys+2*(yw-ys),lwd=4,col="grey")
+segments(xs,ys,xp,yp,lty=2,col="red",lwd=4)
+segments(xp,yp,xt,yt,lty=2,col="blue",lwd=4)
 
-# visualize data
+points(xp,yp,cex=2,pch=16,col="purple")
+text(xp,yp,expression((x[P]*','*y[P])),pos=4,cex=1.5,offset=1,col="purple")
+points(xs,ys,cex=3,pch=16)
+text(xs,ys,expression((x[S]*','*y[S])),pos=2,cex=1.5)
+points(xw,yw,cex=2,pch=16,col="grey")
+text(xw,yw,expression((x[W]*','*y[W])),pos=4,cex=1.5,offset=1,col="grey")
+points(xt,yt,cex=3,pch=16,col="orange")
+text(xt,yt,expression((x[T]*','*y[T])),pos=4,cex=1.5,col="orange")
+text(xs+2*(xw-xs),ys+2*(yw-ys),"W",pos=3,cex=1.5,offset=1,col="grey")
+text(-1.5,-1,"X",cex=1.5,col="red")
+text(-2.1,-2.9,"Y",cex=1.5,col="blue")
 
-layout(matrix(c(1,2,3,3),2,2,byrow = T))
-par(mar=c(5,6,2,5))
+plot(0,0,xlim=c(-1,3.5),ylim=c(-1,3.5),type="n",asp=1,xlab="",ylab="",main="X > 0",cex.main=2)
+mtext("B",adj=1,font=2)
+xorigin<-0
+yorigin<-0
+degree<-2*pi*(45/360)
+xs<-xorigin
+xw<-xs+sin(degree)
+ys<-yorigin
+yw<-ys+cos(degree)
+xt<-1
+yt<-4
+c<-((xt-xs)*(xw-xs)+(yt-ys)*(yw-ys))/((xw-xs)^2+(yw-ys)^2)
+xp<-xs+c*(xw-xs)
+yp<-ys+c*(yw-ys)
 
-## histograms
-hist(delta.pustules$area,main="",breaks=100,xlab="",cex.lab=2,cex.axis=2,cex.main=2,panel.first=grid())
-box()
-mtext(expression('pustule area ('*mm^2*')'),side=1,line = 3.5,cex=2*.83)
-mtext("A",side=3,adj=.95,line=-3,cex=2)
-hist((delta.pustules$area.next-delta.pustules$area)/delta.pustules$time,main="",breaks=100,xlab="",cex.lab=2,cex.axis=2,cex.main=2,panel.first=grid())
-box()
-mtext(expression('change in pustule area per day ('*mm^2*')'),side=1,line = 3.5,cex=2*.83)
-mtext("B",side=3,adj=.95,line=-3,cex=2)
+arrows(xs,ys,xs+2*(xw-xs),ys+2*(yw-ys),lwd=4,col="grey")
+segments(xs,ys,xp,yp,lty=2,col="red",lwd=4)
+segments(xp,yp,xt,yt,lty=2,col="blue",lwd=4)
 
-## plot trajectories
-par(mar=c(3,6,0,5))
-plot(c(min(pustules$date),max(pustules$date)),c(0,max(pustules$area)),type="n",xlab="",ylab=expression('pustule area ('*mm^2*')'),cex.lab=2,cex.axis=2,panel.first = grid())
-mtext("C",side=3,adj=.975,line=-3,cex=2)
-i<-0
+points(xp,yp,cex=2,pch=16,col="purple")
+text(xp,yp,expression((x[P]*','*y[P])),pos=4,cex=1.5,offset=1,col="purple")
+points(xs,ys,cex=3,pch=16)
+text(xs,ys,expression((x[S]*','*y[S])),pos=2,cex=1.5)
+points(xw,yw,cex=2,pch=16,col="grey")
+text(xw,yw,expression((x[W]*','*y[W])),pos=4,cex=1.5,offset=1,col="grey")
+points(xt,yt,cex=3,pch=16,col="orange")
+text(xt,yt,expression((x[T]*','*y[T])),pos=4,cex=1.5,col="orange")
+text(xs+2*(xw-xs),ys+2*(yw-ys),"W",pos=3,cex=1.5,offset=1,col="grey")
+text(2.3,2,"X",cex=1.5,col="red")
+text(2.1,3.25,"Y",cex=1.5,col="blue")
 
-set.seed(8427602)
-plot.cols<-sample(rainbow(2007))
-
-for (tag in unique(pustules$tag))
-{
-  sub.pustules1<-pustules[which(pustules$tag==tag),]
-  
-  for (color in unique(sub.pustules1$color))
-  {
-    sub.pustules2<-sub.pustules1[which(sub.pustules1$color==color),]
-    
-    for(leaf.iteration in unique(sub.pustules2$leaf.iteration)) 
-    {
-      sub.pustules3<-sub.pustules2[which(sub.pustules2$leaf.iteration==leaf.iteration),]
-      
-      for(pustule.number in unique(sub.pustules3$pustule.number))
-      {
-        i<-i+1
-        sub.pustules4<-sub.pustules3[which(sub.pustules3$pustule.number==pustule.number),]
-        sub.pustules4<-sub.pustules4[order(sub.pustules4$date),]
-        points(sub.pustules4$date,sub.pustules4$area,col=plot.cols[i],type="l",lwd=.5)
-      }
-    }
-  }
-}
-
-#export at 1156 x 738

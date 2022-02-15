@@ -27,7 +27,7 @@ layout(matrix(c(rep(10,10),rep(16,13),
 # B-I
 par(mar=c(4,4,1,1))
 plot(transmission.model,select = 1,scheme = 2,zlim=c(-12,12),too.far=1,hcolors=rev(heat.colors(101)),contour.col="black",cex.lab=1.5,cex.axis=1.5,xlab="",ylab="",main="",rug=F)
-mtext(expression(log[10]*'(predicted spore deposition per day)'),1,line = 2.25,cex=1)
+mtext(expression(log[10]*' predicted spore deposition per day'),1,line = 2.25,cex=1)
 mtext("plant height (cm)",2,line=2.25,cex=1)
 points(transmission.data$log.10.spore.deposition.per.day,transmission.data$height.cm,pch=16,cex=.1)
 
@@ -116,7 +116,7 @@ weath.data.scenario.vec<-c(NA,"rcp45","rcp85","rcp45","rcp85","rcp45","rcp85")
 weather.colors<-c("black",viridis_pal(option = "C")(5)[c(4,4,3,3,2,2,1,1)])
 
 plot.height<-25
-plot(0,0,type="n",xlab=expression('predicted '*log[10]*'(spore deposition per day)'),ylab="odds of infection",cex.lab=2,cex.axis=2,ylim=c(0,.9),xlim=c(-6.5,1),panel.first = grid())
+plot(0,0,type="n",xlab=expression('predicted '*log[10]*' spore deposition per day'),ylab="odds of infection",cex.lab=2,cex.axis=2,ylim=c(0,.9),xlim=c(-6.5,1),panel.first = grid())
 legend("topleft",
        legend=c("2020 RCP4.5", "2020 RCP8.5", "2045 RCP4.5","2045 RCP8.5","2070 RCP4.5","2070 RCP8.5"),
        cex=1.75,
@@ -214,5 +214,5 @@ for(j in 2:7)
   points(new.data$log.10.spore.deposition.per.day,predict(transmission.model,newdata = new.data,type = "response"),type="l",col=weather.colors[j],lwd=4,lty=c(1,3,1,3,1,3,1,3,1)[j])
 }
 
-# export at 1564x719
+# export at 1291x812
 
