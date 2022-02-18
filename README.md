@@ -8,10 +8,8 @@ The below text provides a summary of the analysis pipeline. To recreate results,
 <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/plant height dataset building.R">plant height data set building.R</a>  <br />
 <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/pustule area data prep.R">pustule area data prep.R</a> <br />
 <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/pustule area analysis.R">pustule area analysis.R</a> <br />
-<a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/n pustules data prep.R">n pusutles data prep.R</a> <br />
-<a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/n pustules analysis.R">n pustules analysis.R</a> <br />
-<a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/plant data prep">plant data prep.R</a> <br />
-<a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/plant analysis.R">plant analysis.R</a> <br />
+<a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/infection intensity data prep.R">infection intensity data prep.R</a> <br />
+<a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/infection intensity analysis.R">infection intensity analysis.R</a> <br />
 <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/spore deposition model fitting tilt.R">spore deposition model fitting tilt.R</a> <br />
 <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/building foi dataset.R">building foi dataset.R</a> <br />
 <a href="https://github.com/ianfmiller/flax.rust/blob/main/cross.scale.transmission.dynamics/foi analysis.R">foi analysis.R</a> <br />
