@@ -16,7 +16,7 @@ rm(site)
 
 simulate.epi<-function(site,step.size=7,print.progress=T,day.start="00:00:00",weath.data="observed",weath.data.scenario=NA)
 {
-  if(!(weath.data %in% c("observed","2020","2045","2070"))) {warning('weath.data must be either "observed", "2020", "2045",or "2070"')}
+  if(!(weath.data %in% c("observed","2020","2030","2040","2045","2050","2060","2070"))) {warning('weath.data must be either "observed", "2020", "2030", "2040", "2045", "2050", "2060", or "2070"')}
   if(!(weath.data.scenario %in% c(NA,"rcp45","rcp85"))) {warning('weath.data must be either NA, "rcp45", or "rcp85"')}
   if(!(weath.data=="observed") & is.na(weath.data.scenario)) {warning('weath.data.scenario must be either "rcp45", or "rcp85" if using non-observed weather data')}
   
@@ -297,6 +297,38 @@ for (site in c("BT","GM"))
     saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2020.rcp85.",site,".step.size.",step.size,".RDS"))
   }
   
+  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2030.rcp45.",site,".step.size.",step.size,".RDS")))
+  {
+    registerDoParallel(n.cores)
+    rm(.Random.seed, envir=globalenv())
+    pred.epi<-foreach(k = 1:10, .multicombine = T) %dorng% {set.seed(random.seeds[k]); simulate.epi(site=site,step.size=7,print.progress=F,day.start="00:00:00",weath.data="2030",weath.data.scenario="rcp45")}
+    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2030.rcp45.",site,".step.size.",step.size,".RDS"))
+  }
+  
+  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2030.rcp85.",site,".step.size.",step.size,".RDS")))
+  {
+    registerDoParallel(n.cores)
+    rm(.Random.seed, envir=globalenv())
+    pred.epi<-foreach(k = 1:10, .multicombine = T) %dorng% {set.seed(random.seeds[k]); simulate.epi(site=site,step.size=7,print.progress=F,day.start="00:00:00",weath.data="2030",weath.data.scenario="rcp85")}
+    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2030.rcp85.",site,".step.size.",step.size,".RDS"))
+  }
+  
+  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2040.rcp45.",site,".step.size.",step.size,".RDS")))
+  {
+    registerDoParallel(n.cores)
+    rm(.Random.seed, envir=globalenv())
+    pred.epi<-foreach(k = 1:10, .multicombine = T) %dorng% {set.seed(random.seeds[k]); simulate.epi(site=site,step.size=7,print.progress=F,day.start="00:00:00",weath.data="2040",weath.data.scenario="rcp45")}
+    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2040.rcp45.",site,".step.size.",step.size,".RDS"))
+  }
+  
+  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2040.rcp85.",site,".step.size.",step.size,".RDS")))
+  {
+    registerDoParallel(n.cores)
+    rm(.Random.seed, envir=globalenv())
+    pred.epi<-foreach(k = 1:10, .multicombine = T) %dorng% {set.seed(random.seeds[k]); simulate.epi(site=site,step.size=7,print.progress=F,day.start="00:00:00",weath.data="2040",weath.data.scenario="rcp85")}
+    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2040.rcp85.",site,".step.size.",step.size,".RDS"))
+  }
+  
   if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2045.rcp45.",site,".step.size.",step.size,".RDS")))
   {
     registerDoParallel(n.cores)
@@ -311,6 +343,38 @@ for (site in c("BT","GM"))
     rm(.Random.seed, envir=globalenv())
     pred.epi<-foreach(k = 1:10, .multicombine = T) %dorng% {set.seed(random.seeds[k]); simulate.epi(site=site,step.size=7,print.progress=F,day.start="00:00:00",weath.data="2045",weath.data.scenario="rcp85")}
     saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2045.rcp85.",site,".step.size.",step.size,".RDS"))
+  }
+  
+  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2050.rcp45.",site,".step.size.",step.size,".RDS")))
+  {
+    registerDoParallel(n.cores)
+    rm(.Random.seed, envir=globalenv())
+    pred.epi<-foreach(k = 1:10, .multicombine = T) %dorng% {set.seed(random.seeds[k]); simulate.epi(site=site,step.size=7,print.progress=F,day.start="00:00:00",weath.data="2050",weath.data.scenario="rcp45")}
+    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2050.rcp45.",site,".step.size.",step.size,".RDS"))
+  }
+  
+  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2050.rcp85.",site,".step.size.",step.size,".RDS")))
+  {
+    registerDoParallel(n.cores)
+    rm(.Random.seed, envir=globalenv())
+    pred.epi<-foreach(k = 1:10, .multicombine = T) %dorng% {set.seed(random.seeds[k]); simulate.epi(site=site,step.size=7,print.progress=F,day.start="00:00:00",weath.data="2050",weath.data.scenario="rcp85")}
+    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2050.rcp85.",site,".step.size.",step.size,".RDS"))
+  }
+  
+  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2060.rcp45.",site,".step.size.",step.size,".RDS")))
+  {
+    registerDoParallel(n.cores)
+    rm(.Random.seed, envir=globalenv())
+    pred.epi<-foreach(k = 1:10, .multicombine = T) %dorng% {set.seed(random.seeds[k]); simulate.epi(site=site,step.size=7,print.progress=F,day.start="00:00:00",weath.data="2060",weath.data.scenario="rcp45")}
+    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2060.rcp45.",site,".step.size.",step.size,".RDS"))
+  }
+  
+  if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2060.rcp85.",site,".step.size.",step.size,".RDS")))
+  {
+    registerDoParallel(n.cores)
+    rm(.Random.seed, envir=globalenv())
+    pred.epi<-foreach(k = 1:10, .multicombine = T) %dorng% {set.seed(random.seeds[k]); simulate.epi(site=site,step.size=7,print.progress=F,day.start="00:00:00",weath.data="2060",weath.data.scenario="rcp85")}
+    saveRDS(pred.epi,file=paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2060.rcp85.",site,".step.size.",step.size,".RDS"))
   }
   
   if(!file.exists(paste0("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/summarized data/pred.epi.2070.rcp45.",site,".step.size.",step.size,".RDS")))
