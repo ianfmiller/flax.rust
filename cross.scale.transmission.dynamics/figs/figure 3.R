@@ -105,7 +105,7 @@ sim.dates<-seq.POSIXt(start.date,end.date,"7 day")
 weath.data.vec<-c("observed","2020","2020","2045","2045","2070","2070")
 weath.data.scenario.vec<-c(NA,"rcp45","rcp85","rcp45","rcp85","rcp45","rcp85")
 
-plot(0,0,xlim=c(start.date,end.date),ylim=c(0,1500),type="n",xlab="date",ylab="infection intensity",cex.lab=2,axes=F)
+plot(0,0,xlim=c(start.date,max(sim.dates)),ylim=c(0,1500),type="n",xlab="date",ylab="infection intensity",cex.lab=2,axes=F)
 grid()
 mtext("J",side=3,adj=1,cex=2)
 axis.POSIXct(1,sim.dates,cex.axis=2)
