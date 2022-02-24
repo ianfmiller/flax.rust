@@ -135,10 +135,6 @@ for(j in 2:7)
   weath.data<-weath.data.vec[j]
   weath.data.scenario<-weath.data.scenario.vec[j]
   
-  xcords<-rep(NA,length(sim.dates)) #time values
-  inf.intens.cords<-rep(NA,length(sim.dates)) #infection intensity values
-  height.cords<-rep(NA,length(sim.dates)) #height values
-  
   if(!(weath.data=="observed"))
   {
     mean.temp.data<-read.csv(paste0("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/",weath.data,"/Tair.csv"),header = F)
