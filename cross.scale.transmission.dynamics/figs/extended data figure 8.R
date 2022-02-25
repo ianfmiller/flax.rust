@@ -16,14 +16,14 @@ site<-"GM"
 date0<-as.POSIXct("2020-07-07 00:00:00",tz="UTC")
 date1<-as.POSIXct("2020-07-14 00:00:00",tz="UTC")
 weath.data.scenario.vec<-c("rcp45","rcp85")
-weath.data.vec<-c("2020","2030","2040","2050","2060","2070")
+weath.data.vec<-c("2020","2030","2040","2045","2050","2060","2070")
 plot.height<-25
 
 colors<-c("lightblue4","lightblue2")
 par(mar=c(4,6,2,2))
 plot(0,0,type="n",xlim=c(2020,2070),ylim=c(0,.8),xlab="",ylab=expression('odds of infection for '*log[10]*' spore deposition = 0'),cex.lab=2,cex.axis=2)
 grid()
-legend("topright",legend=c("RCP4.5","RCP8.5"),cex=2,lwd=4,lty=c(2,1),col=colors,bty="n",seg.len = 4)
+legend("topright",legend=c("RCP4.5","RCP8.5"),cex=2,lwd=4,lty=c(2,1),col=colors,bty="n",seg.len = 3)
 ltys<-c(2,1)
 for(i in 1:length(weath.data.scenario.vec))
 {
@@ -117,7 +117,7 @@ for(i in 1:length(weath.data.scenario.vec))
 
 
   }
-  points(seq(2020,2070,10),predictions,type="l",lty=ltys[i],lwd=4,col=colors[i])
+  points(as.numeric(weath.data.vec),predictions,type="l",lty=ltys[i],lwd=4,col=colors[i])
 }
 
-#export at 940x696
+#export at 1202x777

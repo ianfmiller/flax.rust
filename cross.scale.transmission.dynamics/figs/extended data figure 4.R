@@ -12,7 +12,7 @@ start.date<-c(as.POSIXct("2020-06-23 00:00:00",tz="UTC"),as.POSIXct("2020-06-20 
 end.date<-c(as.POSIXct("2020-07-27 00:00:00",tz="UTC"),as.POSIXct("2020-07-29 00:00:00",tz="UTC"),as.POSIXct("2020-07-28 00:00:00",tz="UTC"),as.POSIXct("2020-07-10 00:00:00",tz="UTC"))[which(c("CC","BT","GM","HM")==site)]
 sim.dates<-seq.POSIXt(start.date,end.date,"7 day")
 weath.data.scenario.vec<-c("rcp45","rcp85")
-weath.data.vec<-c("2020","2030","2040","2050","2060","2070")
+weath.data.vec<-c("2020","2030","2040","2045","2050","2060","2070")
 start.height<-25
 start.inf.intens<-1
 
@@ -281,18 +281,18 @@ grid()
 ltys<-c(2,1)
 
 i<-1
-points(seq(2020,2070,10),log10(final.preds.1),type="l",lty=ltys[i],lwd=4,col=colors[i])
+points(as.numeric(weath.data.vec),log10(final.preds.1),type="l",lty=ltys[i],lwd=4,col=colors[i])
 i<-2
-points(seq(2020,2070,10),log10(final.preds.2),type="l",lty=ltys[i],lwd=4,col=colors[i])
+points(as.numeric(weath.data.vec),log10(final.preds.2),type="l",lty=ltys[i],lwd=4,col=colors[i])
 legend("right",legend=c("RCP4.5","RCP8.5"),cex=2,lwd=4,lty=c(2,1),col=colors,seg.len = 4,bty="n")
 
-par(fig=c(.1,.6,.1,.6),new=T)
+par(fig=c(.1,.55,.1,.55),new=T)
 plot(0,0,type="n",xlim=c(2020,2070),ylim=c(-1,5),xlab="",ylab="",cex.lab=2,cex.axis=2)
 i<-1
-polygon(c(2020,2030,2040,2050,2060,2070,2070,2060,2050,2040,2030,2020),log10(c(final.preds.9.1,rev(final.preds.1.1))),col=colors[i],density=50,angle=c(45,135)[i])
-points(seq(2020,2070,10),log10(final.preds.1),type="l",lty=ltys[i],lwd=4,col=colors[i])
+polygon(c(2020,2030,2040,2045,2050,2060,2070,2070,2060,2050,2045,2040,2030,2020),log10(c(final.preds.9.1,rev(final.preds.1.1))),col=colors[i],density=50,angle=c(45,135)[i])
+points(as.numeric(weath.data.vec),log10(final.preds.1),type="l",lty=ltys[i],lwd=4,col=colors[i])
 i<-2
-polygon(c(2020,2030,2040,2050,2060,2070,2070,2060,2050,2040,2030,2020),log10(c(final.preds.9.2,rev(final.preds.1.2))),col=colors[i],density=50,angle=c(45,135)[i])
-points(seq(2020,2070,10),log10(final.preds.2),type="l",lty=ltys[i],lwd=4,col=colors[i])
+polygon(c(2020,2030,2040,2045,2050,2060,2070,2070,2060,2050,2045,2040,2030,2020),log10(c(final.preds.9.2,rev(final.preds.1.2))),col=colors[i],density=50,angle=c(45,135)[i])
+points(as.numeric(weath.data.vec),log10(final.preds.2),type="l",lty=ltys[i],lwd=4,col=colors[i])
 
 #export at 1202x777

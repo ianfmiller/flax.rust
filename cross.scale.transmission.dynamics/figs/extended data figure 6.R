@@ -10,7 +10,7 @@ start.date<-c(as.POSIXct("2020-06-23 00:00:00",tz="UTC"),as.POSIXct("2020-06-20 
 end.date<-c(as.POSIXct("2020-07-27 00:00:00",tz="UTC"),as.POSIXct("2020-07-29 00:00:00",tz="UTC"),as.POSIXct("2020-07-28 00:00:00",tz="UTC"),as.POSIXct("2020-07-10 00:00:00",tz="UTC"))[which(c("CC","BT","GM","HM")==site)]
 sim.dates<-seq.POSIXt(start.date,end.date,"7 day")
 weath.data.scenario.vec<-c("rcp45","rcp85")
-weath.data.vec<-c("2020","2030","2040","2050","2060","2070")
+weath.data.vec<-c("2020","2030","2040","2045","2050","2060","2070")
 start.height<-10
 
 colors<-c("lightblue4","lightblue2")
@@ -133,8 +133,8 @@ for(i in 1:length(weath.data.scenario.vec))
     final.preds.9<-c(final.preds.9,quantile(ycords[-1,ncol(ycords)],.9))
     
   }
-  polygon(c(2020,2030,2040,2050,2060,2070,2070,2060,2050,2040,2030,2020),c(final.preds.9,rev(final.preds.1)),col=colors[i],density=50,angle=c(45,135)[i])
-  points(seq(2020,2070,10),final.preds,type="l",lty=ltys[i],lwd=4,col=colors[i])
+  polygon(c(2020,2030,2040,2045,2050,2060,2070,2070,2060,2050,2045,2040,2030,2020),c(final.preds.9,rev(final.preds.1)),col=colors[i],density=50,angle=c(45,135)[i])
+  points(as.numeric(weath.data.vec),final.preds,type="l",lty=ltys[i],lwd=4,col=colors[i])
 }
 
 #export at 1202x777

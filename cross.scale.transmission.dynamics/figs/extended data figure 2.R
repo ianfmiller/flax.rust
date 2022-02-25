@@ -10,14 +10,14 @@ start.date<-c(as.POSIXct("2020-06-23 00:00:00",tz="UTC"),as.POSIXct("2020-06-20 
 end.date<-c(as.POSIXct("2020-07-27 00:00:00",tz="UTC"),as.POSIXct("2020-07-29 00:00:00",tz="UTC"),as.POSIXct("2020-07-28 00:00:00",tz="UTC"),as.POSIXct("2020-07-10 00:00:00",tz="UTC"))[which(c("CC","BT","GM","HM")==site)]
 sim.dates<-seq.POSIXt(start.date,end.date,"7 day")
 weath.data.scenario.vec<-c("rcp45","rcp85")
-weath.data.vec<-c("2020","2030","2040","2050","2060","2070")
+weath.data.vec<-c("2020","2030","2040","2045","2050","2060","2070")
 start.area<-0.1
 
 colors<-c("lightblue4","lightblue2")
 par(mar=c(4,6,2,2))
 plot(0,0,type="n",xlim=c(2020,2070),ylim=c(0,.9),xlab="",ylab=expression('predicted pustule area ('*mm^2*') on July 22'),cex.lab=2,cex.axis=2)
 grid()
-legend("topright",legend=c("RCP4.5","RCP8.5"),cex=2,lwd=4,lty=c(2,1),col=colors,bty="n",seg.len = 4)
+legend("topright",legend=c("RCP4.5","RCP8.5"),cex=2,lwd=4,lty=c(2,1),col=colors,bty="n",seg.len = 3)
 ltys<-c(2,1)
 
 for(i in 1:length(weath.data.scenario.vec))
@@ -134,8 +134,8 @@ for(i in 1:length(weath.data.scenario.vec))
     final.preds<-c(final.preds,mean(ycords[-1,ncol(ycords)]))
     final.preds.9<-c(final.preds.9,quantile(ycords[-1,ncol(ycords)],.9))
   }
-  polygon(c(2020,2030,2040,2050,2060,2070,2070,2060,2050,2040,2030,2020),c(final.preds.9,rev(final.preds.1)),col=colors[i],density=50,angle=c(45,135)[i])
-  points(seq(2020,2070,10),final.preds,type="l",lty=ltys[i],lwd=4,col=colors[i])
+  polygon(c(2020,2030,2040,2045,2050,2060,2070,2070,2060,2050,2045,2040,2030,2020),c(final.preds.9,rev(final.preds.1)),col=colors[i],density=50,angle=c(45,135)[i])
+  points(as.numeric(weath.data.vec),final.preds,type="l",lty=ltys[i],lwd=4,col=colors[i])
 }
 
 #export at 1202x777

@@ -2,7 +2,7 @@ library(viridis)
 source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant loc data set building.R")
 
 weath.data.scenario.vec<-c("rcp45","rcp85")
-weath.data.vec<-c("2020","2030","2040","2050","2060","2070")
+weath.data.vec<-c("2020","2030","2040","2045","2050","2060","2070")
 weather.lty<-c(2,1)
 
 par(mar=c(4,6,2,2),mfrow=c(1,2))
@@ -48,8 +48,8 @@ for(site in c("BT","GM"))
       year.yvals.1<-c(year.yvals.1,quantile(all.yvals,.1))
       year.yvals.9<-c(year.yvals.9,quantile(all.yvals,.9))
     }
-    polygon(c(2020,2030,2040,2050,2060,2070,2070,2060,2050,2040,2030,2020),c(year.yvals.9,rev(year.yvals.1)),col=colors[i],density=50,angle=c(45,135)[i])
-    points(seq(2020,2070,10),year.yvals,type="l",lty=weather.lty[i],lwd=4,col=colors[i])
+    polygon(c(2020,2030,2040,2045,2050,2060,2070,2070,2060,2050,2045,2040,2030,2020),c(year.yvals.9,rev(year.yvals.1)),col=colors[i],density=50,angle=c(45,135)[i])
+    points(as.numeric(weath.data.vec),year.yvals,type="l",lty=weather.lty[i],lwd=4,col=colors[i])
   }
 }
 legend("topright",legend=c("RCP4.5","RCP8.5"),cex=2,lwd=4,lty=c(2,1),col=colors,bty="n",seg.len = 3)
