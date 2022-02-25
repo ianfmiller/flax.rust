@@ -1,192 +1,298 @@
+library(mgcv)
+library(MASS)
+library(viridis)
+source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/infection intensity data prep.R")
+delta.infection.intensity<-subset(delta.infection.intensity,time<=8)
+infection.intensity.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/infection.intensity.model.RDS")
+dummy.infection.intensity.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/dummy.infection.intensity.model.RDS")
 plant.growth.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS")
 
-t_col <- function(color, percent = 50, name = NULL) {
-  rgb.val <- col2rgb(color)
-  t.col <- rgb(rgb.val[1], rgb.val[2], rgb.val[3],
-               max = 255,
-               alpha = (100 - percent) * 255 / 100,
-               names = name)
-  invisible(t.col)
-}
+site<-"GM"
+start.date<-c(as.POSIXct("2020-06-23 00:00:00",tz="UTC"),as.POSIXct("2020-06-20 00:00:00",tz="UTC"),as.POSIXct("2020-06-24 00:00:00",tz="UTC"),as.POSIXct("2020-06-26 00:00:00",tz="UTC"))[which(c("CC","BT","GM","HM")==site)]
+end.date<-c(as.POSIXct("2020-07-27 00:00:00",tz="UTC"),as.POSIXct("2020-07-29 00:00:00",tz="UTC"),as.POSIXct("2020-07-28 00:00:00",tz="UTC"),as.POSIXct("2020-07-10 00:00:00",tz="UTC"))[which(c("CC","BT","GM","HM")==site)]
+sim.dates<-seq.POSIXt(start.date,end.date,"7 day")
+weath.data.scenario.vec<-c("rcp45","rcp85")
+weath.data.vec<-c("2020","2030","2040","2050","2060","2070")
+start.height<-25
+start.inf.intens<-1
 
-weather.colors<-c("black",viridis_pal(option = "C")(5)[c(4,4,3,3,2,2,1,1)])
+i<-1
+weath.data.scenario<-weath.data.scenario.vec[i]
+final.preds.1<-c()
+final.preds.1.1<-c()
+final.preds.9.1<-c()
 
-source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/within host climate prediction functions.R")
-library("MASS")
-library("viridis")
-start.height<-10
-
-weath.data.vec<-c("observed","2020","2020","2045","2045","2070","2070")
-weath.data.scenario.vec<-c(NA,"rcp45","rcp85","rcp45","rcp85","rcp45","rcp85")
-
-dev.off()
-par(mfrow=c(4,2),mar=c(2,5,2,2))
-
-for(site in c("CC","BT","GM","HM"))
+for(j in 1:length(weath.data.vec))
 {
-  start.date<-c(as.POSIXct("2020-06-23 00:00:00",tz="UTC"),as.POSIXct("2020-06-20 00:00:00",tz="UTC"),as.POSIXct("2020-06-24 00:00:00",tz="UTC"),as.POSIXct("2020-06-26 00:00:00",tz="UTC"))[which(c("CC","BT","GM","HM")==site)]
-  end.date<-c(as.POSIXct("2020-07-27 00:00:00",tz="UTC"),as.POSIXct("2020-07-29 00:00:00",tz="UTC"),as.POSIXct("2020-07-28 00:00:00",tz="UTC"),as.POSIXct("2020-07-10 00:00:00",tz="UTC"))[which(c("CC","BT","GM","HM")==site)]
-  sim.dates<-seq.POSIXt(start.date,end.date,"3 day")
+  weath.data<-weath.data.vec[j]
   
-  par(mfg=c(which(sites==site),1))
-  plot(0,0,xlim=c(start.date,end.date),ylim=c(10,35),type="n",xlab="date",ylab="plant height (cm)",cex.lab=1.75,axes=F,main=site,cex.main=2)
-  tmp1<-par('usr')
-  grid()
-  mtext(c("A","C","E","G")[which(sites==site)],side=3,adj=1,cex=1.5)
-  axis.POSIXct(1,sim.dates,cex.axis=1.75)
-  axis(2,cex.axis=1.75)
-  box()
-  par(mfg=c(which(sites==site),2))
-  plot(0,0,xlim=c(start.date,end.date),ylim=c(10,35),type="n",xlab="date",ylab="plant height (cm)",cex.lab=1.75,axes=F,main=site,cex.main=2)
-  tmp2<-par('usr')
-  grid()
-  mtext(c("B","D","F","H")[which(sites==site)],side=3,adj=1,cex=1.5)
-  axis.POSIXct(1,sim.dates,cex.axis=1.75)
-  axis(2,cex.axis=1.75)
-  box()
+  xcords<-rep(NA,length(sim.dates)) #time values
+  ycords<-rep(NA,length(sim.dates)) #area values
   
-  individual.simulations<-list()
-  for(i in 1:7)
+  set.seed(73452749)
+  for(k in 1:100)
   {
-    weath.data<-weath.data.vec[i]
-    weath.data.scenario<-weath.data.scenario.vec[i]
+    inf.intens<-start.inf.intens
+    height<-start.height
+    xcords.new<-c(sim.dates[1])
+    ycords.new<-c(inf.intens)
     
-    xcords<-rep(NA,length(sim.dates)) #time values
-    ycords<-rep(NA,length(sim.dates)) #height values
-    
-    set.seed(874627)
-    
-    for(j in 1:100)
+    for (l in 1:(length(sim.dates)-1))
     {
-      height<-start.height
-      xcords.new<-c(sim.dates[1])
-      ycords.new<-c(height)
+      date0<-sim.dates[l]
+      date1<-sim.dates[l+1]
       
-      for(k in 1:(length(sim.dates)-1))
+      if(!(weath.data=="observed"))
       {
-        date0<-sim.dates[k]
-        date1<-sim.dates[k+1]
+        mean.temp.data<-read.csv(paste0("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/",weath.data,"/Tair.csv"),header = F)
+        max.temp.data<-read.csv(paste0("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/",weath.data,"/tasmax.csv"),header = F)
+        min.temp.data<-read.csv(paste0("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/",weath.data,"/tasmin.csv"),header = F)
+        rh.data<-read.csv(paste0("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/",weath.data,"/relHumid.csv"),header = F)
+        rainfall.data<-read.csv(paste0("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/",weath.data,"/rainfall.csv"),header = F)
+        colnames(mean.temp.data)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
+        colnames(max.temp.data)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
+        colnames(min.temp.data)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
+        colnames(rh.data)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
+        colnames(rainfall.data)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
         
-        if(!(weath.data=="observed"))
-        {
-          mean.temp.data<-read.csv(paste0("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/",weath.data,"/Tair.csv"),header = F)
-          max.temp.data<-read.csv(paste0("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/",weath.data,"/tasmax.csv"),header = F)
-          min.temp.data<-read.csv(paste0("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/",weath.data,"/tasmin.csv"),header = F)
-          rh.data<-read.csv(paste0("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/",weath.data,"/relHumid.csv"),header = F)
-          rainfall.data<-read.csv(paste0("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/",weath.data,"/rainfall.csv"),header = F)
-          colnames(mean.temp.data)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
-          colnames(max.temp.data)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
-          colnames(min.temp.data)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
-          colnames(rh.data)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
-          colnames(rainfall.data)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
-          
-          mean.temp.data.sub.1<-mean.temp.data[which(format(as.Date(paste0(mean.temp.data$year,"-",mean.temp.data$month,"-",mean.temp.data$day)),"%m-%d")>=format(as.Date(date0),"%m-%d")),] #compare only month and day
-          mean.temp.data.sub.2<-mean.temp.data.sub.1[which(format(as.Date(paste0(mean.temp.data.sub.1$year,"-",mean.temp.data.sub.1$month,"-",mean.temp.data.sub.1$day)),"%m-%d")<format(as.Date(date1),"%m-%d")),]
-          
-          max.temp.data.sub.1<-max.temp.data[which(format(as.Date(paste0(max.temp.data$year,"-",max.temp.data$month,"-",max.temp.data$day)),"%m-%d")>=format(as.Date(date0),"%m-%d")),]
-          max.temp.data.sub.2<-max.temp.data.sub.1[which(format(as.Date(paste0(max.temp.data.sub.1$year,"-",max.temp.data.sub.1$month,"-",max.temp.data.sub.1$day)),"%m-%d")<format(as.Date(date1),"%m-%d")),]
-          
-          min.temp.data.sub.1<-min.temp.data[which(format(as.Date(paste0(min.temp.data$year,"-",min.temp.data$month,"-",min.temp.data$day)),"%m-%d")>=format(as.Date(date0),"%m-%d")),]
-          min.temp.data.sub.2<-min.temp.data.sub.1[which(format(as.Date(paste0(min.temp.data.sub.1$year,"-",min.temp.data.sub.1$month,"-",min.temp.data.sub.1$day)),"%m-%d")<format(as.Date(date1),"%m-%d")),]
-          
-          rh.data.sub.1<-rh.data[which(format(as.Date(paste0(rh.data$year,"-",rh.data$month,"-",rh.data$day)),"%m-%d")>=format(as.Date(date0),"%m-%d")),]
-          rh.data.sub.2<-rh.data.sub.1[which(format(as.Date(paste0(rh.data.sub.1$year,"-",rh.data.sub.1$month,"-",rh.data.sub.1$day)),"%m-%d")<format(as.Date(date1),"%m-%d")),]
-          
-          rainfall.data.sub.1<-rainfall.data[which(format(as.Date(paste0(rainfall.data$year,"-",rainfall.data$month,"-",rainfall.data$day)),"%m-%d")>=format(as.Date(date0),"%m-%d")),]
-          rainfall.data.sub.2<-rainfall.data.sub.1[which(format(as.Date(paste0(rainfall.data.sub.1$year,"-",rainfall.data.sub.1$month,"-",rainfall.data.sub.1$day)),"%m-%d")<format(as.Date(date1),"%m-%d")),]
-          
-          new.mean.temp<-mean(mean.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
-          new.max.temp<-max(max.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
-          new.min.temp<-min(min.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
-          abs.hums<-13.24732*exp((17.67*mean.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])/(mean.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)]+243.5))*rh.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)]/(273.15+mean.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
-          new.mean.abs.hum<-mean(abs.hums)
-          new.mean.daily.rain<-mean(rainfall.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
-          
-        }
+        mean.temp.data.sub.1<-mean.temp.data[which(format(as.Date(paste0(mean.temp.data$year,"-",mean.temp.data$month,"-",mean.temp.data$day)),"%m-%d")>=format(as.Date(date0),"%m-%d")),] #compare only month and day
+        mean.temp.data.sub.2<-mean.temp.data.sub.1[which(format(as.Date(paste0(mean.temp.data.sub.1$year,"-",mean.temp.data.sub.1$month,"-",mean.temp.data.sub.1$day)),"%m-%d")<format(as.Date(date1),"%m-%d")),]
         
-        if(weath.data=="observed")
-        {
-          source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
-          
-          weath.sub<-all.weath[which(all.weath$site==site),] #pull out weath data for site
-          temp.rh.sub<-all.temp.rh[which(all.temp.rh$site==site),] #### pull out temp data for site
-          
-          #### subst temp rh data to relevant window
-          temp.rh.sub<-subset(temp.rh.sub,date.time<=date1) #### pull out relevant data
-          temp.rh.sub<-subset(temp.rh.sub,date.time>=date0) #### pull out relevant data
-          temp.rh.sub<-subset(temp.rh.sub,!is.na(temp.c)) #### throw out NAs
-          
-          #### subset weather data to relevant window
-          weath.sub<-subset(weath.sub,date<=date1) #### pull out relevant data
-          weath.sub<-subset(weath.sub,date>=date0) #### pull out relevant data
-          
-          #### calculate environmental variable metrics
-          new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
-          new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
-          new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
-          abs.hum<-13.24732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+temp.rh.sub$temp.c)
-          new.mean.abs.hum<-mean(abs.hum,na.rm=T)
-          new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)*(12*24)
-        }
-        beta <- coef(plant.growth.model) ## posterior mean of coefs
-        Vb   <- vcov(plant.growth.model) ## posterior  cov of coefs
-        n <-2
-        mrand <- mvrnorm(n, beta, Vb) ## simulate n rep coef vectors from posterior
-        pred.data<-data.frame("height"=height,"inf.intens"=0,"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.mean.temp,"mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,tag="NA",site=site)
-        Xp <- predict(plant.growth.model, newdata = pred.data, exclude=c("s(tag)"),type="lpmatrix")
-        ilink <- family(plant.growth.model)$linkinv
-        preds <- rep(NA,n)
-        for (l in seq_len(n)) { 
-          preds[l]   <- ilink(Xp %*% mrand[l, ])[1]
-        }
-        height.change<-preds[1]
-        height<-height+height.change*as.numeric(date1-date0)
-        if(height<5) {height<-5}
+        max.temp.data.sub.1<-max.temp.data[which(format(as.Date(paste0(max.temp.data$year,"-",max.temp.data$month,"-",max.temp.data$day)),"%m-%d")>=format(as.Date(date0),"%m-%d")),]
+        max.temp.data.sub.2<-max.temp.data.sub.1[which(format(as.Date(paste0(max.temp.data.sub.1$year,"-",max.temp.data.sub.1$month,"-",max.temp.data.sub.1$day)),"%m-%d")<format(as.Date(date1),"%m-%d")),]
         
-        #reps<-reps+pred.window
-        xcords.new<-c(xcords.new,date1)
-        ycords.new<-c(ycords.new,height)
+        min.temp.data.sub.1<-min.temp.data[which(format(as.Date(paste0(min.temp.data$year,"-",min.temp.data$month,"-",min.temp.data$day)),"%m-%d")>=format(as.Date(date0),"%m-%d")),]
+        min.temp.data.sub.2<-min.temp.data.sub.1[which(format(as.Date(paste0(min.temp.data.sub.1$year,"-",min.temp.data.sub.1$month,"-",min.temp.data.sub.1$day)),"%m-%d")<format(as.Date(date1),"%m-%d")),]
+        
+        rh.data.sub.1<-rh.data[which(format(as.Date(paste0(rh.data$year,"-",rh.data$month,"-",rh.data$day)),"%m-%d")>=format(as.Date(date0),"%m-%d")),]
+        rh.data.sub.2<-rh.data.sub.1[which(format(as.Date(paste0(rh.data.sub.1$year,"-",rh.data.sub.1$month,"-",rh.data.sub.1$day)),"%m-%d")<format(as.Date(date1),"%m-%d")),]
+        
+        rainfall.data.sub.1<-rainfall.data[which(format(as.Date(paste0(rainfall.data$year,"-",rainfall.data$month,"-",rainfall.data$day)),"%m-%d")>=format(as.Date(date0),"%m-%d")),]
+        rainfall.data.sub.2<-rainfall.data.sub.1[which(format(as.Date(paste0(rainfall.data.sub.1$year,"-",rainfall.data.sub.1$month,"-",rainfall.data.sub.1$day)),"%m-%d")<format(as.Date(date1),"%m-%d")),]
+        
+        new.mean.temp<-mean(mean.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
+        new.max.temp<-max(max.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
+        new.min.temp<-min(min.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
+        abs.hums<-13.24732*exp((17.67*mean.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])/(mean.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)]+243.5))*rh.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)]/(273.15+mean.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
+        new.mean.abs.hum<-mean(abs.hums)
+        new.mean.daily.rain<-mean(rainfall.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
+        
       }
-      xcords<-rbind(xcords,xcords.new)
-      ycords<-rbind(ycords,ycords.new)  
-      individual.simulations<-append(individual.simulations,list(list(xcords.new,ycords.new,t_col(weather.colors[i],50),i)))
+      
+      if(weath.data=="observed")
+      {
+        source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
+        
+        weath.sub<-all.weath[which(all.weath$site==site),] #pull out weath data for site
+        temp.rh.sub<-all.temp.rh[which(all.temp.rh$site==site),] #### pull out temp data for site
+        
+        #### subst temp rh data to relevant window
+        temp.rh.sub<-subset(temp.rh.sub,date.time<=date1) #### pull out relevant data
+        temp.rh.sub<-subset(temp.rh.sub,date.time>=date0) #### pull out relevant data
+        temp.rh.sub<-subset(temp.rh.sub,!is.na(temp.c)) #### throw out NAs
+        
+        #### subset weather data to relevant window
+        weath.sub<-subset(weath.sub,date<=date1) #### pull out relevant data
+        weath.sub<-subset(weath.sub,date>=date0) #### pull out relevant data
+        
+        #### calculate environmental variable metrics
+        new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
+        new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
+        new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
+        abs.hum<-13.24732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+temp.rh.sub$temp.c)
+        new.mean.abs.hum<-mean(abs.hum,na.rm=T)
+        new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)*(12*24)
+      }
+      
+      beta.inf.intens <- coef(infection.intensity.model) ## posterior mean of coefs
+      Vb.inf.intens  <- vcov(infection.intensity.model) ## posterior  cov of coefs
+      n <-2
+      mrand.inf.intens <- mvrnorm(n, beta.inf.intens, Vb.inf.intens) ## simulate n rep coef vectors from posterior
+      pred.data.inf.intens<-data.frame("max.height"=height,"infection.intensity"=inf.intens,"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.mean.temp,"mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,tag="NA",site=site)
+      Xp.inf.intens <- predict(infection.intensity.model, newdata = pred.data.inf.intens, exclude=c("s(tag)"),type="lpmatrix")
+      ilink.inf.intens <- family(infection.intensity.model)$linkinv
+      preds.inf.intens <- rep(NA,n)
+      for (l in seq_len(n)) { 
+        preds.inf.intens[l]   <- ilink.inf.intens(Xp.inf.intens %*% mrand.inf.intens[l, ])[1]
+      }
+      inf.intens.change<-preds.inf.intens[1]
+      inf.intens<-inf.intens+inf.intens.change*as.numeric(date1-date0)
+      if(inf.intens<0.1) {inf.intens<-0.1}
+      
+      beta.growth <- coef(plant.growth.model) ## posterior mean of coefs
+      Vb.growth  <- vcov(plant.growth.model) ## posterior  cov of coefs
+      n <-2
+      mrand.growth <- mvrnorm(n, beta.growth, Vb.growth) ## simulate n rep coef vectors from posterior
+      pred.data.growth<-data.frame("height"=height,"inf.intens"=inf.intens,"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.mean.temp,"mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,tag="NA",site=site)
+      Xp.growth <- predict(plant.growth.model, newdata = pred.data.growth, exclude=c("s(tag)"),type="lpmatrix")
+      ilink.growth <- family(plant.growth.model)$linkinv
+      preds.growth <- rep(NA,n)
+      for (l in seq_len(n)) { 
+        preds.growth[l]   <- ilink.growth(Xp.growth %*% mrand.growth[l, ])[1]
+      }
+      height.change<-preds.growth[1]
+      height<-height+height.change*as.numeric(date1-date0)
+      if(height<5) {height<-5}
+      
+      xcords.new<-c(xcords.new,date1)
+      ycords.new<-c(ycords.new,inf.intens)
     }
-    par(mfg=c(which(sites==site),1))
-    par(usr=tmp1)
-    points(xcords[2,],colMeans(ycords[-1,]),col=weather.colors[i],type="l",lwd=4,lty=c(1,3,1,3,1,3,1,3,1)[i])
+    xcords<-rbind(xcords,xcords.new)
+    ycords<-rbind(ycords,ycords.new)  
   }
-  
-  par(mfg=c(which(sites==site),2))
-  par(usr=tmp2)
-  for(m in sample(1:length(individual.simulations),replace = F))
-  {
-    points(individual.simulations[[m]][[1]],individual.simulations[[m]][[2]],col=individual.simulations[[m]][[3]],type="l",lwd=1,lty=c(1,3,1,3,1,3,1,3,1)[individual.simulations[[m]][[4]]]) 
-  }
-  
-  if(site=="HM")
-  {
-    par(mfg=c(which(sites==site),1))
-    legend("topleft",
-           legend=c("2020 RCP4.5", "2020 RCP8.5", "2045 RCP4.5","2045 RCP8.5","2070 RCP4.5","2070 RCP8.5"),
-           cex=1.25,
-           lwd=4,
-           seg.len = 3.5,
-           lty=c(1,3,1,3,1,3,1)[-1],
-           col=weather.colors[-1],
-           bty="n"
-    )
-    
-    par(mfg=c(which(sites==site),2))
-    legend("topleft",
-           legend=c("2020 RCP4.5", "2020 RCP8.5", "2045 RCP4.5","2045 RCP8.5","2070 RCP4.5","2070 RCP8.5"),
-           cex=1.25,
-           lwd=2,
-           seg.len = 3.5,
-           lty=c(1,3,1,3,1,3,1)[-1],
-           col=unlist(lapply(weather.colors[-1], t_col,percent=50)),
-           bty="n"
-    )
-  }
+  final.preds.1.1<-c(final.preds.1.1,quantile(ycords[-1,ncol(ycords)],.1))
+  final.preds.1<-c(final.preds.1,mean(ycords[-1,ncol(ycords)]))
+  final.preds.9.1<-c(final.preds.9.1,quantile(ycords[-1,ncol(ycords)],.9))
 }
 
-#export at dimensions 1268 x 878
+i<-2
+weath.data.scenario<-weath.data.scenario.vec[i]
+final.preds.2<-c()
+final.preds.1.2<-c()
+final.preds.9.2<-c()
+
+for(j in 1:length(weath.data.vec))
+{
+  weath.data<-weath.data.vec[j]
+  
+  xcords<-rep(NA,length(sim.dates)) #time values
+  ycords<-rep(NA,length(sim.dates)) #area values
+  
+  set.seed(73452749)
+  for(k in 1:100)
+  {
+    inf.intens<-start.inf.intens
+    height<-start.height
+    xcords.new<-c(sim.dates[1])
+    ycords.new<-c(inf.intens)
+    
+    for (l in 1:(length(sim.dates)-1))
+    {
+      date0<-sim.dates[l]
+      date1<-sim.dates[l+1]
+      
+      if(!(weath.data=="observed"))
+      {
+        mean.temp.data<-read.csv(paste0("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/",weath.data,"/Tair.csv"),header = F)
+        max.temp.data<-read.csv(paste0("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/",weath.data,"/tasmax.csv"),header = F)
+        min.temp.data<-read.csv(paste0("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/",weath.data,"/tasmin.csv"),header = F)
+        rh.data<-read.csv(paste0("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/",weath.data,"/relHumid.csv"),header = F)
+        rainfall.data<-read.csv(paste0("~/Documents/GitHub/flax.rust/data/enviro/climate.projections/",weath.data,"/rainfall.csv"),header = F)
+        colnames(mean.temp.data)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
+        colnames(max.temp.data)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
+        colnames(min.temp.data)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
+        colnames(rh.data)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
+        colnames(rainfall.data)<-c("year","month","day","cesm1.cam5.1.rcp45","cesm1.cam5.1.rcp85")
+        
+        mean.temp.data.sub.1<-mean.temp.data[which(format(as.Date(paste0(mean.temp.data$year,"-",mean.temp.data$month,"-",mean.temp.data$day)),"%m-%d")>=format(as.Date(date0),"%m-%d")),] #compare only month and day
+        mean.temp.data.sub.2<-mean.temp.data.sub.1[which(format(as.Date(paste0(mean.temp.data.sub.1$year,"-",mean.temp.data.sub.1$month,"-",mean.temp.data.sub.1$day)),"%m-%d")<format(as.Date(date1),"%m-%d")),]
+        
+        max.temp.data.sub.1<-max.temp.data[which(format(as.Date(paste0(max.temp.data$year,"-",max.temp.data$month,"-",max.temp.data$day)),"%m-%d")>=format(as.Date(date0),"%m-%d")),]
+        max.temp.data.sub.2<-max.temp.data.sub.1[which(format(as.Date(paste0(max.temp.data.sub.1$year,"-",max.temp.data.sub.1$month,"-",max.temp.data.sub.1$day)),"%m-%d")<format(as.Date(date1),"%m-%d")),]
+        
+        min.temp.data.sub.1<-min.temp.data[which(format(as.Date(paste0(min.temp.data$year,"-",min.temp.data$month,"-",min.temp.data$day)),"%m-%d")>=format(as.Date(date0),"%m-%d")),]
+        min.temp.data.sub.2<-min.temp.data.sub.1[which(format(as.Date(paste0(min.temp.data.sub.1$year,"-",min.temp.data.sub.1$month,"-",min.temp.data.sub.1$day)),"%m-%d")<format(as.Date(date1),"%m-%d")),]
+        
+        rh.data.sub.1<-rh.data[which(format(as.Date(paste0(rh.data$year,"-",rh.data$month,"-",rh.data$day)),"%m-%d")>=format(as.Date(date0),"%m-%d")),]
+        rh.data.sub.2<-rh.data.sub.1[which(format(as.Date(paste0(rh.data.sub.1$year,"-",rh.data.sub.1$month,"-",rh.data.sub.1$day)),"%m-%d")<format(as.Date(date1),"%m-%d")),]
+        
+        rainfall.data.sub.1<-rainfall.data[which(format(as.Date(paste0(rainfall.data$year,"-",rainfall.data$month,"-",rainfall.data$day)),"%m-%d")>=format(as.Date(date0),"%m-%d")),]
+        rainfall.data.sub.2<-rainfall.data.sub.1[which(format(as.Date(paste0(rainfall.data.sub.1$year,"-",rainfall.data.sub.1$month,"-",rainfall.data.sub.1$day)),"%m-%d")<format(as.Date(date1),"%m-%d")),]
+        
+        new.mean.temp<-mean(mean.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
+        new.max.temp<-max(max.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
+        new.min.temp<-min(min.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
+        abs.hums<-13.24732*exp((17.67*mean.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])/(mean.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)]+243.5))*rh.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)]/(273.15+mean.temp.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
+        new.mean.abs.hum<-mean(abs.hums)
+        new.mean.daily.rain<-mean(rainfall.data.sub.2[,paste0("cesm1.cam5.1.",weath.data.scenario)])
+        
+      }
+      
+      if(weath.data=="observed")
+      {
+        source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
+        
+        weath.sub<-all.weath[which(all.weath$site==site),] #pull out weath data for site
+        temp.rh.sub<-all.temp.rh[which(all.temp.rh$site==site),] #### pull out temp data for site
+        
+        #### subst temp rh data to relevant window
+        temp.rh.sub<-subset(temp.rh.sub,date.time<=date1) #### pull out relevant data
+        temp.rh.sub<-subset(temp.rh.sub,date.time>=date0) #### pull out relevant data
+        temp.rh.sub<-subset(temp.rh.sub,!is.na(temp.c)) #### throw out NAs
+        
+        #### subset weather data to relevant window
+        weath.sub<-subset(weath.sub,date<=date1) #### pull out relevant data
+        weath.sub<-subset(weath.sub,date>=date0) #### pull out relevant data
+        
+        #### calculate environmental variable metrics
+        new.mean.temp<-mean(temp.rh.sub$temp.c,na.rm = T) #mean temperature
+        new.max.temp<-max(temp.rh.sub$temp.c,na.rm = T) #max temperature
+        new.min.temp<-min(temp.rh.sub$temp.c,na.rm = T) #min temperature
+        abs.hum<-13.24732*exp((17.67*temp.rh.sub$temp.c)/(temp.rh.sub$temp.c+243.5))*temp.rh.sub$rh/(273.15+temp.rh.sub$temp.c)
+        new.mean.abs.hum<-mean(abs.hum,na.rm=T)
+        new.mean.daily.rain<-mean(weath.sub$rain,na.rm=T)*(12*24)
+      }
+      
+      beta.inf.intens <- coef(infection.intensity.model) ## posterior mean of coefs
+      Vb.inf.intens  <- vcov(infection.intensity.model) ## posterior  cov of coefs
+      n <-2
+      mrand.inf.intens <- mvrnorm(n, beta.inf.intens, Vb.inf.intens) ## simulate n rep coef vectors from posterior
+      pred.data.inf.intens<-data.frame("max.height"=height,"infection.intensity"=inf.intens,"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.mean.temp,"mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,tag="NA",site=site)
+      Xp.inf.intens <- predict(infection.intensity.model, newdata = pred.data.inf.intens, exclude=c("s(tag)"),type="lpmatrix")
+      ilink.inf.intens <- family(infection.intensity.model)$linkinv
+      preds.inf.intens <- rep(NA,n)
+      for (l in seq_len(n)) { 
+        preds.inf.intens[l]   <- ilink.inf.intens(Xp.inf.intens %*% mrand.inf.intens[l, ])[1]
+      }
+      inf.intens.change<-preds.inf.intens[1]
+      inf.intens<-inf.intens+inf.intens.change*as.numeric(date1-date0)
+      if(inf.intens<0.1) {inf.intens<-0.1}
+      
+      beta.growth <- coef(plant.growth.model) ## posterior mean of coefs
+      Vb.growth  <- vcov(plant.growth.model) ## posterior  cov of coefs
+      n <-2
+      mrand.growth <- mvrnorm(n, beta.growth, Vb.growth) ## simulate n rep coef vectors from posterior
+      pred.data.growth<-data.frame("height"=height,"inf.intens"=inf.intens,"mean.temp"=new.mean.temp,"max.temp"=new.max.temp,"min.temp"=new.mean.temp,"mean.abs.hum"=new.mean.abs.hum,"mean.daily.rain"=new.mean.daily.rain,tag="NA",site=site)
+      Xp.growth <- predict(plant.growth.model, newdata = pred.data.growth, exclude=c("s(tag)"),type="lpmatrix")
+      ilink.growth <- family(plant.growth.model)$linkinv
+      preds.growth <- rep(NA,n)
+      for (l in seq_len(n)) { 
+        preds.growth[l]   <- ilink.growth(Xp.growth %*% mrand.growth[l, ])[1]
+      }
+      height.change<-preds.growth[1]
+      height<-height+height.change*as.numeric(date1-date0)
+      if(height<5) {height<-5}
+      
+      xcords.new<-c(xcords.new,date1)
+      ycords.new<-c(ycords.new,inf.intens)
+    }
+    xcords<-rbind(xcords,xcords.new)
+    ycords<-rbind(ycords,ycords.new)  
+  }
+  final.preds.1.2<-c(final.preds.1.2,quantile(ycords[-1,ncol(ycords)],.1))
+  final.preds.2<-c(final.preds.2,mean(ycords[-1,ncol(ycords)]))
+  final.preds.9.2<-c(final.preds.9.2,quantile(ycords[-1,ncol(ycords)],.9))
+}
+
+colors<-c("lightblue4","lightblue2")
+par(mar=c(4,6,2,2))
+plot(0,0,type="n",xlim=c(2020,2070),ylim=c(2,3),xlab="",ylab=expression('predicted '*log[10]*' infection intensity on July 22'),cex.lab=2,cex.axis=2)
+grid()
+ltys<-c(2,1)
+
+i<-1
+points(seq(2020,2070,10),log10(final.preds.1),type="l",lty=ltys[i],lwd=4,col=colors[i])
+i<-2
+points(seq(2020,2070,10),log10(final.preds.2),type="l",lty=ltys[i],lwd=4,col=colors[i])
+legend("right",legend=c("RCP4.5","RCP8.5"),cex=2,lwd=4,lty=c(2,1),col=colors,seg.len = 4,bty="n")
+
+par(fig=c(.1,.6,.1,.6),new=T)
+plot(0,0,type="n",xlim=c(2020,2070),ylim=c(-1,5),xlab="",ylab="",cex.lab=2,cex.axis=2)
+i<-1
+polygon(c(2020,2030,2040,2050,2060,2070,2070,2060,2050,2040,2030,2020),log10(c(final.preds.9.1,rev(final.preds.1.1))),col=colors[i],density=50,angle=c(45,135)[i])
+points(seq(2020,2070,10),log10(final.preds.1),type="l",lty=ltys[i],lwd=4,col=colors[i])
+i<-2
+polygon(c(2020,2030,2040,2050,2060,2070,2070,2060,2050,2040,2030,2020),log10(c(final.preds.9.2,rev(final.preds.1.2))),col=colors[i],density=50,angle=c(45,135)[i])
+points(seq(2020,2070,10),log10(final.preds.2),type="l",lty=ltys[i],lwd=4,col=colors[i])
+
+#export at 1202x777

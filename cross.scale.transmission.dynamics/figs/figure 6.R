@@ -131,7 +131,7 @@ for(site in c("BT","GM"))
 }
 
 legend("topleft",
-       legend=c("2020 RCP 4.5", "2020 RCP 8.5", "2045 RCP 4.5","2024 RCP 8.5","2070 RCP 4.5","2070 RCP 8.5"),
+       legend=c("2020 RCP 4.5", "2020 RCP 8.5", "2045 RCP 4.5","2045 RCP 8.5","2070 RCP 4.5","2070 RCP 8.5"),
        title="predictions",
        lwd=4,
        cex=1.5,
