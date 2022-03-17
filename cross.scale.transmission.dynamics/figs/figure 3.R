@@ -6,7 +6,9 @@ infection.intensity.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.tra
 dummy.infection.intensity.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/dummy.infection.intensity.model.RDS")
 plant.growth.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS")
 
-site.cols<-viridis_pal(alpha=.5)(20)[c(20,15,6,1)]
+p.vals<-summary(infection.intensity.model)$s.table[,4] #p values
+
+site.cols<-viridis_pal(alpha=.75)(20)[c(20,15,6,1)]
 weather.colors<-c("black",viridis_pal(option = "C")(5)[c(4,4,3,3,2,2,1,1)])
 
 layout(matrix(c(rep(10,10),rep(16,13),
@@ -26,7 +28,7 @@ vis.gam(dummy.infection.intensity.model,view=c("max.height","log.10.infection.in
 mtext("plant height (cm)",1,line = 2.25,cex=1)
 mtext(expression(log[10]*' infection intensity'),2,line=2.25,cex=1)
 points(delta.infection.intensity$max.height,log10(delta.infection.intensity$infection.intensity),pch=".")
-
+mtext("***")
 par(mar=c(4,0,1,2.5))
 plot(0,0,type="n",xlim=c(0,1),ylim=c(-4000-40.40404,4000+40.40404),axes=F,xlab="",ylab="")
 for(i in 1:101)
@@ -53,6 +55,7 @@ plot(infection.intensity.model,select = 4,shade=T,main="",cex.lab=1.25,cex.axis=
 mtext("min. temperature (°C)",1,line = 2.25,cex=1)
 mtext("s(min. temperature)",2,line=2.25,cex=1)
 grid()
+mtext("*")
 mtext("E",adj=1,cex=1.5)
 plot(infection.intensity.model,select = 5,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
 mtext(expression('mean abs. humidity ('*g/m^3*')'),1,line = 2.25,cex=1)
@@ -71,6 +74,7 @@ box()
 mtext("Gaussian quantiles",1,line = 2.25,cex=1)
 mtext("s(plant ID)",2,line=2.25,cex=1)
 grid()
+mtext("***")
 mtext("H",adj=1,cex=1.5)
 par(col=NA) #hack to get rid of qqline
 plot(infection.intensity.model,select = 8,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="",col=site.cols[c(2,1,3,4)],cex=1.5/par()$cex,pch=16)
@@ -85,10 +89,10 @@ legend("bottomright",legend=c("CC","BT","GM","HM"),pch=16,col=site.cols,cex=1.25
 mtext("generalized additive model",outer=T,adj=19.5/23,cex=2,line=-2.5)
 mtext("change in infection intensity per day",outer=T,adj=20/23,cex=1.75,line=-5.5)
 
+site.cols<-viridis_pal(alpha=.5)(20)[c(20,15,6,1)]
 site.indicies<-c(2,1,3,4)[as.numeric(delta.infection.intensity$site)]
 par(mar=c(5,6,5,2))
-plot(delta.infection.intensity$infection.intensity,delta.infection.intensity$infection.intensity.next,xlab = "observed infection intensity",ylab="next observed infection intensity",cex.lab=2,cex.axis=2,col=site.cols[site.indicies],pch=16,cex=delta.infection.intensity$time/2,panel.first = abline(0,1,lty=2))
-grid()
+plot(log10(delta.infection.intensity$infection.intensity),log10(delta.infection.intensity$infection.intensity.next),xlab = expression('observed '*log[10]*' infection intensity'),ylab=expression('next observed '*log[10]*' infection intensity'),cex.lab=2,cex.axis=2,col=site.cols[site.indicies],pch=16,cex=delta.infection.intensity$time/2,panel.first = {abline(0,1,lty=2);grid()},xlim=c(-1,5))
 mtext("A",side=3,adj=1,cex=1.5)
 legend("bottomright",legend=c("CC","BT","GM","HM","2 days","4 days","6 days"),col=c(site.cols,"grey","grey","grey"),pt.cex=c(3,3,3,3,2/2,4/2,6/2),pch=16,cex=1.75,bty="n")
 mtext("data",cex=2,line=1)

@@ -11,7 +11,9 @@ transmission.data$log.10.spore.deposition.per.day<-log10(transmission.data$tot.s
 
 transmission.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/transmission.model.RDS")
 
-site.cols<-viridis_pal(alpha=.5)(20)[c(20,15,6,1)]
+#p.vals<-summary(transmission.model)$s.table[,4] #p values
+
+site.cols<-viridis_pal(alpha=.75)(20)[c(20,15,6,1)]
 
 layout(matrix(c(rep(10,10),rep(16,13),
                 rep(10,10),1,1,1,1,2,3,3,3,3,4,4,4,4,
@@ -29,6 +31,7 @@ par(mar=c(4,4,1,1))
 plot(transmission.model,select = 1,scheme = 2,zlim=c(-12,12),too.far=1,hcolors=rev(heat.colors(101)),contour.col="black",cex.lab=1.5,cex.axis=1.5,xlab="",ylab="",main="",rug=F)
 mtext(expression(log[10]*' predicted spore deposition per day'),1,line = 2.25,cex=1)
 mtext("plant height (cm)",2,line=2.25,cex=1)
+mtext("***")
 points(transmission.data$log.10.spore.deposition.per.day,transmission.data$height.cm,pch=16,cex=.1)
 
 par(mar=c(4,0,1,2.5))
@@ -47,6 +50,7 @@ plot(transmission.model,select = 2,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab=
 mtext("mean temperature (°C)",1,line = 2.25,cex=1)
 mtext("s(mean temperature)",2,line=2.25,cex=1)
 grid()
+mtext("***")
 mtext("C",adj=1,cex=1.5)
 plot(transmission.model,select = 3,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
 mtext("max. temperature (°C)",1,line = 2.25,cex=1)
@@ -57,6 +61,7 @@ plot(transmission.model,select = 4,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab=
 mtext("min. temperature (°C)",1,line = 2.25,cex=1)
 mtext("s(min. temperature)",2,line=2.25,cex=1)
 grid()
+mtext("***")
 mtext("E",adj=1,cex=1.5)
 plot(transmission.model,select = 5,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
 mtext(expression('mean abs. humidity ('*g/m^3*')'),1,line = 2.25,cex=1)
@@ -68,11 +73,10 @@ mtext("total rainfall (mm)",1,line = 2.25,cex=1)
 mtext("s(total rainfall)",2,line=2.25,cex=1)
 grid()
 mtext("G",adj=1,cex=1.5)
-par(col=NA) #hack to get rid of qqline
-plot(transmission.model,select = 7,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="",col="black")
-par(col="black")
+plot.dat<-coef(transmission.model)[grep("tag",names(coef(transmission.model)))]
+plot(plot.dat[order(plot.dat)],axes=F,xlab="",ylab="",col="black")
+axis(2,cex.axis=1,cex.lab=1.25)
 box()
-mtext("Gaussian quantiles",1,line = 2.25,cex=1)
 mtext("s(plant ID)",2,line=2.25,cex=1)
 grid()
 mtext("H",adj=1,cex=1.5)
@@ -83,6 +87,7 @@ box()
 mtext("Gaussian quantiles",1,line = 2.25,cex=1)
 mtext("s(site)",2,line=2.25,cex=1)
 grid()
+mtext("*")
 mtext("I",adj=1,cex=1.5)
 legend("topleft",legend=c("CC","BT","GM","HM"),pch=16,col=site.cols,cex=1.25,bty="n",pt.cex = 1.5/par()$cex)
 
@@ -90,6 +95,7 @@ mtext("generalized additive model",outer=T,adj=19.5/23,cex=2,line=-2.5)
 mtext("odds of infection",outer=T,adj=18.5/23,cex=1.75,line=-5.5)
 
 # A
+site.cols<-viridis_pal(alpha=.5)(20)[c(20,15,6,1)]
 set.seed(98579835)
 transmission.data.shuffled= transmission.data[sample(1:nrow(transmission.data)), ]
 site.indicies<-c(2,1,3,4)[as.numeric(transmission.data.shuffled$site)]

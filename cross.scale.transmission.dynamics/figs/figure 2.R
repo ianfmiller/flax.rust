@@ -4,7 +4,9 @@ source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/pustule a
 delta.pustules<-subset(delta.pustules,time<=8)
 pustule.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/pustule.model.RDS")
 
-site.cols<-viridis_pal(alpha=.5)(20)[c(20,15,6,1)]
+p.vals<-summary(pustule.model)$s.table[,4] #p values
+
+site.cols<-viridis_pal(alpha=.75)(20)[c(20,15,6,1)]
 weather.colors<-c("black",viridis_pal(option = "C")(5)[c(4,4,3,3,2,2,1,1)])
 
 layout(matrix(c(rep(9,10),rep(12,13),
@@ -18,17 +20,21 @@ layout(matrix(c(rep(9,10),rep(12,13),
             rep(10,10),14,11,11,7,7,7,7,8,8,8,8,13,13,
             rep(10,10),14,11,11,7,7,7,7,8,8,8,8,13,13),
     10,23,byrow=T))
+
+
 par(mar=c(4,4,1,1))
 
 plot(pustule.model,select = 1,scale=0,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
 mtext(expression('pustule area ('*mm^2*')'),1,line = 2.25,cex=1)
 mtext("s(pustule area)",2,line=2.25,cex=1)
 grid()
+mtext("***")
 mtext("B",adj=1,cex=1.5)
 plot(pustule.model,select = 2,ylim=c(-.025,.025),shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
 mtext("mean temperature (°C)",1,line = 2.25,cex=1)
 mtext("s(mean temperature)",2,line=2.25,cex=1)
 grid()
+mtext("***")
 mtext("C",adj=1,cex=1.5)
 plot(pustule.model,select = 3,ylim=c(-.025,.025),shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
 mtext("max. temperature (°C)",1,line = 2.25,cex=1)
@@ -39,16 +45,19 @@ plot(pustule.model,select = 4,ylim=c(-.025,.025),shade=T,main="",cex.lab=1.25,ce
 mtext("min. temperature (°C)",1,line = 2.25,cex=1)
 mtext("s(min. temperature)",2,line=2.25,cex=1)
 grid()
+mtext("**")
 mtext("E",adj=1,cex=1.5)
 plot(pustule.model,select = 5,ylim=c(-.025,.025),shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
 mtext(expression('mean abs. humidity ('*g/m^3*')'),1,line = 2.25,cex=1)
 mtext("s(mean abs. humidity)",2,line=2.25,cex=1)
 grid()
+mtext("***")
 mtext("F",adj=1,cex=1.5)
 plot(pustule.model,select = 6,ylim=c(-.025,.025),shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
 mtext("total rainfall (mm)",1,line = 2.25,cex=1)
 mtext("s(total rainfall)",2,line=2.25,cex=1)
 grid()
+mtext("***")
 mtext("G",adj=1,cex=1.5)
 par(col=NA) #hack to get rid of qqline
 plot(pustule.model,select = 7,shade=T,main="",cex.lab=1.25,cex.axis=1,ylab="",xlab="",col="black")
@@ -57,6 +66,7 @@ box()
 mtext("Gaussian quantiles",1,line = 2.25,cex=1)
 mtext("s(plant ID)",2,line=2.25,cex=1)
 grid()
+mtext("***")
 mtext("H",adj=1,cex=1.5)
 par(col=NA) #hack to get rid of qqline
 plot(pustule.model,select = 8,shade=T,main="",cex.lab=1.25,cex.axis=1,ylab="",xlab="",col=site.cols[c(2,1,3,4)],cex=1.5/par()$cex,pch=16)
@@ -71,6 +81,7 @@ legend("topleft",legend=c("CC","BT","GM","HM"),pch=16,col=site.cols,cex=1.25,bty
 mtext("generalized additive model",outer=T,adj=19.5/23,cex=2,line=-2.5)
 mtext(expression('change in pustule area ('*mm^2*' per day)'),outer=T,adj=20/23,cex=1.75,line=-5.5)
 
+site.cols<-viridis_pal(alpha=.5)(20)[c(20,15,6,1)]
 site.indicies<-c(2,1,3,4)[as.numeric(delta.pustules$site)]
 par(mar=c(5,6,5,2))
 plot(delta.pustules$area,delta.pustules$area.next,xlab = "",ylab=expression('next observed pustule area '*(mm^2)),cex.lab=2,cex.axis=2,col=site.cols[site.indicies],pch=16,cex=delta.pustules$time/2,panel.first = {abline(0,1,lty=2);grid()})

@@ -4,7 +4,9 @@ source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/plant gro
 delta.plant.heights<-subset(delta.plant.heights,time<=8)
 plant.growth.model<-readRDS("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/models/plant.growth.model.RDS")
 
-site.cols<-viridis_pal(alpha=.5)(20)[c(20,15,6,1)]
+p.vals<-summary(plant.growth.model)$s.table[,4] #p values
+
+site.cols<-viridis_pal(alpha=.75)(20)[c(20,15,6,1)]
 weather.colors<-c("black",viridis_pal(option = "C")(5)[c(4,4,3,3,2,2,1,1)])
 
 layout(matrix(c(rep(10,10),rep(16,13),
@@ -24,7 +26,7 @@ vis.gam(plant.growth.model,view=c("height","inf.intens"),plot.type = "contour",t
 mtext("plant height (cm)",1,line = 2.25,cex=1)
 mtext("infection intensity",2,line=2.25,cex=1)
 points(delta.plant.heights$height,delta.plant.heights$inf.intens,pch=".")
-
+mtext("**")
 par(mar=c(4,0,1,2.5))
 plot(0,0,type="n",xlim=c(0,1),ylim=c(-.75-0.0075,.75+0.0075),axes=F,xlab="",ylab="")
 for(i in 1:101)
@@ -46,6 +48,7 @@ plot(plant.growth.model,select = 3,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab=
 mtext("max. temperature (°C)",1,line = 2.25,cex=1)
 mtext("s(max. temperature)",2,line=2.25,cex=1)
 grid()
+mtext("***")
 mtext("D",adj=1,cex=1.5)
 plot(plant.growth.model,select = 4,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
 mtext("min. temperature (°C)",1,line = 2.25,cex=1)
@@ -56,6 +59,7 @@ plot(plant.growth.model,select = 5,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab=
 mtext(expression('mean abs. humidity ('*g/m^3*')'),1,line = 2.25,cex=1)
 mtext("s(mean abs. humidity)",2,line=2.25,cex=1)
 grid()
+mtext("***")
 mtext("F",adj=1,cex=1.5)
 plot(plant.growth.model,select = 6,shade=T,main="",cex.lab=1.25,cex.axis=1,xlab="",ylab="")
 mtext("mean daily rainfall (mm)",1,line = 2.25,cex=1)
@@ -83,6 +87,7 @@ legend("topleft",legend=c("CC","BT","GM","HM"),pch=16,col=site.cols,cex=1.25,bty
 mtext("generalized additive model",outer=T,adj=19.5/23,cex=2,line=-2.5)
 mtext("change in plant height (cm per day)",outer=T,adj=20/23,cex=1.75,line=-5.5)
 
+site.cols<-viridis_pal(alpha=.5)(20)[c(20,15,6,1)]
 site.indicies<-c(2,1,3,4)[as.numeric(delta.plant.heights$site)]
 par(mar=c(5,6,5,2))
 plot(delta.plant.heights$height,delta.plant.heights$height.next,xlab = "observed height (cm)",ylab="next observed height (cm)",cex.lab=2,cex.axis=2,col=site.cols[site.indicies],pch=16,cex=delta.plant.heights$time/2,panel.first = {abline(0,1,lty=2);grid()})
