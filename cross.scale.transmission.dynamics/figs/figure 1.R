@@ -286,7 +286,7 @@ mtext("O",side=3,adj=1.19,cex=2,line=-2.25)
 par(mar=c(3.5,0,2.5,3),xpd=F)
 plot(0,0,type="n",axes=F,xlab="",ylab="",bty="n")
 legend("left",
-       legend=c("2020 RCP4.5", "2020 RCP8.5", "2045 RCP4.5","2024 RCP8.5","2070 RCP4.5","2070 RCP8.5"),
+       legend=c("2020 RCP4.5", "2020 RCP8.5", "2045 RCP4.5","2045 RCP8.5","2070 RCP4.5","2070 RCP8.5"),
        lwd=4,
        cex=1.75,
        seg.len = 4,
