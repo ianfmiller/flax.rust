@@ -25,6 +25,18 @@ topography_raw <- "https://rmbl-sdp.s3.us-east-2.amazonaws.com/data_products/rel
 topography_adjusted <- paste("/vsicurl/",topography_raw,sep="")
 topography <- raster(topography_adjusted, progress='text')
 
+slope_raw <- "https://rmbl-sdp.s3.us-east-2.amazonaws.com/data_products/released/release3/UG_dem_slope_1m_v1.tif"
+slope_adjusted <- paste("/vsicurl/",slope_raw,sep="")
+slope <- raster(slope_adjusted, progress='text')
+
+slope_southness_raw <- "https://rmbl-sdp.s3.us-east-2.amazonaws.com/data_products/released/release3/UG_dem_aspect_southness_1m_v1.tif"
+slope_southness_adjusted <- paste("/vsicurl/",slope_southness_raw,sep="")
+slope_southness <- raster(slope_southness_adjusted, progress='text')
+
+slope_westness_raw <- "https://rmbl-sdp.s3.us-east-2.amazonaws.com/data_products/released/release3/UG_dem_aspect_westness_1m_v1.tif"
+slope_westness_adjusted <- paste("/vsicurl/",slope_westness_raw,sep="")
+slope_westness <- raster(slope_westness_adjusted, progress='text')
+
 landcover_raw <- "https://rmbl-sdp.s3.us-east-2.amazonaws.com/data_products/released/release3/UG_landcover_1m_v4.tif"
 landcover_adjusted <- paste("/vsicurl/",landcover_raw,sep="")
 landcover <- raster(landcover_adjusted, progress='text')
@@ -33,6 +45,9 @@ landcover <- raster(landcover_adjusted, progress='text')
 clearPlot()
 Plot(topography)
 Plot(landcover)
+Plot(slope)
+Plot(slope_southness)
+Plot(slope_westness)
 
 # load gpx data and population data
 
@@ -139,7 +154,12 @@ for(transect in transects) ### for each transect
   
     if(plot) {map<-addPolygons(map=map,data = st_transform(ribbon,crs="+proj=longlat +datum=WGS84"),col=col)} ##### add polygon to map
     
-    if(!file.exists(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".elevation.RDS")) | !file.exists(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".landcover.RDS")) )
+    if(!file.exists(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".elevation.RDS")) | 
+       !file.exists(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".landcover.RDS")) |
+       !file.exists(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".slope.RDS")) |
+       !file.exists(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".slope.southness.RDS")) |
+       !file.exists(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".slope.westness.RDS"))
+       )
     {
       sample_points<-st_sample(ribbon,size=as.numeric(floor(st_area(ribbon))),type="regular") ##### regularly sample 1 point per m2 from polygon 
       sample_points<-st_transform(sample_points,crs=proj4string(topography)) ##### align crs of sample_points and data
@@ -147,12 +167,21 @@ for(transect in transects) ### for each transect
       #if(plot) {map<-addCircleMarkers(map=map,data=st_transform(sample_points,crs="+proj=longlat +datum=WGS84"),col="black",radius = .1,weight=0)}
       
       elevation_data<-unlist(raster::extract(x=topography,y=as(sample_points,"Spatial"),method="bilinear",na.rm=T)) ##### extract data
+      slope_data<-unlist(raster::extract(x=slope,y=as(sample_points,"Spatial"),method="bilinear",na.rm=T))
+      slope_southness_data<-unlist(raster::extract(x=slope_southness,y=as(sample_points,"Spatial"),method="bilinear",na.rm=T)) 
+      slope_westness_data<-unlist(raster::extract(x=slope_westness,y=as(sample_points,"Spatial"),method="bilinear",na.rm=T))
       landcover_data<-unlist(raster::extract(x=landcover,y=as(sample_points,"Spatial"),method="simple",na.rm=T))
       saveRDS(elevation_data,file=paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".elevation.RDS"))
+      saveRDS(slope_data,file=paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".slope.RDS"))
+      saveRDS(slope_southness_data,file=paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".slope.southness.RDS"))
+      saveRDS(slope_westness_data,file=paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".slope.westness.RDS"))
       saveRDS(landcover_data,file=paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".landcover.RDS"))
     }
     
     elevation_data<-readRDS(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".elevation.RDS"))
+    slope_data<-readRDS(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".slope.RDS"))
+    slope_southness_data<-readRDS(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".slope.southness.RDS"))
+    slope_westness_data<-readRDS(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".slope.westness.RDS"))
     landcover_data<-readRDS(paste0("~/Documents/GitHub/flax.rust/data/landscape.transect.data/raster.extracted/",transect,".chunk.",chunk,".landcover.RDS"))
     
     ##### store data
@@ -163,6 +192,9 @@ for(transect in transects) ### for each transect
                                   "flax.presence"=flax.presence,
                                   "incidence"=incidence,
                                   "elevation"=elevation_data,
+                                  "slope"=slope_data,
+                                  "slope_southness"=slope_southness_data,
+                                  "slope_westness"=slope_westness_data,
                                   "landcover"=landcover_data)
     all_transects<-rbind(all_transects,new_all_transects)
     
@@ -211,6 +243,9 @@ for(transect in transects) ### for each transect
                                     "nearest.pop.dist"=nearest.pop.dist,
                                     "nearest.D.pop.dist"=nearest.D.pop.dist,
                                     "elevation"=mean(elevation_data),
+                                    "slope"=mean(slope_data),
+                                    "slope.southness"=mean(slope_southness_data),
+                                    "slope.westness"=mean(slope_westness_data),
                                     "mode.landcover"=mode.landcover,
                                     "p.landcover.1"=p.landcover.1,
                                     "p.landcover.2"=p.landcover.2,
