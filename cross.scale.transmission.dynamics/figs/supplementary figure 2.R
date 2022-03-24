@@ -1,51 +1,55 @@
 library(mgcv)
-set.seed(89757038)
 
-# load and prep data
-source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/infection intensity data prep.R")
-delta.infection.intensity<-subset(delta.infection.intensity,time<=8)
+# load data
+source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/pustule area data prep.R")
+
+delta.pustules<-subset(delta.pustules,time<=8)
 
 # visualize data
+
 layout(matrix(c(1,2,3,3),2,2,byrow = T))
 par(mar=c(5,6,2,5))
 
 ## histograms
-hist(delta.infection.intensity$infection.intensity,main="",breaks=100,xlab="infection intensity",cex.lab=2,cex.axis=2,cex.main=2,panel.first=grid())
+hist(delta.pustules$area,main="",breaks=100,xlab="",cex.lab=2,cex.axis=2,cex.main=2,panel.first=grid())
 box()
+mtext(expression('pustule area ('*mm^2*')'),side=1,line = 3.5,cex=2*.83)
 mtext("A",side=3,adj=.95,line=-3,cex=2)
-hist((delta.infection.intensity$infection.intensity.next-delta.infection.intensity$infection.intensity)/delta.infection.intensity$time,main="",breaks=100,xlab="change in infection intensity per day",cex.lab=2,cex.axis=2,cex.main=2,panel.first=grid())
+hist((delta.pustules$area.next-delta.pustules$area)/delta.pustules$time,main="",breaks=100,xlab="",cex.lab=2,cex.axis=2,cex.main=2,panel.first=grid())
 box()
+mtext(expression('change in pustule area per day ('*mm^2*')'),side=1,line = 3.5,cex=2*.83)
 mtext("B",side=3,adj=.95,line=-3,cex=2)
 
 ## plot trajectories
 par(mar=c(3,6,0,5))
-plot(c(min(as.Date(infection.intensity$Date,tryFormats = "%m/%d/%Y")),max(as.Date(infection.intensity$Date,tryFormats = "%m/%d/%Y"))),c(0,max(infection.intensity$infection.intensity)),type="n",xlab="",ylab="infection intensity",cex.lab=2,cex.axis=2,ylim=c(0,750),panel.first=grid())
-
-i<-0
-set.seed(8427602)
-plot.cols<-sample(rainbow(length(unique(infection.intensity$Tag))))
-
-for (tag in unique(infection.intensity$Tag))
-{
-  sub.infection.intensity.1<-infection.intensity[which(infection.intensity$Tag==tag),]
-  points(sub.infection.intensity.1$Date,sub.infection.intensity.1$infection.intensity,col=plot.cols[i],type="l",lwd=.5)
-  i<-i+1
-}
-
+plot(c(min(pustules$date),max(pustules$date)),c(0,max(pustules$area)),type="n",xlab="",ylab=expression('pustule area ('*mm^2*')'),cex.lab=2,cex.axis=2,panel.first = grid())
 mtext("C",side=3,adj=.975,line=-3,cex=2)
-
-par(fig=c(.04,.34,.24,.49),new=T)
-plot(c(min(as.Date(infection.intensity$Date,tryFormats = "%m/%d/%Y")),max(as.Date(infection.intensity$Date,tryFormats = "%m/%d/%Y"))),c(0,max(infection.intensity$infection.intensity)),type="n",xlab="",ylab="",cex.lab=1,cex.axis=1)
-rect(par()$usr[1],par()$usr[3],par()$usr[2],par()$usr[4],col="white")
-grid()
 i<-0
-plot.cols<-sample(rainbow(length(unique(infection.intensity$Tag))))
 
-for (tag in unique(infection.intensity$Tag))
+set.seed(8427602)
+plot.cols<-sample(rainbow(2007))
+
+for (tag in unique(pustules$tag))
 {
-  sub.infection.intensity.1<-infection.intensity[which(infection.intensity$Tag==tag),]
-  points(sub.infection.intensity.1$Date,sub.infection.intensity.1$infection.intensity,col=plot.cols[i],type="l",lwd=.5)
-  i<-i+1
+  sub.pustules1<-pustules[which(pustules$tag==tag),]
+  
+  for (color in unique(sub.pustules1$color))
+  {
+    sub.pustules2<-sub.pustules1[which(sub.pustules1$color==color),]
+    
+    for(leaf.iteration in unique(sub.pustules2$leaf.iteration)) 
+    {
+      sub.pustules3<-sub.pustules2[which(sub.pustules2$leaf.iteration==leaf.iteration),]
+      
+      for(pustule.number in unique(sub.pustules3$pustule.number))
+      {
+        i<-i+1
+        sub.pustules4<-sub.pustules3[which(sub.pustules3$pustule.number==pustule.number),]
+        sub.pustules4<-sub.pustules4[order(sub.pustules4$date),]
+        points(sub.pustules4$date,sub.pustules4$area,col=plot.cols[i],type="l",lwd=.5)
+      }
+    }
+  }
 }
 
-#export at 1156 x 738   
+#export at 1156 x 738

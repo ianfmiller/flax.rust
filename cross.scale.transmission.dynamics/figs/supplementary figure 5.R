@@ -1,43 +1,51 @@
-# load spore deposition functions and data
-source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/spore deposition functions tilt.R")
-source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/prep.enviro.data.R")
-spore.deposition<-read.csv("~/Documents/GitHub/flax.rust/data/spore counts.csv")
-spore.deposition[which(spore.deposition$Distance.cm==0),"Distance.cm"]<-5 #set distance for "0" spore traps to 5cm
-demog<-read.csv("~/Documents/GitHub/flax.rust/data/Demography.csv")
-demog<-demog[which(demog$year==2020),] #subset to 2020
+library(mgcv)
+set.seed(89757038)
 
-# load fitted tilted gaussian plume model parameters
-opt<-list(par=c(5.739690e-07,4.451030e-02, 7.777373e-02))
+# load and prep data
+source("~/Documents/GitHub/flax.rust/cross.scale.transmission.dynamics/infection intensity data prep.R")
+delta.infection.intensity<-subset(delta.infection.intensity,time<=8)
 
-## visualize fit
-pred.mat<-param.search.optim.tilted.plume(opt$par,return.out=T)
+# visualize data
+layout(matrix(c(1,2,3,3),2,2,byrow = T))
+par(mar=c(5,6,2,5))
 
-SS.tot<-sum((pred.mat$obs-mean(pred.mat$obs))^2)
-SS.resid<-sum(pred.mat$obs-pred.mat$pred)^2
-R.squared<-1-SS.resid/SS.tot
+## histograms
+hist(delta.infection.intensity$infection.intensity,main="",breaks=100,xlab="infection intensity",cex.lab=2,cex.axis=2,cex.main=2,panel.first=grid())
+box()
+mtext("A",side=3,adj=.95,line=-3,cex=2)
+hist((delta.infection.intensity$infection.intensity.next-delta.infection.intensity$infection.intensity)/delta.infection.intensity$time,main="",breaks=100,xlab="change in infection intensity per day",cex.lab=2,cex.axis=2,cex.main=2,panel.first=grid())
+box()
+mtext("B",side=3,adj=.95,line=-3,cex=2)
 
-par(mfrow=c(2,2),mar=c(5,5,5,5))
-plot(pred.mat$obs,pred.mat$pred,xlab="observed spore deposition",ylab="predicted spore deposition",cex=2,cex.lab=2)
+## plot trajectories
+par(mar=c(3,6,0,5))
+plot(c(min(as.Date(infection.intensity$Date,tryFormats = "%m/%d/%Y")),max(as.Date(infection.intensity$Date,tryFormats = "%m/%d/%Y"))),c(0,max(infection.intensity$infection.intensity)),type="n",xlab="",ylab="infection intensity",cex.lab=2,cex.axis=2,ylim=c(0,750),panel.first=grid())
+
+i<-0
+set.seed(8427602)
+plot.cols<-sample(rainbow(length(unique(infection.intensity$Tag))))
+
+for (tag in unique(infection.intensity$Tag))
+{
+  sub.infection.intensity.1<-infection.intensity[which(infection.intensity$Tag==tag),]
+  points(sub.infection.intensity.1$Date,sub.infection.intensity.1$infection.intensity,col=plot.cols[i],type="l",lwd=.5)
+  i<-i+1
+}
+
+mtext("C",side=3,adj=.975,line=-3,cex=2)
+
+par(fig=c(.04,.34,.24,.49),new=T)
+plot(c(min(as.Date(infection.intensity$Date,tryFormats = "%m/%d/%Y")),max(as.Date(infection.intensity$Date,tryFormats = "%m/%d/%Y"))),c(0,max(infection.intensity$infection.intensity)),type="n",xlab="",ylab="",cex.lab=1,cex.axis=1)
+rect(par()$usr[1],par()$usr[3],par()$usr[2],par()$usr[4],col="white")
 grid()
-text(65,27,expression(R^2*' = 0.409'),pos=4,offset=0,cex=2)
-segments(65,23,77,23,lwd=1,lty=2)
-text(78,23,"y = x",pos=4,offset=0,cex=2)
-abline(0,1,lty=2,lwd=1)
-mtext("A",adj=1,cex=1.5,line=1)
+i<-0
+plot.cols<-sample(rainbow(length(unique(infection.intensity$Tag))))
 
-plot(log10(pred.mat$obs),log10(pred.mat$pred),xlab=expression(log[10]*" observed spore deposition"),ylab=expression(log[10]*" predicted spore deposition"),cex=2,cex.lab=2)
-grid()
-abline(0,1,lty=2,lwd=1)
-mtext("B",adj=1,cex=1.5,line=1)
+for (tag in unique(infection.intensity$Tag))
+{
+  sub.infection.intensity.1<-infection.intensity[which(infection.intensity$Tag==tag),]
+  points(sub.infection.intensity.1$Date,sub.infection.intensity.1$infection.intensity,col=plot.cols[i],type="l",lwd=.5)
+  i<-i+1
+}
 
-plot(pred.mat$obs,pred.mat$pred-pred.mat$obs,xlab="observed spore deposition",ylab="residual",cex=2,cex.lab=2)
-grid()
-abline(h=0,lty=2,lwd=1)
-mtext("C",adj=1,cex=1.5,line=1)
-
-plot(pred.mat$dist,pred.mat$pred-pred.mat$obs,xlab="distance",ylab="residual",cex=2,cex.lab=2)
-grid()
-abline(h=0,lty=2,lwd=1)
-mtext("D",adj=1,cex=1.5,line=1)
-
-#export at 1250 x 878
+#export at 1156 x 738   
