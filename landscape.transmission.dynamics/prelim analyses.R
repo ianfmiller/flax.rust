@@ -56,7 +56,7 @@ summary(mod1)
 ### no relationship to anything
 
 # where is flax rust, relative to where flax is
-all_dis_transects<-all_transects[which(all_transects$flax.presence==1),]
+all_flax_transects<-all_transects[which(all_transects$flax.presence==1),]
 
 mod2<-gam(incidence~
             s(elevation)+
@@ -64,7 +64,7 @@ mod2<-gam(incidence~
             s(slope_southness)+
             s(slope_westness)+
             landcover,
-          select=T,link=binomial(family="logit"),data=all_dis_transects)
+          select=T,link=binomial(family="logit"),data=all_flax_transects)
 plot(mod2,pages=1)
 summary(mod2)
 
